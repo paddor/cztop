@@ -1,5 +1,6 @@
-require 'bundler/setup'
-require "minitest/autorun"
-require "minitest/spec"
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'cztop'
 
-require_relative '../lib/cztop'
+RSpec.configure do |config|
+  config.expect_with :minitest
+end

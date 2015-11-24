@@ -1,5 +1,4 @@
-gem 'ffi'
+source 'https://rubygems.org'
+gemspec
 
-group :test do
-  gem 'minitest', require: false
-end
+gem 'ffi'

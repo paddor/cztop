@@ -6,21 +6,27 @@ describe CZTop::Message do
     it "is empty" do
       assert_empty subject
     end
-    it "has no content" do
+    it "has content size zero" do
       assert_equal 0, subject.content_size
     end
     it "has no frames" do
       assert_equal 0, subject.size
     end
 
-    context "with initial content" do
+    context "with initial string" do
       let(:content) { "foo" }
       subject { described_class.new(content) }
-      it "gets that content" do
-        assert_equal 1, subject.frames.count
+      it "gets that string" do
         assert_equal content, subject.frames.first.to_s
       end
 
+      it "has non-zero content size" do
+        assert_operator subject.content_size, :>, 0
+      end
+
+      it "has one frame" do
+        assert_equal 1, subject.frames.count
+      end
     end
   end
 

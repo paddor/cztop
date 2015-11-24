@@ -1,6 +1,7 @@
 # CZTop
 
-This is a CZMQ Ruby binding, based on the generated low-level FFI bindings from the CZMQ project.
+This is a CZMQ Ruby binding, based on the generated low-level FFI bindings of
+the [CZMQ](https://github.com/zeromq/czmq) project.
 
 ## Reasons
 

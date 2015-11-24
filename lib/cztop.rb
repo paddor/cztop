@@ -26,6 +26,12 @@ module CZTop
       def native_delegate(*methods)
         def_delegators(:@delegate, *methods)
       end
+
+      def from_delegate(delegate)
+        obj = new
+        obj.delegate = delegate
+        return obj
+      end
     end
 
     def self.included(m)

@@ -26,21 +26,13 @@ module CZTop
     native_delegate :endpoint, :signal, :wait
 
     def send(str_or_msg)
-      str_or_msg = Message.coerce(str_or_msg)
-      str_or_msg.send_to(self)
+      Message.coerce(str_or_msg).send_to(self)
     end
     alias_method :<<, :send
 
     def receive
+      Message.receive_from(self)
     end
-
-#    def send_string(str)
-#      str = String str
-#      @delegate.send("b", :string, str, :size_t, str.bytesize)
-#    end
-#    def receive_string
-#      @delegate.recv("b")
-#    end
 
     def connect(endpoint)
       @delegate.connect(endpoint)
@@ -58,6 +50,24 @@ module CZTop
     def unbind(endpoint)
       # we can do sprintf in Ruby
       @delegate.unbind(endpoint, *nil)
+    end
+
+    def options
+      Options.new(self)
+    end
+
+    def set_option(option, value)
+      options.__send__(:"#{option}=", value)
+    end
+    def get_option(option)
+      options.__send__(option.to_sym, value)
+    end
+
+    class Options
+      # @param zocket [Socket, Actor]
+      def initialize(zocket)
+        @zocket = zocket
+      end
     end
 
     class REQ < Socket

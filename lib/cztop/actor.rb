@@ -1,6 +1,11 @@
 module CZTop
-   # just because Proxy and Authenticator are actors
+  # @note Mainly because Proxy and Authenticator are actors.
   class Actor
+    include NativeDelegate
+
+    def initialize
+      # TODO
+    end
 
     # @param str_or_msg [String, Message]
     def send(str_or_msg)

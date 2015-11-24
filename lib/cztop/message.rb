@@ -24,6 +24,10 @@ module CZTop
       self << content if content
     end
 
+    def empty?
+      content_size.zero?
+    end
+
     def send_to(destination)
       CZMQ::FFI::Zmsg.send(@delegate, destination)
     end
@@ -43,6 +47,7 @@ module CZTop
 
     # @return [Integer] number of frames
     def size
+      frames.count
     end
 
     # @return [Integer] number of bytes? FIXME in total
@@ -66,11 +71,15 @@ module CZTop
       end
 
       def first
-        Frame.from_delegate(@message.delegate.first)
+        first = @message.delegate.first
+        return nil if first.null?
+        Frame.from_delegate(first)
       end
 
       def last
-        Frame.from_delegate(@message.delegate.last)
+        last = @message.delegate.last
+        return nil if last.null?
+        Frame.from_delegate(last)
       end
 
       def [](*args)
@@ -86,9 +95,10 @@ module CZTop
         first = first()
         return unless first
         yield first
-        while _next = self.next
-          yield _next
+        while _next = @message.delegate.next and not _next.null?
+          yield Frame.from_delegate(_next)
         end
+        return self
       end
     end
   end

@@ -82,10 +82,11 @@ describe CZTop::Socket do
 #    refute_nil rep_socket
 #  end
 
-#  it "sends and receives a string" do
-#    req_socket.send_string "foobar"
-#    assert_equal "foobar", rep_socket.receive_string
-#    rep_socket.send_string "foobarbaz"
-#    assert_equal "foobarbaz", req_socket.receive_string
-#  end
+  it "sends and receives a string" do
+    req_socket << "foobar"
+    assert_equal "foobar", rep_socket.receive.frames.first.to_s
+
+    rep_socket.send "foobarbaz"
+    assert_equal "foobarbaz", req_socket.receive.frames.first.to_s
+  end
 end

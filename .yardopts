@@ -1,1 +1,1 @@
---private
+--private lib/**/*.rb vendor/czmq/bindings/ruby/**/*.rb

@@ -12,7 +12,7 @@ module CZTop
 end
 
 # Helpers of this binding
-require_relative 'cztop/native_delegate'
+require_relative 'cztop/ffi_delegate'
 
 # CZMQ classes
 require_relative 'cztop/actor'

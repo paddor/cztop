@@ -1,7 +1,7 @@
 module CZTop
   # @note Mainly because Proxy and Authenticator are actors.
   class Actor
-    include NativeDelegate
+    include FFIDelegate
 
     def initialize
       # TODO

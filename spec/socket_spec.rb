@@ -8,15 +8,17 @@ describe CZTop::Socket do
   let(:binding_pair_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
-  it "creates low-level REP socket" do
-    endpoint = "inproc://sock#{i}"
-    sock = ::CZMQ::FFI::Zsock.new_rep(endpoint)
-    refute_operator sock, :null?
-  end
+  describe "low-level binding" do
+    it "creates REP Zsock" do
+      endpoint = "inproc://sock#{i}"
+      sock = ::CZMQ::FFI::Zsock.new_rep(endpoint)
+      refute_operator sock, :null?
+    end
 
-  it "creates low-level REQ socket" do
-    sock = ::CZMQ::FFI::Zsock.new_req(endpoint)
-    refute_operator sock, :null?
+    it "creates REQ Zsock" do
+      sock = ::CZMQ::FFI::Zsock.new_req(endpoint)
+      refute_operator sock, :null?
+    end
   end
 
 
@@ -40,23 +42,48 @@ describe CZTop::Socket do
 
   end
 
-  it "allows creating a socket without providing an endpoint" do
-    CZTop::Socket::PAIR.new
+  describe "#initialize" do
+    context "given no endpoint" do
+      subject { CZTop::Socket::PAIR.new }
+      it "creates a socket" do
+        subject
+      end
+    end
+
+    context "given invalid endpoint" do
+      let(:endpoint) { "foo://bar" }
+      it "raises" do
+        assert_raises(CZTop::InitializationError) do
+          CZTop::Socket::REP.new(endpoint)
+        end
+      end
+    end
+
+    context "given same binding endpoint to multiple REP sockets" do
+      let(:endpoint) { "inproc://the_one_and_only" }
+      it "raises" do
+        sock1 = CZTop::Socket::REP.new(endpoint)
+        # there can only be one REP socket bound to one endpoint
+        assert_raises(CZTop::InitializationError) do
+          sock2 = CZTop::Socket::REP.new(endpoint)
+        end
+      end
+    end
   end
 
-  it "sends and waits for a signal" do
-    s1 = connecting_pair_socket
-    s2 = binding_pair_socket
-    s1.signal 5
-    assert_equal 5, s2.wait
-  end
+  describe "signals" do
+    let (:signal_code) { 5 }
+    describe "#signal" do
+      it "sends a signal" do
+        connecting_pair_socket.signal(signal_code)
+      end
+    end
 
-  it "raises when socket couldn't be created" do
-    endpoint = "inproc://the_one_and_only"
-    sock1 = CZTop::Socket::REP.new(endpoint)
-    # there can only be one REP socket bound to one endpoint
-    assert_raises(CZTop::InitializationError) do
-      sock2 = CZTop::Socket::REP.new(endpoint)
+    describe "#wait" do
+      it "waits for a signal" do
+        connecting_pair_socket.signal(signal_code)
+        assert_equal signal_code, binding_pair_socket.wait
+      end
     end
   end
 
@@ -82,11 +109,24 @@ describe CZTop::Socket do
 #    refute_nil rep_socket
 #  end
 
-  it "sends and receives a string" do
-    req_socket << "foobar"
-    assert_equal "foobar", rep_socket.receive.frames.first.to_s
+  describe "#send" do
+    let(:content) { "foobar" }
+    it "sends content" do
+      req_socket.send content # REQ => REP
+    end
 
-    rep_socket.send "foobarbaz"
-    assert_equal "foobarbaz", req_socket.receive.frames.first.to_s
+    it "has alias #<<" do
+      req_socket << content # REQ => REP
+    end
+  end
+
+  describe "#receive" do
+    context "given a sent content" do
+      let(:content) { "foobar" }
+      it "receives the content" do
+        req_socket << content # REQ => REP
+        assert_equal content, rep_socket.receive.frames.first.to_s
+      end
+    end
   end
 end

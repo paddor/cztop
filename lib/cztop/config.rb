@@ -111,7 +111,7 @@ module CZTop
     class Comments
       include Enumerable
 
-      # @param message [Message]
+      # @param config [Config]
       def initialize(config)
         @config = config
       end

@@ -23,7 +23,7 @@ module CZTop::FFIDelegate
     end
 
     def from_ffi_delegate(ffi_delegate)
-      obj = new
+      obj = allocate
       obj.attach_ffi_delegate(ffi_delegate)
       return obj
     end

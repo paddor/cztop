@@ -91,9 +91,7 @@ module CZTop
     end
 
     # @return [String]
-    def filename
-      # TODO
-    end
+    ffi_delegate :filename
 
     class ReloadError < RuntimeError; end
 

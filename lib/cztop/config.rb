@@ -1,8 +1,9 @@
 module CZTop
-  include FFIDelegate
 
   # Represents a {CZMQ::FFI::Zconfig} item.
   class Config
+    include FFIDelegate
+
     def initialize(name, parent)
     end
 

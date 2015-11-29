@@ -66,7 +66,7 @@ module CZTop
     end
 
     def self.load(path)
-      Zconfig.load(path.to_s)
+      from_ffi_delegate(CZMQ::FFI::Zconfig.load(path.to_s))
     end
 
     def save(filename)

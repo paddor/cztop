@@ -29,8 +29,11 @@ main
 
 
     describe ".load" do
+
+      let(:loaded_config) { described_class.load(filename) }
       it "loads the file" do
-        assert_kind_of described_class, described_class.load(filename)
+        assert_kind_of described_class, loaded_config
+        assert_equal filename, loaded_config.filename
       end
     end
   end

@@ -9,4 +9,4 @@ addons:
       - czmq
 before_install:
   - gem install bundler -v 1.10.6
-script: rake spec
+script: bundle exec rake spec

@@ -3,6 +3,8 @@ cache: bundler
 sudo: false
 rvm:
   - 2.2.3
+  - rubinius
+  - jruby
 addons:
   apt:
     packages:

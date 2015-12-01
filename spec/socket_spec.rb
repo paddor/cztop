@@ -1,6 +1,5 @@
 require_relative 'spec_helper'
 
-
 describe CZTop::Socket do
   i = 0
   let(:endpoint) { "inproc://endpoint_#{i+=1}" }

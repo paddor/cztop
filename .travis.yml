@@ -1,4 +1,10 @@
 language: ruby
 rvm:
   - 2.2.3
-before_install: gem install bundler -v 1.10.6
+before_install:
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install czmq
+  - gem install bundler -v 1.10.6
+  - bundle --verbose
+script: rake spec

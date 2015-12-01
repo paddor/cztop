@@ -1,3 +1,5 @@
+[![Build Status on Travis CI](https://travis-ci.org/paddor/cztop.svg?branch=master)](https://travis-ci.org/paddor/cztop?branch=master)
+
 # CZTop
 
 This is a CZMQ Ruby binding, based on the generated low-level FFI bindings of

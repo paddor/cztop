@@ -40,10 +40,6 @@ module CZTop
       end
     end
 
-    def mode
-      ffi_delegate.mode_str
-    end
-
     private
 
     # Gets correct size, depending on the platform.

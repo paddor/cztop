@@ -7,10 +7,6 @@ describe CZTop::Z85 do
     assert_kind_of CZTop::Z85, subject
   end
 
-  it "uses Z85" do
-    assert_equal "z85", subject.mode
-  end
-
   describe "#encode" do
     context "empty data" do
       it "encodes" do

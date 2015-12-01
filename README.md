@@ -33,6 +33,8 @@ Here are some some of the goals I have in mind for this library:
 * encryption made easy, including handling of certificates
 * being able to implement some of the missing (CZMQ based) Ruby examples in the ZMQ Guide
 * being able to make well-designed reliability patterns from ZMQ Guide ready to use
+* provide a portable Z85 implementation
+** unlike [fpesce/z85](https://github.com/fpesce/z85), which is a C extension
 
 ## Installation
 
@@ -57,26 +59,30 @@ TODO: Write usage instructions here
 ## TODO
 
 * maybe find a better name for this project
+* change zproject to generate Ruby bindings using Fiddle instead of FFI
 * think of a neat Ruby API, including:
-  - Actor
-  - Socket
-    - Options to encapsulate all option setters and getters
-  - Message
-  - Frame
-    - enumerable Frames
-  - Loop
-  - Authenticator
-  - Certificate
-  - CertificateStore
-  - Config
-  - Proxy
-  - Z85
-    - a portable (FFI) one, as opposed to [fpesce/z85](https://github.com/fpesce/z85)
-  - Beacon
+  - Actor [ ]
+  - Socket [x]
+    - Options to encapsulate all option setters and getters [ ]
+  - Message [x]
+  - Frame [x]
+    - enumerable Frames [x]
+  - Loop [ ]
+  - Authenticator [ ]
+  - Certificate [ ]
+  - CertificateStore [ ]
+  - Config [x]
+  - Proxy [ ]
+  - Z85 [x]
+  - Beacon [ ]
 * specify runnable specs
+  - lot of outlining already done
 * write the missing XML API files in CZMQ
+  - zarmour.xml [x]
+  - zconfig.xml [x]
+  - zsock_option.xml [x]
+  - zcert.xml
   - zcertstore.xml
-  - zconfig.xml
 * reliability patterns (in another project, or have a closer look at Malamute/MLDP)
   - ping-pong (a la http://zguide.zeromq.org/page:all#Heartbeating-for-Paranoid-Pirate)
   - Majordomo

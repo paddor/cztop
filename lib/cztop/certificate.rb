@@ -1,4 +1,5 @@
 module CZTop
+  # Represents a {CZMQ::FFI::Zcert}.
   class Certificate
     include FFIDelegate
 

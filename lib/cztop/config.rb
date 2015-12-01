@@ -1,6 +1,7 @@
 module CZTop
 
   # Represents a {CZMQ::FFI::Zconfig} item.
+  # @see rfc.zeromq.org/spec:4/ZPL
   class Config
     include FFIDelegate
 
@@ -65,11 +66,16 @@ module CZTop
       delegate.set_comment(nil)
     end
 
+    # Loads a Config tree from a file.
+    # @param path [String, Pathname, #to_s] the path to the ZPL config file
+    # @return [Config]
     def self.load(path)
       from_ffi_delegate(CZMQ::FFI::Zconfig.load(path.to_s))
     end
 
-    def save(filename)
+    # Saves the Config tree to a file.
+    # @param path [String, Pathname, #to_s] the path to the ZPL config file
+    def save(path)
       # TODO
     end
 

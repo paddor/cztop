@@ -1,4 +1,5 @@
 module CZTop
+  # Represents a {CZMQ::FFI::Zframe}.
   class Frame
     include FFIDelegate
 
@@ -54,22 +55,31 @@ module CZTop
       ffi_delegate.reset(content_ptr, content_size)
     end
 
-    # TODO
-    def dup
-    end
+    # Duplicates a frame.
+    # @return [Frame] new frame with same content
+    ffi_delegate :dup
 
-    # TODO
+    # @return [Boolean] if the MORE indicator is set
+    # @note This happens when reading a frame from a {Socket} or using
+    #   {more=}.
     def more?
+      ffi_delegate.more
     end
 
-    # TODO
+    # Sets the MORE indicator.
+    # @param [Boolean]
+    # @note This is NOT used when sending frame to socket.
+    # @see #send_to
     def more=(indicator)
     end
 
-    # TODO
+    # Compare to another frame.
+    # @param other [Frame]
+    # @return [Boolean] if this and the other frame have identical size and
+    #   data
     def ==(other)
+      ffi_delegate.eq(other)
     end
-
 
     # @!attribute [r]
     # @return [Integer] content length in bytes

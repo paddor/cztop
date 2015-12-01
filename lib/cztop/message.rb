@@ -1,15 +1,19 @@
 module CZTop
-  # TODO
+  # Represents a {CZMQ::FFI::Zmsg}.
   class Message
     include FFIDelegate
 
-    # TODO
+    # Gets a new message from a socket.
+    # @param socket [Socket] the socket to read a message from
+    # @return [Message] the message read
     def self.from_socket(socket)
       from_ffi_delegate(CZMQ::FFI::Zmsg.recv(socket))
     end
 
-    # TODO
+    # Coerces an object into a {Message}.
     # @param msg [Message, String, Frame]
+    # @return [Message]
+    # @raise [ArgumentError] if it can't be coerced
     def self.coerce(msg)
       case msg
       when Message
@@ -17,23 +21,23 @@ module CZTop
       when String, Frame
         return new(msg)
       else
-        raise "cannot coerce message: %p" % msg
+        raise ArgumentError, "cannot coerce message: %p" % msg
       end
     end
 
-    # TODO
     # @param content [String, Frame]
     def initialize(content=nil)
       attach_ffi_delegate(CZMQ::FFI::Zmsg.new)
       self << content if content
     end
 
-    # TODO
+    # @return [Boolean] if this message is empty or not
     def empty?
       content_size.zero?
     end
 
-    # Send {Message} to a {Socket}/{Actor}.
+    # Send {Message} to a {Socket} or {Actor}.
+    # @param destination [Socket, Actor]
     # @note Do not use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
     def send_to(destination)
@@ -41,34 +45,36 @@ module CZTop
     end
 
     # Receive {Message} from a {Socket} or {Actor}.
+    # @param source [Socket, Actor]
+    # @return [Message]
     def self.receive_from(source)
       from_ffi_delegate(CZMQ::FFI::Zmsg.recv(source))
     end
 
-    # TODO
-    def <<(str_or_frame)
-      case str_or_frame
+    # Append something to this message.
+    # @param obj [String, Frame]
+    # @raise [ArgumentError] if obj has an invalid type
+    def <<(obj)
+      case obj
       when String
-        ffi_delegate.addstr(str_or_frame)
+        ffi_delegate.addstr(obj)
       when Frame
-        ffi_delegate.append(str_or_frame.to_ptr)
+        ffi_delegate.append(obj.to_ptr)
+      else
+        raise ArgumentError, "invalid object: %p" % obj
       end
     end
 
-    # TODO
     # @return [Integer] number of frames
+    # @see content_size
     def size
       frames.count
     end
 
-    # TODO
-    # @return [Integer] number of bytes? FIXME in total
+    # @return [Integer] size of this message in bytes
+    # @see size
     def content_size
       ffi_delegate.content_size
-    end
-
-    # TODO
-    def []
     end
 
     # Access to this {Message}'s {Frame}s.

@@ -19,5 +19,11 @@ module CZTop
       return Message.from_ptr()
       # TODO: maybe just Message.from_socket(self) ?
     end
+
+    # Access to the options of this actor.
+    # @return [Socket::Options]
+    def options
+      Socket::Options.new(self)
+    end
   end
 end

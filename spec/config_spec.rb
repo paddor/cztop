@@ -28,6 +28,9 @@ main
     let(:filename) { file.path }
 
 
+    describe ".from_string" do
+    end
+
     describe ".load" do
 
       let(:loaded_config) { described_class.load(filename) }
@@ -36,5 +39,35 @@ main
         assert_equal filename, loaded_config.filename
       end
     end
+
+    describe "#save"
+
+    context "Marshalling" do
+      describe "#_dump"
+      describe "._load"
+    end
+
+    describe "#filename"
+    describe "#reload"
+
+    describe "#name"
+    describe "#name="
+    describe "#value"
+    describe "#value="
+    describe "#put"
+    describe "#get"
+    describe "#children"
+    describe "#siblings"
+    describe "#locate"
+    describe "#last_at_depth"
+    describe "#comments"
+    describe "#add_comment"
+    describe "#delete_comments"
   end
+end
+
+describe CZTop::Config::Comments do
+  describe "#<<"
+  describe "#delete_all"
+  describe "#each"
 end

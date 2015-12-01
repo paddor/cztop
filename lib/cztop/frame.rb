@@ -61,13 +61,13 @@ module CZTop
 
     # @return [Boolean] if the MORE indicator is set
     # @note This happens when reading a frame from a {Socket} or using
-    #   {more=}.
+    #   {#more=}.
     def more?
       ffi_delegate.more
     end
 
     # Sets the MORE indicator.
-    # @param [Boolean]
+    # @param indicator [Boolean]
     # @note This is NOT used when sending frame to socket.
     # @see #send_to
     def more=(indicator)

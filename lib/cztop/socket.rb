@@ -29,7 +29,7 @@ module CZTop
     ].freeze
 
     # @param type [Symbol, Integer] type from {Types} or like +:PUB+
-    # @return [REQ, REP, PUSH, PULL, ..., Socket] the new socket
+    # @return [REQ, REP, PUSH, PULL, ... ] the new socket
     # @see Types
     def self.new_by_type(type)
       case type

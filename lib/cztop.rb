@@ -16,6 +16,7 @@ require_relative 'cztop/ffi_delegate'
 
 # CZMQ classes
 require_relative 'cztop/actor'
+require_relative 'cztop/authenticator'
 require_relative 'cztop/certificate'
 require_relative 'cztop/certificate_store'
 require_relative 'cztop/config'

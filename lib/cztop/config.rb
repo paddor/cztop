@@ -4,12 +4,15 @@ module CZTop
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
     include FFIDelegate
+    include Enumerable
+
+    class Error < RuntimeError; end
 
     def initialize(name, parent)
     end
 
     def name
-      # TODO
+      ffi_delegate.name.read_string
     end
     def name=(new_name)
       # TODO
@@ -32,9 +35,60 @@ module CZTop
     end
     alias_method :[], :get
 
+    # Calls the given block once for each {Config} item in the tree, starting
+    # with self, passing that element as a parameter.
+    #
+    # An Enumerator is returned if no block is given.
+    #
+    # @overload each(&block)
+    #   @yieldparam config [Config] the config item
+    #   @yieldparam level [Integer] level of the item (self has level 0,
+    #     its direct children have level 1)
+    #   @note The second parameter +level+ is only yielded if the given block
+    #     expects exactly 2 parameters. This is to ensure that Enumerable#to_a
+    #     works as expected, returning an array of {Config} items.
+    #   @return [self]
+    #   @raise [Exception] the block's exception, in case it raises (it won't
+    #     call the block any more after that)
+    # @overload each()
+    #   @return [Enumerator]
+    # @raise [Error] if zconfig_execute() returns an error code
+    def each
+      return to_a.each unless block_given?
 
+      exception = nil
+      level_wanted = Proc.new.arity == 2
+      callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
+        begin
+          config = self.class.from_ffi_delegate(zconfig)
+
+          if level_wanted
+            yield config, level
+          else
+            # make Enumerable#to_a work as expected
+            yield config
+          end
+
+          0 # report success to keep zconfig_execute() going
+        rescue
+          # remember exception, so we can raise it later to the ruby code
+          # (it can't be raised now, as we have to report failure to
+          # zconfig_execute())
+          exception = $! 
+
+          -1 # report failure to stop zconfig_execute() immediately
+        end
+      end
+      ret = ffi_delegate.execute(callback, arg = nil)
+      raise exception if exception
+      raise Error, "zconfig_execute() returned failure code" if ret.nonzero?
+      return self
+    end
+
+    # @return [Array<Config>]
+    # @see #each
     def children
-      # TODO
+      to_a[1..-1]
     end
 
     def siblings
@@ -71,6 +125,8 @@ module CZTop
     # @return [Config]
     def self.load(path)
       from_ffi_delegate(CZMQ::FFI::Zconfig.load(path.to_s))
+    rescue CZTop::InitializationError
+      raise Error, "error while reading file: %p" % path.to_s
     end
 
     # Saves the Config tree to a file.
@@ -92,7 +148,7 @@ module CZTop
     # @note This method is automatically used by Marshal.load.
     # @return [Config]
     def self._load(string)
-      ptr = Zconfig.load_str(string)
+      ptr = CZMQ::FFI::Zconfig.str_load(string)
       from_ptr(ptr)
     end
 
@@ -109,8 +165,11 @@ module CZTop
       raise ReloadError if ret == -1
     end
 
+    # Loads a {Config} tree from a string.
+    # @param string [String] the tree
+    # @return [Config]
     def self.from_string(string)
-      # TODO
+      from_ffi_delegate CZMQ::FFI::Zconfig.str_load(string)
     end
 
     # Used to access a {Config}'s comments.

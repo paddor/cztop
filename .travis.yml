@@ -6,6 +6,7 @@ rvm:
   - rubinius
   - jruby
 before_install:
+  - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ wily main universe"
   - sudo apt-get update -qq
   - sudo apt-get install libczmq3
   - gem install bundler -v 1.10.6

@@ -14,6 +14,7 @@ module CZTop
     VERBOSE_CMD = "VERBOSE".freeze
 
     # Enable verbose logging of commands and activity.
+    # @return [void]
     def verbose!
       ::CZMQ::FFI::Zstr.send(@actor, VERBOSE_CMD)
     end
@@ -41,6 +42,7 @@ module CZTop
     # @param data [String] data to publish
     # @param interval [Integer] interval in msec
     # @raise if data is longer than {MAX_BEACON_DATA} bytes
+    # @return [void]
     def publish(data, interval)
       raise if data.bytesize > MAX_BEACON_DATA
       ::CZMQ::FFI::Zsock.send(@actor, PUBLISH_PIC, PUBLISH_CMD, data, data.bytesize, interval)
@@ -49,6 +51,7 @@ module CZTop
     SILENCE_CMD = "SILENCE".freeze
 
     # Stop broadcasting the beacon.
+    # @return [void]
     def silence
       ::CZMQ::FFI::Zstr.sendx(@actor, SILENCE_CMD, nil)
     end
@@ -67,6 +70,7 @@ module CZTop
     UNSUBSCRIBE_CMD = "UNSUBSCRIBE".freeze
 
     # Stop listening to other peers.
+    # @return [void]
     def unsubscribe
       ::CZMQ::FFI::Zstr.sendx(@actor, UNSUBSCRIBE_CMD, nil)
     end

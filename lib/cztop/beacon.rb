@@ -61,10 +61,15 @@ module CZTop
 
     # Start listening to beacons from peers.
     # @param filter [String] do a prefix match on received beacons
-    # @param filter [nil] subscribe to all peer beacons
-    def subscribe(filter = nil)
+    # @return [void]
+    def subscribe(filter)
       ::CZMQ::FFI::Zsock.send(@actor, SUBSCRIBE_PIC, SUBSCRIBE_CMD, filter, filter.bytesize)
-      # TODO
+    end
+
+    # Just like {#subscribe}, but subscribe to all peer beacons.
+    # @return [void]
+    def listen
+      ::CZMQ::FFI::Zsock.send(@actor, SUBSCRIBE_PIC, SUBSCRIBE_CMD, nil, 0)
     end
 
     UNSUBSCRIBE_CMD = "UNSUBSCRIBE".freeze

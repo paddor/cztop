@@ -74,7 +74,7 @@ TODO: Write usage instructions here
   - Config [x]
   - Proxy [ ]
   - Z85 [x]
-  - Beacon [ ]
+  - Beacon [x]
 * specify runnable specs
   - lot of outlining already done
 * write the missing XML API files in CZMQ

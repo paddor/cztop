@@ -17,7 +17,9 @@ module CZTop
     def receive
       zmsg = @delegate.recv
       return Message.from_ptr()
-      # TODO: maybe just Message.from_socket(self) ?
+      # TODO: maybe just Message.receive_from(self) ?
+      #
+      # Is there any difference??
     end
 
     # Access to the options of this actor.

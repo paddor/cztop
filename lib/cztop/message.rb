@@ -3,13 +3,6 @@ module CZTop
   class Message
     include FFIDelegate
 
-    # Gets a new message from a socket.
-    # @param socket [Socket] the socket to read a message from
-    # @return [Message] the message read
-    def self.from_socket(socket)
-      from_ffi_delegate(CZMQ::FFI::Zmsg.recv(socket))
-    end
-
     # Coerces an object into a {Message}.
     # @param msg [Message, String, Frame]
     # @return [Message]
@@ -44,7 +37,7 @@ module CZTop
       CZMQ::FFI::Zmsg.send(ffi_delegate, destination)
     end
 
-    # Receive {Message} from a {Socket} or {Actor}.
+    # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
     # @return [Message]
     def self.receive_from(source)

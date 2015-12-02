@@ -2,7 +2,7 @@ module CZTop
   class Beacon
 
     # function pointer to the `zbeacon()` function
-    ZBEACON_FPTR = ::CZMQ::FFI.ffi_libs.each do |dl|
+    ZBEACON_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zbeacon")
       break fptr unless fptr.nil?
     end

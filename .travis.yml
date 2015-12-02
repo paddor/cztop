@@ -1,14 +1,12 @@
 language: ruby
 cache: bundler
-sudo: false
+sudo: required
 rvm:
   - 2.2.3
   - rubinius
   - jruby
-addons:
-  apt:
-    packages:
-      - czmq
 before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install czmq
   - gem install bundler -v 1.10.6
 script: bundle exec rake spec

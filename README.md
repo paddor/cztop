@@ -88,8 +88,8 @@ TODO: Write usage instructions here
   - zarmour.xml [x]
   - zconfig.xml [x]
   - zsock_option.xml [x]
-  - zcert.xml
-  - zcertstore.xml
+  - zcert.xml [ ]
+  - zcertstore.xml [ ]
 
 ## License
 

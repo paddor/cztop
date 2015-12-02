@@ -14,8 +14,8 @@ the [CZMQ](https://github.com/zeromq/czmq) project.
   * outdated
   * according to its author, it's an "abomination"
 * [methodmissing/rbczmq](https://github.com/methodmissing/rbczmq)
-  * no JRuby support (see methodmissing/rbczmq#48)
-  * no support for security features (see methodmissing/rbczmq#28)
+  * no JRuby support (see [methodmissing/rbczmq#48](https://github.com/methodmissing/rbczmq/issues/48))
+  * no support for security features (see [methodmissing/rbczmq#28](https://github.com/methodmissing/rbczmq/issues/28))
 * [mtortonesi/ruby-czmq](https://github.com/mtortonesi/ruby-czmq)
   * no tests
   * outdated

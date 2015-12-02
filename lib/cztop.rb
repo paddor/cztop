@@ -25,6 +25,7 @@ require_relative 'cztop/frame'
 require_relative 'cztop/message'
 require_relative 'cztop/proxy'
 require_relative 'cztop/socket'
+require_relative 'cztop/socket/types'
 require_relative 'cztop/loop'
 require_relative 'cztop/z85'
 

@@ -12,7 +12,7 @@ the [CZMQ](https://github.com/zeromq/czmq) project.
   * but they were in a very bad state (much better now, of course)
 * [Asmod4n/ruby-ffi-czmq](https://github.com/Asmod4n/ruby-ffi-czmq)
   * outdated
-  * "abomination" according its author
+  * according to its author, it's an "abomination"
 * [methodmissing/rbczmq](https://github.com/methodmissing/rbczmq)
   * no JRuby support (see methodmissing/rbczmq#48)
   * no support for security features (see methodmissing/rbczmq#28)
@@ -28,13 +28,20 @@ Here are some some of the goals I have in mind for this library:
 
 * as easy as possible API
 * first class support for security (CURVE mechanism)
+  * including handling of certificates
 * support MRI, Rubinius, and JRuby
 * use it to replace the Celluloid::ZMQ part of Celluloid
-* encryption made easy, including handling of certificates
 * being able to implement some of the missing (CZMQ based) Ruby examples in the ZMQ Guide
-* being able to make well-designed reliability patterns from ZMQ Guide ready to use
 * provide a portable Z85 implementation
   * unlike [fpesce/z85](https://github.com/fpesce/z85), which is a C extension
+
+Possibly in another project, which will use this one:
+
+* being able to make well-designed reliability patterns from ZMQ Guide ready to use
+  - ping-pong (a la http://zguide.zeromq.org/page:all#Heartbeating-for-Paranoid-Pirate)
+  - Majordomo
+  - Freelance
+  - (TODO: have a closer look at Malamute/MLDP)
 
 ## Installation
 
@@ -83,10 +90,6 @@ TODO: Write usage instructions here
   - zsock_option.xml [x]
   - zcert.xml
   - zcertstore.xml
-* reliability patterns (in another project, or have a closer look at Malamute/MLDP)
-  - ping-pong (a la http://zguide.zeromq.org/page:all#Heartbeating-for-Paranoid-Pirate)
-  - Majordomo
-  - Freelance
 
 ## License
 

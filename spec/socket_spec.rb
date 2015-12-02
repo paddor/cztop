@@ -122,8 +122,8 @@ describe CZTop::Socket do
     context "given a sent content" do
       let(:content) { "foobar" }
       it "receives the content" do
-        req_socket << content # REQ => REP
-        assert_equal content, rep_socket.receive.frames.first.to_s
+        connecting_pair_socket << content # REQ => REP
+        assert_equal content, binding_pair_socket.receive.frames.first.to_s
       end
     end
   end

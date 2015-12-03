@@ -1,6 +1,9 @@
 module CZTop
   # Represents a {CZMQ::FFI::Zsock}.
   class Socket
+    # @!parse extend CZTop::FFIDelegate::ClassMethods
+
+
     include FFIDelegate
 
     # @return [String] last bound endpoint, if any

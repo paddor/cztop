@@ -12,6 +12,7 @@ module CZTop
     class Error < RuntimeError; end
 
     def initialize(name, parent)
+      # TODO
     end
 
     # @!group ZPL attributes

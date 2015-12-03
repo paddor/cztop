@@ -1,6 +1,9 @@
 module CZTop
   # Represents a {CZMQ::FFI::Zcert}.
   class Certificate
+    # @!parse extend CZTop::FFIDelegate::ClassMethods
+
+
     include FFIDelegate
 
     def self.load(filename)

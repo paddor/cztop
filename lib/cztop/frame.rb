@@ -1,6 +1,9 @@
 module CZTop
   # Represents a {CZMQ::FFI::Zframe}.
   class Frame
+    # @!parse extend CZTop::FFIDelegate::ClassMethods
+
+
     include FFIDelegate
 
     # Initialize a new {Frame}.
@@ -23,6 +26,7 @@ module CZTop
     # @note If you don't specify +reuse: true+, do NOT use this {Message}
     #   anymore afterwards. Its native counterpart will have been destroyed.
     # @note This is low-level. Consider just sending a {Message}.
+    # @return [void]
     def send_to(destination, more: false, reuse: false)
       flags = 0; flags |= FLAG_MORE if more; flags |= FLAG_REUSE if reuse
       self_ptr = more ? self : ffi_delegate.__ptr_give_ref
@@ -31,6 +35,7 @@ module CZTop
 
     # Receive {Frame} from a {Socket}/{Actor}.
     # @note This is low-level. Consider just receiving a {Message}.
+    # @return [Frame]
     def self.receive_from(source)
       from_ffi_delegate(CZMQ::FFI::Zframe.recv(source))
     end
@@ -48,6 +53,7 @@ module CZTop
 
     # Sets new content of this {Frame}.
     # @param new_content [String]
+    # @return [void]
     def content=(new_content)
       content_ptr = ::FFI::MemoryPointer.from_string(new_content)
       content_size = content_ptr.size
@@ -70,7 +76,9 @@ module CZTop
     # @param indicator [Boolean]
     # @note This is NOT used when sending frame to socket.
     # @see #send_to
+    # @return [indicator]
     def more=(indicator)
+      # TODO
     end
 
     # Compare to another frame.

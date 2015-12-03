@@ -63,7 +63,9 @@ module CZTop
 
     # Duplicates a frame.
     # @return [Frame] new frame with same content
-    ffi_delegate :dup
+    def dup
+      from_ffi_delegate(ffi_delegate.dup)
+    end
 
     # @return [Boolean] if the MORE indicator is set
     # @note This happens when reading a frame from a {Socket} or using

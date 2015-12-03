@@ -91,6 +91,13 @@ TODO: Write usage instructions here
   - zcert.xml [ ]
   - zcertstore.xml [ ]
 
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/paddor/cztop.
+
+To run the tests before/after you made any changes to the source and have
+created a test case for it, use `rake spec`.
+
 ## License
 
 The gem is available as open source under the terms of the [ISC License](http://opensource.org/licenses/ISC).

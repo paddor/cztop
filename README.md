@@ -66,7 +66,6 @@ TODO: Write usage instructions here
 ## TODO
 
 * maybe find a better name for this project
-* change zproject to generate Ruby bindings using Fiddle instead of FFI
 * think of a neat Ruby API, including:
   - Actor [ ]
   - Socket [x]

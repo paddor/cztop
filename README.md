@@ -70,6 +70,7 @@ TODO: Write usage instructions here
   - Actor [ ]
   - Socket [x]
     - Options to encapsulate all option setters and getters [ ]
+    - Security mechanisms [ ]
   - Message [x]
   - Frame [x]
     - enumerable Frames [x]

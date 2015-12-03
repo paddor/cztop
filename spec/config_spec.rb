@@ -18,7 +18,7 @@ main
         bind = 'inproc:@@//@@addr1'
         bind = 'ipc:@@//@@addr2'
     backend
-        bind = inproc:@@//@@addr3<Paste>
+        bind = inproc:@@//@@addr3
       EOF
     end
 
@@ -59,6 +59,15 @@ main
       end
     end
 
+    describe "#initialize" do
+      context "given a name" do
+        it "sets that name"
+        context "given a parent" do
+          it "appends it to that parent"
+        end
+      end
+    end
+
     describe "#save"
 
     context "Marshalling" do
@@ -75,11 +84,120 @@ main
         assert_equal "context", config.children.first.name
       end
     end
-    describe "#name="
-    describe "#value"
-    describe "#value="
-    describe "#put"
-    describe "#get"
+
+    describe "#name=" do
+      let(:new_name) { "foo" }
+      it "sets name" do
+        config.name = new_name
+        assert_equal new_name, config.name
+      end
+    end
+
+    describe "#value" do
+      context "given config item that has no value" do
+        let(:item) { config.locate("/main/backend") }
+        it "returns the empty string" do
+          assert_empty item.value
+        end
+      end
+
+      context "given config item that has value" do
+        let(:item) { config.locate("/main/backend/bind") }
+        let(:expected_value) { "inproc:@@//@@addr3" }
+        it "reads value" do
+          assert_equal expected_value, item.value
+        end
+      end
+    end
+
+    describe "#value=" do
+      let(:item) { config.locate("main/frontend/option/hwm") }
+      before(:each) do
+        item.value = new_value
+      end
+      context "given safe string" do
+        let(:new_value) { "foo bar" }
+
+        it "sets value" do
+          assert_equal new_value, item.value
+        end
+      end
+
+      context "given integer" do
+        let(:new_value) { 555 }
+
+        it "sets value" do
+          assert_equal new_value.to_s, item.value
+        end
+      end
+
+      context "given unsafe, user-supplied value" do
+        let(:new_value) { "%s" }
+
+        it "sets value" do
+          assert_equal new_value, item.value
+        end
+      end
+    end
+
+    describe "#[]=" do
+      context "given a path and value" do
+        let(:path) { "main/type" }
+        let(:new_value) { "foobar" }
+        it "changes the item's value" do
+          refute_equal new_value, config[path]
+          config[path] = new_value
+          assert_equal new_value, config[path]
+        end
+        it "has alias #put" do
+          config.put(path, new_value)
+          assert_equal new_value, config[path]
+        end
+      end
+    end
+
+    describe "#[]" do
+      context "given existing path" do
+        context "with value set" do
+          let(:path) { "main/type" }
+          it "returns correct value" do
+            assert_equal "zqueue", config.get(path)
+          end
+
+          it "has alias #get" do
+            assert_equal config[path], config.get(path)
+          end
+        end
+        context "with no value set" do
+          let(:path) { "main/frontend" }
+          it "returns the empty string" do
+            assert_empty config[path]
+          end
+
+          context "given default value" do
+            let(:default) { "my default value" }
+            it "returns empty string" do
+              assert_empty config[path, default]
+            end
+          end
+        end
+      end
+
+      context "given non-existent path" do
+        let(:path) { "main/foobar" }
+        it "returns the empty string" do
+          assert_empty config[path]
+        end
+
+        context "given default value" do
+          let(:default) { "my default value" }
+          it "returns default value" do
+            assert_equal default, config[path, default]
+          end
+        end
+      end
+    end
+
     describe "#each" do
       context "given a block taking 2 parameters" do
         it "yields config and level" do
@@ -190,8 +308,27 @@ main
         assert_equal 13, config.children.size
       end
     end
+
     describe "#siblings"
-    describe "#locate"
+
+    describe "#locate" do
+      context "given existing path" do
+        let(:located_item) { config.locate("/main/frontend/option/swap") }
+        it "returns config item" do
+          assert_kind_of described_class, located_item
+          assert_equal "swap", located_item.name
+        end
+      end
+
+      context "given non-existent path" do
+        let(:nonexistent_path) { "/foo/bar" }
+        let(:located_item) { config.locate nonexistent_path }
+        it "returns nil" do
+          assert_nil located_item
+        end
+      end
+    end
+
     describe "#last_at_depth"
     describe "#comments"
     describe "#add_comment"

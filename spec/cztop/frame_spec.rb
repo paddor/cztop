@@ -154,6 +154,10 @@ describe CZTop::Frame do
       When { frame.routing_id = new_routing_id }
       Then { frame.routing_id == new_routing_id }
     end
+  end
+
+  describe "#routing_id=" do
+    Given(:frame) { described_class.new }
 
     context "with negative routing ID" do
       Given(:new_routing_id) { -123456 }
@@ -166,10 +170,5 @@ describe CZTop::Frame do
       When(:result) { frame.routing_id = new_routing_id }
       Then { result == Failure(RangeError) }
     end
-  end
-
-  describe "#routing_id=" do
-    Given(:frame) { described_class.new }
-    context "setting routing"
   end
 end

@@ -1,4 +1,4 @@
-require_relative 'spec_helper'
+require_relative '../spec_helper'
 
 describe CZTop::Z85 do
   subject { CZTop::Z85.new }

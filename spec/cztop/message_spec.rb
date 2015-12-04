@@ -1,4 +1,4 @@
-require_relative 'spec_helper'
+require_relative '../spec_helper'
 
 describe CZTop::Message do
   context "new Message" do
@@ -32,14 +32,24 @@ describe CZTop::Message do
 
   describe ".coerce" do
     context "given a Message" do
-      it "takes the Message as is"
+      let(:msg) { described_class.new }
+      it "takes the Message as is" do
+        assert_same msg, described_class.coerce(msg)
+      end
     end
 
     context "given a String" do
-      it "creates a new Message from the String"
+      let(:content) { "foobar" }
+      let(:coerced_msg) { described_class.coerce(content) }
+      it "creates a new Message from the String" do
+        assert_kind_of described_class, coerced_msg
+        assert_equal 1, coerced_msg.size
+        assert_equal content, coerced_msg.frames.first.to_s
+      end
     end
 
     context "given a Frame" do
+      let(:frame) { CZTop::Frame.new() }
       it "creates a new Message from the Frame"
     end
   end

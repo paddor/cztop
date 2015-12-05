@@ -61,7 +61,20 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Suppose you have a set of devices (workers) and you want to connect them to
+your central server (broker), so they're ready to get tasks to assigned to them
+(to specific workers) and complete them. You could do something like this, as
+`worker.rb`:
+
+```ruby
+#!/usr/bin/env ruby
+# worker.rb
+```
+
+```ruby
+#!/usr/bin/env ruby
+# server.rb
+```
 
 ## TODO
 

@@ -80,6 +80,24 @@ module CZTop
       end
     end
 
+    # Dealer socket for the ZeroMQ Request-Reply Pattern.
+    # @see http://rfc.zeromq.org/spec:28
+    class DEALER < Socket
+      # @param endpoints [String] endpoints
+      def initialize(endpoints)
+        attach_ffi_delegate(CZMQ::FFI::Zsock.new_dealer(endpoints))
+      end
+    end
+
+    # Router socket for the ZeroMQ Request-Reply Pattern.
+    # @see http://rfc.zeromq.org/spec:28
+    class ROUTER < Socket
+      # @param endpoints [String] endpoints
+      def initialize(endpoints)
+        attach_ffi_delegate(CZMQ::FFI::Zsock.new_router(endpoints))
+      end
+    end
+
     # Publish socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
     class PUB < Socket

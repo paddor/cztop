@@ -6,6 +6,8 @@ module CZTop
 
     include FFIDelegate
 
+    class Error < RuntimeError; end
+
     # Initialize a new {Frame}.
     # @param content [String] initial content
     def initialize(content = nil)
@@ -15,22 +17,47 @@ module CZTop
 
     FLAG_MORE = 1
     FLAG_REUSE = 2
-    FLAG_DONTWAIT = 4 # FIXME: Used for ...?
+    FLAG_DONTWAIT = 4
 
     # Send {Message} to a {Socket}/{Actor}.
     # @param destination [Socket, Actor] where to send this {Message} to
-    # @param more [Boolean] are there more {Frame}s to come for the same
-    #   {Message}?
-    # @param reuse [Boolean] do you wanna send this {Frame} to other
-    #   destinations as well?
-    # @note If you don't specify +reuse: true+, do NOT use this {Message}
+    # @param more [Boolean] whether there are more {Frame}s to come for the
+    #   same {Message}
+    # @param reuse [Boolean] whether this {Frame} will be used to send to
+    #   other destinations later
+    # @param dontwait [Boolean] whether the operation should be performed in
+    #   non-blocking mode
+    # @note If you don't specify +reuse: true+, do NOT use this {Frame}
     #   anymore afterwards. Its native counterpart will have been destroyed.
     # @note This is low-level. Consider just sending a {Message}.
     # @return [void]
-    def send_to(destination, more: false, reuse: false)
-      flags = 0; flags |= FLAG_MORE if more; flags |= FLAG_REUSE if reuse
-      self_ptr = more ? self : ffi_delegate.__ptr_give_ref
-      CZMQ::FFI::Zframe.send(self_ptr, destination, flags)
+    # @raise [IO::EAGAINWaitWritable] if dontwait was set and the operation
+    #   would have blocked right now
+    # @raise [Error] if there was some error. In that case, the native
+    #   counterpart still exists and this {Frame} can be reused.
+    def send_to(destination, more: false, reuse: false, dontwait: false)
+      flags = 0
+      flags |= FLAG_MORE if more
+      flags |= FLAG_REUSE if reuse
+      flags |= FLAG_DONTWAIT if dontwait
+
+      # remember pointer, in case the zframe_t won't be destroyed
+      zframe_ptr = ffi_delegate.to_ptr
+      ret = CZMQ::FFI::Zframe.send(ffi_delegate, destination, flags)
+
+      if reuse || ret == -1
+        # zframe_t hasn't been destroyed yet: avoid memory leak.
+        attach_ffi_delegate(CZMQ::FFI::Zframe.__new(zframe_ptr, true))
+        # OPTIMIZE: reuse existing Zframe object by redefining its finalizer
+      end
+
+      if ret == -1
+        if dontwait && FFI.errno == Errno::EAGAIN::Errno
+          raise IO::EAGAINWaitWritable
+        end
+
+        raise Error
+      end
     end
 
     # Receive {Frame} from a {Socket}/{Actor}.

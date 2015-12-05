@@ -2,7 +2,87 @@ require_relative '../spec_helper'
 
 describe CZTop::Frame do
 
-  describe ".send_to"
+  describe ".send_to" do
+    Given(:frame) { CZTop::Frame.new }
+    Given(:socket) { double() } # doesn't matter
+    it "delegates it to CZMQ::FFI" do
+      expect(CZMQ::FFI::Zframe).to receive(:send)
+      frame.send_to(socket)
+    end
+    describe "with MORE option set" do
+      it "provides correct flags" do
+        provided_flags = nil
+        expect(CZMQ::FFI::Zframe).to receive(:send) do |_,_,flags|
+          provided_flags = flags
+        end.and_return(0)
+        frame.send_to(socket, more: true)
+        assert_operator CZTop::Frame::FLAG_MORE & provided_flags, :>, 0
+      end
+    end
+    describe "with DONTWAIT set" do
+      it "provides correct flags" do
+        provided_flags = nil
+        expect(CZMQ::FFI::Zframe).to receive(:send) do |_,_,flags|
+          provided_flags = flags
+        end.and_return(0)
+        frame.send_to(socket, dontwait: true)
+        assert_operator CZTop::Frame::FLAG_DONTWAIT & provided_flags, :>, 0
+      end
+
+      describe "when it can't send right now" do
+        Given(:socket) { CZTop::Socket.new_by_type(:DEALER) }
+        When(:result) { frame.send_to(socket, dontwait: true) }
+        Then { result == Failure(IO::EAGAINWaitWritable) }
+      end
+    end
+    describe "with a surviving zframe_t" do
+      # this is the case if:
+      # * there's an error, or
+      # * the REUSE flag was set
+
+      let(:current_delegate) { frame.ffi_delegate }
+      let!(:old_delegate) { frame.ffi_delegate }
+
+      describe "with REUSE option set" do
+        it "provides correct flags" do
+          provided_flags = nil
+          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,flags|
+            provided_flags = flags
+            zframe.__ptr_give_ref # detach, so it won't try to free()
+          end.and_return(0)
+          frame.send_to(socket, reuse: true)
+          assert_operator CZTop::Frame::FLAG_REUSE & provided_flags, :>, 0
+        end
+        it "wraps native counterpart in new Zframe" do
+          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,flags|
+            zframe.__ptr_give_ref # detach, so it won't try to free()
+          end.and_return(0)
+          frame.send_to(socket, reuse: true)
+          refute_same old_delegate, current_delegate
+        end
+      end
+
+      describe "when there's an error" do # avoid memory leak
+        before(:each) do
+          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,flags|
+            zframe.__ptr_give_ref # detach, so it won't try to free()
+          end.and_return(-1)
+        end
+        let(:expected_return_code) { -1 } # fake an error
+        it "wraps native counterpart in new Zframe" do
+          frame.send_to(socket) rescue nil
+          refute_same old_delegate, current_delegate
+        end
+
+        it "raises Error" do
+          assert_raises(CZTop::Frame::Error) do
+            frame.send_to(socket)
+          end
+        end
+      end
+    end
+  end
+
   describe ".receive_from"
 
   describe "#initialize" do

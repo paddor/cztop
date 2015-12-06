@@ -83,6 +83,14 @@ main
         assert_equal "root", config.name
         assert_equal "context", config.all_children.first.name
       end
+
+      # This is supposed to be a general test for the generated Ruby bindings.
+      describe "when pointer nullified" do
+        Given(:ffi_delegate) { config.ffi_delegate }
+        When { ffi_delegate.__ptr_give_ref } # nullifies pointer
+        Then { ffi_delegate.null? }
+        And { assert_raises(CZMQ::FFI::DestroyedError) { config.name } }
+      end
     end
 
     describe "#name=" do

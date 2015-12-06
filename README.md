@@ -114,6 +114,14 @@ end
 #   - CZTop::Socket::ROUTER#send_to(receiver, message)
 ```
 
+## Documentation
+
+The following API documentation is currently available:
+
+* [YARD API documentation](http://www.rubydoc.info/github/paddor/cztop)
+
+Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
+
 ## TODO
 
 * maybe find a better name for this project

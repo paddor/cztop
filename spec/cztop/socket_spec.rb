@@ -22,47 +22,6 @@ describe CZTop::Socket do
     end
   end
 
-  describe ".new_by_type" do
-    context "given valid type" do
-      let(:expected_class) { CZTop::Socket::PUSH }
-      context "by integer" do
-        let(:type) { CZTop::Socket::Types::PUSH }
-        it "returns socket" do
-          assert_kind_of Integer, type
-          assert_kind_of expected_class, described_class.new_by_type(type)
-        end
-      end
-      context "by symbol" do
-        let(:type) { :PUSH }
-        it "returns socket" do
-          assert_kind_of expected_class, described_class.new_by_type(type)
-        end
-      end
-    end
-
-    context "given invalid type name" do
-      context "by integer" do
-        let(:type) { 99 } # non-existent type
-        it "raises" do
-          assert_raises(ArgumentError) { described_class.new_by_type(type) }
-        end
-      end
-      context "by symbol" do
-        let(:type) { :FOOBAR } # non-existent type
-        it "raises" do
-          assert_raises(NameError) { described_class.new_by_type(type) }
-        end
-      end
-      context "by other kind" do
-        # NOTE: No support for socket types as Strings for now.
-        let(:type) { "PUB" }
-        it "raises" do
-          assert_raises(ArgumentError) { described_class.new_by_type(type) }
-        end
-      end
-    end
-  end
-  
   describe "#initialize" do
     context "given invalid endpoint" do
       let(:endpoint) { "foo://bar" }

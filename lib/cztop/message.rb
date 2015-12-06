@@ -21,10 +21,11 @@ module CZTop
       end
     end
 
-    # @param content [String, Frame]
-    def initialize(content=nil)
+    # @param parts [String, Frame, Array<String>, Array<Frame>] initial parts
+    #   of the message
+    def initialize(parts = nil)
       attach_ffi_delegate(CZMQ::FFI::Zmsg.new)
-      self << content if content
+      Array(parts).each { |part| self << part } if parts
     end
 
     # @return [Boolean] if this message is empty or not

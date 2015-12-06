@@ -28,6 +28,12 @@ describe CZTop::Message do
         assert_equal 1, subject.frames.count
       end
     end
+
+    context "with multiple parts" do
+      Given(:parts) { [ "foo", "", "bar"] }
+      When(:msg) { described_class.new(parts) }
+      Then { msg.size == parts.size }
+    end
   end
 
   describe ".coerce" do

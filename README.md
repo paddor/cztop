@@ -69,11 +69,48 @@ your central server (broker), so they're ready to get tasks to assigned to them
 ```ruby
 #!/usr/bin/env ruby
 # worker.rb
+
+config = CZTop::Config.load(ENV[:WORKER_CONFIG])
+endpoint = config["broker/address"]
+socket = CZTop::Socket::DEALER.new(endpoint)
+
+while message = socket.receive
+  puts "received message with #{message.size} frames"
+  message.frames.each.with_index do |frame, i|
+    puts "frame #%i: %p" % [ i, frame.to_s ]
+  end
+end
+
+# TODO:
+# * describe security
+#   - loading broker's public key (CZTop::Certificate)
+#   - loading client's certificate (CZTop::Certificate)
 ```
 
 ```ruby
 #!/usr/bin/env ruby
 # server.rb
+
+config = CZTop::Config.load(ENV[:BROKER_CONFIG])
+endpoint = config["broker/address"]
+socket = CZTop::Socket::ROUTER.new(endpoint)
+
+# ...
+
+##
+# assuming all workers have connected by now
+#
+config["workers"].direct_children.each do |worker|
+  message = CZTop::Message.new([ worker.name, "", "take a break"])
+  socket << message
+end
+
+# TODO:
+# * describe security
+#   - loading broker's certificate (CZTop::Certificate)
+#   - allowing all client public keys from a directory (CZTop::CertificateStore)
+# * nicer way to send a message to a specific worker
+#   - CZTop::Socket::ROUTER#send_to(receiver, message)
 ```
 
 ## TODO

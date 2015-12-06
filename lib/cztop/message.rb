@@ -36,6 +36,7 @@ module CZTop
     # @param destination [Socket, Actor]
     # @note Do not use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
+    # @return [void]
     def send_to(destination)
       CZMQ::FFI::Zmsg.send(ffi_delegate, destination)
     end
@@ -52,6 +53,7 @@ module CZTop
     # @raise [ArgumentError] if obj has an invalid type
     # @note If you provide a {Frame}, do NOT use that frame afterwards
     #   anymore, as its native counterpart will have been destroyed.
+    # @return [void]
     def <<(obj)
       case obj
       when String
@@ -140,6 +142,7 @@ module CZTop
       end
 
       # @note Not thread safe.
+      # @return [self]
       def each
         first = first()
         return unless first

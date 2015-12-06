@@ -38,7 +38,9 @@ group :spec do
   puts "README pattern: %p" % README_FILE
   puts "ruby lib files pattern: %p" % ruby_lib_files
   puts "spec files pattern: %p" % spec_files
+end
 
+group :syntax_check do
   guard :shell do
     # check Ruby syntax
     watch(Regexp.union(ruby_lib_files, spec_files)) do |m|

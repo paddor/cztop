@@ -239,6 +239,13 @@ describe CZTop::Frame do
   describe "#routing_id=" do
     Given(:frame) { described_class.new }
 
+    context "with valid routing ID" do
+      # code duplication for completeness' sake
+      Given(:new_routing_id) { 123456 }
+      When { frame.routing_id = new_routing_id }
+      Then { frame.routing_id == new_routing_id }
+    end
+
     context "with negative routing ID" do
       Given(:new_routing_id) { -123456 }
       When(:result) { frame.routing_id = new_routing_id }

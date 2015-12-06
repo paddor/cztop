@@ -49,11 +49,47 @@ describe CZTop::Message do
     end
 
     context "given a Frame" do
-      let(:frame) { CZTop::Frame.new() }
-      it "creates a new Message from the Frame"
+      Given(:frame_content) { "foobar special content" }
+      Given(:frame) { CZTop::Frame.new(frame_content) }
+      When(:coerced_msg) { described_class.coerce(frame) }
+      Then { coerced_msg.kind_of? described_class }
+      And { coerced_msg.size == 1 }
+      And { coerced_msg.frames.first.to_s == frame_content }
     end
   end
 
-  describe "" do
+  describe "#routing_id" do
+    Given(:msg) { described_class.new }
+    context "with no routing ID set" do
+      Then { msg.routing_id == 0 }
+    end
+    context "with routing ID set" do
+      Given(:routing_id) { 12345 }
+      When { msg.routing_id = routing_id }
+      Then { msg.routing_id == routing_id }
+    end
+  end
+
+  describe "#routing_id=" do
+    Given(:msg) { described_class.new }
+
+    context "with valid routing ID" do
+      # code duplication for completeness' sake
+      Given(:new_routing_id) { 123456 }
+      When { msg.routing_id = new_routing_id }
+      Then { msg.routing_id == new_routing_id }
+    end
+
+    context "with negative routing ID" do
+      Given(:new_routing_id) { -123456 }
+      When(:result) { msg.routing_id = new_routing_id }
+      Then { result == Failure(RangeError) }
+    end
+
+    context "with too big routing ID" do
+      Given(:new_routing_id) { 123456345676543456765 }
+      When(:result) { msg.routing_id = new_routing_id }
+      Then { result == Failure(RangeError) }
+    end
   end
 end

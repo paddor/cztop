@@ -137,9 +137,7 @@ module CZTop
     # @note This only set when the frame came from a {CZTop::Socket::SERVER}
     #   socket.
     # @return [Integer] the routing ID, or 0 if unset
-    def routing_id
-      ffi_delegate.routing_id
-    end
+    ffi_delegate :routing_id
 
     # Sets a new routing ID.
     # @note This is used when the frame is sent to a {CZTop::Socket::SERVER}

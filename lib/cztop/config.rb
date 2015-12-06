@@ -119,10 +119,19 @@ module CZTop
       return self
     end
 
+    # Returns all children, direct and indirect ones.
     # @return [Array<Config>]
     # @see #each
-    def children
+    def all_children
       to_a[1..-1]
+    end
+
+    def first_child
+      # TODO
+    end
+
+    def direct_children
+      # TODO
     end
 
     def siblings

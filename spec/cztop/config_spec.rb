@@ -81,7 +81,7 @@ main
     describe "#name" do
       it "returns name" do
         assert_equal "root", config.name
-        assert_equal "context", config.children.first.name
+        assert_equal "context", config.all_children.first.name
       end
     end
 
@@ -216,7 +216,7 @@ main
 
         context "starting from non-root element" do
           it "level still starts at 0" do
-            child = config.children.first
+            child = config.all_children.first
             child.each do |_,level|
               assert_equal 0, level
               break
@@ -305,7 +305,7 @@ main
 
     describe "#children" do
       it "returns all children" do
-        assert_equal 13, config.children.size
+        assert_equal 13, config.all_children.size
       end
     end
 

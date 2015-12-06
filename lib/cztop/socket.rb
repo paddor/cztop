@@ -14,7 +14,7 @@ module CZTop
     # Sends a signal.
     # @param [Integer] signal (0-255)
     ffi_delegate :signal
-    
+
     # Waits for a signal.
     # @return [Integer] the received signal
     ffi_delegate :wait

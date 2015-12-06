@@ -1,6 +1,7 @@
 module CZTop
   class Socket
-    #  Socket types
+    #  Socket types. Each constant in this namespace holds the type code used
+    #  for the zsock_new() function.
     module Types
       PAIR = 0
       PUB = 1
@@ -18,6 +19,8 @@ module CZTop
       CLIENT = 13
     end
 
+    # All the available type codes, mapped to their Symbol equivalent.
+    # @return [Hash<Integer, Symbol>]
     TypeNames = Hash[
       Types.constants.map { |name| i = Types.const_get(name); [ i, name ] }
     ].freeze
@@ -25,6 +28,8 @@ module CZTop
     # @param type [Symbol, Integer] type from {Types} or like +:PUB+
     # @return [REQ, REP, PUSH, PULL, ... ] the new socket
     # @see Types
+    # @example Creating a socket by providing its type as a parameter
+    #   my_sock = CZTop::Socket.new_by_type(:DEALER, "tcp://example.com:4000")
     def self.new_by_type(type)
       case type
       when Integer

@@ -52,8 +52,8 @@ module CZTop
     # Client socket for the ZeroMQ Client-Server Pattern.
     # @see http://rfc.zeromq.org/spec:41
     class CLIENT < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_client(endpoints))
       end
     end
@@ -61,8 +61,8 @@ module CZTop
     # Server socket for the ZeroMQ Client-Server Pattern.
     # @see http://rfc.zeromq.org/spec:41
     class SERVER < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_server(endpoints))
       end
     end
@@ -70,8 +70,8 @@ module CZTop
     # Request socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
     class REQ < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_req(endpoints))
       end
     end
@@ -79,8 +79,8 @@ module CZTop
     # Reply socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
     class REP < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_rep(endpoints))
       end
     end
@@ -88,8 +88,8 @@ module CZTop
     # Dealer socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
     class DEALER < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_dealer(endpoints))
       end
     end
@@ -97,8 +97,8 @@ module CZTop
     # Router socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
     class ROUTER < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_router(endpoints))
       end
     end
@@ -106,8 +106,8 @@ module CZTop
     # Publish socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
     class PUB < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_pub(endpoints))
       end
     end
@@ -115,18 +115,19 @@ module CZTop
     # Subscribe socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
     class SUB < Socket
-      # @param endpoints [String] endpoints
+      # @param endpoints [String] endpoints to connect to
       # @param subscription [String] what to subscribe to
-      def initialize(endpoints, subscription=nil)
+      def initialize(endpoints = nil, subscription = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints))
+        # TODO: subscription
       end
     end
 
     # Extended publish socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
     class XPUB < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_xpub(endpoints))
       end
     end
@@ -134,17 +135,18 @@ module CZTop
     # Extended subscribe socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
     class XSUB < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil, subscription = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_xsub(endpoints))
+        # TODO: subscription
       end
     end
 
     # Push socket for the ZeroMQ Pipeline Pattern.
     # @see http://rfc.zeromq.org/spec:30
     class PUSH < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_push(endpoints))
       end
     end
@@ -152,8 +154,8 @@ module CZTop
     # Pull socket for the ZeroMQ Pipeline Pattern.
     # @see http://rfc.zeromq.org/spec:30
     class PULL < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to bind to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_pull(endpoints))
       end
     end
@@ -161,8 +163,8 @@ module CZTop
     # Pair socket for inter-thread communication.
     # @see http://rfc.zeromq.org/spec:31
     class PAIR < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_pair(endpoints))
       end
     end
@@ -171,8 +173,8 @@ module CZTop
     # communicating with a non-ZMQ peer, done over TCP.
     # @see http://api.zeromq.org/4-2:zmq-socket#toc16
     class STREAM < Socket
-      # @param endpoints [String] endpoints
-      def initialize(endpoints)
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_stream(endpoints))
       end
     end

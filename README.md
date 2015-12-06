@@ -160,4 +160,4 @@ created a test case for it, use `rake spec`.
 ## License
 
 The gem is available as open source under the terms of the [ISC License](http://opensource.org/licenses/ISC).
-See the LICENSE file.
+See the [LICENSE](https://github.com/paddor/cztop/blob/master/LICENSE) file.

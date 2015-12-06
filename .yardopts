@@ -1,1 +1,1 @@
---use-cache .yardoc/cache.db --private lib/**/*.rb vendor/czmq/bindings/ruby/**/*.rb
+--private lib/**/*.rb vendor/czmq/bindings/ruby/**/*.rb

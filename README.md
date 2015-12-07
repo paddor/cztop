@@ -3,6 +3,15 @@
 
 # CZTop
 
+```
+_________  _____________________
+\_   ___ \ \____    /\__    ___/____  ______
+/    \  \/   /     /   |    |  /  _ \ \____ \
+\     \____ /     /_   |    | (  <_> )|  |_> >
+ \______  //_______ \  |____|  \____/ |   __/
+         \/         \/                 |__|
+```
+
 This is a CZMQ Ruby binding, based on the generated low-level FFI bindings of
 the [CZMQ](https://github.com/zeromq/czmq) project.
 

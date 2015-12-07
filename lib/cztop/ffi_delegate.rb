@@ -1,3 +1,12 @@
+require 'forwardable'
+
+module CZTop
+  # This is raised when trying to attach an FFI delegate (an instance from one
+  # of the classes in the CZMQ::FFI namespace) whose internal pointer has been
+  # nullified.
+  class InitializationError < ::FFI::NullPointerError; end
+end
+
 module CZTop::FFIDelegate
   # @return [CZMQ::FFI::*]
   attr_accessor :ffi_delegate

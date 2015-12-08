@@ -9,7 +9,7 @@ _________  _____________________
 /    \  \/   /     /   |    |  /  _ \ \____ \
 \     \____ /     /_   |    | (  <_> )|  |_> >
  \______  //_______ \  |____|  \____/ |   __/
-         \/         \/                 |__|
+        \/         \/                 |__|
 ```
 
 This is a CZMQ Ruby binding, based on the generated low-level FFI bindings of

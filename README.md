@@ -15,8 +15,9 @@ _________  _____________________
         \/         \/                 |__|
 ```
 
-This is a CZMQ Ruby binding, based on the generated low-level FFI bindings of
-the [CZMQ](https://github.com/zeromq/czmq) project.
+This is CZTop, an easy-to-use CZMQ Ruby binding. It is based on
+[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level FFI
+binding of [CZMQ](https://github.com/zeromq/czmq).
 
 ## Reasons
 

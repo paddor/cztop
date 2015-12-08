@@ -1,3 +1,0 @@
-[submodule "vendor/czmq"]
-	path = vendor/czmq
-	url = https://github.com/zeromq/czmq.git

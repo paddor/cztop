@@ -1,10 +1,5 @@
-lib = File.expand_path('../../vendor/czmq/bindings/ruby/lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
-require 'czmq/ffi'
-require 'cztop/version'
-
-CZMQ::FFI.available? or raise LoadError, "libczmq is not available"
+require 'czmq-ffi-gen'
+require_relative 'cztop/version'
 
 # Helpers of this binding
 require_relative 'cztop/ffi_delegate'

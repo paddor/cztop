@@ -2,6 +2,5 @@
 set -e
 git clone https://github.com/paddor/czmq-ffi-gen
 cd czmq-ffi-gen
-git submodule init
 ci-scripts/install-libzmq
 ci-scripts/install-libczmq

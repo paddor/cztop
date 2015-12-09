@@ -70,22 +70,21 @@ module CZTop
     # @!group Traversing
 
     # Calls the given block once for each {Config} item in the tree, starting
-    # with self, passing that element as a parameter.
+    # with self.
     #
     # An Enumerator is returned if no block is given.
     #
-    # @overload each(&block)
-    #   @yieldparam config [Config] the config item
-    #   @yieldparam level [Integer] level of the item (self has level 0,
-    #     its direct children have level 1)
-    #   @note The second parameter +level+ is only yielded if the given block
-    #     expects exactly 2 parameters. This is to ensure that Enumerable#to_a
-    #     works as expected, returning an array of {Config} items.
-    #   @return [self]
-    #   @raise [Exception] the block's exception, in case it raises (it won't
-    #     call the block any more after that)
+    # @yieldparam config [Config] the config item
+    # @yieldparam level [Integer] level of the item (self has level 0,
+    #   its direct children have level 1)
+    # @note The second parameter +level+ is only yielded if the given block
+    #   expects exactly 2 parameters. This is to ensure that Enumerable#to_a
+    #   works as expected, returning an array of {Config} items.
+    # @return [self]
+    # @raise [Exception] the block's exception, in case it raises (it won't
+    #   call the block any more after that)
     # @overload each()
-    #   @return [Enumerator]
+    #   @return [Enumerator] if no block is given
     # @raise [Error] if zconfig_execute() returns an error code
     def each
       return to_a.each unless block_given?

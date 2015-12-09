@@ -2,7 +2,7 @@ language: ruby
 cache: bundler
 sudo: required
 rvm:
-  - jruby
+  - jruby-head
 before_install:
   - ci-scripts/install-deps
   - gem install bundler -v 1.10.6

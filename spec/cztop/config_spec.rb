@@ -237,11 +237,8 @@ main
       context "given a block which breaks" do
         it "calls block no more" do
           called = 0
-          begin
-            config.each { |_| called += 1; break }
-          rescue
-            assert_equal 1, called
-          end
+          config.each { |_| called += 1; break }
+          assert_equal 1, called
         end
 
         it "doesn't raise" do

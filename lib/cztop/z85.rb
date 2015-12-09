@@ -40,7 +40,7 @@ module CZTop
       FFI::MemoryPointer.new(:size_t) do |size_ptr|
         buffer_ptr = ffi_delegate.decode(input, size_ptr)
         raise Error if buffer_ptr.null?
-        decoded_string = buffer_ptr.read_string_length(_size(size_ptr) - 1)
+        decoded_string = buffer_ptr.read_string(_size(size_ptr) - 1)
         return decoded_string
       end
     end
@@ -53,7 +53,12 @@ module CZTop
     # @see https://github.com/ffi/ffi/issues/333
     def _size(size_ptr)
       if size_ptr.size == 8 # 64 bit
-        size_ptr.read_uint64
+        if RUBY_ENGINE == "jruby"
+          # NOTE: JRuby FFI doesn't have #read_uint64
+          size_ptr.read_ulong_long
+        else
+          size_ptr.read_uint64
+        end
       else
         size_ptr.read_uint32
       end

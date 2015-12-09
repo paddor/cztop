@@ -70,7 +70,7 @@ module CZTop
     # @note This string is always binary. Use String#force_encoding if needed.
     # @return [String] content as string (encoding = Encoding::BINARY)
     def content
-      ffi_delegate.data.read_string_length(size)
+      ffi_delegate.data.read_string(size)
     end
     alias_method :to_s, :content
 

@@ -7,9 +7,11 @@ module CZTop
   class InitializationError < ::FFI::NullPointerError; end
 end
 
+# This module is used to attach the low-level objects of classes within the
+# CZMQ::FFI namespace (coming from the _czmq-ffi-gen_ gem) as delegates.
 module CZTop::FFIDelegate
-  # @return [CZMQ::FFI::*]
-  attr_accessor :ffi_delegate
+  # @return [CZMQ::FFI::*] the attached delegate
+  attr_reader :ffi_delegate
 
   # @return [FFI::Pointer] FFI delegate's pointer
   def to_ptr
@@ -23,28 +25,35 @@ module CZTop::FFIDelegate
   # @return [void]
   def attach_ffi_delegate(ffi_delegate)
     raise CZTop::InitializationError if ffi_delegate.null?
-    self.ffi_delegate = ffi_delegate
+    @ffi_delegate = ffi_delegate
   end
 
   # Same as the counterpart in {ClassMethods}, but usable from within an
   # instance.
   # @see CZTop::FFIDelegate::ClassMethods#from_ffi_delegate
   # @return [CZTop::*] the new object
-  def from_ffi_delegate(*args)
-    self.class.from_ffi_delegate(*args)
+  def from_ffi_delegate(ffi_delegate)
+    self.class.from_ffi_delegate(ffi_delegate)
   end
 
   module ClassMethods
-    # Delegate specified instance methods to the registered FFI delegates.
-    # @param methods [Array<Symbol>] methods to delegate
+    # Delegate specified instance method to the registered FFI delegate.
+    # @note It only takes one method name so it's easy to add some
+    #   documentation for each delegated method.
+    # @param method [Symbol] method to delegate
     # @return [void]
-    def ffi_delegate(*methods)
-      def_delegators(:@ffi_delegate, *methods)
+    def ffi_delegate(method)
+      def_delegators(:@ffi_delegate, method)
     end
 
-    # Allocates a new instance and attaches the FFI delegate to it.
-    # @return [CZTop::*] the new object
-    # @note #initialize won't be called on the new object
+    # Allocates a new instance and attaches the FFI delegate to it. This is
+    # useful if you already have an FFI delegate and need to attach it to a
+    # fresh high-level object.
+    # @return [CZTop::*] the fresh object
+    # @note #initialize won't be called on the fresh object. This works around
+    #   the fact that #initialize usually assumes that no FFI delegate is
+    #   attached yet and will try to do so (and also expect to be called in a
+    #   specific way).
     def from_ffi_delegate(ffi_delegate)
       obj = allocate
       obj.attach_ffi_delegate(ffi_delegate)

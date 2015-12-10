@@ -34,8 +34,11 @@ module CZTop
 
     # Connects to an endpoint.
     # @param endpoint [String]
+    # @return [void]
+    # @raise [ArgumentError] if the endpoint is incorrect
     def connect(endpoint)
-      ffi_delegate.connect(endpoint)
+      rc = ffi_delegate.connect(endpoint)
+      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
     # Disconnects from an endpoint.

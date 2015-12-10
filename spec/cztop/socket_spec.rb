@@ -85,7 +85,23 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#connect"
+  describe "#connect" do
+    context "with valid endpoint" do
+      let(:another_endpoint) { "inproc://foo" }
+      it "connects" do
+        req_socket.connect(another_endpoint)
+      end
+    end
+    context "with invalid endpoint" do
+      let(:another_endpoint) { "bar://foo" }
+      it "raises" do
+        assert_raises(ArgumentError) do
+          req_socket.connect(another_endpoint)
+        end
+      end
+    end
+  end
+
   describe "#disconnect"
   describe "#bind"
   describe "#unbind"

@@ -138,6 +138,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 ## TODO
 
 * maybe find a better name for this project
+* pack generated code into its own gem (czmq-ffi-gen) [x]
 * think of a neat Ruby API, including:
   - Actor [ ]
   - Socket [x]
@@ -160,8 +161,8 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - zarmour.xml [x]
   - zconfig.xml [x]
   - zsock_option.xml [x]
-  - zcert.xml [ ]
-  - zcertstore.xml [ ]
+  - zcert.xml [x]
+  - zcertstore.xml [x]
 
 ## Contributing
 

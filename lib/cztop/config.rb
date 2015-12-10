@@ -3,10 +3,10 @@ module CZTop
   # Represents a {CZMQ::FFI::Zconfig} item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
-    # @!parse extend CZTop::FFIDelegate::ClassMethods
+    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
 
 
-    include FFIDelegate
+    include HasFFIDelegate
     include Enumerable
 
     class Error < RuntimeError; end

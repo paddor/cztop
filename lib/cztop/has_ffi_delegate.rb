@@ -9,7 +9,7 @@ end
 
 # This module is used to attach the low-level objects of classes within the
 # CZMQ::FFI namespace (coming from the _czmq-ffi-gen_ gem) as delegates.
-module CZTop::FFIDelegate
+module CZTop::HasFFIDelegate
   # @return [CZMQ::FFI::*] the attached delegate
   attr_reader :ffi_delegate
 

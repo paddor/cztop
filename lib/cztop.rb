@@ -2,7 +2,7 @@ require 'czmq-ffi-gen'
 require_relative 'cztop/version'
 
 # Helpers of this binding
-require_relative 'cztop/ffi_delegate'
+require_relative 'cztop/has_ffi_delegate'
 
 # CZMQ classes
 require_relative 'cztop/actor'

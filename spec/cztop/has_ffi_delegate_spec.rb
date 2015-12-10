@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-describe CZTop::FFIDelegate do
+describe CZTop::HasFFIDelegate do
   let(:delegate_class) do
     Class.new do
       def initialize(ptr) @ptr = ptr end
@@ -14,7 +14,7 @@ describe CZTop::FFIDelegate do
   let(:delegate) { delegate_class.new(ptr) }
   let(:delegator_class) do
     Class.new do
-      include CZTop::FFIDelegate
+      include CZTop::HasFFIDelegate
     end
   end
   let(:delegator) { delegator_class.new }
@@ -121,7 +121,7 @@ describe CZTop::FFIDelegate do
         assert_operator klass, :<, described_class
       end
       it "extends class with ClassMethods" do
-        assert_kind_of CZTop::FFIDelegate::ClassMethods, klass
+        assert_kind_of CZTop::HasFFIDelegate::ClassMethods, klass
       end
     end
   end

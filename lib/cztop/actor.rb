@@ -1,10 +1,10 @@
 module CZTop
   # @note Mainly because Proxy and Authenticator are actors.
   class Actor
-    # @!parse extend CZTop::FFIDelegate::ClassMethods
+    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
 
 
-    include FFIDelegate
+    include HasFFIDelegate
 
     def initialize
       # TODO

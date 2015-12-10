@@ -62,7 +62,7 @@ describe CZTop::Socket do
 
   describe "ffi_delegate" do
     it "returns pointer to the real zsock" do
-      refute req_socket.ffi_delegate.null?
+      refute_operator req_socket.ffi_delegate, :null?
     end
   end
 

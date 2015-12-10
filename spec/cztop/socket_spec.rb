@@ -1,6 +1,8 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Socket do
+  include_examples "has FFI delegate"
+
   i = 0
   let(:endpoint) { "inproc://endpoint_#{i+=1}" }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }

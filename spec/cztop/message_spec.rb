@@ -1,6 +1,8 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Message do
+  include_examples "has FFI delegate"
+
   context "new Message" do
     subject { CZTop::Message.new }
     it "is empty" do

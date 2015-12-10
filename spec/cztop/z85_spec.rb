@@ -1,6 +1,7 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Z85 do
+  include_examples "has FFI delegate"
   subject { CZTop::Z85.new }
 
   it "instantiates" do

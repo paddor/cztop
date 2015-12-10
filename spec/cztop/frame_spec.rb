@@ -1,6 +1,7 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Frame do
+  include_examples "has FFI delegate"
 
   describe ".send_to" do
     Given(:frame) { CZTop::Frame.new }

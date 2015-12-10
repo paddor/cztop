@@ -7,8 +7,10 @@ module CZTop
     include HasFFIDelegate
 
     def self.load(filename)
+      # TODO
     end
 
+    # TODO
     def self.new_from(public_key, secret_key)
       Zcert.new_from(public_key, secret_key)
     end

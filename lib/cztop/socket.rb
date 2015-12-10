@@ -6,6 +6,9 @@ module CZTop
 
     include HasFFIDelegate
 
+    # Used for various errors.
+    class Error < RuntimeError; end
+
     # @return [String] last bound endpoint, if any
     def last_endpoint
       ffi_delegate.endpoint
@@ -43,22 +46,37 @@ module CZTop
 
     # Disconnects from an endpoint.
     # @param endpoint [String]
+    # @raise [ArgumentError] if the endpoint is incorrect
     def disconnect(endpoint)
       # we can do sprintf in Ruby
-      ffi_delegate.disconnect(endpoint, *nil)
+      rc = ffi_delegate.disconnect(endpoint, *nil)
+      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
+    # @return [Integer] last automatically selected, bound TCP port, if any
+    # @return [nil] if not bound to a TCP port yet
+    attr_reader :last_tcp_port
+
     # Binds to an endpoint.
+    # @note When binding to an automatically selected TCP port, this will set
+    #   {#last_tcp_port}.
     # @param endpoint [String]
+    # @return [void]
+    # @raise [Error] in case of failure
     def bind(endpoint)
-      ffi_delegate.bind(endpoint)
+      rc = ffi_delegate.bind(endpoint)
+      raise Error, "unable to bind to %p" % endpoint if rc == -1
+      @last_tcp_port = rc if rc > 0
     end
 
     # Unbinds from an endpoint.
     # @param endpoint [String]
+    # @return [void]
+    # @raise [ArgumentError] if the endpoint is incorrect
     def unbind(endpoint)
       # we can do sprintf in Ruby
-      ffi_delegate.unbind(endpoint, *nil)
+      rc = ffi_delegate.unbind(endpoint, *nil)
+      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
     # Access to the options of this socket.
@@ -83,6 +101,10 @@ module CZTop
 
     # Used to access the options of a {Socket} or {Actor}.
     class Options
+      # @return [Socket, Actor] whose options this {Options} instance is
+      #   accessing
+      attr_reader :zocket
+
       # @param zocket [Socket, Actor]
       def initialize(zocket)
         @zocket = zocket

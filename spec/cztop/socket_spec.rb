@@ -102,10 +102,81 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#disconnect"
-  describe "#bind"
-  describe "#unbind"
-  describe "#options"
+  describe "#disconnect" do
+    context "with valid endpoint" do
+      it "disconnects" do
+        expect(req_socket.ffi_delegate).to receive(:disconnect)
+        req_socket.disconnect(endpoint)
+      end
+    end
+    context "with invalid endpoint" do
+      let(:another_endpoint) { "bar://foo" }
+      it "raises" do
+        assert_raises(ArgumentError) do
+          req_socket.disconnect(another_endpoint)
+        end
+      end
+    end
+  end
+
+  describe "#bind" do
+    Given(:socket) { rep_socket }
+    context "with valid endpoint" do
+      Then { assert_nil socket.last_tcp_port }
+      context "with automatic TCP port selection endpoint" do
+        Given(:another_endpoint) { "tcp://127.0.0.1:*" }
+        When { socket.bind(another_endpoint) }
+        Then { assert_kind_of Integer, socket.last_tcp_port }
+        And { socket.last_tcp_port > 0 }
+      end
+      context "with explicit TCP port endpoint" do
+        Given(:port) { 55755 }
+        Given(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
+        When { socket.bind(another_endpoint) }
+        Then { socket.last_tcp_port == port }
+      end
+      context "with non-TCP endpoint" do
+        Given(:another_endpoint) { "inproc://non_tcp_endpoint" }
+        When { socket.bind(another_endpoint) }
+        Then { assert_nil socket.last_tcp_port }
+      end
+    end
+    context "with invalid endpoint" do
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.bind(another_endpoint) }
+      Then { result == Failure(CZTop::Socket::Error) }
+    end
+  end
+
+  describe "#unbind" do
+    context "with valid endpoint" do
+      it "unbinds" do
+        expect(req_socket.ffi_delegate).to receive(:unbind)
+        req_socket.unbind(endpoint)
+      end
+    end
+    context "with invalid endpoint" do
+      let(:another_endpoint) { "bar://foo" }
+      it "raises" do
+        assert_raises(ArgumentError) do
+          req_socket.unbind(another_endpoint)
+        end
+      end
+    end
+  end
+
+  describe "#options" do
+    let(:socket) { binding_pair_socket }
+    let(:options) { socket.options }
+    it "returns options proxy" do
+      assert_kind_of CZTop::Socket::Options, options
+    end
+
+    it "changes the correct socket's options" do
+      assert_same socket, options.zocket
+    end
+  end
+
   describe "#set_option"
   describe "#get_option"
 

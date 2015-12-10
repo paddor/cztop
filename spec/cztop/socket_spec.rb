@@ -10,20 +10,6 @@ describe CZTop::Socket do
   let(:binding_pair_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
-  # low-level binding
-  describe ::CZMQ::FFI::Zsock do
-    it "creates REP Zsock" do
-      endpoint = "inproc://sock#{i}"
-      sock = ::CZMQ::FFI::Zsock.new_rep(endpoint)
-      refute_operator sock, :null?
-    end
-
-    it "creates REQ Zsock" do
-      sock = ::CZMQ::FFI::Zsock.new_req(endpoint)
-      refute_operator sock, :null?
-    end
-  end
-
   describe "#initialize" do
     context "given invalid endpoint" do
       let(:endpoint) { "foo://bar" }
@@ -59,12 +45,6 @@ describe CZTop::Socket do
         connecting_pair_socket.signal(signal_code)
         assert_equal signal_code, binding_pair_socket.wait
       end
-    end
-  end
-
-  describe "ffi_delegate" do
-    it "returns pointer to the real zsock" do
-      refute_operator req_socket.ffi_delegate, :null?
     end
   end
 

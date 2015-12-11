@@ -10,11 +10,11 @@ module CZTop
     # Access to this {Message}'s {Frame}s.
     # @return [Frames]
     def frames
-      Frames.new(self)
+      FramesAccessor.new(self)
     end
 
     # Used to access a {Message}'s {Frame}s.
-    class Frames
+    class FramesAccessor
       include Enumerable
 
       # @param message [Message]

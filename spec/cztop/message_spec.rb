@@ -11,9 +11,6 @@ describe CZTop::Message do
     it "has content size zero" do
       assert_equal 0, subject.content_size
     end
-    it "has no frames" do
-      assert_equal 0, subject.size
-    end
 
     context "with initial string" do
       let(:content) { "foo" }

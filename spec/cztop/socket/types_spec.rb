@@ -114,7 +114,26 @@ describe CZTop::Socket::PULL do
 end
 
 describe CZTop::Socket::PAIR do
-  # TODO
+  i = 0
+  let(:endpoint) { "inproc://endpoint_socket_types_spec_#{i+=1}" }
+  let(:binding_socket) { described_class.new("@#{endpoint}") }
+  let(:connecting_socket) { described_class.new(">#{endpoint}") }
+
+  it "creates PAIR sockets" do
+    binding_socket
+    connecting_socket
+  end
+
+  it "raises when more than 2 PAIR sockets are connected" do
+    binding_socket
+    connecting_socket
+    assert_raises(CZTop::InitializationError) do
+      described_class.new("@#{endpoint}")
+    end
+#    assert_raises do
+#      CZMQ::Socket::PAIR.new(">#{endpoint}")
+#    end
+  end
 end
 
 describe CZTop::Socket::STREAM do

@@ -179,48 +179,4 @@ describe CZTop::Socket do
 
   describe "#set_option"
   describe "#get_option"
-
-
-  describe CZTop::Socket::Options do
-  end
-
-  describe CZTop::Socket::CLIENT do
-  end
-  describe CZTop::Socket::SERVER do
-  end
-  describe CZTop::Socket::REQ do
-  end
-  describe CZTop::Socket::REP do
-  end
-  describe CZTop::Socket::PUB do
-  end
-  describe CZTop::Socket::SUB do
-  end
-  describe CZTop::Socket::XPUB do
-  end
-  describe CZTop::Socket::XSUB do
-  end
-  describe CZTop::Socket::PUSH do
-  end
-  describe CZTop::Socket::PULL do
-  end
-  describe CZTop::Socket::PAIR do
-    it "creates PAIR sockets" do
-      binding_pair_socket
-      connecting_pair_socket
-    end
-
-    it "raises when more than 2 PAIR sockets are connected" do
-      binding_pair_socket
-      connecting_pair_socket
-      assert_raises(CZTop::InitializationError) do
-        CZTop::Socket::PAIR.new("@#{endpoint}")
-      end
-  #    assert_raises do
-  #      CZMQ::Socket::PAIR.new(">#{endpoint}")
-  #    end
-    end
-  end
-  describe CZTop::Socket::STREAM do
-  end
 end

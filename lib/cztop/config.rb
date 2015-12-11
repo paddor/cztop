@@ -87,6 +87,8 @@ module CZTop
     #   @return [Enumerator] if no block is given
     # @raise [Error] if zconfig_execute() returns an error code
     def each
+      # TODO rename to #execute, exclude Enumerable, add
+      #   ChildrenAccessor<Enumerable, ...
       return to_a.each unless block_given?
 
       exception = nil

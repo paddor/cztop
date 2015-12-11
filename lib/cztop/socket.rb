@@ -5,6 +5,7 @@ module CZTop
 
 
     include HasFFIDelegate
+    include ZsockOptions
 
     # Used for various errors.
     class Error < RuntimeError; end
@@ -79,37 +80,14 @@ module CZTop
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
-    # Access to the options of this socket.
-    # @return [Options]
-    def options
-      Options.new(self)
+    def routing_id
+      # TODO
+    end
+    def routing_id=(new_routing_id)
+      # TODO
     end
 
-    # Sets an option by its name.
-    # @param option [Symbol, String] option name like +:rcvhwm+
-    # @param value [Integer, String] value, depending on the option
-    def set_option(option, value)
-      options.__send__(:"#{option}=", value)
-    end
-
-    # Gets an option by its name.
-    # @param option [Symbol, String] option name like +:rcvhwm+
-    # @return [Integer, String] value, depending on the option
-    def get_option(option)
-      options.__send__(option.to_sym, value)
-    end
-
-    # Used to access the options of a {Socket} or {Actor}.
-    class Options
-      # @return [Socket, Actor] whose options this {Options} instance is
-      #   accessing
-      attr_reader :zocket
-
-      # @param zocket [Socket, Actor]
-      def initialize(zocket)
-        @zocket = zocket
-      end
-
+    def set_unbounded
       # TODO
     end
   end

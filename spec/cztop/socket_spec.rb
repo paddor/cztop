@@ -4,11 +4,15 @@ describe CZTop::Socket do
   include_examples "has FFI delegate"
 
   i = 0
-  let(:endpoint) { "inproc://endpoint_#{i+=1}" }
+  let(:endpoint) { "inproc://endpoint_socket_spec_#{i+=1}" }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
   let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
   let(:binding_pair_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
+
+  it "has Zsock options" do
+    assert_operator described_class, :<, CZTop::ZsockOptions
+  end
 
   describe "#initialize" do
     context "given invalid endpoint" do
@@ -164,19 +168,4 @@ describe CZTop::Socket do
       end
     end
   end
-
-  describe "#options" do
-    let(:socket) { binding_pair_socket }
-    let(:options) { socket.options }
-    it "returns options proxy" do
-      assert_kind_of CZTop::Socket::Options, options
-    end
-
-    it "changes the correct socket's options" do
-      assert_same socket, options.zocket
-    end
-  end
-
-  describe "#set_option"
-  describe "#get_option"
 end

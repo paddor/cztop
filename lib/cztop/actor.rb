@@ -5,6 +5,7 @@ module CZTop
 
 
     include HasFFIDelegate
+    include ZsockOptions
 
     def initialize
       # TODO

@@ -4,14 +4,32 @@ require 'tempfile'
 describe CZTop::Config do
 
   describe "#initialize" do
-    context "given a name" do
+    context "with a name" do
       let(:name) { "foo" }
       let(:config) { described_class.new name }
       it "sets that name" do
         assert_equal name, config.name
       end
-      context "given a parent" do
-        it "appends it to that parent"
+    end
+    context "with no name" do
+      let(:config) { described_class.new }
+      it "creates a config item anyway" do
+        assert_kind_of described_class, config
+      end
+    end
+    context "given a parent" do
+      let(:parent_name) { "foo" }
+      let(:parent_config) { described_class.new parent_name }
+      let(:name) { "bar" }
+      let(:config) { described_class.new name, parent_config }
+      it "appends it to that parent" do
+        assert_nil parent_config.first_child
+        config
+        assert_equal config.to_ptr, parent_config.first_child.to_ptr
+      end
+
+      it "removes finalizer from delegate" do # parent will free it
+        refute_operator config.ffi_delegate, :__finalizer_defined?
       end
     end
   end
@@ -308,6 +326,23 @@ main
     describe "#children" do
       it "returns all children" do
         assert_equal 13, config.all_children.size
+      end
+    end
+
+    describe "#first_child" do
+      context "with children" do
+        let(:parent) { config.locate("/main/frontend/option") }
+        let(:child) { parent.first_child }
+        it "returns first child" do
+          refute_nil child
+          assert_equal "hwm", child.name
+        end
+      end
+      context "with no children" do
+        let(:parent) { config.locate("/main/frontend/option/swap") }
+        it "returns nil" do
+          assert_nil parent.first_child
+        end
       end
     end
 

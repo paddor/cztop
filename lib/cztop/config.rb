@@ -11,8 +11,20 @@ module CZTop
 
     class Error < RuntimeError; end
 
-    def initialize(name, parent=nil)
-      attach_ffi_delegate ::CZMQ::FFI::Zconfig.new(name, parent)
+    # Initializes a new {Config} item.
+    # @param name [String] config item name
+    # @param name [Config] parent
+    # @note If parent is given, the native child will be destroyed when the
+    #   native parent is destroyed (and not when the child's corresponding
+    #   {Config} object is garbage collected).
+    def initialize(name = nil, parent = nil)
+      parent = parent.ffi_delegate if parent.is_a?(Config)
+      delegate = ::CZMQ::FFI::Zconfig.new(name, parent)
+      attach_ffi_delegate(delegate)
+
+      # NOTE: this delegate must not be freed automatically, because the
+      # parent will free it.
+      delegate.__undef_finalizer
     end
 
     # @!group ZPL attributes
@@ -127,8 +139,14 @@ module CZTop
       to_a[1..-1]
     end
 
+    # Returns the first child or nil.
+    # @return [Config] if there are any children
+    # @return [nil] if there no children
     def first_child
-      # TODO
+      # TODO: extract to ChildrenAccessor
+      ptr = ffi_delegate.child
+      return nil if ptr.null?
+      from_ffi_delegate(ptr)
     end
 
     def direct_children
@@ -209,5 +227,16 @@ module CZTop
     end
 
     # @!endgroup
+  end
+end
+
+# TODO: Merge these changes into zproject.
+class CZMQ::FFI::Zconfig
+  def __undef_finalizer
+    ObjectSpace.undefine_finalizer self
+    @finalizer = nil
+  end
+  def __finalizer_defined?
+    !!@finalizer
   end
 end

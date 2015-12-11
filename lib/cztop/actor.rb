@@ -25,11 +25,5 @@ module CZTop
       #
       # Is there any difference??
     end
-
-    # Access to the options of this actor.
-    # @return [Socket::Options]
-    def options
-      Socket::Options.new(self)
-    end
   end
 end

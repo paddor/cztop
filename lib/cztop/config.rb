@@ -11,8 +11,8 @@ module CZTop
 
     class Error < RuntimeError; end
 
-    def initialize(name, parent)
-      # TODO
+    def initialize(name, parent=nil)
+      attach_ffi_delegate ::CZMQ::FFI::Zconfig.new(name, parent)
     end
 
     # @!group ZPL attributes

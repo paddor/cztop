@@ -3,6 +3,19 @@ require 'tempfile'
 
 describe CZTop::Config do
 
+  describe "#initialize" do
+    context "given a name" do
+      let(:name) { "foo" }
+      let(:config) { described_class.new name }
+      it "sets that name" do
+        assert_equal name, config.name
+      end
+      context "given a parent" do
+        it "appends it to that parent"
+      end
+    end
+  end
+
   context "given a config file" do
     let(:config_contents) do
       <<-EOF
@@ -59,14 +72,6 @@ main
       end
     end
 
-    describe "#initialize" do
-      context "given a name" do
-        it "sets that name"
-        context "given a parent" do
-          it "appends it to that parent"
-        end
-      end
-    end
 
     describe "#save"
 

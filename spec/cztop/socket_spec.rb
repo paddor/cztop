@@ -14,6 +14,14 @@ describe CZTop::Socket do
     assert_operator described_class, :<, CZTop::ZsockOptions
   end
 
+  it "has send/receive methods" do
+    assert_operator described_class, :<, CZTop::SendReceiveMethods
+  end
+
+  it "has polymorphic Zsock methods" do
+    assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
+  end
+
   describe "#initialize" do
     context "given invalid endpoint" do
       let(:endpoint) { "foo://bar" }
@@ -32,22 +40,6 @@ describe CZTop::Socket do
         assert_raises(CZTop::InitializationError) do
           sock2 = CZTop::Socket::REP.new(endpoint)
         end
-      end
-    end
-  end
-
-  describe "signals" do
-    let (:signal_code) { 5 }
-    describe "#signal" do
-      it "sends a signal" do
-        connecting_pair_socket.signal(signal_code)
-      end
-    end
-
-    describe "#wait" do
-      it "waits for a signal" do
-        connecting_pair_socket.signal(signal_code)
-        assert_equal signal_code, binding_pair_socket.wait
       end
     end
   end

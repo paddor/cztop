@@ -6,4 +6,12 @@ describe CZTop::Actor do
   it "has Zsock options" do
     assert_operator described_class, :<, CZTop::ZsockOptions
   end
+
+  it "has send/receive methods" do
+    assert_operator described_class, :<, CZTop::SendReceiveMethods
+  end
+
+  it "has polymorphic Zsock methods" do
+    assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
+  end
 end

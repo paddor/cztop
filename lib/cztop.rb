@@ -4,6 +4,8 @@ require_relative 'cztop/version'
 # modules
 require_relative 'cztop/has_ffi_delegate'
 require_relative 'cztop/zsock_options'
+require_relative 'cztop/send_receive_methods'
+require_relative 'cztop/polymorphic_zsock_methods'
 
 # CZMQ classes
 require_relative 'cztop/actor'

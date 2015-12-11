@@ -6,6 +6,8 @@ module CZTop
 
     include HasFFIDelegate
     include ZsockOptions
+    include SendReceiveMethods
+    include PolymorphicZsockMethods
 
     # Used for various errors.
     class Error < RuntimeError; end
@@ -13,27 +15,6 @@ module CZTop
     # @return [String] last bound endpoint, if any
     def last_endpoint
       ffi_delegate.endpoint
-    end
-
-    # Sends a signal.
-    # @param [Integer] signal (0-255)
-    ffi_delegate :signal
-
-    # Waits for a signal.
-    # @return [Integer] the received signal
-    ffi_delegate :wait
-
-    # Sends a message.
-    # @param str_or_msg [Message, String] what to send
-    def send(str_or_msg)
-      Message.coerce(str_or_msg).send_to(self)
-    end
-    alias_method :<<, :send
-
-    # Receives a message.
-    # @return [Message]
-    def receive
-      Message.receive_from(self)
     end
 
     # Connects to an endpoint.
@@ -84,10 +65,6 @@ module CZTop
       # TODO
     end
     def routing_id=(new_routing_id)
-      # TODO
-    end
-
-    def set_unbounded
       # TODO
     end
   end

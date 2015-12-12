@@ -1,11 +1,11 @@
 # Methods used around serialization of {CZTop::Config} items.
 module CZTop::Config::Serialization
+  # Ruby callback. This will extend m with {ClassMethods}.
+  # @param m [Module] the module/class which included this module
+  # @return [void]
   def self.included(m)
     m.class_eval do
       extend CZTop::Config::Serialization::ClassMethods
-
-      # @return [String]
-      ffi_delegate :filename
     end
   end
 
@@ -13,6 +13,12 @@ module CZTop::Config::Serialization
   # @return [String]
   def to_s
     ffi_delegate.str_save.read_string
+  end
+
+  # Returns the path/filename of the file this {Config} tree was loaded from.
+  # @return [String]
+  def filename
+    ffi_delegate.filename
   end
 
   module ClassMethods

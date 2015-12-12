@@ -1,5 +1,5 @@
 module CZTop
-  # Represents a {CZMQ::FFI::Zsock}.
+  # Represents a CZMQ::FFI::Zsock.
   class Socket
     # @!parse extend CZTop::HasFFIDelegate::ClassMethods
 

@@ -1,5 +1,5 @@
 module CZTop
-  # Represents a {CZMQ::FFI::Zmsg}.
+  # Represents a CZMQ::FFI::Zmsg.
   class Message
     # @!parse extend CZTop::HasFFIDelegate::ClassMethods
 

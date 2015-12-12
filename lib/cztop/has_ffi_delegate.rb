@@ -20,7 +20,7 @@ module CZTop::HasFFIDelegate
 
   # Attaches an FFI delegate to the current (probably new) {CZTop} object.
   # @param ffi_delegate an instance of the corresponding class in the
-  #   {CZMQ::FFI} namespace
+  #   CZMQ::FFI namespace
   # @raise [CZTop::InitializationError] if delegate is #null?
   # @return [void]
   def attach_ffi_delegate(ffi_delegate)

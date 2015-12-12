@@ -1,5 +1,5 @@
 module CZTop
-  # Represents a {CZMQ::FFI::Zcert}.
+  # Represents a CZMQ::FFI::Zcert.
   class Certificate
     # @!parse extend CZTop::HasFFIDelegate::ClassMethods
 

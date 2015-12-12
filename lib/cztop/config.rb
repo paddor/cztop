@@ -1,6 +1,6 @@
 module CZTop
 
-  # Represents a {CZMQ::FFI::Zconfig} item.
+  # Represents a CZMQ::FFI::Zconfig item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
     # @!parse extend CZTop::HasFFIDelegate::ClassMethods
@@ -13,7 +13,7 @@ module CZTop
     # Initializes a new {Config} item. Takes an optional block to initialize
     # the item further.
     # @param name [String] config item name
-    # @param name [Config] parent
+    # @param parent [Config] parent config item
     # @yieldparam config [self]
     # @note If parent is given, the native child will be destroyed when the
     #   native parent is destroyed (and not when the child's corresponding

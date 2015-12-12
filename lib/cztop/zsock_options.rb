@@ -11,8 +11,8 @@ module CZTop
 
     # Used to access the options of a {Socket} or {Actor}.
     class OptionsAccessor
-      # @return [Socket, Actor] whose options this {Options} instance is
-      #   accessing
+      # @return [Socket, Actor] whose options this {OptionsAccessor} instance
+      #   is accessing
       attr_reader :zocket
 
       # @param zocket [Socket, Actor]

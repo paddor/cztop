@@ -1,5 +1,5 @@
 module CZTop
-  # Represents a {CZMQ::FFI::Zarmour} in Z85 mode.
+  # Represents a CZMQ::FFI::Zarmour in Z85 mode.
   #
   # Use this class to encode to and from the Z85 encoding algorithm.
   # @see http://rfc.zeromq.org/spec:32

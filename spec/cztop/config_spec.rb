@@ -26,9 +26,9 @@ describe CZTop::Config do
       let(:name) { "bar" }
       let(:config) { described_class.new name, parent_config }
       it "appends it to that parent" do
-        assert_nil parent_config.first_child
+        assert_nil parent_config.children.first
         config
-        assert_equal config.to_ptr, parent_config.first_child.to_ptr
+        assert_equal config.to_ptr, parent_config.children.first.to_ptr
       end
 
       it "removes finalizer from delegate" do # parent will free it
@@ -242,7 +242,7 @@ main
     describe "#name" do
       it "returns name" do
         assert_equal "root", config.name
-        assert_equal "context", config.all_children.first.name
+        assert_equal "context", config.children.first.name
       end
     end
 
@@ -379,17 +379,17 @@ c
       end
     end
 
-    describe "#each" do
-      context "given a block taking 2 parameters" do
+    describe "#execute" do
+      context "given a block" do
         it "yields config and level" do
-          config.each do |c,l|
+          config.execute do |c,l|
             assert_kind_of described_class, c
             assert_kind_of Integer, l
           end
         end
 
         it "level starts at 0" do
-          config.each do |_,level|
+          config.execute do |_,level|
             assert_equal 0, level
             break
           end
@@ -397,8 +397,8 @@ c
 
         context "starting from non-root element" do
           it "level still starts at 0" do
-            child = config.all_children.first
-            child.each do |_,level|
+            child = config.children.first
+            child.execute do |_,level|
               assert_equal 0, level
               break
             end
@@ -406,67 +406,29 @@ c
         end
       end
 
-      context "given a block taking one paramater" do
-        it "yields config only" do
-          config.each do |*params|
-            assert_equal 1, params.size
-            assert_kind_of described_class, params.first
-          end
-        end
-      end
-
       context "given a block which breaks" do
         it "calls block no more" do
           called = 0
-          config.each { |_| called += 1; break }
+          config.execute { |_| called += 1; break }
           assert_equal 1, called
         end
 
         it "doesn't raise" do
-          config.each { |_| break }
+          config.execute { |_| break }
         end
 
         it "returns break value" do
-          assert_nil config.each { |_| break }
-          assert_equal :foo, config.each { |_| break :foo }
+          assert_nil config.execute { |_| break }
+          assert_equal :foo, config.execute { |_| break :foo }
         end
       end
 
-      context "given no a block" do
-        let(:enum) { config.each }
-        it "returns Enumerator" do
-          assert_kind_of Enumerator, enum
-        end
-
-        it "the Enumerator yields config items only" do
-          enum.each do |*params|
-            assert_equal 1, params.size # no level parameter
-            assert_kind_of described_class, params.first
-          end
-        end
-
-        it "the Enumerator yields all config items" do
-          assert_equal config.to_a.size, enum.size
-        end
-      end
-
-      describe "#to_a" do
-        let(:array) { config.to_a }
-        it "returns config items" do
-          array.each do |c|
-            assert_kind_of described_class, c
-          end
-        end
-        it "returns all config items including root element" do
-          assert_equal 14, array.size
-        end
-      end
 
       context "given raising block" do
         it "calls block no more" do
           called = 0
           begin
-            config.each { |config| called += 1; raise }
+            config.execute { |config| called += 1; raise }
           rescue
             assert_equal 1, called
           end
@@ -475,36 +437,75 @@ c
         let(:exception) { Class.new(RuntimeError) }
         it "raises" do
           assert_raises(exception) do
-            config.each { raise exception }
+            config.execute { raise exception }
           end
         end
       end
     end
 
     describe "#children" do
-      it "returns all children" do
-        assert_equal 13, config.all_children.size
+      let(:parent) { config }
+      let(:children) { parent.children }
+      it "returns SiblingsAccessor" do
+        assert_kind_of CZTop::Config::SiblingsAccessor, children
       end
-    end
 
-    describe "#first_child" do
       context "with children" do
         let(:parent) { config.locate("/main/frontend/option") }
-        let(:child) { parent.first_child }
         it "returns first child" do
-          refute_nil child
-          assert_equal "hwm", child.name
+          refute_nil children.first
+          assert_equal "hwm", children.first.name
+        end
+        it "returns all children" do
+          assert_equal %w[hwm swap], children.to_a.map(&:name)
         end
       end
       context "with no children" do
         let(:parent) { config.locate("/main/frontend/option/swap") }
-        it "returns nil" do
-          assert_nil parent.first_child
+        it "has no children" do
+          assert_nil parent.children.first
+          assert_empty parent.children.to_a
         end
       end
     end
 
-    describe "#siblings"
+    describe "#siblings" do
+      let(:item) { config }
+      let(:siblings) { item.siblings }
+      it "returns SiblingsAccessor" do
+        assert_kind_of CZTop::Config::SiblingsAccessor, siblings
+      end
+      context "with no siblings" do
+        it "has no siblings" do
+          refute_operator siblings, :any?
+          assert_equal 0, siblings.count
+          assert_nil siblings.first
+        end
+      end
+      context "with siblings" do
+        let(:item) { config.locate("main/frontend/option") }
+        it "has siblings" do
+          assert_operator siblings, :any?
+        end
+        it "returns correct first sibling" do
+          assert_equal config.locate("main/frontend/bind"), siblings.first
+        end
+        it "returns all siblings" do
+          assert_equal 2, siblings.count
+        end
+        it "returns siblings as Config objects" do
+          siblings.each { |s| assert_kind_of CZTop::Config, s }
+        end
+      end
+      context "with no younger siblings" do
+        # has only an "older" sibling
+        let(:item) { config.locate("main/backend") }
+        it "acts like it has no siblings" do
+          assert_empty siblings.to_a
+          assert_nil siblings.first
+        end
+      end
+    end
 
     describe "#locate" do
       context "given existing path" do

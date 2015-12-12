@@ -7,7 +7,6 @@ module CZTop
 
 
     include HasFFIDelegate
-    include Enumerable
 
     class Error < RuntimeError; end
 
@@ -92,37 +91,19 @@ module CZTop
     # Calls the given block once for each {Config} item in the tree, starting
     # with self.
     #
-    # An Enumerator is returned if no block is given.
-    #
     # @yieldparam config [Config] the config item
     # @yieldparam level [Integer] level of the item (self has level 0,
     #   its direct children have level 1)
-    # @note The second parameter +level+ is only yielded if the given block
-    #   expects exactly 2 parameters. This is to ensure that Enumerable#to_a
-    #   works as expected, returning an array of {Config} items.
     # @return [self]
     # @raise [Exception] the block's exception, in case it raises (it won't
     #   call the block any more after that)
-    # @overload each()
-    #   @return [Enumerator] if no block is given
     # @raise [Error] if zconfig_execute() returns an error code
-    def each
-      # TODO rename to #execute, exclude Enumerable, add
-      #   ChildrenAccessor<Enumerable, ...
-      return to_a.each unless block_given?
-
+    def execute
       exception = nil
-      level_wanted = Proc.new.arity == 2
       callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
         begin
           config = from_ffi_delegate(zconfig)
-
-          if level_wanted
-            yield config, level
-          else
-            # make Enumerable#to_a work as expected
-            yield config
-          end
+          yield config, level
 
           0 # report success to keep zconfig_execute() going
         rescue
@@ -134,45 +115,69 @@ module CZTop
           -1 # report failure to stop zconfig_execute() immediately
         end
       end
-      ret = ffi_delegate.execute(callback, arg = nil)
+      rc = ffi_delegate.execute(callback, arg = nil)
       raise exception if exception
-      raise Error, "zconfig_execute() returned failure code" if ret.nonzero?
+      raise Error, "zconfig_execute() returned failure code" if rc.nonzero?
       return self
     end
 
-    # Returns all children, direct and indirect ones.
-    # @return [Array<Config>]
-    # @see #each
-    def all_children
-      to_a[1..-1]
+    # Access to this config item's direct children.
+    # @return [SiblingsAccessor]
+    def children
+      SiblingsAccessor.of_parent(self)
     end
 
-    # Returns the first child or nil.
-    # @return [Config] if there are any children
-    # @return [nil] if there no children
-    def first_child
-      # TODO: extract to ChildrenAccessor
-      ptr = ffi_delegate.child
-      return nil if ptr.null?
-      from_ffi_delegate(ptr)
-    end
-
-    def direct_children
-      # TODO
-    end
-
+    # Access to this config item's siblings.
+    # @note Only the "younger" (later in the ZPL file) config items are
+    #   considered.
+    # @return [SiblingsAccessor]
     def siblings
-      # TODO
+      SiblingsAccessor.of_older_sibling(self)
     end
 
-    # Returns the next sibling of this config item, if any.
-    # @return [Config]
-    # @return [nil] if there's no next sibling
-    def next
-      # TODO: move into SiblingsAccessor
-      ptr = ffi_delegate.next
-      return nil if ptr.null?
-      from_ffi_delegate(ptr)
+    # Accesses a set of siblings, which can either be all direct children of
+    # a config item, or all younger siblings of a config item.
+    class SiblingsAccessor
+      include Enumerable
+      # Used to create a {SiblingsAccessor} for the provided config item's
+      # direct children.
+      # @param config [Config] the parent config item
+      # @return [SiblingsAccessor]
+      def self.of_parent(config)
+        ptr = config.ffi_delegate.child
+        child = ptr.null? ? nil : config.from_ffi_delegate(ptr)
+        new(child)
+      end
+      # Used to create a {SiblingsAccessor} for the provided config item's
+      # siblings (not including itself).
+      # @param config [Config] ideally the "oldest" sibling config item
+      # @return [SiblingsAccessor]
+      def self.of_older_sibling(config)
+        ptr = config.ffi_delegate.next
+        sibling = ptr.null? ? nil : config.from_ffi_delegate(ptr)
+        new(sibling)
+      end
+      def initialize(config)
+        @config = config
+      end
+      # Returns the first sibling/child.
+      # @return [Config]
+      # @return [nil] if no more siblings/no children
+      def first
+        @config
+      end
+      # Yields all further siblings.
+      # @yieldparam config [Config]
+      def each
+        return unless @config
+        yield @config
+        current = @config.ffi_delegate
+        while sibling = current.next
+          break if sibling.null?
+          yield @config.from_ffi_delegate(sibling)
+          current = sibling
+        end
+      end
     end
 
     # Finds a config item along a path, relative to the current item.
@@ -265,8 +270,8 @@ module CZTop
     def ==(other)
       name == other.name &&
       value == other.value &&
-      first_child == other.first_child &&
-      self.next == other.next
+      children.first == other.children.first &&
+      self.siblings.first == other.siblings.first
     end
   end
 end

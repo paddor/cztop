@@ -207,9 +207,9 @@ describe CZTop::Socket::PAIR do
     assert_raises(CZTop::InitializationError) do
       described_class.new("@#{endpoint}")
     end
-#    assert_raises do
-#      CZMQ::Socket::PAIR.new(">#{endpoint}")
-#    end
+    assert_raises do
+      CZMQ::Socket::PAIR.new(">#{endpoint}")
+    end
   end
 end
 

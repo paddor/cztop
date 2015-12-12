@@ -23,6 +23,8 @@ require_relative 'cztop/z85'
 
 # additional
 require_relative 'cztop/config/comments'
+require_relative 'cztop/config/traversing'
+require_relative 'cztop/config/serialization'
 require_relative 'cztop/message/frames'
 require_relative 'cztop/socket/types'
 

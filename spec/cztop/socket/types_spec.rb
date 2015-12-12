@@ -117,23 +117,28 @@ describe CZTop::Socket::SERVER do
 end
 
 describe CZTop::Socket::REQ do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::REP do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::DEALER do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::ROUTER do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::SUB do
@@ -166,19 +171,23 @@ describe CZTop::Socket::SUB do
 end
 
 describe CZTop::Socket::XPUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::XSUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PUSH do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PULL do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PAIR do
@@ -205,5 +214,6 @@ describe CZTop::Socket::PAIR do
 end
 
 describe CZTop::Socket::STREAM do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end

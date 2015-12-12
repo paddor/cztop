@@ -25,8 +25,9 @@ describe CZTop::ZsockOptions do
       end
       context "setting new value" do
         let(:new_value) { 99 }
+        before(:each) { options.sndhwm = new_value }
         it "sets new value" do
-          assert_kind_of Integer, options.sndhwm
+          assert_equal new_value, options.sndhwm
         end
       end
     end
@@ -38,8 +39,9 @@ describe CZTop::ZsockOptions do
       end
       context "setting new value" do
         let(:new_value) { 99 }
+        before(:each) { options.rcvhwm = new_value }
         it "sets new value" do
-          assert_kind_of Integer, options.rcvhwm
+          assert_equal new_value, options.rcvhwm
         end
       end
     end

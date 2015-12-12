@@ -23,6 +23,9 @@ describe CZTop::PolymorphicZsockMethods do
   end
 
   describe "#set_unbounded" do
-    it "sets HWM to 0"
+    Given(:options) { socket_a.options }
+    When { socket_a.set_unbounded }
+    Then { options.sndhwm == 0 }
+    And { options.rcvhwm == 0 }
   end
 end

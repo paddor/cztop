@@ -32,7 +32,7 @@ describe CZTop::Config do
       end
 
       it "removes finalizer from delegate" do # parent will free it
-        refute_operator config.ffi_delegate, :__finalizer_defined?
+        assert_nil config.ffi_delegate.instance_variable_get(:@finalizer)
       end
     end
   end

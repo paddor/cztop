@@ -257,14 +257,3 @@ module CZTop
     end
   end
 end
-
-# TODO: Merge these changes into zproject.
-class CZMQ::FFI::Zconfig
-  def __undef_finalizer
-    ObjectSpace.undefine_finalizer self
-    @finalizer = nil
-  end
-  def __finalizer_defined?
-    !!@finalizer
-  end
-end

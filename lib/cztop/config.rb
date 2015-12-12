@@ -11,9 +11,11 @@ module CZTop
 
     class Error < RuntimeError; end
 
-    # Initializes a new {Config} item.
+    # Initializes a new {Config} item. Takes an optional block to initialize
+    # the item further.
     # @param name [String] config item name
     # @param name [Config] parent
+    # @yieldparam config [self]
     # @note If parent is given, the native child will be destroyed when the
     #   native parent is destroyed (and not when the child's corresponding
     #   {Config} object is garbage collected).
@@ -25,6 +27,8 @@ module CZTop
       # NOTE: this delegate must not be freed automatically, because the
       # parent will free it.
       delegate.__undef_finalizer
+
+      yield self if block_given?
     end
 
     # @!group ZPL attributes
@@ -182,8 +186,13 @@ module CZTop
       from_ffi_delegate(ptr)
     end
 
+    # Finds last item at given level (0 = root).
+    # @return [Config] the last config item at given level
+    # @return [nil] if there's no config item at given level
     def last_at_depth(level)
-      # TODO
+      ptr = ffi_delegate.at_depth(level)
+      return nil if ptr.null?
+      from_ffi_delegate(ptr)
     end
 
     # @!endgroup
@@ -210,40 +219,44 @@ module CZTop
     def self.load(path)
       from_ffi_delegate(CZMQ::FFI::Zconfig.load(path.to_s))
     rescue CZTop::InitializationError
-      raise Error, "error while reading file: %p" % path.to_s
+      raise Error, "error while reading the file %p" % path.to_s
     end
 
     # Saves the Config tree to a file.
     # @param path [String, Pathname, #to_s] the path to the ZPL config file
+    # @return [void]
+    # @raise [Error] if there's a problem
     def save(path)
-      # TODO
+      rc = ffi_delegate.save(path.to_s)
+      raise Error, "error while saving to the file %s" % path.to_s if rc == -1
     end
 
-    class ReloadError < RuntimeError; end
+    class ReloadError < Error; end
 
     # Reload config tree from same file that it was previously loaded from.
-    # @raise [ReloadError] if there's an error (no existing data will be
+    # @raise [Error] if there's an error (no existing data will be
     #   changed)
+    # @return [void]
     def reload
-      ret = delegate.reload
-      raise ReloadError if ret == -1
+      rc = ::CZMQ::FFI::Zconfig.reload(ffi_delegate)
+      raise Error, "error while reloading from the file %p" % filename if rc == -1
     end
 
     # Serialize (marshal) this Config and all its children.
     #
     # @note This method is automatically used by Marshal.dump.
-    # @return [String]
+    # @return [String] marshalled {Config}
     def _dump(level)
-      # TODO
+      to_s
     end
 
     # Load a Config object from a marshalled string.
     #
     # @note This method is automatically used by Marshal.load.
+    # @param string [String] marshalled {Config}
     # @return [Config]
     def self._load(string)
-      ptr = CZMQ::FFI::Zconfig.str_load(string)
-      from_ptr(ptr)
+      from_string(string)
     end
 
     # @!endgroup

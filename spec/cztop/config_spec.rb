@@ -35,6 +35,13 @@ describe CZTop::Config do
         assert_nil config.ffi_delegate.instance_variable_get(:@finalizer)
       end
     end
+    context "with a block" do
+      it "yields self" do
+        yielded = nil
+        config = described_class.new { |c| yielded = c }
+        assert_same config, yielded
+      end
+    end
   end
 
   context "given a config" do
@@ -157,6 +164,45 @@ main
           assert_kind_of described_class, loaded_config
           assert_equal filename, loaded_config.filename
         end
+
+        describe "#reload" do
+          context "loaded from file" do
+            let(:config2) { described_class.load(filename) }
+            context "when unchanged" do
+              before(:each) { loaded_config.reload }
+              it "is still the same" do
+                assert_equal config2, config
+              end
+            end
+            context "when changed" do
+              before(:each) do
+                config2["context/verbose"] = 0
+                config2.save(filename)
+              end
+              it "isn't the same anymore" do
+                refute_equal config2, config
+              end
+            end
+          end
+          context "created in-memory" do # or any other problem
+            it "raises" do
+              assert_raises { config.reload }
+            end
+          end
+        end
+        describe "#filename" do
+          context "root config item" do
+            it "returns filename" do
+              assert_equal filename, loaded_config.filename
+            end
+          end
+          context "child item" do
+            let(:item) { loaded_config.locate("context/verbose") }
+            it "returns nil" do
+              assert_nil item.filename
+            end
+          end
+        end
       end
 
       context "given no config file" do
@@ -169,16 +215,29 @@ main
       end
     end
 
-
-    describe "#save"
-
-    context "Marshalling" do
-      describe "#_dump"
-      describe "._load"
+    describe "#save" do
+      let(:file) { Tempfile.new("zconfig_test") }
+      let(:saved_file) do
+        config.save(file.path)
+        Pathname.new(file.path)
+      end
+      it "saves to that file" do
+        assert_operator saved_file, :size?
+      end
+      it "saves correctly" do
+        assert_equal config, described_class.load(saved_file.to_s)
+      end
     end
 
-    describe "#filename"
-    describe "#reload"
+    context "Marshalling" do
+      let(:marshaled) { Marshal.dump(config) }
+      let(:unmarshaled) { Marshal.load(marshaled) }
+      describe "#_dump and ._load" do
+        it "roundtrips" do
+          assert_equal config, unmarshaled
+        end
+      end
+    end
 
     describe "#name" do
       it "returns name" do
@@ -465,6 +524,36 @@ c
       end
     end
 
-    describe "#last_at_depth"
+    describe "#last_at_depth" do
+      let(:found) { config.last_at_depth(level) }
+      context "with level 0" do
+        let(:level) { 0 }
+        let(:expected) { config }
+        it "finds correct item" do
+          assert_equal expected, found
+        end
+      end
+      context "with level 1" do
+        let(:level) { 1 }
+        let(:expected) { config.locate("main") }
+        it "finds correct item" do
+          assert_equal expected, found
+        end
+      end
+      context "with level 2" do
+        let(:level) { 2 }
+        let(:expected) { config.locate("main/backend") }
+        it "finds correct item" do
+          assert_equal expected, found
+        end
+      end
+      context "with level 99" do
+        let(:level) { 99 }
+        let(:expected) { nil }
+        it "returns nil" do
+          assert_equal expected, found
+        end
+      end
+    end
   end
 end

@@ -137,7 +137,32 @@ describe CZTop::Socket::PUB do
 end
 
 describe CZTop::Socket::SUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
+
+  let(:subscription) { "test_prefix" }
+
+  context "with subscription" do
+    it "subscribes" do
+      expect(::CZMQ::FFI::Zsock).to receive(:new_sub).with(nil, subscription).
+        and_call_original
+
+      described_class.new(nil, subscription)
+    end
+  end
+
+  describe "#subscribe" do
+    it "subscribes" do
+      expect(socket.ffi_delegate).to receive(:set_subscribe).with(subscription)
+      socket.subscribe(subscription)
+    end
+  end
+  describe "#unsubscribe" do
+    it "unsubscribes" do
+      expect(socket.ffi_delegate).to receive(:set_unsubscribe).with(subscription)
+      socket.unsubscribe(subscription)
+    end
+  end
 end
 
 describe CZTop::Socket::XPUB do

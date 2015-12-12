@@ -137,8 +137,21 @@ module CZTop
       # @param endpoints [String] endpoints to connect to
       # @param subscription [String] what to subscribe to
       def initialize(endpoints = nil, subscription = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints))
-        # TODO: subscription
+        attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints, subscription))
+      end
+
+      # Subscribes to the given prefix string.
+      # @param prefix [String] prefix string to subscribe to
+      # @return [void]
+      def subscribe(prefix)
+        ffi_delegate.set_subscribe(prefix)
+      end
+
+      # Unsubscribes from the given prefix.
+      # @param prefix [String] prefix string to unsubscribe from
+      # @return [void]
+      def unsubscribe(prefix)
+        ffi_delegate.set_unsubscribe(prefix)
       end
     end
 

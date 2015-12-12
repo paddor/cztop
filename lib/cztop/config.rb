@@ -31,7 +31,9 @@ module CZTop
 
     # @return [String] name of the config item
     def name
-      ffi_delegate.name.read_string
+      ptr = ffi_delegate.name
+      return nil if ptr.null? # NOTE: for unnamed elements
+      ptr.read_string
     end
     # @param new_name [String, #to_s]
     # @return [new_name]
@@ -43,7 +45,9 @@ module CZTop
     # @return [String]
     # @note This returns an empty string if the value is unset.
     def value
-      ffi_delegate.value.read_string
+      ptr = ffi_delegate.value
+      return "" if ptr.null? # NOTE: for root elements
+      ptr.read_string
     end
 
     # Set or update the value of the config item.
@@ -157,6 +161,16 @@ module CZTop
       # TODO
     end
 
+    # Returns the next sibling of this config item, if any.
+    # @return [Config]
+    # @return [nil] if there's no next sibling
+    def next
+      # TODO: move into SiblingsAccessor
+      ptr = ffi_delegate.next
+      return nil if ptr.null?
+      from_ffi_delegate(ptr)
+    end
+
     # Finds a config item along a path, relative to the current item.
     # @param path [String] path (leading slash is optional and will be
     #   ignored)
@@ -174,6 +188,12 @@ module CZTop
 
     # @!endgroup
     # @!group Saving and Loading
+
+    # Serialize to a string in the ZPL format.
+    # @return [String]
+    def to_s
+      ffi_delegate.str_save.read_string
+    end
 
     # @return [String]
     ffi_delegate :filename
@@ -227,6 +247,14 @@ module CZTop
     end
 
     # @!endgroup
+
+    # @return [Boolean]
+    def ==(other)
+      name == other.name &&
+      value == other.value &&
+      first_child == other.first_child &&
+      self.next == other.next
+    end
   end
 end
 

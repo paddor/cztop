@@ -16,6 +16,9 @@ describe CZTop::Config do
       it "creates a config item anyway" do
         assert_kind_of described_class, config
       end
+      it "has nil name" do
+        assert_nil config.name
+      end
     end
     context "given a parent" do
       let(:parent_name) { "foo" }
@@ -34,7 +37,7 @@ describe CZTop::Config do
     end
   end
 
-  context "given a config file" do
+  context "given a config" do
     let(:config_contents) do
       <<-EOF
 context
@@ -60,6 +63,82 @@ main
       context "given a string containing config tree" do
         it "returns a config" do
           assert_kind_of described_class, loaded_config
+        end
+      end
+    end
+
+    describe "#to_s" do
+      it "serializes the config tree to a string" do
+        assert_kind_of String, config.to_s
+      end
+      it "serializes correctly" do
+        assert_equal config, described_class.from_string(config.to_s)
+      end
+
+      context "with only root element" do
+        context "with no name" do
+          let(:config) { described_class.new }
+          it "serializes to empty string" do
+            assert_equal "", config.to_s
+          end
+        end
+        context "with name and value set" do
+          let(:config) do
+            c = described_class.new("foo")
+            c.value = "bar"
+            c
+          end
+          # NOTE: doesn't make a lot of sense to me
+          it "serializes to empty string" do
+            assert_equal "", config.to_s
+          end
+        end
+      end
+      context "with root as parent" do
+        let(:root) { described_class.new }
+        context "with no name" do
+          let(:config) { described_class.new nil, root }
+          it "serializes to the empty string" do
+            assert_equal "", config.to_s
+          end
+          it "even root serializes to the empty string" do
+            assert_equal "", root.to_s
+          end
+        end
+        context "with just a name" do
+          let(:name) { "foo" }
+          let(:config) { described_class.new(name, root) }
+          it "serializes to just the name" do
+            assert_equal "", config.to_s
+            assert_equal "#{name}\n", root.to_s
+          end
+        end
+        context "with a name and a vaue" do
+          let(:name) { "foo" }
+          let(:value) { "bar" }
+          let(:config) do
+            c = described_class.new(name, root)
+            c.value = value
+            c
+          end
+          it "serializes to the full config item" do
+            assert_equal "", config.to_s
+            assert_equal "#{name} = \"#{value}\"\n", root.to_s
+          end
+        end
+      end
+    end
+
+    describe "#==" do
+      context "given equal config" do
+        it "returns true" do
+          assert_equal config, config
+        end
+      end
+      context "given different config" do
+        let(:other_config) do described_class.new("foo") end
+        it "returns false" do
+          refute_equal config, other_config
         end
       end
     end
@@ -117,18 +196,38 @@ main
     end
 
     describe "#value" do
-      context "given config item that has no value" do
-        let(:item) { config.locate("/main/backend") }
+      let(:config_contents) do
+        <<-EOF
+a = 1
+b = ""
+c
+    d = "foo"
+    f = bar
+    g
+    h # no value either
+        EOF
+      end
+      context "with no value" do
+        let(:item) { config.locate("/c/g") }
         it "returns the empty string" do
           assert_empty item.value
         end
       end
 
-      context "given config item that has value" do
-        let(:item) { config.locate("/main/backend/bind") }
-        let(:expected_value) { "inproc:@@//@@addr3" }
+      context "with value" do
+        let(:paths_values) do
+          { "a" => "1",
+            "b" => "",
+            "c" => "",
+            "c/d" => "foo",
+            "c/f" => "bar",
+            "c/g" => "",
+            "c/h" => "" }
+        end
         it "reads value" do
-          assert_equal expected_value, item.value
+          paths_values.each do |path,expected|
+            assert_equal expected, config.locate(path).value
+          end
         end
       end
     end
@@ -367,14 +466,5 @@ main
     end
 
     describe "#last_at_depth"
-    describe "#comments"
-    describe "#add_comment"
-    describe "#delete_comments"
   end
-end
-
-describe CZTop::Config::Comments do
-  describe "#<<"
-  describe "#delete_all"
-  describe "#each"
 end

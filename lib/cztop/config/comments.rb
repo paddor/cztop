@@ -1,28 +1,17 @@
 module CZTop
   class Config
-    # @!group Comments
 
-    # Config::Comments
+    # Access this config item's comments.
+    # @note Note that comments are discarded when loading a config (either from
+    #   a string or file) and thus, only the comments you add during runtime
+    #   are accessible.
+    # @return [CommentsAccessor]
     def comments
-      zlist_ptr = delegate.comments
-      return Comments.new_from_ptr(zlist_ptr)
+      return CommentsAccessor.new(self)
     end
-
-    # @param new_comment [String]
-    def add_comment(new_comment)
-      new_comment_ptr = ::FFI::MemoryPointer.from_string(new_comment)
-      delegate.set_comment(new_comment_ptr)
-    end
-
-    # Deletes all comments for this {Config} item.
-    def delete_comments
-      delegate.set_comment(nil)
-    end
-
-    # @!endgroup
 
     # Used to access a {Config}'s comments.
-    class Comments
+    class CommentsAccessor
       include Enumerable
 
       # @param config [Config]
@@ -30,18 +19,38 @@ module CZTop
         @config = config
       end
 
+      # @return [CZMQ::FFI::Zlist] the zlist of comments for this config item
+      def zlist
+        @config.ffi_delegate.comments
+      end
+
       # @param new_comment [String]
+      # @return [self]
       def <<(new_comment)
-        @config.add_comment(new_comment)
+        @config.ffi_delegate.set_comment("%s", :string, new_comment)
+        return self
       end
 
+      # Deletes all comments for this {Config} item.
       def delete_all
-        @message.delete_comments
+        @config.ffi_delegate.set_comment(nil)
       end
 
+      # Yields all comments for this {Config} item.
+      # @yieldparam comment [String]
       def each
-        # use Zconfig.
-      # TODO
+        while comment = zlist.next
+          break if comment.null?
+          yield comment.read_string
+        end
+      rescue CZMQ::FFI::Zlist::DestroyedError
+      end
+
+      # @return [Integer]
+      def size
+        zlist.size
+      rescue CZMQ::FFI::Zlist::DestroyedError
+        0
       end
     end
   end

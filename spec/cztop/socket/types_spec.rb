@@ -70,7 +70,50 @@ describe CZTop::Socket::CLIENT do
 end
 
 describe CZTop::Socket::SERVER do
-  # TODO
+  Given(:socket) { described_class.new }
+
+  it "instanciates" do
+    begin
+      socket
+      flunk "REMOVE ME and enable code below"
+    rescue
+      skip "ZMQ_SERVER disabled"
+    end
+  end
+
+  # TODO: enable when ZMQ_SERVER is available
+#  describe "#routing_id" do
+#    context "with no routing ID set" do
+#      Then { socket.routing_id == 0 }
+#    end
+#
+#    context "with routing ID set" do
+#      Given(:new_routing_id) { 123456 }
+#      When { socket.routing_id = new_routing_id }
+#      Then { socket.routing_id == new_routing_id }
+#    end
+#  end
+#
+#  describe "#routing_id=" do
+#    context "with valid routing ID" do
+#      # code duplication for completeness' sake
+#      Given(:new_routing_id) { 123456 }
+#      When { socket.routing_id = new_routing_id }
+#      Then { socket.routing_id == new_routing_id }
+#    end
+#
+#    context "with negative routing ID" do
+#      Given(:new_routing_id) { -123456 }
+#      When(:result) { socket.routing_id = new_routing_id }
+#      Then { result == Failure(RangeError) }
+#    end
+#
+#    context "with too big routing ID" do
+#      Given(:new_routing_id) { 123456345676543456765 }
+#      When(:result) { socket.routing_id = new_routing_id }
+#      Then { result == Failure(RangeError) }
+#    end
+#  end
 end
 
 describe CZTop::Socket::REQ do

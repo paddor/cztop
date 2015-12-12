@@ -60,12 +60,5 @@ module CZTop
       rc = ffi_delegate.unbind(endpoint, *nil)
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
-
-    def routing_id
-      # TODO
-    end
-    def routing_id=(new_routing_id)
-      # TODO
-    end
   end
 end

@@ -81,4 +81,24 @@ describe CZTop::Z85 do
       end
     end
   end
+
+  describe "#_size" do
+    let(:ptr) { double("pointer") }
+    context "on 64-bit system" do
+      let(:size) { double("uint64") }
+      before(:each) { stub_const "::FFI::Pointer::SIZE", 8 }
+      before(:each) { expect(ptr).to receive(:read_uint64).and_return(size) }
+      it "reads uint64" do
+        assert_same size, subject.send(:_size, ptr)
+      end
+    end
+    context "on 32-bit system" do
+      let(:size) { double("uint32") }
+      before(:each) { stub_const "::FFI::Pointer::SIZE", 4 }
+      before(:each) { expect(ptr).to receive(:read_uint32).and_return(size) }
+      it "reads uint32" do
+        assert_same size, subject.send(:_size, ptr)
+      end
+    end
+  end
 end

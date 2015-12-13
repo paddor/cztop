@@ -1,5 +1,7 @@
 module CZTop
+  # Represents a CZMQ::FFI::Zactor.
   # @note Mainly because Proxy and Authenticator are actors.
+  # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods

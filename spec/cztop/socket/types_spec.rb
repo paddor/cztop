@@ -63,7 +63,15 @@ describe CZTop::Socket do
 end
 
 describe CZTop::Socket::CLIENT do
-  # TODO
+  Given(:socket) { described_class.new }
+  it "instanciates" do
+    begin
+      socket
+      flunk "REMOVE ME and enable code below"
+    rescue
+      skip "ZMQ_CLIENT disabled"
+    end
+  end
 
   # * endpoints can be nil
   # * if not nil, expect call to Zsock.new_client

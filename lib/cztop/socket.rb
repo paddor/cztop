@@ -1,10 +1,8 @@
 module CZTop
   # Represents a CZMQ::FFI::Zsock.
   class Socket
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
     include ZsockOptions
     include SendReceiveMethods
     include PolymorphicZsockMethods

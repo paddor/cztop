@@ -1,10 +1,8 @@
 module CZTop
   # @note Mainly because Proxy and Authenticator are actors.
   class Actor
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
     include ZsockOptions
     include SendReceiveMethods
     include PolymorphicZsockMethods

@@ -4,10 +4,9 @@ module CZTop
   # Use this class to encode to and from the Z85 encoding algorithm.
   # @see http://rfc.zeromq.org/spec:32
   class Z85
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
+
     class Error < RuntimeError; end
 
     def initialize

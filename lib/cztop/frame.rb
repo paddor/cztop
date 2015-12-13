@@ -1,10 +1,8 @@
 module CZTop
   # Represents a CZMQ::FFI::Zframe.
   class Frame
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
     class Error < RuntimeError; end
 

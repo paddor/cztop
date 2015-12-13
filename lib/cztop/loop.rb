@@ -1,10 +1,8 @@
 module CZTop
   # CZMQ's reactor.
   class Loop
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
     # TODO
   end

@@ -3,10 +3,8 @@ module CZTop
   # Represents a CZMQ::FFI::Zconfig item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
     class Error < RuntimeError; end
 

@@ -15,6 +15,7 @@ describe CZTop::HasFFIDelegate do
   let(:delegator_class) do
     Class.new do
       include CZTop::HasFFIDelegate
+      extend CZTop::HasFFIDelegate::ClassMethods
     end
   end
   let(:delegator) { delegator_class.new }
@@ -109,19 +110,6 @@ describe CZTop::HasFFIDelegate do
 
       it "won't call the constructor" do
         assert_same delegate, obj.ffi_delegate
-      end
-    end
-  end
-
-  describe ".included" do
-    let(:klass) { Class.new }
-    context "when included" do
-      before(:each) { klass.send :include, described_class }
-      it "extends class with Forwardable" do
-        assert_operator klass, :<, described_class
-      end
-      it "extends class with ClassMethods" do
-        assert_kind_of CZTop::HasFFIDelegate::ClassMethods, klass
       end
     end
   end

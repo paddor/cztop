@@ -37,6 +37,8 @@ module CZTop::HasFFIDelegate
   end
 
   module ClassMethods
+    include Forwardable
+
     # Delegate specified instance method to the registered FFI delegate.
     # @note It only takes one method name so it's easy to add some
     #   documentation for each delegated method.
@@ -58,16 +60,6 @@ module CZTop::HasFFIDelegate
       obj = allocate
       obj.attach_ffi_delegate(ffi_delegate)
       return obj
-    end
-  end
-
-  # Ruby callback. This will extend m with Forwardable and {ClassMethods}.
-  # @param m [Module] the module/class which included this module
-  # @return [void]
-  def self.included(m)
-    m.class_eval do
-      extend Forwardable
-      extend ClassMethods
     end
   end
 end

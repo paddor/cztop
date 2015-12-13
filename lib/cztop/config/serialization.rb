@@ -1,14 +1,5 @@
 # Methods used around serialization of {CZTop::Config} items.
 module CZTop::Config::Serialization
-  # Ruby callback. This will extend m with {ClassMethods}.
-  # @param m [Module] the module/class which included this module
-  # @return [void]
-  def self.included(m)
-    m.class_eval do
-      extend CZTop::Config::Serialization::ClassMethods
-    end
-  end
-
   # Serialize to a string in the ZPL format.
   # @return [String]
   def to_s
@@ -77,4 +68,5 @@ end
 
 class CZTop::Config
   include Serialization
+  extend Serialization::ClassMethods
 end

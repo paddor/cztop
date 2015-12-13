@@ -1,10 +1,8 @@
 module CZTop
   # TODO
   class CertificateStore
-    # @!parse extend CZTop::HasFFIDelegate::ClassMethods
-
-
     include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
   # TODO
   end

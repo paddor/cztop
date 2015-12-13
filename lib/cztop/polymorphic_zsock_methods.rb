@@ -5,7 +5,7 @@ module CZTop
   module PolymorphicZsockMethods
     # Sends a signal.
     # @param status [Integer] signal (0-255)
-    def signal(status)
+    def signal(status = 0)
       ::CZMQ::FFI::Zsock.signal(ffi_delegate, status)
     end
 

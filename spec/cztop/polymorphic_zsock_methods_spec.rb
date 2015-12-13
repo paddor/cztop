@@ -7,18 +7,27 @@ describe CZTop::PolymorphicZsockMethods do
   let(:socket_b) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
   describe "signals" do
-    let (:status) { 5 }
+    let(:delegate_b) { socket_b.ffi_delegate }
+    let(:status) { 5 }
     describe "#signal" do
-      it "sends a signal" do
-        socket_b.signal(status)
+      context "with signal" do
+        it "sends a signal" do
+          expect(CZMQ::FFI::Zsock).to receive(:signal).with(delegate_b, status)
+          socket_b.signal(status)
+        end
+      end
+
+      context "with no signal given" do
+        it "sends signal 0" do
+          expect(CZMQ::FFI::Zsock).to receive(:signal).with(delegate_b, 0)
+          socket_b.signal
+        end
       end
     end
 
     describe "#wait" do
-      it "waits for a signal" do
-        socket_b.signal(status)
-        assert_equal status, socket_a.wait
-      end
+      When { socket_b.signal(status) }
+      Then { status == socket_a.wait }
     end
   end
 

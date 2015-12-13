@@ -14,4 +14,15 @@ describe CZTop::Actor do
   it "has polymorphic Zsock methods" do
     assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
   end
+
+  it "instanciates" do
+    described_class.new
+  end
+
+  let(:actor) { CZTop::Actor.new }
+  let(:cmd) { %w[SHOW] }
+  let(:msg) { CZTop::Message.new(cmd) }
+  it "receives commands" do
+    actor << msg
+  end
 end

@@ -51,7 +51,7 @@ module CZTop
     # @see https://github.com/ffi/ffi/issues/398
     # @see https://github.com/ffi/ffi/issues/333
     def _size(size_ptr)
-      if size_ptr.size == 8 # 64 bit
+      if ::FFI::Pointer::SIZE == 8 # 64 bit
         size_ptr.read_uint64
       else
         size_ptr.read_uint32

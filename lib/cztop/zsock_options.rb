@@ -20,22 +20,17 @@ module CZTop
         @zocket = zocket
       end
 
+      # just to shorten the lines
+      Z = ::CZMQ::FFI::Zsock
+
       # @return [Integer]
-      def sndhwm
-        ::CZMQ::FFI::Zsock.sndhwm(@zocket)
-      end
+      def sndhwm() Z.sndhwm(@zocket) end
       # @param value [Integer]
-      def sndhwm=(value)
-        ::CZMQ::FFI::Zsock.set_sndhwm(@zocket, value)
-      end
+      def sndhwm=(value) Z.set_sndhwm(@zocket, value) end
       # @return [Integer]
-      def rcvhwm
-        ::CZMQ::FFI::Zsock.rcvhwm(@zocket)
-      end
+      def rcvhwm() Z.rcvhwm(@zocket) end
       # @param value [Integer]
-      def rcvhwm=(value)
-        ::CZMQ::FFI::Zsock.set_rcvhwm(@zocket, value)
-      end
+      def rcvhwm=(value) Z.set_rcvhwm(@zocket, value) end
     end
   end
 end

@@ -9,7 +9,12 @@ module CZTop
     include SendReceiveMethods
     include PolymorphicZsockMethods
 
-    def initialize
+    # @param callback [FFI::Pointer]
+    # @param args [FFI::Pointer]
+    # @overload initialize(&task)
+    #   @yieldparam command [String]
+    #   @yieldparam pipe [String]
+    def initialize(callback = nil, args = nil)
       # TODO
       # After initialization: call signal(pipe, 0)
       # React to "$TERM" command with destroy

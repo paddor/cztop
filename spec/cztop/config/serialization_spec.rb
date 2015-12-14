@@ -169,6 +169,16 @@ main
     it "saves correctly" do
       assert_equal config, described_class.load(saved_file.to_s)
     end
+    context "with empty path" do
+      it "raises" do
+        assert_raises { config.save("") }
+      end
+    end
+    context "with invalid path" do
+      it "raises" do
+        assert_raises { config.save("/") }
+      end
+    end
   end
 
   context "Marshalling" do

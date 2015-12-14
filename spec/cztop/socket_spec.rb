@@ -82,6 +82,7 @@ describe CZTop::Socket do
   end
 
   describe "#connect" do
+    Given(:socket) { rep_socket }
     context "with valid endpoint" do
       let(:another_endpoint) { "inproc://foo" }
       it "connects" do
@@ -89,29 +90,32 @@ describe CZTop::Socket do
       end
     end
     context "with invalid endpoint" do
-      let(:another_endpoint) { "bar://foo" }
-      it "raises" do
-        assert_raises(ArgumentError) do
-          req_socket.connect(another_endpoint)
-        end
-      end
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.connect(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:connect).with("%s", any_args).and_return(0)
+      socket.connect(double("endpoint"))
     end
   end
 
   describe "#disconnect" do
+    Given(:socket) { rep_socket }
     context "with valid endpoint" do
       it "disconnects" do
-        expect(req_socket.ffi_delegate).to receive(:disconnect)
-        req_socket.disconnect(endpoint)
+        expect(socket.ffi_delegate).to receive(:disconnect)
+        socket.disconnect(endpoint)
       end
     end
     context "with invalid endpoint" do
-      let(:another_endpoint) { "bar://foo" }
-      it "raises" do
-        assert_raises(ArgumentError) do
-          req_socket.disconnect(another_endpoint)
-        end
-      end
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.disconnect(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:disconnect).with("%s", any_args).and_return(0)
+      socket.disconnect(double("endpoint"))
     end
   end
 
@@ -142,22 +146,29 @@ describe CZTop::Socket do
       When(:result) { socket.bind(another_endpoint) }
       Then { result == Failure(CZTop::Socket::Error) }
     end
+
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:bind).with("%s", any_args).and_return(0)
+      socket.bind(double("endpoint"))
+    end
   end
 
   describe "#unbind" do
+    Given(:socket) { rep_socket }
     context "with valid endpoint" do
       it "unbinds" do
-        expect(req_socket.ffi_delegate).to receive(:unbind)
-        req_socket.unbind(endpoint)
+        expect(socket.ffi_delegate).to receive(:unbind)
+        socket.unbind(endpoint)
       end
     end
     context "with invalid endpoint" do
-      let(:another_endpoint) { "bar://foo" }
-      it "raises" do
-        assert_raises(ArgumentError) do
-          req_socket.unbind(another_endpoint)
-        end
-      end
+      Given(:another_endpoint) { "bar://foo" }
+      When(:result) { socket.unbind(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:unbind).with("%s", any_args).and_return(0)
+      socket.unbind(double("endpoint"))
     end
   end
 end

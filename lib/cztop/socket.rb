@@ -20,7 +20,7 @@ module CZTop
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def connect(endpoint)
-      rc = ffi_delegate.connect(endpoint)
+      rc = ffi_delegate.connect("%s", :string, endpoint)
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
@@ -28,8 +28,7 @@ module CZTop
     # @param endpoint [String]
     # @raise [ArgumentError] if the endpoint is incorrect
     def disconnect(endpoint)
-      # we can do sprintf in Ruby
-      rc = ffi_delegate.disconnect(endpoint, *nil)
+      rc = ffi_delegate.disconnect("%s", :string, endpoint)
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
@@ -44,7 +43,7 @@ module CZTop
     # @return [void]
     # @raise [Error] in case of failure
     def bind(endpoint)
-      rc = ffi_delegate.bind(endpoint)
+      rc = ffi_delegate.bind("%s", :string, endpoint)
       raise Error, "unable to bind to %p" % endpoint if rc == -1
       @last_tcp_port = rc if rc > 0
     end
@@ -54,8 +53,7 @@ module CZTop
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def unbind(endpoint)
-      # we can do sprintf in Ruby
-      rc = ffi_delegate.unbind(endpoint, *nil)
+      rc = ffi_delegate.unbind("%s", :string, endpoint)
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
   end

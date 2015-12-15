@@ -79,6 +79,12 @@ main
 
     let(:config) { described_class.from_string(config_contents) }
 
+    context "#inspect" do
+      it "has a nice output" do
+        assert_match /Config.+name=.+value=/, config.inspect
+      end
+    end
+
     describe "#==" do
       Given(:this_name) { "foo" }
       Given(:this_value) { "bar" }

@@ -36,6 +36,7 @@ module CZTop::HasFFIDelegate
     self.class.from_ffi_delegate(ffi_delegate)
   end
 
+  # Some class methods related to FFI delegates.
   module ClassMethods
     include Forwardable
 

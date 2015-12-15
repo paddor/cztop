@@ -45,7 +45,7 @@ module CZTop::Config::Serialization
   # @raise [CZTop::Config::Error] if this fails
   def save(path)
     rc = ffi_delegate.save(path.to_s)
-    raise CZTop::Config::Error, "error while saving to the file %s" % path.to_s if rc == -1
+    raise CZTop::Config::Error, "error while saving to the file %s" % path if rc == -1
   end
 
   # Reload config tree from same file that it was previously loaded from.

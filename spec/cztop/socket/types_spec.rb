@@ -62,7 +62,7 @@ describe CZTop::Socket do
   end
 end
 
-describe CZTop::Socket::CLIENT do
+describe CZTop::Socket::CLIENT, skip: true do
   Given(:socket) { described_class.new }
   it "instanciates" do
     socket
@@ -72,14 +72,13 @@ describe CZTop::Socket::CLIENT do
   # * if not nil, expect call to Zsock.new_client
 end
 
-describe CZTop::Socket::SERVER do
+describe CZTop::Socket::SERVER, skip: true do
   Given(:socket) { described_class.new }
 
   it "instanciates" do
     socket
   end
 
-  # TODO: enable when ZMQ_SERVER is available
   describe "#routing_id" do
     context "with no routing ID set" do
       Then { socket.routing_id == 0 }

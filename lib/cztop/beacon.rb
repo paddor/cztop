@@ -1,4 +1,6 @@
 module CZTop
+  # Used for LAN discovery and presence.
+  # @see http://api.zeromq.org/czmq3-0:zbeacon
   class Beacon
 
     # Used for {Beacon} errors.

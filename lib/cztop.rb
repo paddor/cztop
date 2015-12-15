@@ -1,6 +1,10 @@
 require 'czmq-ffi-gen'
 require_relative 'cztop/version'
 
+# CZTop tries to provide a complete CZMQ binding with a nice, Ruby-like API.
+module CZTop
+end
+
 # modules
 require_relative 'cztop/has_ffi_delegate'
 require_relative 'cztop/zsock_options'

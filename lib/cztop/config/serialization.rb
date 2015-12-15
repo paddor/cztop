@@ -12,6 +12,7 @@ module CZTop::Config::Serialization
     ffi_delegate.filename
   end
 
+  # Some class methods for {Config} related to serialization.
   module ClassMethods
     # Loads a {Config} tree from a string.
     # @param string [String] the tree

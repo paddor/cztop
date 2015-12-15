@@ -34,9 +34,9 @@ module CZTop::Config::Traversing
   end
 
   # Access to this config item's direct children.
-  # @return [SiblingsAccessor]
+  # @return [ChildrenAccessor]
   def children
-    SiblingsAccessor.of_parent(self)
+    ChildrenAccessor.new(self)
   end
 
   # Access to this config item's siblings.
@@ -44,51 +44,74 @@ module CZTop::Config::Traversing
   #   considered.
   # @return [SiblingsAccessor]
   def siblings
-    SiblingsAccessor.of_older_sibling(self)
+    SiblingsAccessor.new(self)
   end
 
-  # Accesses a set of siblings, which can either be all direct children of
-  # a config item, or all younger siblings of a config item.
-  class SiblingsAccessor
+  # Used to give access to a {Config} item's children or siblings.
+  # @abstract
+  class FamilyAccessor
     include Enumerable
-    # Used to create a {SiblingsAccessor} for the provided config item's
-    # direct children.
-    # @param config [Config] the parent config item
-    # @return [SiblingsAccessor]
-    def self.of_parent(config)
-      ptr = config.ffi_delegate.child
-      child = ptr.null? ? nil : config.from_ffi_delegate(ptr)
-      new(child)
-    end
-    # Used to create a {SiblingsAccessor} for the provided config item's
-    # siblings (not including itself).
-    # @param config [Config] ideally the "oldest" sibling config item
-    # @return [SiblingsAccessor]
-    def self.of_older_sibling(config)
-      ptr = config.ffi_delegate.next
-      sibling = ptr.null? ? nil : config.from_ffi_delegate(ptr)
-      new(sibling)
-    end
+
+    # @param config [Config] the relative starting point (either parent or
+    #   an older sibling)
     def initialize(config)
       @config = config
     end
-    # Returns the first sibling/child.
-    # @return [Config]
-    # @return [nil] if no more siblings/no children
-    def first
-      @config
-    end
-    # Yields all further siblings.
+
+    # This is supposed to return the first relevant config item.
+    # @abstract
+    # @return [Config, nil]
+    def first; end
+
+    # Yields all direct children/younger siblings. Starts with {#first}, if
+    # set.
     # @yieldparam config [Config]
     def each
-      return unless @config
-      yield @config
-      current = @config.ffi_delegate
-      while sibling = current.next
-        break if sibling.null?
-        yield @config.from_ffi_delegate(sibling)
-        current = sibling
+      current = first()
+      return if current.nil?
+      yield current
+      current_delegate = current.ffi_delegate
+      while current_delegate = current_delegate.next
+        break if current_delegate.null?
+        yield CZTop::Config.from_ffi_delegate(current_delegate)
       end
+    end
+
+    def ==(other)
+      to_a == other.to_a
+    end
+  end
+
+  # Accesses the younger siblings of a given {Config} item.
+  class SiblingsAccessor < FamilyAccessor
+    # Returns the first sibling.
+    # @return [Config]
+    # @return [nil] if no younger siblings
+    def first
+      ptr = @config.ffi_delegate.next
+      return nil if ptr.null?
+      CZTop::Config.from_ffi_delegate(ptr)
+    end
+  end
+
+  # Accesses the direct children of a given {Config} item.
+  class ChildrenAccessor < FamilyAccessor
+    def first
+      ptr = @config.ffi_delegate.child
+      return nil if ptr.null?
+      CZTop::Config.from_ffi_delegate(ptr)
+    end
+
+    # Adds a new Config item and yields it, so it can be configured in
+    # a block.
+    # @param name [String] name for new config item
+    # @param value [String] value for new config item
+    # @yieldparam [Config] the new config item, if block was given
+    # @return [Config] the new config item
+    def new(name = nil, value = nil)
+      config = CZTop::Config.new(name, value, parent: @config)
+      yield config if block_given?
+      config
     end
   end
 

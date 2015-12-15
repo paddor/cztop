@@ -88,7 +88,7 @@ main
     let(:parent) { config }
     let(:children) { parent.children }
     it "returns SiblingsAccessor" do
-      assert_kind_of CZTop::Config::SiblingsAccessor, children
+      assert_kind_of CZTop::Config::ChildrenAccessor, children
     end
 
     context "with children" do
@@ -106,6 +106,40 @@ main
       it "has no children" do
         assert_nil parent.children.first
         assert_empty parent.children.to_a
+      end
+    end
+
+    context "adding a new child" do
+      let(:new_child) { children.new }
+      it "returns new child" do
+        assert_kind_of CZTop::Config, new_child
+      end
+      it "adds new child" do
+        new_child
+        assert_equal 2+1, children.count
+        assert_equal new_child, parent.last_at_depth(1)
+      end
+      context "with name" do
+        let(:name) { "foo" }
+        it "sets name" do
+          assert_equal name, children.new(name).name
+        end
+      end
+      context "with name and value" do
+        let(:name) { "foo" }
+        let(:value) { "bar" }
+        let(:new_child) { children.new(name, value) }
+        it "sets name and value" do
+          assert_equal name, new_child.name
+          assert_equal value, new_child.value
+        end
+      end
+      context "with block given" do
+        it "yields new child" do
+          yielded = nil
+          new_child = children.new { |c| yielded = c }
+          assert_same new_child, yielded
+        end
       end
     end
   end

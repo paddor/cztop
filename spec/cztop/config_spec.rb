@@ -19,11 +19,20 @@ describe CZTop::Config do
         assert_nil config.name
       end
     end
+    context "with name and value" do
+      let(:name) { "foo" }
+      let(:value) { "bar" }
+      let(:config) { described_class.new name, value }
+      it "sets name and value" do
+        assert_equal name, config.name
+        assert_equal value, config.value
+      end
+    end
     context "given a parent" do
       let(:parent_name) { "foo" }
       let(:parent_config) { described_class.new parent_name }
       let(:name) { "bar" }
-      let(:config) { described_class.new name, parent_config }
+      let(:config) { described_class.new name, parent: parent_config }
       it "appends it to that parent" do
         assert_nil parent_config.children.first
         config
@@ -32,6 +41,12 @@ describe CZTop::Config do
 
       it "removes finalizer from delegate" do # parent will free it
         assert_nil config.ffi_delegate.instance_variable_get(:@finalizer)
+      end
+    end
+    context "with no parent" do
+      let(:config) { described_class.new }
+      it "doesn't remove finalizer from delegate" do
+        refute_nil config.ffi_delegate.instance_variable_get(:@finalizer)
       end
     end
     context "with a block" do
@@ -65,16 +80,51 @@ main
     let(:config) { described_class.from_string(config_contents) }
 
     describe "#==" do
-      context "given equal config" do
-        it "returns true" do
-          assert_equal config, config
+      Given(:this_name) { "foo" }
+      Given(:this_value) { "bar" }
+      Given(:this) { described_class.new(this_name, this_value) }
+
+      context "with equal config" do
+        Given(:that) { described_class.new(this_name, this_value) }
+        Then { this == that }
+        And { that == this }
+      end
+      context "with different config" do
+        Given(:that_name) { "quu" }
+        Given(:that_value) { "quux" }
+
+        context "with different name" do
+          Given(:that) { described_class.new(that_name, this_value) }
+          Then { this != that }
+          And  { that != this }
+        end
+
+        context "with different value" do
+          Given(:that) { described_class.new(this_name, that_value) }
+          Then { this != that }
+          And  { that != this }
         end
       end
-      context "given different config" do
-        let(:other_config) do described_class.new("foo") end
-        it "returns false" do
-          refute_equal config, other_config
+    end
+
+    describe "#tree_equal?" do
+      context "given equal config tree" do
+        Given(:this) { config.locate("main/frontend") }
+        Given(:other) { described_class.from_string(config_contents) }
+        Given(:that) { other.locate("main/frontend") }
+        When do
+          # mangle an independent side-tree a bit
+          backend = config.locate("main/backend")
+          backend.name = "foobar"
+          backend.children.new("foo", "bar")
         end
+        Then { this.tree_equal? that }
+        And { that.tree_equal? this }
+      end
+      context "given different config tree" do
+        let(:other_config) { described_class.new("foo") }
+        Then { !config.tree_equal?(other_config) }
+        And  { !other_config.tree_equal?(config) }
       end
     end
 

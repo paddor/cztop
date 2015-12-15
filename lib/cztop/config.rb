@@ -11,20 +11,27 @@ module CZTop
     # Initializes a new {Config} item. Takes an optional block to initialize
     # the item further.
     # @param name [String] config item name
+    # @param value [String] config item value
     # @param parent [Config] parent config item
     # @yieldparam config [self]
     # @note If parent is given, the native child will be destroyed when the
     #   native parent is destroyed (and not when the child's corresponding
     #   {Config} object is garbage collected).
-    def initialize(name = nil, parent = nil)
-      parent = parent.ffi_delegate if parent.is_a?(Config)
-      delegate = ::CZMQ::FFI::Zconfig.new(name, parent)
-      attach_ffi_delegate(delegate)
+    def initialize(name = nil, value = nil, parent: nil)
+      if parent
+        parent = parent.ffi_delegate if parent.is_a?(Config)
+        delegate = ::CZMQ::FFI::Zconfig.new(name, parent)
+        attach_ffi_delegate(delegate)
 
-      # NOTE: this delegate must not be freed automatically, because the
-      # parent will free it.
-      delegate.__undef_finalizer
+        # NOTE: this delegate must not be freed automatically, because the
+        # parent will free it.
+        delegate.__undef_finalizer
+      else
+        delegate = ::CZMQ::FFI::Zconfig.new(name, nil)
+        attach_ffi_delegate(delegate)
+      end
 
+      self.value = value if value
       yield self if block_given?
     end
 
@@ -58,6 +65,12 @@ module CZTop
       ffi_delegate.set_value("%s", :string, new_value.to_s)
     end
 
+    # Inspects this {Config} item.
+    # @return [String] shows class, name, and value
+    def inspect
+      "#<#{self.class.name}: name=#{name.inspect} value=#{value.inspect}>"
+    end
+
     # Update the value of a config item by path.
     # @param path [String, #to_s] path to config item
     # @param value [String, #to_s] path to config item
@@ -83,12 +96,21 @@ module CZTop
     end
     alias_method :get, :[]
 
-    # @return [Boolean]
+    # Compares this config item to another. Only the name and value are
+    # considered. If you need to compare a config tree, use {#tree_equal?}.
+    # @param [Config] the other config item
+    # @return [Boolean] whether they're equal
     def ==(other)
       name == other.name &&
-      value == other.value &&
-      children.first == other.children.first &&
-      self.siblings.first == other.siblings.first
+      value == other.value
+    end
+
+    # Compares this config tree to another tree or subtree. Names, values, and
+    # children are considered.
+    # @param [Config] the other config tree
+    # @return [Boolean] whether they're equal
+    def tree_equal?(other)
+      self == other && self.children == other.children
     end
   end
 end

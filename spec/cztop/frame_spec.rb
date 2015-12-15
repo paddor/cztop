@@ -55,7 +55,7 @@ describe CZTop::Frame do
           assert_operator CZTop::Frame::FLAG_REUSE & provided_flags, :>, 0
         end
         it "wraps native counterpart in new Zframe" do
-          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,flags|
+          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,_|
             zframe.__ptr_give_ref # detach, so it won't try to free()
           end.and_return(0)
           frame.send_to(socket, reuse: true)
@@ -65,7 +65,7 @@ describe CZTop::Frame do
 
       describe "when there's an error" do # avoid memory leak
         before(:each) do
-          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,flags|
+          expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,_|
             zframe.__ptr_give_ref # detach, so it won't try to free()
           end.and_return(-1)
         end

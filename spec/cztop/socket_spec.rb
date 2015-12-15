@@ -34,11 +34,12 @@ describe CZTop::Socket do
 
     context "given same binding endpoint to multiple REP sockets" do
       let(:endpoint) { "inproc://the_one_and_only" }
+      let(:sock1) { CZTop::Socket::REP.new(endpoint) }
+      before(:each) { sock1 }
       it "raises" do
-        sock1 = CZTop::Socket::REP.new(endpoint)
         # there can only be one REP socket bound to one endpoint
         assert_raises(CZTop::InitializationError) do
-          sock2 = CZTop::Socket::REP.new(endpoint)
+          CZTop::Socket::REP.new(endpoint)
         end
       end
     end

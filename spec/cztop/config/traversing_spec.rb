@@ -69,7 +69,7 @@ main
       it "calls block no more" do
         called = 0
         begin
-          config.execute { |config| called += 1; raise }
+          config.execute { |_| called += 1; raise }
         rescue
           assert_equal 1, called
         end

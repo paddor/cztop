@@ -113,7 +113,6 @@ test
         c.value = "bar"
         c.comments << "baz"
         c.comments << "bii"
-        c
         root
       end
       context "when serializing" do

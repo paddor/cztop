@@ -6,7 +6,7 @@ module CZTop
     def deny(*addrs)
       # TODO
     end
-    ANY_CERTIFICATE="*"
+    ANY_CERTIFICATE = "*"
     def use_curve(directory = ANY_CERTIFICATE)
       # TODO
     end

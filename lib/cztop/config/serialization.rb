@@ -61,7 +61,7 @@ module CZTop::Config::Serialization
   #
   # @note This method is automatically used by Marshal.dump.
   # @return [String] marshalled {Config}
-  def _dump(level)
+  def _dump(_level)
     to_s
   end
 end

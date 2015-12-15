@@ -58,8 +58,8 @@ module CZTop
         first = first()
         return unless first
         yield first
-        while _next = @message.ffi_delegate.next and not _next.null?
-          yield Frame.from_ffi_delegate(_next)
+        while frame = @message.ffi_delegate.next and not frame.null?
+          yield Frame.from_ffi_delegate(frame)
         end
         return self
       end

@@ -44,6 +44,8 @@ module CZTop
           yield comment.read_string
         end
       rescue CZMQ::FFI::Zlist::DestroyedError
+        # there are no comments
+        nil
       end
 
       # @return [Integer]

@@ -27,7 +27,7 @@ module CZTop::Config::Traversing
         -1 # report failure to stop zconfig_execute() immediately
       end
     end
-    rc = ffi_delegate.execute(callback, arg = nil)
+    rc = ffi_delegate.execute(callback, _arg = nil)
     raise exception if exception
     raise Error, "zconfig_execute() returned failure code" if rc.nonzero?
     return self

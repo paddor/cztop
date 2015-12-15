@@ -59,13 +59,12 @@ module CZTop::Config::Serialization
     # gets reassigned by zconfig_reload(). We can just use Zconfig.load and
     # swap out the FFI delegate.
     filename = filename() or
-      raise CZTop::Config::Error, "can't reload in-memory confing"
+      raise CZTop::Config::Error, "can't reload in-memory config"
     new_delegate = ::CZMQ::FFI::Zconfig.load(filename)
-    if new_delegate.null?
-      raise CZTop::Config::Error,
-        "error while reloading from the file %p" % filename
-    end
     attach_ffi_delegate(new_delegate)
+  rescue CZTop::InitializationError
+    raise CZTop::Config::Error,
+      "error while reloading from the file %p" % filename
   end
 
   # Serialize (marshal) this Config and all its children.

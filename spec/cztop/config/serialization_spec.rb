@@ -133,15 +133,16 @@ main
             end
           end
           context "when it can't reload" do
-            before(:each) { Pathname.new(filename).delete }
             it "raises" do
+              loaded_config
+              Pathname.new(filename).delete
               assert_raises(CZTop::Config::Error) { loaded_config.reload }
             end
           end
         end
         context "created in-memory" do # or any other problem
           it "raises" do
-            assert_raises { config.reload }
+            assert_raises(CZTop::Config::Error) { config.reload }
           end
         end
       end

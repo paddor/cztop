@@ -149,7 +149,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
     - enumerable Frames [x]
   - Loop [ ]
   - Authenticator [ ]
-  - Certificate [ ]
+  - Certificate [X]
   - CertificateStore [ ]
   - Config [x]
   - Proxy [ ]

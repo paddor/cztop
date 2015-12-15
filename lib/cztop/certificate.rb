@@ -48,8 +48,12 @@ module CZTop
 
     # Returns the secret key in binary form.
     # @return [String] binary secret key
+    # @return [nil] if secret key is undefined (like after loading from a file
+    #   created using {#save_public})
     def secret_key
-      ffi_delegate.secret_key.read_string(KEY_BYTES)
+      key = ffi_delegate.secret_key.read_string(KEY_BYTES)
+      return nil if key.count("\0") == KEY_BYTES
+      key
     end
 
     # Returns the public key in Z85 form.
@@ -77,14 +81,22 @@ module CZTop
       if value
         ffi_delegate.set_meta(key, "%s", :string, value)
       else
-        ffi_delegate.set_meta(key, nil)
+        ffi_delegate.unset_meta(key)
       end
     end
 
     # Returns meta keys set.
     # @return [Array<String>]
     def meta_keys
-      # TODO
+      zlist = ffi_delegate.meta_keys
+      first_key = zlist.first
+      return [] if first_key.null?
+      keys = [first_key.read_string]
+      while key = zlist.next
+        break if key.null?
+        keys << key.read_string
+      end
+      keys
     end
 
     # Save full certificate (public + secret) to files.
@@ -99,14 +111,29 @@ module CZTop
       rc = ffi_delegate.save(filename.to_s)
       raise Error, "error while saving to file %p" % filename if rc == -1
     end
-    # TODO
+
+    # Saves the public key to file in ZPL ({Config}) format.
+    # @return [void]
+    # @raise [Error] if this fails
     def save_public(filename)
+      rc = ffi_delegate.save_public(filename.to_s)
+      raise Error, "error while saving to the file %p" % filename if rc == -1
     end
-    # TODO
+
+    # Saves the secret key to file in ZPL ({Config}) format.
+    # @return [void]
+    # @raise [Error] if this fails
     def save_secret(filename)
+      rc = ffi_delegate.save_secret(filename.to_s)
+      raise Error, "error while saving to the file %p" % filename if rc == -1
     end
-    # TODO
+
+    # Applies this certificate on a {Socket} or {Actor}.
+    # @return [void]
+    # @raises [Error] if secret key is undefined
     def apply(zocket)
+      raise Error, "secret key is undefined" if secret_key.nil?
+      ffi_delegate.apply(zocket)
     end
 
     # Duplicates the certificate.

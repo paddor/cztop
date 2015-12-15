@@ -5,8 +5,9 @@ require 'pathname'
 describe CZTop::Certificate do
   include_examples "has FFI delegate"
 
-  context "with certificate given" do
+  context "with certificate" do
     let(:cert) { CZTop::Certificate.new }
+    let(:ffi_delegate) { cert.ffi_delegate }
     describe "#initialize" do
       it "initializes" do
         cert
@@ -36,6 +37,18 @@ describe CZTop::Certificate do
       end
       it "has correct length" do
         assert_equal 32, key.bytesize
+      end
+      context "with undefined secret key" do
+        # NOTE: this happens when cert was loaded from file created with
+        # #save_public
+        let(:undefined_key) { "\0" * 32 }
+        let(:pointer) { double(read_string: undefined_key) }
+        before(:each) do
+          expect(ffi_delegate).to(receive(:secret_key).and_return(pointer))
+        end
+        it "returns nil" do
+          assert_nil cert.secret_key
+        end
       end
     end
 
@@ -85,7 +98,6 @@ describe CZTop::Certificate do
       end
 
       describe "#meta=" do
-        let(:ffi_delegate) { cert.ffi_delegate }
         context "when setting" do
           it "sets" do
             expect(ffi_delegate).to(
@@ -106,11 +118,18 @@ describe CZTop::Certificate do
 
       describe "#meta_keys" do
         context "with meta keys set" do
+          let(:values) { { "key1" => "value1", "key2" => "value2" } }
+          before(:each) do
+            values.each {|k,v| cert[k] = v }
+          end
           it "returns keys" do
+            assert_equal values.keys.sort, cert.meta_keys.sort
           end
         end
         context "with no meta keys set" do
-          it "returns empty array"
+          it "returns empty array" do
+            assert_equal [], cert.meta_keys
+          end
         end
       end
 
@@ -166,7 +185,23 @@ describe CZTop::Certificate do
       end
 
       describe "#apply" do
-        it "applies to socket"
+        let(:zocket) { double("zocket") }
+
+        it "applies to socket" do
+          expect(ffi_delegate).to(receive(:apply).with(zocket))
+          cert.apply(zocket)
+        end
+
+        context "with undefined secret key" do
+          before(:each) do
+            expect(cert).to(receive(:secret_key).and_return(nil))
+          end
+          it "raises" do
+            assert_raises(CZTop::Certificate::Error) do
+              cert.apply(zocket)
+            end
+          end
+        end
       end
     end
 
@@ -192,6 +227,29 @@ describe CZTop::Certificate do
         end
       end
 
+      describe "#save_public" do
+        When(:result) { cert.save_public(path) }
+        context "with valid path" do
+          Given { !path.exist? }
+          Then { path.exist? }
+        end
+        context "with invalid path" do
+          Given(:path) { "/" }
+          Then { result == Failure(CZTop::Certificate::Error) }
+        end
+      end
+      describe "#save_secret" do
+        When(:result) { cert.save_secret(path) }
+        context "with valid path" do
+          Given { !path.exist? }
+          Then { path.exist? }
+        end
+        context "with invalid path" do
+          Given(:path) { "/" }
+          Then { result == Failure(CZTop::Certificate::Error) }
+        end
+      end
+
       describe ".load" do
         context "with existing file" do
           before(:each) { cert.save(path) }
@@ -208,13 +266,6 @@ describe CZTop::Certificate do
             end
           end
         end
-      end
-
-      describe "#save_public" do
-        it "saves public key"
-      end
-      describe "#save_secret" do
-        it "saves secret key"
       end
     end
   end

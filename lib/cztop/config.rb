@@ -6,8 +6,6 @@ module CZTop
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
-    class Error < RuntimeError; end
-
     # Initializes a new {Config} item. Takes an optional block to initialize
     # the item further.
     # @param name [String] config item name

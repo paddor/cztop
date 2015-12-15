@@ -118,8 +118,10 @@ test
       end
       context "when serializing" do
         let(:serialized) { config.to_s }
-        it "serializes comments as well" do
+        it "serializes first comment" do
           assert_match /#baz/, serialized
+        end
+        it "serializes second comment" do
           assert_match /#bii/, serialized
         end
       end

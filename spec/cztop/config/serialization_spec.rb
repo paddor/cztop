@@ -132,17 +132,17 @@ main
               refute_operator fix_config, :tree_equal?, loaded_config
             end
           end
-          context "when it can't reload" do
+          context "when file has been deleted" do
             it "raises" do
               loaded_config
               Pathname.new(filename).delete
-              assert_raises(CZTop::Config::Error) { loaded_config.reload }
+              assert_raises(CZTop::Config::Serialization::Error) { loaded_config.reload }
             end
           end
         end
         context "created in-memory" do # or any other problem
           it "raises" do
-            assert_raises(CZTop::Config::Error) { config.reload }
+            assert_raises(CZTop::Config::Serialization::Error) { config.reload }
           end
         end
       end
@@ -163,8 +163,8 @@ main
 
     context "given no config file" do
       let(:nonexistent_filename) { "/foo/bar.zpl" }
-      it "raises CZTop::Config::Error" do
-        assert_raises(CZTop::Config::Error) do
+      it "raises CZTop::Config::Serialization::Error" do
+        assert_raises(CZTop::Config::Serialization::Error) do
           described_class.load(nonexistent_filename)
         end
       end

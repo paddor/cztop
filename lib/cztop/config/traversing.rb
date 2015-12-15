@@ -1,5 +1,9 @@
 # Methods used to traverse a {CZTop::Config} tree.
 module CZTop::Config::Traversing
+
+  # used for various {Traversing} errors
+  class Error < RuntimeError; end
+
   # Calls the given block once for each {Config} item in the tree, starting
   # with self.
   #
@@ -11,6 +15,7 @@ module CZTop::Config::Traversing
   #   call the block any more after that)
   # @raise [Error] if zconfig_execute() returns an error code
   def execute
+    raise Error, "no block given" if !block_given?
     exception = nil
     callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
       begin

@@ -21,7 +21,7 @@ main
   let(:config) { described_class.from_string(config_contents) }
 
   describe "#execute" do
-    context "given a block" do
+    context "with a block" do
       it "yields config and level" do
         config.execute do |c,l|
           assert_kind_of described_class, c
@@ -47,7 +47,7 @@ main
       end
     end
 
-    context "given a block which breaks" do
+    context "with a block that breaks" do
       it "calls block no more" do
         called = 0
         config.execute { |_| called += 1; break }
@@ -65,7 +65,7 @@ main
     end
 
 
-    context "given raising block" do
+    context "with a block that raises" do
       it "calls block no more" do
         called = 0
         begin
@@ -80,6 +80,23 @@ main
         assert_raises(exception) do
           config.execute { raise exception }
         end
+      end
+    end
+
+    context "with no block" do
+      it "raises" do
+        assert_raises(CZTop::Config::Traversing::Error) { config.execute }
+      end
+    end
+
+    context "with failure code from zconfig_execute()" do
+      let(:ffi_delegate) { config.ffi_delegate }
+      before(:each) do
+        expect(ffi_delegate).to(
+          receive(:execute).with(kind_of(FFI::Function), nil)).and_return(-1)
+      end
+      it "raises" do
+        assert_raises(CZTop::Config::Traversing::Error) { config.execute {} }
       end
     end
   end

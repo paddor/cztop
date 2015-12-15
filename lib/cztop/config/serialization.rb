@@ -20,7 +20,8 @@ module CZTop::Config::Serialization
     def from_string(string)
       from_ffi_delegate CZMQ::FFI::Zconfig.str_load(string)
     end
-    # Loads a Config tree from a file.
+
+    # Loads a {Config} tree from a file.
     # @param path [String, Pathname, #to_s] the path to the ZPL config file
     # @raise [CZTop::Config::Error] if this fails
     # @return [Config]
@@ -30,8 +31,7 @@ module CZTop::Config::Serialization
       raise CZTop::Config::Error, "error while reading the file %p" % path.to_s
     end
 
-    # Load a Config object from a marshalled string.
-    #
+    # Loads a {Config} tree from a marshalled string.
     # @note This method is automatically used by Marshal.load.
     # @param string [String] marshalled {Config}
     # @return [Config]
@@ -46,7 +46,8 @@ module CZTop::Config::Serialization
   # @raise [CZTop::Config::Error] if this fails
   def save(path)
     rc = ffi_delegate.save(path.to_s)
-    raise CZTop::Config::Error, "error while saving to the file %s" % path if rc == -1
+    raise CZTop::Config::Error,
+      "error while saving to the file %s" % path if rc == -1
   end
 
   # Reload config tree from same file that it was previously loaded from.
@@ -54,8 +55,17 @@ module CZTop::Config::Serialization
   #   changed)
   # @return [void]
   def reload
-    rc = ::CZMQ::FFI::Zconfig.reload(ffi_delegate)
-    raise CZTop::Config::Error, "error while reloading from the file %p" % filename if rc == -1
+    # NOTE: can't use Zconfig.reload, as we won't get the self pointer that
+    # gets reassigned by zconfig_reload(). We can just use Zconfig.load and
+    # swap out the FFI delegate.
+    filename = filename() or
+      raise CZTop::Config::Error, "can't reload in-memory confing"
+    new_delegate = ::CZMQ::FFI::Zconfig.load(filename)
+    if new_delegate.null?
+      raise CZTop::Config::Error,
+        "error while reloading from the file %p" % filename
+    end
+    attach_ffi_delegate(new_delegate)
   end
 
   # Serialize (marshal) this Config and all its children.

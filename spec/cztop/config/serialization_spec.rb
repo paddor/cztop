@@ -70,7 +70,7 @@ main
       end
       context "with just a name" do
         let(:name) { "foo" }
-        let(:config) { described_class.new(name, root) }
+        let(:config) { described_class.new(name, parent: root) }
         it "serializes to just the name" do
           assert_equal "", config.to_s
           assert_equal "#{name}\n", root.to_s
@@ -80,7 +80,7 @@ main
         let(:name) { "foo" }
         let(:value) { "bar" }
         let(:config) do
-          c = described_class.new(name, root)
+          c = described_class.new(name, parent: root)
           c.value = value
           c
         end
@@ -102,6 +102,7 @@ main
       end
       let(:filename) { file.path }
       let(:loaded_config) { described_class.load(filename) }
+
       it "loads the file" do
         assert_kind_of described_class, loaded_config
         assert_equal filename, loaded_config.filename
@@ -109,20 +110,32 @@ main
 
       describe "#reload" do
         context "loaded from file" do
-          let(:config2) { described_class.load(filename) }
+          let(:fix_config) { described_class.from_string(config_contents) }
           context "when unchanged" do
             before(:each) { loaded_config.reload }
             it "is still the same" do
-              assert_equal config2, config
+              assert_equal fix_config, loaded_config
+              assert_operator fix_config, :tree_equal?, loaded_config
             end
           end
           context "when changed" do
             before(:each) do
-              config2["context/verbose"] = 0
-              config2.save(filename)
+              changing_config = described_class.from_string(config_contents)
+              changing_config["context/verbose"] = 0 # normally 1
+              changing_config.save(filename) # overwrite existing file
+              loaded_config.reload
             end
-            it "isn't the same anymore" do
-              refute_equal config2, config
+            it "item is different" do
+              refute_equal fix_config["context/verbose"], loaded_config["context/verbose"]
+            end
+            it "tree is different" do
+              refute_operator fix_config, :tree_equal?, loaded_config
+            end
+          end
+          context "when it can't reload" do
+            before(:each) { Pathname.new(filename).delete }
+            it "raises" do
+              assert_raises(CZTop::Config::Error) { loaded_config.reload }
             end
           end
         end

@@ -109,10 +109,11 @@ test
     describe "serialization" do
       let(:config) do
         root = described_class.new
-        c = described_class.new "foo", root
-        c.value = "bar"
-        c.comments << "baz"
-        c.comments << "bii"
+        root.children.new("foo") do |c|
+          c.value = "bar"
+          c.comments << "baz"
+          c.comments << "bii"
+        end
         root
       end
       context "when serializing" do

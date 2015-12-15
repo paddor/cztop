@@ -101,7 +101,7 @@ module CZTop
 
     # Compares this config item to another. Only the name and value are
     # considered. If you need to compare a config tree, use {#tree_equal?}.
-    # @param [Config] the other config item
+    # @param other [Config] the other config item
     # @return [Boolean] whether they're equal
     def ==(other)
       name == other.name &&
@@ -110,7 +110,7 @@ module CZTop
 
     # Compares this config tree to another tree or subtree. Names, values, and
     # children are considered.
-    # @param [Config] the other config tree
+    # @param other [Config] the other config tree
     # @return [Boolean] whether they're equal
     def tree_equal?(other)
       self == other && self.children == other.children

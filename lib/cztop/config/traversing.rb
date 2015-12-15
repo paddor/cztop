@@ -77,8 +77,15 @@ module CZTop::Config::Traversing
       end
     end
 
+    # Recursively compares these config items with the ones of the other.
+    # @param other [FamilyAccessor]
     def ==(other)
-      to_a == other.to_a
+      these = to_a
+      those = other.to_a
+      these.size == those.size && these.zip(those) do |this, that|
+        this.tree_equal?(that) or return false
+      end
+      return true
     end
   end
 

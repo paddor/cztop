@@ -37,12 +37,15 @@ module CZTop
 
     # @!group ZPL attributes
 
+    # Gets the name.
     # @return [String] name of the config item
     def name
       ptr = ffi_delegate.name
       return nil if ptr.null? # NOTE: for unnamed elements
       ptr.read_string
     end
+
+    # Sets a new name.
     # @param new_name [String, #to_s]
     # @return [new_name]
     def name=(new_name)

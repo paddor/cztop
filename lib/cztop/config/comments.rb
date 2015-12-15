@@ -19,11 +19,7 @@ module CZTop
         @config = config
       end
 
-      # @return [CZMQ::FFI::Zlist] the zlist of comments for this config item
-      def zlist
-        @config.ffi_delegate.comments
-      end
-
+      # Adds a new comment.
       # @param new_comment [String]
       # @return [self]
       def <<(new_comment)
@@ -32,14 +28,16 @@ module CZTop
       end
 
       # Deletes all comments for this {Config} item.
+      # @return [void]
       def delete_all
         @config.ffi_delegate.set_comment(nil)
       end
 
       # Yields all comments for this {Config} item.
       # @yieldparam comment [String]
+      # @return [void]
       def each
-        while comment = zlist.next
+        while comment = _zlist.next
           break if comment.null?
           yield comment.read_string
         end
@@ -48,11 +46,20 @@ module CZTop
         nil
       end
 
-      # @return [Integer]
+      # Returns the number of comments for this {Config} item.
+      # @return [Integer] number of comments
       def size
-        zlist.size
+        _zlist.size
       rescue CZMQ::FFI::Zlist::DestroyedError
         0
+      end
+
+      private
+
+      # Returns the Zlist to the list of comments for this config item.
+      # @return [CZMQ::FFI::Zlist] the zlist of comments for this config item
+      def _zlist
+        @config.ffi_delegate.comments
       end
     end
   end

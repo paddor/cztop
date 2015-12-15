@@ -23,13 +23,13 @@ module CZTop
       # just to shorten the lines
       Z = ::CZMQ::FFI::Zsock
 
-      # @return [Integer]
+      # @return [Integer] the send high water mark
       def sndhwm() Z.sndhwm(@zocket) end
-      # @param value [Integer]
+      # @param value [Integer] the new send high water mark.
       def sndhwm=(value) Z.set_sndhwm(@zocket, value) end
-      # @return [Integer]
+      # @return [Integer] the receive high water mark
       def rcvhwm() Z.rcvhwm(@zocket) end
-      # @param value [Integer]
+      # @param value [Integer] the new receive high water mark
       def rcvhwm=(value) Z.set_rcvhwm(@zocket, value) end
 
 # TODO: a reasonable subset of these

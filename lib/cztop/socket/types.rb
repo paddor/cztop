@@ -157,7 +157,7 @@ module CZTop
 
     # Extended publish socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
-    class XPUB < PUB
+    class XPUB < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_xpub(endpoints))
@@ -166,11 +166,10 @@ module CZTop
 
     # Extended subscribe socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
-    class XSUB < SUB
+    class XSUB < Socket
       # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil, subscription = nil)
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_xsub(endpoints))
-        # TODO: subscription
       end
     end
 

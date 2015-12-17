@@ -54,14 +54,8 @@ end
 
 YARD_OPTS = "--use-cache .yardoc/cache.db"
 
-# KISS. guard-yard doesn't work the way I want.
-# @see https://github.com/panthomakos/guard-yard/issues/20
 group :doc do
-  guard :shell do
-    # regenreate documentation
-    watch(Regexp.union(README_FILE, ruby_lib_files)) do |m|
-      puts "Regenerating documentation for #{m[0].inspect} ..."
-      system("yard doc #{YARD_OPTS} %s" % m[0])
-    end
+  guard 'yard' do
+    watch(Regexp.union(README_FILE, ruby_lib_files))
   end
 end

@@ -20,13 +20,14 @@ describe CZTop::Loop do
   end
 
   describe "#every" do
-  end
-
-  describe "#timer_created" do
 
   end
 
-  describe "#timer_canceled" do
+  describe "#remember_timer" do
+
+  end
+
+  describe "#forget_timer" do
 
   end
 
@@ -34,15 +35,23 @@ describe CZTop::Loop do
 
   end
 
-  describe "#reset_ticket_timer" do
-
-  end
-
-  describe "#remove_ticket_timer" do
+  describe "#ticket_delay" do
 
   end
 
   describe "#start" do
 
+  end
+
+  describe CZTop::Loop::SimpleTimer do
+    describe "#cancel" do
+
+    end
+  end
+
+  describe CZTop::Loop::TicketTimer do
+    describe "#cancel" do
+
+    end
   end
 end

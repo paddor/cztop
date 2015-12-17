@@ -46,7 +46,7 @@ module CZTop::HasFFIDelegate
     # @param method [Symbol] method to delegate
     # @return [void]
     def ffi_delegate(method)
-      def_delegators(:@ffi_delegate, method)
+      def_delegator(:@ffi_delegate, method)
     end
 
     # Allocates a new instance and attaches the FFI delegate to it. This is

@@ -165,6 +165,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - zsock_option.xml [x]
   - zcert.xml [x]
   - zcertstore.xml [x]
+* check availability of libsodium
 
 ## Contributing
 

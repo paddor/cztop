@@ -10,11 +10,14 @@ module CZTop
 
     class Error < RuntimeError; end
 
+    # @return [Set<FFI::Function>] remembered handlers (callbacks)
+    attr_reader :handlers
+
     # @return [Hash<Integer, Timer>] all timers by their timer ID
     attr_reader :timers
 
     def initialize
-      from_ffi_delegate(Zloop.new)
+      attach_ffi_delegate(Zloop.new)
       @handlers = Hash.new { |h,k| h[k] = Set.new } # socket => Set<handler>
       @timers = {} # timer.id => Timer
     end
@@ -24,7 +27,7 @@ module CZTop
     # @return [void]
     def add_reader(socket, &blk)
       handler = Zloop.reader_fn(&blk)
-      rc = ffi_delegate.reader(socket, handler)
+      rc = ffi_delegate.reader(socket.ffi_delegate, handler, nil)
       raise Error, "adding reader failed" if rc == -1
       @handlers[socket] << handler
     end

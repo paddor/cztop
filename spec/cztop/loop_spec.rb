@@ -4,7 +4,12 @@ describe CZTop::Loop do
   include_examples "has FFI delegate"
 
   describe "#add_reader" do
-
+    context "with socket" do
+      it "adds reader"
+    end
+    contexst "with nil" do
+      it "raises"
+    end
   end
 
   describe "#remove_reader" do

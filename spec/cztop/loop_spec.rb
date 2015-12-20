@@ -50,6 +50,11 @@ describe CZTop::Loop do
       assert_equal 2, subject.handlers[socket].size
     end
 
+    it "removes socket from loop" do
+      expect(ffi_delegate).to receive(:reader_end).with(socket.ffi_delegate)
+      subject.remove_reader(socket)
+    end
+
     it "removes handlers for a socket" do
       subject.remove_reader(socket)
       assert_empty subject.handlers[socket]

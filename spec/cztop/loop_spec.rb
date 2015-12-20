@@ -24,7 +24,7 @@ describe CZTop::Loop do
       it "adds reader" do
         expect(ffi_delegate).to receive(:reader)
           .with(socket.ffi_delegate, kind_of(::FFI::Function), nil)
-          .and_return(0)
+          .and_call_original
         subject.add_reader(socket) { }
       end
 
@@ -51,7 +51,9 @@ describe CZTop::Loop do
     end
 
     it "removes socket from loop" do
-      expect(ffi_delegate).to receive(:reader_end).with(socket.ffi_delegate)
+      expect(ffi_delegate).to receive(:reader_end)
+        .with(socket.ffi_delegate)
+        .and_call_original
       subject.remove_reader(socket)
     end
 
@@ -62,7 +64,12 @@ describe CZTop::Loop do
   end
 
   describe "#tolerate_reader" do
-
+    it "sets socket tolerant" do
+      expect(ffi_delegate).to receive(:reader_set_tolerant)
+        .with(socket.ffi_delegate)
+        .and_call_original
+      subject.tolerate_reader(socket)
+    end
   end
 
   describe "#after" do

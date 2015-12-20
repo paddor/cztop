@@ -10,7 +10,7 @@ module CZTop
 
     class Error < RuntimeError; end
 
-    # @return [Set<FFI::Function>] remembered handlers (callbacks)
+    # @return [Hash<Socket, Set<FFI::Function>] remembered handlers (callbacks)
     attr_reader :handlers
 
     # @return [Hash<Integer, Timer>] all timers by their timer ID

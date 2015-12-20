@@ -73,15 +73,53 @@ describe CZTop::Loop do
   end
 
   describe "#after" do
+    let(:timer) { subject.after(600) {} }
 
+    it "registers timer" do
+      expect_any_instance_of(CZTop::Loop::SimpleTimer).to receive(:register)
+      assert_equal 1, timer.times
+    end
+
+    it "returns SimpleTimer" do
+      assert_kind_of CZTop::Loop::SimpleTimer, timer
+    end
+
+    it "remembers timer" do
+      expect(subject).to receive(:remember_timer).
+        with(kind_of(CZTop::Loop::SimpleTimer))
+      timer
+    end
+
+    context "with explicit number of times" do
+      it "passes number of times" do
+        timer = subject.after(300, times: 5) {}
+        assert_equal 5, timer.times
+      end
+    end
   end
 
   describe "#every" do
+    let(:timer) { subject.every(500) {} }
+
+    it "registers timer" do
+      expect_any_instance_of(CZTop::Loop::SimpleTimer).to receive(:register)
+      assert_equal 0, timer.times
+    end
+
+    it "returns SimpleTimer" do
+      assert_kind_of CZTop::Loop::SimpleTimer, timer
+    end
 
   end
 
   describe "#remember_timer" do
-
+    let(:id) { double("timer id") }
+    let(:timer) { double("timer", id: id) }
+    it "adds timer to list" do
+      subject.remember_timer(timer)
+      assert_equal 1, subject.timers.size
+      assert_same timer, subject.timers[id]
+    end
   end
 
   describe "#forget_timer" do
@@ -100,13 +138,54 @@ describe CZTop::Loop do
 
   end
 
-  describe CZTop::Loop::SimpleTimer do
-    describe "#cancel" do
+  describe CZTop::Loop::Timer do
+    describe "#initialize"
+    describe "#retain_reference"
+    describe "#loop"
+    describe "#id"
+  end
 
+  describe CZTop::Loop::SimpleTimer do
+    let(:delay) { 1000 }
+    let(:times) { 1 }
+    let(:block) { ->{} }
+    let(:timer) { described_class.new(delay, times, subject, &block) }
+
+    it "inherits from Timer" do
+      assert_operator described_class, :<, CZTop::Loop::Timer
+    end
+
+    describe "#initialize" do
+    end
+
+    it "yields block"
+
+    it "yields itself"
+
+    describe "#register" do
+      it "is implemented"
+      it "registers simple timer" do
+        expect(ffi_delegate).to receive(:timer)
+          .with(delay, 1, kind_of(FFI::Function), nil)
+          .and_call_original
+        timer
+      end
+    end
+
+    describe "#cancel" do
+      it "cancels timer"
     end
   end
 
   describe CZTop::Loop::TicketTimer do
+    it "inherits from Timer" do
+      assert_operator described_class, :<, CZTop::Loop::Timer
+    end
+
+    describe "#initialize" do
+
+    end
+
     describe "#cancel" do
 
     end

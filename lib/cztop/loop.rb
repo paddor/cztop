@@ -53,30 +53,52 @@ module CZTop
     # @param times [Integer] number of times to expire
     # @return [SimpleTimer]
     def after(delay, times: 1, &blk)
-      t = SimpleTimer.new(delay, times, self, &blk)
-    ensure
-      remember_timer(t) if t
+      SimpleTimer.new(delay, times, self, &blk)
     end
 
     # Add a new, reoccurring timer.
     # @param delay [Integer] delay before each expiry in msec
     # @return [SimpleTimer]
     def every(delay, &blk)
-      t = SimpleTimer.new(delay, _times = 0, self, &blk)
-    ensure
-      remember_timer(t) if t
+      SimpleTimer.new(delay, _times = 0, self, &blk)
     end
 
     # @abstract
     class Timer
+      include ::CZMQ::FFI
+
       # @return [Integer] the timer ID
       attr_reader :id
 
       # @return [Loop] the associated reactor
       attr_reader :loop
 
+      # This will {#register} this timer and {#retain_reference} of it. So
+      # a subclass should ensure the needed ivars are set before calling
+      # super().
+      def initialize
+        register
+        retain_reference
+      end
+
+      # @abstract
+      # Used to actually create this timer.
+      # @return [void]
+      def register
+        raise NotImplementedError
+      end
+
+      # @abstract
+      # Used to cancel this timer.
+      # @return [void]
       def cancel
         raise NotImplementedError
+      end
+
+      # Registers itself in the associated {CZTop::Loop} to retain a reference
+      # on the handler. This should be called by {#initialize}.
+      def retain_reference
+        @loop.remember_timer(self)
       end
     end
 
@@ -94,7 +116,14 @@ module CZTop
       def initialize(delay, times, loop)
         @delay, @times, @loop = delay, times, loop
         @handler = Zloop.timer_fn { yield self }
-        register
+        super()
+      end
+
+      # Actually creates the timer using the handler.
+      # @return [void]
+      def register
+        @id = @loop.ffi_delegate.timer(@delay, @times, @handler, nil)
+        raise Error, "adding timer failed" if @id == -1
       end
 
       # Cancels this timer manually.
@@ -102,17 +131,6 @@ module CZTop
       def cancel
         Zloop.timer_end(@loop.ffi_delegate, @id)
         loop.forget_timer(self)
-      end
-
-      private
-
-      # Actually creates the timer using the handler and registers itself in
-      # the {Loop} to retain a reference on the handler.
-      # @return [void]
-      def register
-        @id = @loop.ffi_delegate.timer(@delay, @times, @handler, nil)
-        raise Error, "adding timer failed" if @id == -1
-        @loop.remember_timer(self)
       end
     end
 
@@ -133,9 +151,7 @@ module CZTop
     # @return [TicketTimer]
     def add_ticket_timer(&blk)
       raise Error, "ticket delay not set" if @ticket_delay.nil?
-      t = TicketTimer.new(delay, &blk)
-    ensure
-      remember_timer(t) if t
+      TicketTimer.new(self, &blk)
     end
 
     # @note Delay must be higher than the previous delay.
@@ -157,7 +173,7 @@ module CZTop
       def initialize(loop)
         @loop = loop
         @handler = Zloop.timer_fn { yield self }
-        register
+        super()
       end
 
       # @return [FFI::Pointer]
@@ -168,20 +184,16 @@ module CZTop
         @loop.ticket_reset(@ptr)
       end
 
+      # Actually creates the timer using the handler.
+      # @return [void]
+      def register
+        @ptr = @loop.ffi_delegate.ticket(@handler, nil)
+      end
+
       # @return [void]
       def cancel
         @loop.ticket_delete(@ptr)
         @loop.forget_timer(self)
-      end
-
-      private
-
-      # Actually creates the timer using the handler and registers itself in
-      # the {Loop} to retain a reference on the handler.
-      # @return [void]
-      def register
-        @ptr = @loop.ffi_delegate.ticket(@handler, nil)
-        @loop.remember_timer(self)
       end
     end
 

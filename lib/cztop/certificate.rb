@@ -138,6 +138,7 @@ module CZTop
     # @return [void]
     # @raises [Error] if secret key is undefined
     def apply(zocket)
+      raise ArgumentError, "invalid zocket argument %p" % zocket unless zocket
       raise Error, "secret key is undefined" if secret_key.nil?
       ffi_delegate.apply(zocket)
     end

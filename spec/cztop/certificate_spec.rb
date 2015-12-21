@@ -202,6 +202,20 @@ describe CZTop::Certificate do
             end
           end
         end
+
+        context "with invalid socket" do
+          let(:zocket) { nil }
+          it "raises" do
+            assert_raises(ArgumentError) { cert.apply(zocket) }
+          end
+        end
+
+        context "with real socket" do
+          let(:zocket) { CZTop::Socket::REQ.new }
+          it "works" do
+            cert.apply(zocket)
+          end
+        end
       end
     end
 

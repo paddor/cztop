@@ -147,7 +147,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Message [x]
   - Frame [x]
     - enumerable Frames [x]
-  - Loop [ ]
+  - Loop [X]
   - Poller [ ]
   - Monitor [ ]
   - Authenticator [ ]
@@ -165,6 +165,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - zsock_option.xml [x]
   - zcert.xml [x]
   - zcertstore.xml [x]
+  - zsys.xml [ ] (for `zsys_has_curve()`)
 * check availability of libsodium
 * read error strings for exceptions (zmq_strerror)
 

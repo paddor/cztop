@@ -166,6 +166,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - zcert.xml [x]
   - zcertstore.xml [x]
 * check availability of libsodium
+* read error strings for exceptions (zmq_strerror)
 
 ## Contributing
 

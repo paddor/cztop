@@ -1,6 +1,9 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Message do
+  include_examples "has FFI delegate"
+  let(:msg) { described_class.new }
+
   context "new Message" do
     subject { CZTop::Message.new }
     it "is empty" do
@@ -8,9 +11,6 @@ describe CZTop::Message do
     end
     it "has content size zero" do
       assert_equal 0, subject.content_size
-    end
-    it "has no frames" do
-      assert_equal 0, subject.size
     end
 
     context "with initial string" do
@@ -31,14 +31,13 @@ describe CZTop::Message do
 
     context "with multiple parts" do
       Given(:parts) { [ "foo", "", "bar"] }
-      When(:msg) { described_class.new(parts) }
+      Given(:msg) { described_class.new(parts) }
       Then { msg.size == parts.size }
     end
   end
 
   describe ".coerce" do
     context "given a Message" do
-      let(:msg) { described_class.new }
       it "takes the Message as is" do
         assert_same msg, described_class.coerce(msg)
       end
@@ -62,10 +61,55 @@ describe CZTop::Message do
       And { coerced_msg.size == 1 }
       And { coerced_msg.frames.first.to_s == frame_content }
     end
+
+    context "given something else" do
+      Given(:something) { Object.new }
+      When(:result) { described_class.coerce(something) }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
+
+  describe "#<<" do
+    Then { msg.size == 0 }
+    context "with a string" do
+      Given(:obj) { "foo" }
+      When { msg << obj }
+      Then { msg.size == 1 }
+    end
+    context "with a frame" do
+      Given(:obj) { CZTop::Frame.new("foo") }
+      When { msg << obj }
+      Then { msg.size == 1 }
+    end
+    context "with something else" do
+      Given(:obj) { Object.new }
+      When(:result) { msg << obj }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
+
+  describe "#send_to" do
+    let(:delegate) { msg.ffi_delegate }
+    let(:destination) { double "destination socket" }
+    it "sends its delegate to the destination" do
+      expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
+      msg.send_to(destination)
+    end
+  end
+
+  describe ".receive_from" do
+    let(:dlg) { msg.ffi_delegate }
+    let(:received_message) { CZTop::Message.receive_from(src) }
+    let(:src) { double "source" }
+    it "receives message from source" do
+      expect(CZMQ::FFI::Zmsg).to(receive(:recv).with(src).and_return(dlg))
+      assert_kind_of CZTop::Message, received_message
+      refute_same msg, received_message
+      assert_same msg.ffi_delegate, received_message.ffi_delegate
+    end
   end
 
   describe "#routing_id" do
-    Given(:msg) { described_class.new }
     context "with no routing ID set" do
       Then { msg.routing_id == 0 }
     end
@@ -77,8 +121,6 @@ describe CZTop::Message do
   end
 
   describe "#routing_id=" do
-    Given(:msg) { described_class.new }
-
     context "with valid routing ID" do
       # code duplication for completeness' sake
       Given(:new_routing_id) { 123456 }

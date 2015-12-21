@@ -1,34 +1,23 @@
 module CZTop
+  # Represents a CZMQ::FFI::Zactor.
   # @note Mainly because Proxy and Authenticator are actors.
+  # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
-    # @!parse extend CZTop::FFIDelegate::ClassMethods
+    include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
+    include ZsockOptions
+    include SendReceiveMethods
+    include PolymorphicZsockMethods
 
-
-    include FFIDelegate
-
-    def initialize
+    # @param callback [FFI::Pointer]
+    # @param args [FFI::Pointer]
+    # @overload initialize(&task)
+    #   @yieldparam command [String]
+    #   @yieldparam pipe [String]
+    def initialize(callback = nil, args = nil)
       # TODO
-    end
-
-    # @param str_or_msg [String, Message]
-    def send(str_or_msg)
-      str_or_msg = Message.coerce(str_or_msg)
-      @delegate.send(str_or_msg)
-    end
-
-    # @return [Message]
-    def receive
-      zmsg = @delegate.recv
-      return Message.from_ptr()
-      # TODO: maybe just Message.receive_from(self) ?
-      #
-      # Is there any difference??
-    end
-
-    # Access to the options of this actor.
-    # @return [Socket::Options]
-    def options
-      Socket::Options.new(self)
+      # After initialization: call signal(pipe, 0)
+      # React to "$TERM" command with destroy
     end
   end
 end

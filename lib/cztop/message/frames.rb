@@ -10,11 +10,11 @@ module CZTop
     # Access to this {Message}'s {Frame}s.
     # @return [Frames]
     def frames
-      Frames.new(self)
+      FramesAccessor.new(self)
     end
 
     # Used to access a {Message}'s {Frame}s.
-    class Frames
+    class FramesAccessor
       include Enumerable
 
       # @param message [Message]
@@ -22,6 +22,7 @@ module CZTop
         @message = message
       end
 
+      # Returns the last frame of this message.
       # @return [Frame] first frame of Message
       # @return [nil] if there are no frames
       def first
@@ -30,6 +31,7 @@ module CZTop
         Frame.from_ffi_delegate(first)
       end
 
+      # Returns the last frame of this message.
       # @return [Frame] last {Frame} of {Message}
       # @return [nil] if there are no frames
       def last
@@ -38,6 +40,8 @@ module CZTop
         Frame.from_ffi_delegate(last)
       end
 
+      # Index access to a frame/frames of this message, just like with an
+      # array.
       # @overload [](index)
       #   @param index [Integer] index of {Frame} within {Message}
       # @overload [](*args)
@@ -52,14 +56,16 @@ module CZTop
         end
       end
 
+      # Yields all frames for this message to the given block.
       # @note Not thread safe.
+      # @yieldparam frame [Frame]
       # @return [self]
       def each
         first = first()
         return unless first
         yield first
-        while _next = @message.ffi_delegate.next and not _next.null?
-          yield Frame.from_ffi_delegate(_next)
+        while frame = @message.ffi_delegate.next and not frame.null?
+          yield Frame.from_ffi_delegate(frame)
         end
         return self
       end

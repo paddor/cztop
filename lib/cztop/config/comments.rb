@@ -1,28 +1,17 @@
 module CZTop
   class Config
-    # @!group Comments
 
-    # Config::Comments
+    # Access this config item's comments.
+    # @note Note that comments are discarded when loading a config (either from
+    #   a string or file) and thus, only the comments you add during runtime
+    #   are accessible.
+    # @return [CommentsAccessor]
     def comments
-      zlist_ptr = delegate.comments
-      return Comments.new_from_ptr(zlist_ptr)
+      return CommentsAccessor.new(self)
     end
-
-    # @param new_comment [String]
-    def add_comment(new_comment)
-      new_comment_ptr = ::FFI::MemoryPointer.from_string(new_comment)
-      delegate.set_comment(new_comment_ptr)
-    end
-
-    # Deletes all comments for this {Config} item.
-    def delete_comments
-      delegate.set_comment(nil)
-    end
-
-    # @!endgroup
 
     # Used to access a {Config}'s comments.
-    class Comments
+    class CommentsAccessor
       include Enumerable
 
       # @param config [Config]
@@ -30,18 +19,47 @@ module CZTop
         @config = config
       end
 
+      # Adds a new comment.
       # @param new_comment [String]
+      # @return [self]
       def <<(new_comment)
-        @config.add_comment(new_comment)
+        @config.ffi_delegate.set_comment("%s", :string, new_comment)
+        return self
       end
 
+      # Deletes all comments for this {Config} item.
+      # @return [void]
       def delete_all
-        @message.delete_comments
+        @config.ffi_delegate.set_comment(nil)
       end
 
+      # Yields all comments for this {Config} item.
+      # @yieldparam comment [String]
+      # @return [void]
       def each
-        # use Zconfig.
-      # TODO
+        while comment = _zlist.next
+          break if comment.null?
+          yield comment.read_string
+        end
+      rescue CZMQ::FFI::Zlist::DestroyedError
+        # there are no comments
+        nil
+      end
+
+      # Returns the number of comments for this {Config} item.
+      # @return [Integer] number of comments
+      def size
+        _zlist.size
+      rescue CZMQ::FFI::Zlist::DestroyedError
+        0
+      end
+
+      private
+
+      # Returns the Zlist to the list of comments for this config item.
+      # @return [CZMQ::FFI::Zlist] the zlist of comments for this config item
+      def _zlist
+        @config.ffi_delegate.comments
       end
     end
   end

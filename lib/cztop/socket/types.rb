@@ -65,6 +65,25 @@ module CZTop
       def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_server(endpoints))
       end
+
+      # Gets the routing ID.
+      # @note This only set when the frame came from a {CZTop::Socket::SERVER}
+      #   socket.
+      # @return [Integer] the routing ID, or 0 if unset
+      ffi_delegate :routing_id
+
+      # Sets a new routing ID.
+      # @note This is used when the frame is sent to a {CZTop::Socket::SERVER}
+      #   socket.
+      # @param new_routing_id [Integer] new routing ID
+      # @raise [RangeError] if new routing ID is out of +uint32_t+ range
+      # @return [new_routing_id]
+      def routing_id=(new_routing_id)
+        # need to raise manually, as FFI lacks this feature.
+        # @see https://github.com/ffi/ffi/issues/473
+        raise RangeError if new_routing_id < 0
+        ffi_delegate.set_routing_id(new_routing_id)
+      end
     end
 
     # Request socket for the ZeroMQ Request-Reply Pattern.
@@ -118,8 +137,21 @@ module CZTop
       # @param endpoints [String] endpoints to connect to
       # @param subscription [String] what to subscribe to
       def initialize(endpoints = nil, subscription = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints))
-        # TODO: subscription
+        attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints, subscription))
+      end
+
+      # Subscribes to the given prefix string.
+      # @param prefix [String] prefix string to subscribe to
+      # @return [void]
+      def subscribe(prefix)
+        ffi_delegate.set_subscribe(prefix)
+      end
+
+      # Unsubscribes from the given prefix.
+      # @param prefix [String] prefix string to unsubscribe from
+      # @return [void]
+      def unsubscribe(prefix)
+        ffi_delegate.set_unsubscribe(prefix)
       end
     end
 
@@ -136,9 +168,8 @@ module CZTop
     # @see http://rfc.zeromq.org/spec:29
     class XSUB < Socket
       # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil, subscription = nil)
+      def initialize(endpoints = nil)
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_xsub(endpoints))
-        # TODO: subscription
       end
     end
 

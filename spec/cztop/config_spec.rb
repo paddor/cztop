@@ -1,9 +1,64 @@
-require_relative '../spec_helper'
-require 'tempfile'
+require_relative 'spec_helper'
 
 describe CZTop::Config do
 
-  context "given a config file" do
+  describe "#initialize" do
+    context "with a name" do
+      let(:name) { "foo" }
+      let(:config) { described_class.new name }
+      it "sets that name" do
+        assert_equal name, config.name
+      end
+    end
+    context "with no name" do
+      let(:config) { described_class.new }
+      it "creates a config item anyway" do
+        assert_kind_of described_class, config
+      end
+      it "has nil name" do
+        assert_nil config.name
+      end
+    end
+    context "with name and value" do
+      let(:name) { "foo" }
+      let(:value) { "bar" }
+      let(:config) { described_class.new name, value }
+      it "sets name and value" do
+        assert_equal name, config.name
+        assert_equal value, config.value
+      end
+    end
+    context "given a parent" do
+      let(:parent_name) { "foo" }
+      let(:parent_config) { described_class.new parent_name }
+      let(:name) { "bar" }
+      let(:config) { described_class.new name, parent: parent_config }
+      it "appends it to that parent" do
+        assert_nil parent_config.children.first
+        config
+        assert_equal config.to_ptr, parent_config.children.first.to_ptr
+      end
+
+      it "removes finalizer from delegate" do # parent will free it
+        assert_nil config.ffi_delegate.instance_variable_get(:@finalizer)
+      end
+    end
+    context "with no parent" do
+      let(:config) { described_class.new }
+      it "doesn't remove finalizer from delegate" do
+        refute_nil config.ffi_delegate.instance_variable_get(:@finalizer)
+      end
+    end
+    context "with a block" do
+      it "yields self" do
+        yielded = nil
+        config = described_class.new { |c| yielded = c }
+        assert_same config, yielded
+      end
+    end
+  end
+
+  context "given a config" do
     let(:config_contents) do
       <<-EOF
 context
@@ -24,64 +79,65 @@ main
 
     let(:config) { described_class.from_string(config_contents) }
 
-    describe ".from_string" do
-      let(:loaded_config) { described_class.from_string(config_contents) }
-      context "given a string containing config tree" do
-        it "returns a config" do
-          assert_kind_of described_class, loaded_config
+    context "#inspect" do
+      it "has a nice output" do
+        assert_match /Config.+name=.+value=/, config.inspect
+      end
+    end
+
+    describe "#==" do
+      Given(:this_name) { "foo" }
+      Given(:this_value) { "bar" }
+      Given(:this) { described_class.new(this_name, this_value) }
+
+      context "with equal config" do
+        Given(:that) { described_class.new(this_name, this_value) }
+        Then { this == that }
+        And { that == this }
+      end
+      context "with different config" do
+        Given(:that_name) { "quu" }
+        Given(:that_value) { "quux" }
+
+        context "with different name" do
+          Given(:that) { described_class.new(that_name, this_value) }
+          Then { this != that }
+          And  { that != this }
+        end
+
+        context "with different value" do
+          Given(:that) { described_class.new(this_name, that_value) }
+          Then { this != that }
+          And  { that != this }
         end
       end
     end
 
-    describe ".load" do
-      context "given config file" do
-        let(:file) do
-          file = Tempfile.new("zconfig_test")
-          file.write(config_contents)
-          file.rewind
-          return file
+    describe "#tree_equal?" do
+      context "given equal config tree" do
+        Given(:this) { config.locate("main/frontend") }
+        Given(:other) { described_class.from_string(config_contents) }
+        Given(:that) { other.locate("main/frontend") }
+        When do
+          # mangle an independent side-tree a bit
+          backend = config.locate("main/backend")
+          backend.name = "foobar"
+          backend.children.new("foo", "bar")
         end
-        let(:filename) { file.path }
-        let(:loaded_config) { described_class.load(filename) }
-        it "loads the file" do
-          assert_kind_of described_class, loaded_config
-          assert_equal filename, loaded_config.filename
-        end
+        Then { this.tree_equal? that }
+        And { that.tree_equal? this }
       end
-
-      context "given no config file" do
-        let(:nonexistent_filename) { "/foo/bar.zpl" }
-        it "raises CZTop::Config::Error" do
-          assert_raises(CZTop::Config::Error) do
-            described_class.load(nonexistent_filename)
-          end
-        end
+      context "given different config tree" do
+        let(:other_config) { described_class.new("foo") }
+        Then { !config.tree_equal?(other_config) }
+        And  { !other_config.tree_equal?(config) }
       end
     end
-
-    describe "#initialize" do
-      context "given a name" do
-        it "sets that name"
-        context "given a parent" do
-          it "appends it to that parent"
-        end
-      end
-    end
-
-    describe "#save"
-
-    context "Marshalling" do
-      describe "#_dump"
-      describe "._load"
-    end
-
-    describe "#filename"
-    describe "#reload"
 
     describe "#name" do
       it "returns name" do
         assert_equal "root", config.name
-        assert_equal "context", config.all_children.first.name
+        assert_equal "context", config.children.first.name
       end
     end
 
@@ -94,18 +150,38 @@ main
     end
 
     describe "#value" do
-      context "given config item that has no value" do
-        let(:item) { config.locate("/main/backend") }
+      let(:config_contents) do
+        <<-EOF
+a = 1
+b = ""
+c
+    d = "foo"
+    f = bar
+    g
+    h # no value either
+        EOF
+      end
+      context "with no value" do
+        let(:item) { config.locate("/c/g") }
         it "returns the empty string" do
           assert_empty item.value
         end
       end
 
-      context "given config item that has value" do
-        let(:item) { config.locate("/main/backend/bind") }
-        let(:expected_value) { "inproc:@@//@@addr3" }
+      context "with value" do
+        let(:paths_values) do
+          { "a" => "1",
+            "b" => "",
+            "c" => "",
+            "c/d" => "foo",
+            "c/f" => "bar",
+            "c/g" => "",
+            "c/h" => "" }
+        end
         it "reads value" do
-          assert_equal expected_value, item.value
+          paths_values.each do |path,expected|
+            assert_equal expected, config.locate(path).value
+          end
         end
       end
     end
@@ -197,147 +273,5 @@ main
         end
       end
     end
-
-    describe "#each" do
-      context "given a block taking 2 parameters" do
-        it "yields config and level" do
-          config.each do |c,l|
-            assert_kind_of described_class, c
-            assert_kind_of Integer, l
-          end
-        end
-
-        it "level starts at 0" do
-          config.each do |_,level|
-            assert_equal 0, level
-            break
-          end
-        end
-
-        context "starting from non-root element" do
-          it "level still starts at 0" do
-            child = config.all_children.first
-            child.each do |_,level|
-              assert_equal 0, level
-              break
-            end
-          end
-        end
-      end
-
-      context "given a block taking one paramater" do
-        it "yields config only" do
-          config.each do |*params|
-            assert_equal 1, params.size
-            assert_kind_of described_class, params.first
-          end
-        end
-      end
-
-      context "given a block which breaks" do
-        it "calls block no more" do
-          called = 0
-          begin
-            config.each { |_| called += 1; break }
-          rescue
-            assert_equal 1, called
-          end
-        end
-
-        it "doesn't raise" do
-          config.each { |_| break }
-        end
-
-        it "returns break value" do
-          assert_nil config.each { |_| break }
-          assert_equal :foo, config.each { |_| break :foo }
-        end
-      end
-
-      context "given no a block" do
-        let(:enum) { config.each }
-        it "returns Enumerator" do
-          assert_kind_of Enumerator, enum
-        end
-
-        it "the Enumerator yields config items only" do
-          enum.each do |*params|
-            assert_equal 1, params.size # no level parameter
-            assert_kind_of described_class, params.first
-          end
-        end
-
-        it "the Enumerator yields all config items" do
-          assert_equal config.to_a.size, enum.size
-        end
-      end
-
-      describe "#to_a" do
-        let(:array) { config.to_a }
-        it "returns config items" do
-          array.each do |c|
-            assert_kind_of described_class, c
-          end
-        end
-        it "returns all config items including root element" do
-          assert_equal 14, array.size
-        end
-      end
-
-      context "given raising block" do
-        it "calls block no more" do
-          called = 0
-          begin
-            config.each { |config| called += 1; raise }
-          rescue
-            assert_equal 1, called
-          end
-        end
-
-        let(:exception) { Class.new(RuntimeError) }
-        it "raises" do
-          assert_raises(exception) do
-            config.each { raise exception }
-          end
-        end
-      end
-    end
-
-    describe "#children" do
-      it "returns all children" do
-        assert_equal 13, config.all_children.size
-      end
-    end
-
-    describe "#siblings"
-
-    describe "#locate" do
-      context "given existing path" do
-        let(:located_item) { config.locate("/main/frontend/option/swap") }
-        it "returns config item" do
-          assert_kind_of described_class, located_item
-          assert_equal "swap", located_item.name
-        end
-      end
-
-      context "given non-existent path" do
-        let(:nonexistent_path) { "/foo/bar" }
-        let(:located_item) { config.locate nonexistent_path }
-        it "returns nil" do
-          assert_nil located_item
-        end
-      end
-    end
-
-    describe "#last_at_depth"
-    describe "#comments"
-    describe "#add_comment"
-    describe "#delete_comments"
   end
-end
-
-describe CZTop::Config::Comments do
-  describe "#<<"
-  describe "#delete_all"
-  describe "#each"
 end

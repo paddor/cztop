@@ -1,5 +1,10 @@
 module CZTop
+  # Used for LAN discovery and presence.
+  # @see http://api.zeromq.org/czmq3-0:zbeacon
   class Beacon
+
+    # Used for {Beacon} errors.
+    class Error < RuntimeError; end
 
     # function pointer to the `zbeacon()` function
     ZBEACON_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
@@ -10,6 +15,9 @@ module CZTop
     def initialize
       @actor = Actor.new(ZBEACON_FPTR)
     end
+
+    # @return [Actor] the actor behind this Beacon
+    attr_reader :actor
 
     VERBOSE_CMD = "VERBOSE".freeze
 
@@ -25,12 +33,13 @@ module CZTop
     # @param port_number [Integer]
     # @return [String] hostname, which can be used as endpoint for incoming
     #   connections
-    # @raise if the system doesn't support UDP broadcasts
+    # @raise [Error] if the system doesn't support UDP broadcasts
     def configure(port_number)
       # TODO: provide Actor#send_picture (or better name, #sys_send)
-      ::CZMQ::FFI::Zsock.send(@actor, CONFIGURE_PIC, CONFIGURE_CMD, port_number)
+      ::CZMQ::FFI::Zsock.send(@actor, CONFIGURE_PIC, CONFIGURE_CMD,
+                              port_number)
       hostname = ::CZMQ::FFI::Zstr.recv(@actor)
-      raise if hostname.empty?
+      raise Error, "system doesn't support UDP broadcasts" if hostname.empty?
       return hostname
     end
 
@@ -41,11 +50,12 @@ module CZTop
     # Start broadcasting a beacon.
     # @param data [String] data to publish
     # @param interval [Integer] interval in msec
-    # @raise if data is longer than {MAX_BEACON_DATA} bytes
+    # @raise [Error] if data is longer than {MAX_BEACON_DATA} bytes
     # @return [void]
     def publish(data, interval)
-      raise if data.bytesize > MAX_BEACON_DATA
-      ::CZMQ::FFI::Zsock.send(@actor, PUBLISH_PIC, PUBLISH_CMD, data, data.bytesize, interval)
+      raise Error, "data is too long" if data.bytesize > MAX_BEACON_DATA
+      ::CZMQ::FFI::Zsock.send(@actor, PUBLISH_PIC, PUBLISH_CMD, data,
+                              data.bytesize, interval)
     end
 
     SILENCE_CMD = "SILENCE".freeze
@@ -63,7 +73,8 @@ module CZTop
     # @param filter [String] do a prefix match on received beacons
     # @return [void]
     def subscribe(filter)
-      ::CZMQ::FFI::Zsock.send(@actor, SUBSCRIBE_PIC, SUBSCRIBE_CMD, filter, filter.bytesize)
+      ::CZMQ::FFI::Zsock.send(@actor, SUBSCRIBE_PIC, SUBSCRIBE_CMD, filter,
+                              filter.bytesize)
     end
 
     # Just like {#subscribe}, but subscribe to all peer beacons.

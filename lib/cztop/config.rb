@@ -1,26 +1,49 @@
 module CZTop
 
-  # Represents a {CZMQ::FFI::Zconfig} item.
+  # Represents a CZMQ::FFI::Zconfig item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
-    # @!parse extend CZTop::FFIDelegate::ClassMethods
+    include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
+    # Initializes a new {Config} item. Takes an optional block to initialize
+    # the item further.
+    # @param name [String] config item name
+    # @param value [String] config item value
+    # @param parent [Config] parent config item
+    # @yieldparam config [self]
+    # @note If parent is given, the native child will be destroyed when the
+    #   native parent is destroyed (and not when the child's corresponding
+    #   {Config} object is garbage collected).
+    def initialize(name = nil, value = nil, parent: nil)
+      if parent
+        parent = parent.ffi_delegate if parent.is_a?(Config)
+        delegate = ::CZMQ::FFI::Zconfig.new(name, parent)
+        attach_ffi_delegate(delegate)
 
-    include FFIDelegate
-    include Enumerable
+        # NOTE: this delegate must not be freed automatically, because the
+        # parent will free it.
+        delegate.__undef_finalizer
+      else
+        delegate = ::CZMQ::FFI::Zconfig.new(name, nil)
+        attach_ffi_delegate(delegate)
+      end
 
-    class Error < RuntimeError; end
-
-    def initialize(name, parent)
-      # TODO
+      self.value = value if value
+      yield self if block_given?
     end
 
     # @!group ZPL attributes
 
+    # Gets the name.
     # @return [String] name of the config item
     def name
-      ffi_delegate.name.read_string
+      ptr = ffi_delegate.name
+      return nil if ptr.null? # NOTE: for unnamed elements
+      ptr.read_string
     end
+
+    # Sets a new name.
     # @param new_name [String, #to_s]
     # @return [new_name]
     def name=(new_name)
@@ -31,7 +54,9 @@ module CZTop
     # @return [String]
     # @note This returns an empty string if the value is unset.
     def value
-      ffi_delegate.value.read_string
+      ptr = ffi_delegate.value
+      return "" if ptr.null? # NOTE: for root elements
+      ptr.read_string
     end
 
     # Set or update the value of the config item.
@@ -39,6 +64,12 @@ module CZTop
     # @return [new_value]
     def value=(new_value)
       ffi_delegate.set_value("%s", :string, new_value.to_s)
+    end
+
+    # Inspects this {Config} item.
+    # @return [String] shows class, name, and value
+    def inspect
+      "#<#{self.class.name}: name=#{name.inspect} value=#{value.inspect}>"
     end
 
     # Update the value of a config item by path.
@@ -66,146 +97,21 @@ module CZTop
     end
     alias_method :get, :[]
 
-    # @!endgroup
-    # @!group Traversing
-
-    # Calls the given block once for each {Config} item in the tree, starting
-    # with self.
-    #
-    # An Enumerator is returned if no block is given.
-    #
-    # @yieldparam config [Config] the config item
-    # @yieldparam level [Integer] level of the item (self has level 0,
-    #   its direct children have level 1)
-    # @note The second parameter +level+ is only yielded if the given block
-    #   expects exactly 2 parameters. This is to ensure that Enumerable#to_a
-    #   works as expected, returning an array of {Config} items.
-    # @return [self]
-    # @raise [Exception] the block's exception, in case it raises (it won't
-    #   call the block any more after that)
-    # @overload each()
-    #   @return [Enumerator] if no block is given
-    # @raise [Error] if zconfig_execute() returns an error code
-    def each
-      return to_a.each unless block_given?
-
-      exception = nil
-      level_wanted = Proc.new.arity == 2
-      callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
-        begin
-          config = from_ffi_delegate(zconfig)
-
-          if level_wanted
-            yield config, level
-          else
-            # make Enumerable#to_a work as expected
-            yield config
-          end
-
-          0 # report success to keep zconfig_execute() going
-        rescue
-          # remember exception, so we can raise it later to the ruby code
-          # (it can't be raised now, as we have to report failure to
-          # zconfig_execute())
-          exception = $!
-
-          -1 # report failure to stop zconfig_execute() immediately
-        end
-      end
-      ret = ffi_delegate.execute(callback, arg = nil)
-      raise exception if exception
-      raise Error, "zconfig_execute() returned failure code" if ret.nonzero?
-      return self
+    # Compares this config item to another. Only the name and value are
+    # considered. If you need to compare a config tree, use {#tree_equal?}.
+    # @param other [Config] the other config item
+    # @return [Boolean] whether they're equal
+    def ==(other)
+      name == other.name &&
+      value == other.value
     end
 
-    # Returns all children, direct and indirect ones.
-    # @return [Array<Config>]
-    # @see #each
-    def all_children
-      to_a[1..-1]
+    # Compares this config tree to another tree or subtree. Names, values, and
+    # children are considered.
+    # @param other [Config] the other config tree
+    # @return [Boolean] whether they're equal
+    def tree_equal?(other)
+      self == other && self.children == other.children
     end
-
-    def first_child
-      # TODO
-    end
-
-    def direct_children
-      # TODO
-    end
-
-    def siblings
-      # TODO
-    end
-
-    # Finds a config item along a path, relative to the current item.
-    # @param path [String] path (leading slash is optional and will be
-    #   ignored)
-    # @return [Config] the found config item
-    # @return [nil] if there's no config item under this path
-    def locate(path)
-      ptr = ffi_delegate.locate(path)
-      return nil if ptr.null?
-      from_ffi_delegate(ptr)
-    end
-
-    def last_at_depth(level)
-      # TODO
-    end
-
-    # @!endgroup
-    # @!group Saving and Loading
-
-    # @return [String]
-    ffi_delegate :filename
-
-    # Loads a {Config} tree from a string.
-    # @param string [String] the tree
-    # @return [Config]
-    def self.from_string(string)
-      from_ffi_delegate CZMQ::FFI::Zconfig.str_load(string)
-    end
-    # Loads a Config tree from a file.
-    # @param path [String, Pathname, #to_s] the path to the ZPL config file
-    # @return [Config]
-    def self.load(path)
-      from_ffi_delegate(CZMQ::FFI::Zconfig.load(path.to_s))
-    rescue CZTop::InitializationError
-      raise Error, "error while reading file: %p" % path.to_s
-    end
-
-    # Saves the Config tree to a file.
-    # @param path [String, Pathname, #to_s] the path to the ZPL config file
-    def save(path)
-      # TODO
-    end
-
-    class ReloadError < RuntimeError; end
-
-    # Reload config tree from same file that it was previously loaded from.
-    # @raise [ReloadError] if there's an error (no existing data will be
-    #   changed)
-    def reload
-      ret = delegate.reload
-      raise ReloadError if ret == -1
-    end
-
-    # Serialize (marshal) this Config and all its children.
-    #
-    # @note This method is automatically used by Marshal.dump.
-    # @return [String]
-    def _dump(level)
-      # TODO
-    end
-
-    # Load a Config object from a marshalled string.
-    #
-    # @note This method is automatically used by Marshal.load.
-    # @return [Config]
-    def self._load(string)
-      ptr = CZMQ::FFI::Zconfig.str_load(string)
-      from_ptr(ptr)
-    end
-
-    # @!endgroup
   end
 end

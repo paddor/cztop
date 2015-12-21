@@ -1,25 +1,25 @@
-require_relative '../spec_helper'
+require_relative 'spec_helper'
 
 describe CZTop::Socket do
+  include_examples "has FFI delegate"
+
   i = 0
-  let(:endpoint) { "inproc://endpoint_#{i+=1}" }
+  let(:endpoint) { "inproc://endpoint_socket_spec_#{i+=1}" }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
   let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
   let(:binding_pair_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
-  # low-level binding
-  describe ::CZMQ::FFI::Zsock do
-    it "creates REP Zsock" do
-      endpoint = "inproc://sock#{i}"
-      sock = ::CZMQ::FFI::Zsock.new_rep(endpoint)
-      refute_operator sock, :null?
-    end
+  it "has Zsock options" do
+    assert_operator described_class, :<, CZTop::ZsockOptions
+  end
 
-    it "creates REQ Zsock" do
-      sock = ::CZMQ::FFI::Zsock.new_req(endpoint)
-      refute_operator sock, :null?
-    end
+  it "has send/receive methods" do
+    assert_operator described_class, :<, CZTop::SendReceiveMethods
+  end
+
+  it "has polymorphic Zsock methods" do
+    assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
   end
 
   describe "#initialize" do
@@ -34,35 +34,14 @@ describe CZTop::Socket do
 
     context "given same binding endpoint to multiple REP sockets" do
       let(:endpoint) { "inproc://the_one_and_only" }
+      let(:sock1) { CZTop::Socket::REP.new(endpoint) }
+      before(:each) { sock1 }
       it "raises" do
-        sock1 = CZTop::Socket::REP.new(endpoint)
         # there can only be one REP socket bound to one endpoint
         assert_raises(CZTop::InitializationError) do
-          sock2 = CZTop::Socket::REP.new(endpoint)
+          CZTop::Socket::REP.new(endpoint)
         end
       end
-    end
-  end
-
-  describe "signals" do
-    let (:signal_code) { 5 }
-    describe "#signal" do
-      it "sends a signal" do
-        connecting_pair_socket.signal(signal_code)
-      end
-    end
-
-    describe "#wait" do
-      it "waits for a signal" do
-        connecting_pair_socket.signal(signal_code)
-        assert_equal signal_code, binding_pair_socket.wait
-      end
-    end
-  end
-
-  describe "ffi_delegate" do
-    it "returns pointer to the real zsock" do
-      refute req_socket.ffi_delegate.null?
     end
   end
 
@@ -103,55 +82,94 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#connect"
-  describe "#disconnect"
-  describe "#bind"
-  describe "#unbind"
-  describe "#options"
-  describe "#set_option"
-  describe "#get_option"
-
-
-  describe CZTop::Socket::Options do
-  end
-
-  describe CZTop::Socket::CLIENT do
-  end
-  describe CZTop::Socket::SERVER do
-  end
-  describe CZTop::Socket::REQ do
-  end
-  describe CZTop::Socket::REP do
-  end
-  describe CZTop::Socket::PUB do
-  end
-  describe CZTop::Socket::SUB do
-  end
-  describe CZTop::Socket::XPUB do
-  end
-  describe CZTop::Socket::XSUB do
-  end
-  describe CZTop::Socket::PUSH do
-  end
-  describe CZTop::Socket::PULL do
-  end
-  describe CZTop::Socket::PAIR do
-    it "creates PAIR sockets" do
-      binding_pair_socket
-      connecting_pair_socket
-    end
-
-    it "raises when more than 2 PAIR sockets are connected" do
-      binding_pair_socket
-      connecting_pair_socket
-      assert_raises(CZTop::InitializationError) do
-        CZTop::Socket::PAIR.new("@#{endpoint}")
+  describe "#connect" do
+    Given(:socket) { rep_socket }
+    context "with valid endpoint" do
+      let(:another_endpoint) { "inproc://foo" }
+      it "connects" do
+        req_socket.connect(another_endpoint)
       end
-  #    assert_raises do
-  #      CZMQ::Socket::PAIR.new(">#{endpoint}")
-  #    end
+    end
+    context "with invalid endpoint" do
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.connect(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:connect).with("%s", any_args).and_return(0)
+      socket.connect(double("endpoint"))
     end
   end
-  describe CZTop::Socket::STREAM do
+
+  describe "#disconnect" do
+    Given(:socket) { rep_socket }
+    context "with valid endpoint" do
+      it "disconnects" do
+        expect(socket.ffi_delegate).to receive(:disconnect)
+        socket.disconnect(endpoint)
+      end
+    end
+    context "with invalid endpoint" do
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.disconnect(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:disconnect).with("%s", any_args).and_return(0)
+      socket.disconnect(double("endpoint"))
+    end
+  end
+
+  describe "#bind" do
+    Given(:socket) { rep_socket }
+    context "with valid endpoint" do
+      Then { assert_nil socket.last_tcp_port }
+      context "with automatic TCP port selection endpoint" do
+        Given(:another_endpoint) { "tcp://127.0.0.1:*" }
+        When { socket.bind(another_endpoint) }
+        Then { assert_kind_of Integer, socket.last_tcp_port }
+        And { socket.last_tcp_port > 0 }
+      end
+      context "with explicit TCP port endpoint" do
+        Given(:port) { 55755 }
+        Given(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
+        When { socket.bind(another_endpoint) }
+        Then { socket.last_tcp_port == port }
+      end
+      context "with non-TCP endpoint" do
+        Given(:another_endpoint) { "inproc://non_tcp_endpoint" }
+        When { socket.bind(another_endpoint) }
+        Then { assert_nil socket.last_tcp_port }
+      end
+    end
+    context "with invalid endpoint" do
+      Given(:another_endpoint) { "foo://bar" }
+      When(:result) { socket.bind(another_endpoint) }
+      Then { result == Failure(CZTop::Socket::Error) }
+    end
+
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:bind).with("%s", any_args).and_return(0)
+      socket.bind(double("endpoint"))
+    end
+  end
+
+  describe "#unbind" do
+    Given(:socket) { rep_socket }
+    context "with valid endpoint" do
+      it "unbinds" do
+        expect(socket.ffi_delegate).to receive(:unbind)
+        socket.unbind(endpoint)
+      end
+    end
+    context "with invalid endpoint" do
+      Given(:another_endpoint) { "bar://foo" }
+      When(:result) { socket.unbind(another_endpoint) }
+      Then { result == Failure(ArgumentError) }
+    end
+    it "does safe format handling" do
+      expect(socket.ffi_delegate).to receive(:unbind).with("%s", any_args).and_return(0)
+      socket.unbind(double("endpoint"))
+    end
   end
 end

@@ -1,13 +1,12 @@
 module CZTop
-  # Represents a {CZMQ::FFI::Zarmour} in Z85 mode.
+  # Represents a CZMQ::FFI::Zarmour in Z85 mode.
   #
   # Use this class to encode to and from the Z85 encoding algorithm.
   # @see http://rfc.zeromq.org/spec:32
   class Z85
-    # @!parse extend CZTop::FFIDelegate::ClassMethods
+    include HasFFIDelegate
+    extend CZTop::HasFFIDelegate::ClassMethods
 
-
-    include FFIDelegate
     class Error < RuntimeError; end
 
     def initialize
@@ -52,13 +51,14 @@ module CZTop
     # @see https://github.com/ffi/ffi/issues/398
     # @see https://github.com/ffi/ffi/issues/333
     def _size(size_ptr)
-      if size_ptr.size == 8 # 64 bit
-        if RUBY_ENGINE == "jruby"
-          # NOTE: JRuby FFI doesn't have #read_uint64
-          size_ptr.read_ulong_long
-        else
-          size_ptr.read_uint64
-        end
+      if RUBY_ENGINE == "jruby"
+        # NOTE: JRuby FFI doesn't have #read_uint64, nor does it have
+        # Pointer::SIZE
+        return size_ptr.read_ulong_long
+      end
+
+      if ::FFI::Pointer::SIZE == 8 # 64 bit
+        size_ptr.read_uint64
       else
         size_ptr.read_uint32
       end

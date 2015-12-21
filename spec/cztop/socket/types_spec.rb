@@ -62,61 +62,155 @@ describe CZTop::Socket do
   end
 end
 
-describe CZTop::Socket::CLIENT do
-  # TODO
+describe CZTop::Socket::CLIENT, skip: true do
+  Given(:socket) { described_class.new }
+  it "instanciates" do
+    socket
+  end
 
   # * endpoints can be nil
   # * if not nil, expect call to Zsock.new_client
 end
 
-describe CZTop::Socket::SERVER do
-  # TODO
+describe CZTop::Socket::SERVER, skip: true do
+  Given(:socket) { described_class.new }
+
+  it "instanciates" do
+    socket
+  end
+
+  describe "#routing_id" do
+    context "with no routing ID set" do
+      Then { socket.routing_id == 0 }
+    end
+
+    context "with routing ID set" do
+      Given(:new_routing_id) { 123456 }
+      When { socket.routing_id = new_routing_id }
+      Then { socket.routing_id == new_routing_id }
+    end
+  end
+
+  describe "#routing_id=" do
+    context "with valid routing ID" do
+      # code duplication for completeness' sake
+      Given(:new_routing_id) { 123456 }
+      When { socket.routing_id = new_routing_id }
+      Then { socket.routing_id == new_routing_id }
+    end
+
+    context "with negative routing ID" do
+      Given(:new_routing_id) { -123456 }
+      When(:result) { socket.routing_id = new_routing_id }
+      Then { result == Failure(RangeError) }
+    end
+
+    context "with too big routing ID" do
+      Given(:new_routing_id) { 123456345676543456765 }
+      When(:result) { socket.routing_id = new_routing_id }
+      Then { result == Failure(RangeError) }
+    end
+  end
 end
 
 describe CZTop::Socket::REQ do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::REP do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::DEALER do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::ROUTER do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::SUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
+
+  let(:subscription) { "test_prefix" }
+
+  context "with subscription" do
+    it "subscribes" do
+      expect(::CZMQ::FFI::Zsock).to receive(:new_sub).with(nil, subscription).
+        and_call_original
+
+      described_class.new(nil, subscription)
+    end
+  end
+
+  describe "#subscribe" do
+    it "subscribes" do
+      expect(socket.ffi_delegate).to receive(:set_subscribe).with(subscription)
+      socket.subscribe(subscription)
+    end
+  end
+  describe "#unsubscribe" do
+    it "unsubscribes" do
+      expect(socket.ffi_delegate).to receive(:set_unsubscribe).with(subscription)
+      socket.unsubscribe(subscription)
+    end
+  end
 end
 
 describe CZTop::Socket::XPUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::XSUB do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PUSH do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PULL do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end
 
 describe CZTop::Socket::PAIR do
-  # TODO
+  i = 0
+  let(:endpoint) { "inproc://endpoint_socket_types_spec_#{i+=1}" }
+  let(:binding_socket) { described_class.new("@#{endpoint}") }
+  let(:connecting_socket) { described_class.new(">#{endpoint}") }
+
+  it "creates PAIR sockets" do
+    binding_socket
+    connecting_socket
+  end
+
+  it "raises when more than 2 PAIR sockets are connected" do
+    binding_socket
+    connecting_socket
+    assert_raises(CZTop::InitializationError) do
+      described_class.new("@#{endpoint}")
+    end
+    assert_raises do
+      CZMQ::Socket::PAIR.new(">#{endpoint}")
+    end
+  end
 end
 
 describe CZTop::Socket::STREAM do
-  # TODO
+  Given(:socket) { described_class.new }
+  Then { socket }
 end

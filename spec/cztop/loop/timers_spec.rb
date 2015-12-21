@@ -155,8 +155,9 @@ describe CZTop::Loop do
     end
 
     describe "#cancel" do
+      let(:ptr) { timer.instance_variable_get(:@ptr) }
       it "cancels timer" do
-        expect(ffi_delegate).to receive(:ticket_delete).with(timer.id)
+        expect(ffi_delegate).to receive(:ticket_delete).with(ptr)
         timer.cancel
       end
 

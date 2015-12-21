@@ -99,7 +99,7 @@ module CZTop
     # @note Delay must be higher than the previous delay.
     # @return [new_delay]
     def ticket_delay=(new_delay)
-      if @ticket_delay && (new_delay <= @previous_delay)
+      if @ticket_delay && (new_delay <= @ticket_delay)
         raise ArgumentError, "must not decrease ticket delay"
       end
       ffi_delegate.set_ticket_delay(new_delay)

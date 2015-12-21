@@ -103,8 +103,9 @@ class CZTop::Loop
       super()
     end
 
-    # @return [FFI::Pointer]
-    def id() @ptr end
+    # Timer ID of ticket timers is always 0.
+    # @return [0]
+    def id() 0 end
 
     # @return [void]
     def reset

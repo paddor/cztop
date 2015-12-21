@@ -150,7 +150,7 @@ describe CZTop::Loop do
         assert_same subject, timer.loop
       end
       it "has an ID" do
-        assert_kind_of FFI::Pointer, timer.id
+        assert_equal 0, timer.id
       end
     end
 

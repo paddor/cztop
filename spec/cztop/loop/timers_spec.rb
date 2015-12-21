@@ -62,6 +62,20 @@ describe CZTop::Loop do
         end
       end
     end
+
+    context "abstract methods" do
+      let(:timer) { CZTop::Loop::Timer.allocate }
+      describe "#register" do
+        it "raises NotImplementedError" do
+          assert_raises(NotImplementedError) { timer.__send__(:register) }
+        end
+      end
+      describe "#cancel" do
+        it "raises NotImplementedError" do
+          assert_raises(NotImplementedError) { timer.cancel }
+        end
+      end
+    end
   end
 
   describe CZTop::Loop::SimpleTimer do

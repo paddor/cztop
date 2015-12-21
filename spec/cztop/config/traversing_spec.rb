@@ -30,19 +30,25 @@ main
       end
 
       it "level starts at 0" do
+        first_level = nil
         config.execute do |_,level|
-          assert_equal 0, level
-          break
+          first_level ||= level
+          break # NOTE: doesn't work on JRuby (yet)
+          # see https://github.com/jruby/jruby/issues/3559
         end
+        assert_equal 0, first_level
       end
 
       context "starting from non-root element" do
+        let(:child) { config.children.first }
         it "level still starts at 0" do
-          child = config.children.first
+          first_level = nil
           child.execute do |_,level|
-            assert_equal 0, level
-            break
+            first_level ||= level
+            break # NOTE: doesn't work on JRuby (yet)
+            # see https://github.com/jruby/jruby/issues/3559
           end
+          assert_equal 0, first_level
         end
       end
     end

@@ -84,7 +84,7 @@ describe CZTop::Z85 do
 
   describe "#_size" do
     let(:ptr) { double("pointer") }
-    context "on non-jruby", skip: RUBY_ENGINE == "jruby" do
+    context "on non-jruby", skip: ("not relevant on JRuby" if RUBY_ENGINE == "jruby") do
       context "on 64-bit system" do
         let(:size) { double("uint64") }
         before(:each) { stub_const "::FFI::Pointer::SIZE", 8 }
@@ -102,7 +102,7 @@ describe CZTop::Z85 do
         end
       end
     end
-    context "on jruby", skip: RUBY_ENGINE != "jruby" do
+    context "on jruby", skip: ("only relevant on JRuby" if RUBY_ENGINE != "jruby") do
       let(:size) { double("ulong_long") }
       before(:each) { expect(ptr).to receive(:read_ulong_long).and_return(size) }
       it "reads ulong_long" do

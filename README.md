@@ -165,7 +165,8 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - zsock_option.xml [x]
   - zcert.xml [x]
   - zcertstore.xml [x]
-  - zsys.xml [ ] (for `zsys_has_curve()`)
+  - zsys.xml [ ]
+    - I need `zsys_has_curve()` to check if CURVE is available
 * check availability of libsodium
 * read error strings for exceptions (zmq_strerror)
 

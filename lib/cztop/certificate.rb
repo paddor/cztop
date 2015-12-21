@@ -68,6 +68,7 @@ module CZTop
     end
 
     # Get metadata.
+    # @param key [String] metadata key
     # @return [String] value for meta key
     # @return [nil] if metadata key is not set
     def [](key)
@@ -76,6 +77,8 @@ module CZTop
       ptr.read_string
     end
     # Set metadata.
+    # @param key [String] metadata key
+    # @param value [String] metadata value
     # @return [value]
     def []=(key, value)
       if value
@@ -100,7 +103,7 @@ module CZTop
     end
 
     # Save full certificate (public + secret) to files.
-    # @param filename [String] path/filename to public file
+    # @param filename [String, #to_s] path/filename to public file
     # @return [void]
     # @raise [Error] if this fails
     # @note This will create two files: one of the public key and one for the
@@ -113,6 +116,7 @@ module CZTop
     end
 
     # Saves the public key to file in ZPL ({Config}) format.
+    # @param filename [String, #to_s] path/filename to public file
     # @return [void]
     # @raise [Error] if this fails
     def save_public(filename)
@@ -121,6 +125,7 @@ module CZTop
     end
 
     # Saves the secret key to file in ZPL ({Config}) format.
+    # @param filename [String, #to_s] path/filename to secret file
     # @return [void]
     # @raise [Error] if this fails
     def save_secret(filename)
@@ -129,6 +134,7 @@ module CZTop
     end
 
     # Applies this certificate on a {Socket} or {Actor}.
+    # @param zocket [Socket, Actor] path/filename to secret file
     # @return [void]
     # @raises [Error] if secret key is undefined
     def apply(zocket)
@@ -146,6 +152,7 @@ module CZTop
     end
 
     # Compares this certificate to another.
+    # @param other [Cert] other certificate
     # @return [Boolean] whether they have the same keys
     def ==(other)
       ffi_delegate.eq(other.ffi_delegate)

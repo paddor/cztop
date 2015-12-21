@@ -10,7 +10,7 @@ describe CZTop::Loop do
     let(:timer_class) do
       Class.new(described_class) do
         def initialize(loop, &blk) @loop, @proc = loop, blk; @id = 666; super() end
-        def register; @registered = true end
+        def register; @registered = true; @loop.remember_timer(self) end
         def registered?() @registered end
       end
     end
@@ -102,6 +102,13 @@ describe CZTop::Loop do
           handler.call(loop_ptr, timer_id, arg)
         end
       end
+
+      context "when expired enough times" do
+        it "removes reference from loop" do
+          expect(subject).to receive(:forget_timer).with(timer)
+          handler.call(loop_ptr, timer_id, arg)
+        end
+      end
     end
 
     describe "#register" do
@@ -109,6 +116,10 @@ describe CZTop::Loop do
         expect(ffi_delegate).to receive(:timer)
           .with(delay, 1, kind_of(FFI::Function), nil)
           .and_call_original
+        timer
+      end
+      it "retains reference" do
+        expect(subject).to receive(:remember_timer).with(kind_of(CZTop::Loop::SimpleTimer))
         timer
       end
       context "when it fails" do
@@ -138,6 +149,8 @@ describe CZTop::Loop do
     let(:delay) { 50 }
     let(:block) { ->{} }
     let(:timer) { described_class.new(subject, &block) }
+    let(:ptr) { timer.instance_variable_get(:@ptr) }
+
     before(:each) { subject.ticket_delay = delay }
 
     it "inherits from Timer" do
@@ -154,8 +167,29 @@ describe CZTop::Loop do
       end
     end
 
+    describe "#register" do
+      it "registers ticket timer" do
+        expect(ffi_delegate).to receive(:ticket)
+          .with(kind_of(FFI::Function), nil)
+          .and_call_original
+        timer
+      end
+      it "retains reference" do
+        expect(subject).to receive(:remember_timer).with(kind_of(CZTop::Loop::TicketTimer))
+        timer
+      end
+      context "when it fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:ticket)
+            .and_return(::FFI::Pointer::NULL)
+        end
+        it "raises" do
+          assert_raises(CZTop::Loop::Error) { timer }
+        end
+      end
+    end
+
     describe "#cancel" do
-      let(:ptr) { timer.instance_variable_get(:@ptr) }
       it "cancels timer" do
         expect(ffi_delegate).to receive(:ticket_delete).with(ptr)
         timer.cancel
@@ -164,6 +198,17 @@ describe CZTop::Loop do
       it "removes it from the loop" do
         expect(subject).to receive(:forget_timer).with(timer)
         timer.cancel
+      end
+    end
+
+    describe "#reset" do
+      it "resets the timer" do
+        expect(ffi_delegate).to receive(:ticket_reset).with(ptr)
+        timer.reset
+      end
+      it "retains reference" do
+        expect(subject).to receive(:remember_timer).with(timer)
+        timer.reset
       end
     end
 
@@ -177,6 +222,11 @@ describe CZTop::Loop do
       context "when called" do
         it "calls #call" do
           expect(timer).to receive(:call).and_return(0)
+          handler.call(loop_ptr, timer_id, arg)
+        end
+
+        it "removes reference from loop" do
+          expect(subject).to receive(:forget_timer).with(timer)
           handler.call(loop_ptr, timer_id, arg)
         end
       end

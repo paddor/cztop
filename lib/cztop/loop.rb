@@ -78,7 +78,6 @@ module CZTop
 
     # Free explicitly canceled timer.
     # @param [Timer] timer to forget
-    # @todo implicitly expired timers need a better solution
     # @return [void]
     def forget_timer(timer)
       @timers.delete(timer.id)

@@ -10,16 +10,15 @@ class CZTop::Loop
     # @return [Loop] the associated reactor
     attr_reader :loop
 
-    # This will {#register} this timer and {#retain_reference} of it. So
-    # a subclass should ensure the needed ivars are set before calling
-    # super().
+    # This will {#register} this timer. So a subclass should ensure the needed
+    # ivars are set before calling super().
     def initialize
       register
-      retain_reference
     end
 
     # @abstract
-    # Used to actually create this timer.
+    # Used to actually create this timer. It should also call
+    # {Loop#remember_timer} to retain a reference to itself.
     # @return [void]
     def register
       raise NotImplementedError
@@ -45,13 +44,6 @@ class CZTop::Loop
       @loop.exception = $! # so Loop#start can raise it
       -1 # report failure so reactor will terminate
     end
-
-    # Registers itself in the associated {CZTop::Loop} to retain a reference
-    # on the handler. This should be called by {#initialize}.
-    def retain_reference
-      @loop.remember_timer(self)
-    end
-    private :retain_reference
   end
 
   # Simple timer, which allows each timer to have its own delay and number
@@ -71,7 +63,8 @@ class CZTop::Loop
     # @yieldparam self [SimpleTimer] this timer
     def initialize(delay, times, loop, &blk)
       @delay, @times, @loop, @proc = delay, times, loop, blk
-      @handler = Zloop.timer_fn { call }
+      @expired = 0
+      @handler = Zloop.timer_fn { expired; call }
       super()
     end
 
@@ -80,6 +73,7 @@ class CZTop::Loop
     def register
       @id = @loop.ffi_delegate.timer(@delay, @times, @handler, nil)
       raise Error, "adding timer failed" if @id == -1
+      @loop.remember_timer(self)
     end
     private :register
 
@@ -88,6 +82,17 @@ class CZTop::Loop
     def cancel
       @loop.ffi_delegate.timer_end(@id)
       @loop.forget_timer(self)
+    end
+
+    private
+
+    # Used to avoid memory leak in case this timer won't be explicitly
+    # canceled. It'll track how many times this timer has expired and remove
+    # its reference from the loop as soon as it has expired {#times} times.
+    # @return [void]
+    def expired
+      @expired += 1
+      @loop.forget_timer(self) if @expired == @times
     end
   end
 
@@ -99,7 +104,12 @@ class CZTop::Loop
     # @yieldparam self [TicketTimer] this timer
     def initialize(loop, &blk)
       @loop, @proc = loop, blk
-      @handler = Zloop.timer_fn { call }
+      @handler = Zloop.timer_fn do
+        # avoid memory leak in case timer won't be canceled explicitly
+        @loop.forget_timer(self)
+
+        call
+      end
       super()
     end
 
@@ -107,15 +117,19 @@ class CZTop::Loop
     # @return [0]
     def id() 0 end
 
+    # Resets the timer so it'll expire again.
     # @return [void]
     def reset
-      @loop.ticket_reset(@ptr)
+      @loop.ffi_delegate.ticket_reset(@ptr)
+      @loop.remember_timer(self)
     end
 
     # Actually creates the timer using the handler.
     # @return [void]
     def register
       @ptr = @loop.ffi_delegate.ticket(@handler, nil)
+      raise Error, "couldn't create ticket timer" if @ptr.null?
+      @loop.remember_timer(self)
     end
     private :register
 

@@ -84,12 +84,6 @@ describe CZTop::Loop do
       assert_kind_of CZTop::Loop::SimpleTimer, timer
     end
 
-    it "remembers timer" do
-      expect(subject).to receive(:remember_timer).
-        with(kind_of(CZTop::Loop::SimpleTimer))
-      timer
-    end
-
     context "with explicit number of times" do
       it "passes number of times" do
         timer = subject.after(300, times: 5) {}
@@ -137,11 +131,59 @@ describe CZTop::Loop do
   end
 
   describe "#add_ticket_timer" do
+    context "with no ticket delay set" do
+      it "raises" do
+        assert_raises(CZTop::Loop::Error) { subject.add_ticket_timer { } }
+      end
+    end
 
+    context "with ticket delay set" do
+      let(:ticket_delay) { 40 }
+      let(:timer) { subject.add_ticket_timer {} }
+      before(:each) { subject.ticket_delay = ticket_delay }
+
+      it "registers timer" do
+        expect_any_instance_of(CZTop::Loop::TicketTimer).to receive(:register)
+        timer
+      end
+
+      it "returns TicketTimer" do
+        assert_kind_of CZTop::Loop::TicketTimer, timer
+      end
+    end
   end
 
   describe "#ticket_delay" do
+    context "with delay not set" do
+      it "returns nil" do
+        assert_nil subject.ticket_delay
+      end
+    end
+    context "with delay set" do
+      let(:delay) { 30 }
+      let(:current_delay) { subject.ticket_delay }
+      before(:each) { subject.ticket_delay = delay }
 
+      it "returns delay" do
+        assert_equal delay, current_delay
+      end
+    end
+  end
+  describe "#ticket_delay=" do
+    let(:new_delay) { 40 }
+    it "sets ticket delay" do
+      expect(ffi_delegate).to receive(:set_ticket_delay).with(new_delay)
+      subject.ticket_delay = new_delay
+    end
+
+    context "with wrong ticket delay" do
+      before(:each) { subject.ticket_delay = 50 } # 50 > 40
+      it "raises" do
+        assert_raises(ArgumentError) do
+          subject.ticket_delay = new_delay
+        end
+      end
+    end
   end
 
   describe "#start" do
@@ -149,93 +191,35 @@ describe CZTop::Loop do
       expect(ffi_delegate).to receive(:start)
       subject.start
     end
+
+    it "reraises handler exceptions" do
+      expect(subject).to receive(:reraise_handler_exception)
+      subject.start
+    end
   end
 
-  describe CZTop::Loop::Timer do
-    describe "#initialize"
-    describe "#retain_reference"
-    describe "#loop"
-    describe "#id"
-  end
-
-  describe CZTop::Loop::SimpleTimer do
-    let(:delay) { 1000 }
-    let(:times) { 1 }
-    let(:block) { ->{} }
-    let(:timer) { described_class.new(delay, times, subject, &block) }
-
-    it "inherits from Timer" do
-      assert_operator described_class, :<, CZTop::Loop::Timer
-    end
-
-    describe "#initialize" do
-      it "remembers delay" do
-        assert_equal delay, timer.delay
+  describe "#reraise_handler_exception" do
+    context "with all non-failing handlers" do
+      it "doesn't raise" do
+        subject.__send__(:reraise_handler_exception) { }
       end
-      it "remembers times" do
-        assert_equal times, timer.times
+
+      it "calls its block" do
+        called = 0
+        subject.__send__(:reraise_handler_exception) { called += 1 }
+        assert_equal 1, called
       end
     end
-
-    describe "handler" do
-      let(:loop_ptr) { subject.ffi_delegate.__ptr }
-      let(:timer_id) { timer.id }
-      let(:arg) { nil }
-      let(:block) { ->(*yielded) { @yielded=yielded; @called ||= 0; @called += 1 } }
-      let(:handler) { timer.instance_variable_get(:@handler) }
-
-      before(:each) { handler.call(loop_ptr, timer_id, arg) }
-      it "yields block" do
-        assert_equal 1, @called
-      end
-
-      it "yields itself" do
-        assert_equal 1, @yielded.size
-        assert_same timer, @yielded.first
-      end
-    end
-
-    describe "#register" do
-      it "registers simple timer" do
-        expect(ffi_delegate).to receive(:timer)
-          .with(delay, 1, kind_of(FFI::Function), nil)
-          .and_call_original
-        timer
-      end
-      context "when it fails" do
-        before(:each) do
-          expect(ffi_delegate).to receive(:timer).and_return(-1)
-        end
-        it "raises" do
-          assert_raises(CZTop::Loop::Error) { timer }
+    context "with a failing handler" do
+      let(:exception_class) { Class.new(RuntimeError) }
+      let(:exception) { exception_class.new }
+      it "raises its exception" do
+        assert_raises(exception_class) do
+          subject.__send__(:reraise_handler_exception) do
+            subject.exception = exception
+          end
         end
       end
-    end
-
-    describe "#cancel" do
-      it "cancels timer" do
-        expect(ffi_delegate).to receive(:timer_end).with(timer.id)
-        timer.cancel
-      end
-
-      it "removes it from the loop" do
-        expect(subject).to receive(:forget_timer).with(timer)
-        timer.cancel
-      end
-    end
-  end
-
-  describe CZTop::Loop::TicketTimer do
-    it "inherits from Timer" do
-      assert_operator described_class, :<, CZTop::Loop::Timer
-    end
-
-    describe "#initialize" do
-
-    end
-
-    describe "#cancel" do
-
     end
   end
 end

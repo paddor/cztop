@@ -87,6 +87,7 @@ module CZTop
       def register
         raise NotImplementedError
       end
+      private :register
 
       # @abstract
       # Used to cancel this timer.
@@ -100,8 +101,12 @@ module CZTop
       def retain_reference
         @loop.remember_timer(self)
       end
+      private :retain_reference
     end
 
+    # Simple timer, which allows each timer to have its own delay and number
+    # of times to expire. But can have a bad impact on performance if more
+    # than a few (>100) are used. In that case, use {TicketTimer}s.
     class SimpleTimer < Timer
       # @return [Integer] the delay
       attr_reader :delay
@@ -112,7 +117,7 @@ module CZTop
       # Register a new timer for the given loop.
       # @param delay [Integer] delay before expiry in msec
       # @param times [Integer] number of times to expire, or 0 to run forever
-      # @yieldparam self [Timer] this timer
+      # @yieldparam self [SimpleTimer] this timer
       def initialize(delay, times, loop)
         @delay, @times, @loop = delay, times, loop
         @handler = Zloop.timer_fn { yield self }
@@ -125,12 +130,13 @@ module CZTop
         @id = @loop.ffi_delegate.timer(@delay, @times, @handler, nil)
         raise Error, "adding timer failed" if @id == -1
       end
+      private :register
 
       # Cancels this timer manually.
       # @return [void]
       def cancel
-        Zloop.timer_end(@loop.ffi_delegate, @id)
-        loop.forget_timer(self)
+        @loop.ffi_delegate.timer_end(@id)
+        @loop.forget_timer(self)
       end
     end
 
@@ -167,9 +173,7 @@ module CZTop
     # timers.
     class TicketTimer < Timer
       # Register a new timer for the given loop.
-      # @param delay [Integer] delay before expiry in msec
-      # @param times [Integer] number of times to expire, or 0 to run forever
-      # @yieldparam self [Timer] this timer
+      # @yieldparam self [TicketTimer] this timer
       def initialize(loop)
         @loop = loop
         @handler = Zloop.timer_fn { yield self }
@@ -189,6 +193,7 @@ module CZTop
       def register
         @ptr = @loop.ffi_delegate.ticket(@handler, nil)
       end
+      private :register
 
       # @return [void]
       def cancel

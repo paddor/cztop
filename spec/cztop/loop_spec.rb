@@ -123,7 +123,17 @@ describe CZTop::Loop do
   end
 
   describe "#forget_timer" do
+    let(:id) { double("timer id") }
+    let(:timer) { double("timer", id: id) }
+    before(:each) do
+      subject.remember_timer(timer)
+      assert_equal 1, subject.timers.size
+    end
 
+    it "forgets timer" do
+      subject.forget_timer(timer)
+      assert_equal 0, subject.timers.size
+    end
   end
 
   describe "#add_ticket_timer" do
@@ -135,7 +145,10 @@ describe CZTop::Loop do
   end
 
   describe "#start" do
-
+    it "starts loop" do
+      expect(ffi_delegate).to receive(:start)
+      subject.start
+    end
   end
 
   describe CZTop::Loop::Timer do
@@ -156,24 +169,59 @@ describe CZTop::Loop do
     end
 
     describe "#initialize" do
+      it "remembers delay" do
+        assert_equal delay, timer.delay
+      end
+      it "remembers times" do
+        assert_equal times, timer.times
+      end
     end
 
-    it "yields block"
+    describe "handler" do
+      let(:loop_ptr) { subject.ffi_delegate.__ptr }
+      let(:timer_id) { timer.id }
+      let(:arg) { nil }
+      let(:block) { ->(*yielded) { @yielded=yielded; @called ||= 0; @called += 1 } }
+      let(:handler) { timer.instance_variable_get(:@handler) }
 
-    it "yields itself"
+      before(:each) { handler.call(loop_ptr, timer_id, arg) }
+      it "yields block" do
+        assert_equal 1, @called
+      end
+
+      it "yields itself" do
+        assert_equal 1, @yielded.size
+        assert_same timer, @yielded.first
+      end
+    end
 
     describe "#register" do
-      it "is implemented"
       it "registers simple timer" do
         expect(ffi_delegate).to receive(:timer)
           .with(delay, 1, kind_of(FFI::Function), nil)
           .and_call_original
         timer
       end
+      context "when it fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:timer).and_return(-1)
+        end
+        it "raises" do
+          assert_raises(CZTop::Loop::Error) { timer }
+        end
+      end
     end
 
     describe "#cancel" do
-      it "cancels timer"
+      it "cancels timer" do
+        expect(ffi_delegate).to receive(:timer_end).with(timer.id)
+        timer.cancel
+      end
+
+      it "removes it from the loop" do
+        expect(subject).to receive(:forget_timer).with(timer)
+        timer.cancel
+      end
     end
   end
 

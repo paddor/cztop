@@ -136,7 +136,7 @@ module CZTop
     # Applies this certificate on a {Socket} or {Actor}.
     # @param zocket [Socket, Actor] path/filename to secret file
     # @return [void]
-    # @raises [Error] if secret key is undefined
+    # @raise [Error] if secret key is undefined
     def apply(zocket)
       raise ArgumentError, "invalid zocket argument %p" % zocket unless zocket
       raise Error, "secret key is undefined" if secret_key.nil?

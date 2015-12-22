@@ -65,6 +65,15 @@ describe CZTop::Message do
       And { coerced_msg.frames.first.to_s == frame_content }
     end
 
+    context "with array of strings" do
+      let(:parts) { [ "foo", "", "bar"] }
+      let(:coerced_msg) { described_class.coerce(parts) }
+      it "takes them as frames" do
+        assert_equal parts.size, coerced_msg.size
+        assert_equal parts, coerced_msg.frames.map(&:to_s)
+      end
+    end
+
     context "given something else" do
       Given(:something) { Object.new }
       When(:result) { described_class.coerce(something) }

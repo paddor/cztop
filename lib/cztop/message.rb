@@ -6,14 +6,14 @@ module CZTop
     include ::CZMQ::FFI
 
     # Coerces an object into a {Message}.
-    # @param msg [Message, String, Frame]
+    # @param msg [Message, String, Frame, Array<String>, Array<Frame>]
     # @return [Message]
     # @raise [ArgumentError] if it can't be coerced
     def self.coerce(msg)
       case msg
       when Message
         return msg
-      when String, Frame
+      when String, Frame, Array
         return new(msg)
       else
         raise ArgumentError, "cannot coerce message: %p" % msg

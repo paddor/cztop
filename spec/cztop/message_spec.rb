@@ -4,7 +4,7 @@ describe CZTop::Message do
   include_examples "has FFI delegate"
   let(:msg) { described_class.new }
 
-  context "new Message" do
+  describe "#initialize" do
     subject { CZTop::Message.new }
     it "is empty" do
       assert_empty subject
@@ -29,21 +29,24 @@ describe CZTop::Message do
       end
     end
 
-    context "with multiple parts" do
-      Given(:parts) { [ "foo", "", "bar"] }
-      Given(:msg) { described_class.new(parts) }
-      Then { msg.size == parts.size }
+    context "with array of strings" do
+      let(:parts) { [ "foo", "", "bar"] }
+      let(:msg) { described_class.new(parts) }
+      it "takes them as frames" do
+        assert_equal parts.size, msg.size
+        assert_equal parts, msg.frames.map(&:to_s)
+      end
     end
   end
 
   describe ".coerce" do
-    context "given a Message" do
+    context "with a Message" do
       it "takes the Message as is" do
         assert_same msg, described_class.coerce(msg)
       end
     end
 
-    context "given a String" do
+    context "with a String" do
       let(:content) { "foobar" }
       let(:coerced_msg) { described_class.coerce(content) }
       it "creates a new Message from the String" do
@@ -53,7 +56,7 @@ describe CZTop::Message do
       end
     end
 
-    context "given a Frame" do
+    context "with a Frame" do
       Given(:frame_content) { "foobar special content" }
       Given(:frame) { CZTop::Frame.new(frame_content) }
       When(:coerced_msg) { described_class.coerce(frame) }

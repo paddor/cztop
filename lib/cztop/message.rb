@@ -3,6 +3,7 @@ module CZTop
   class Message
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
+    include ::CZMQ::FFI
 
     # Coerces an object into a {Message}.
     # @param msg [Message, String, Frame]
@@ -22,7 +23,7 @@ module CZTop
     # @param parts [String, Frame, Array<String>, Array<Frame>] initial parts
     #   of the message
     def initialize(parts = nil)
-      attach_ffi_delegate(CZMQ::FFI::Zmsg.new)
+      attach_ffi_delegate(Zmsg.new)
       Array(parts).each { |part| self << part } if parts
     end
 
@@ -37,14 +38,14 @@ module CZTop
     #   counterpart will have been destroyed.
     # @return [void]
     def send_to(destination)
-      CZMQ::FFI::Zmsg.send(ffi_delegate, destination)
+      Zmsg.send(ffi_delegate, destination)
     end
 
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
     # @return [Message]
     def self.receive_from(source)
-      from_ffi_delegate(CZMQ::FFI::Zmsg.recv(source))
+      from_ffi_delegate(Zmsg.recv(source))
     end
 
     # Append something to this message.

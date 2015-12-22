@@ -53,7 +53,8 @@ module CZTop
         if key.bytesize == 40
           Z.set_curve_serverkey(@zocket, key)
         elsif key.bytesize == 32
-          Z.set_curve_serverkey_bin(@zocket, ::FFI::MemoryPointer.from_string(key))
+          ptr = ::FFI::MemoryPointer.from_string(key)
+          Z.set_curve_serverkey_bin(@zocket, ptr)
         else
           raise ArgumentError, "invalid server key: %p" % key
         end

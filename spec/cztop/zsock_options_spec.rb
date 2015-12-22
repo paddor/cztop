@@ -18,12 +18,12 @@ describe CZTop::ZsockOptions do
 
   describe CZTop::ZsockOptions::OptionsAccessor do
     describe "sndhwm" do
-      context "getting current value" do
+      context "when getting current value" do
         it "returns value" do
           assert_kind_of Integer, options.sndhwm
         end
       end
-      context "setting new value" do
+      context "when setting new value" do
         let(:new_value) { 99 }
         before(:each) { options.sndhwm = new_value }
         it "sets new value" do
@@ -32,12 +32,12 @@ describe CZTop::ZsockOptions do
       end
     end
     describe "rcvhwm" do
-      context "getting current value" do
+      context "when getting current value" do
         it "returns value" do
           assert_kind_of Integer, options.rcvhwm
         end
       end
-      context "setting new value" do
+      context "when setting new value" do
         let(:new_value) { 99 }
         before(:each) { options.rcvhwm = new_value }
         it "sets new value" do

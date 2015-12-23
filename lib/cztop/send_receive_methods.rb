@@ -6,14 +6,18 @@ module CZTop
   # @see http://api.zeromq.org/czmq3-0:zmsg
   module SendReceiveMethods
     # Sends a message.
-    # @param str_or_msg [Message, String] what to send
-    def send(str_or_msg)
-      Message.coerce(str_or_msg).send_to(self)
+    # @param message [Message, String, Array<parts>] the message to send
+    # @return [self]
+    # @see Message.coerce
+    def <<(message)
+      Message.coerce(message).send_to(self)
+      self
     end
-    alias_method :<<, :send
 
     # Receives a message.
     # @return [Message]
+    # @raise [Interrupt] if interrupted
+    # @see Message.receive_from
     def receive
       Message.receive_from(self)
     end

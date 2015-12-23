@@ -45,23 +45,13 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#send" do
-    let(:content) { "foobar" }
-    it "sends content" do
-      req_socket.send content # REQ => REP
-    end
-
-    it "has alias #<<" do
-      req_socket << content # REQ => REP
-    end
-  end
-
-  describe "#receive" do
+  describe "#<< and #receive" do
     context "given a sent content" do
       let(:content) { "foobar" }
       it "receives the content" do
         connecting_pair_socket << content # REQ => REP
-        assert_equal content, binding_pair_socket.receive.frames.first.to_s
+        msg = binding_pair_socket.receive # REQ <= REP
+        assert_equal content, msg.frames.first.to_s
       end
     end
   end

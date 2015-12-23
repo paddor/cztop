@@ -6,18 +6,22 @@ describe CZTop::SendReceiveMethods do
     o.extend CZTop::SendReceiveMethods
     o
   end
-  describe "#send" do
-    let(:content) { "foobar" }
-    it "sends content" do
-      msg = double("Message")
-      expect(CZTop::Message).to receive(:coerce).with(content).and_return(msg)
-      expect(msg).to receive(:send_to).with(zocket)
-      zocket.send(content)
-    end
+  describe "#<<" do
+    context "when sending message" do
+      let(:content) { "foobar" }
+      let(:msg) { double("Message") }
+      before(:each) do
+        expect(CZTop::Message).to receive(:coerce).with(content).and_return(msg)
+        expect(msg).to receive(:send_to).with(zocket)
+      end
 
-    it "has alias #<<" do
-      assert_operator zocket, :respond_to?, :<<
-      assert_equal zocket.method(:send), zocket.method(:<<)
+      it "sends content" do
+        zocket << content
+      end
+
+      it "returns self" do # so it can be chained
+        assert_same zocket, zocket << content
+      end
     end
   end
 

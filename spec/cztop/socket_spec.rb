@@ -131,7 +131,7 @@ describe CZTop::Socket do
         And { socket.last_tcp_port > 0 }
       end
       context "with explicit TCP port endpoint" do
-        Given(:port) { 55755 }
+        Given(:port) { rand(55_755..58_665) }
         Given(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
         When { socket.bind(another_endpoint) }
         Then { socket.last_tcp_port == port }

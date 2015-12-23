@@ -44,8 +44,11 @@ module CZTop
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
     # @return [Message]
+    # @raise [Interrupt] if interrupted while waiting for a message
     def self.receive_from(source)
-      from_ffi_delegate(Zmsg.recv(source))
+      delegate = Zmsg.recv(source)
+      raise Interrupt if delegate.null?
+      from_ffi_delegate(delegate)
     end
 
     # Append something to this message.

@@ -119,6 +119,16 @@ describe CZTop::Message do
       refute_same msg, received_message
       assert_same msg.ffi_delegate, received_message.ffi_delegate
     end
+
+    context "when interrupted" do
+      let(:nullptr) { ::FFI::Pointer::NULL }
+      before(:each) do
+        expect(CZMQ::FFI).to(receive(:zmsg_recv).and_return(nullptr))
+      end
+      it "raises Interrupt" do
+        assert_raises(Interrupt) { received_message }
+      end
+    end
   end
 
   describe "#routing_id" do

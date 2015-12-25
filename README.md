@@ -140,7 +140,8 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 * maybe find a better name for this project
 * pack generated code into its own gem (czmq-ffi-gen) [x]
 * think of a neat Ruby API, including:
-  - Actor [ ]
+  - Actor [x]
+  - Beacon [x]
   - Socket [x]
     - Options to encapsulate all option setters and getters [ ]
     - Security mechanisms [ ]
@@ -156,7 +157,6 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Config [x]
   - Proxy [ ]
   - Z85 [x]
-  - Beacon [x]
 * specify runnable specs
   - lot of outlining already done
 * write the missing XML API files in CZMQ

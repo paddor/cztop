@@ -21,6 +21,12 @@ module CZTop
     # @return [Actor] the actor behind this Beacon
     attr_reader :actor
 
+    # Terminates the beacon.
+    # @return [void]
+    def terminate
+      @actor.terminate
+    end
+
     VERBOSE_CMD = "VERBOSE".freeze
 
     # Enable verbose logging of commands and activity.

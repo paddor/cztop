@@ -86,7 +86,27 @@ module CZTop
 #void zsock_set_curve_publickey (void *self, const char * curve_publickey);
 #void zsock_set_curve_publickey_bin (void *self, const byte *curve_publickey);
 
+      # @return [Integer]
+      def rcvtimeo
+        #int zsock_rcvtimeo (void *self);
+        Z.rcvtimeo(@zocket)
+      end
+      # @param timeout [Integer]
+      def rcvtimeo=(timeout)
+        #void zsock_set_rcvtimeo (void *self, int rcvtimeo);
+        Z.set_rcvtimeo(@zocket, timeout)
+      end
 
+      # @return [Integer]
+      def sndtimeo
+        #int zsock_sndtimeo (void *self);
+        Z.sndtimeo(@zocket)
+      end
+      # @param timeout [Integer]
+      def sndtimeo=(timeout)
+        #void zsock_set_sndtimeo (void *self, int sndtimeo);
+        Z.set_sndtimeo(@zocket, timeout)
+      end
 
 # TODO: a reasonable subset of these
 #//  Get socket options
@@ -115,8 +135,6 @@ module CZTop
 #int zsock_backlog (void *self);
 #int zsock_maxmsgsize (void *self);
 #int zsock_multicast_hops (void *self);
-#int zsock_rcvtimeo (void *self);
-#int zsock_sndtimeo (void *self);
 #int zsock_tcp_keepalive (void *self);
 #int zsock_tcp_keepalive_idle (void *self);
 #int zsock_tcp_keepalive_cnt (void *self);
@@ -162,8 +180,6 @@ module CZTop
 #void zsock_set_backlog (void *self, int backlog);
 #void zsock_set_maxmsgsize (void *self, int maxmsgsize);
 #void zsock_set_multicast_hops (void *self, int multicast_hops);
-#void zsock_set_rcvtimeo (void *self, int rcvtimeo);
-#void zsock_set_sndtimeo (void *self, int sndtimeo);
 #void zsock_set_xpub_verbose (void *self, int xpub_verbose);
 #void zsock_set_tcp_keepalive (void *self, int tcp_keepalive);
 #void zsock_set_tcp_keepalive_idle (void *self, int tcp_keepalive_idle);

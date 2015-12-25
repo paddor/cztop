@@ -74,6 +74,15 @@ module CZTop
       ffi_delegate.content_size
     end
 
+    # Returns all frames as strings in an array. This is useful if for quick
+    # inspection of the message.
+    # @note It'll read all frames in the message and turn them into Ruby
+    #   strings. This can be a problem if the message is huge/has huge frames.
+    # @return [Array<String>] all frames
+    def to_a
+      frames.map(&:to_s)
+    end
+
     # Gets the routing ID.
     # @note This only set when the frame came from a {CZTop::Socket::SERVER}
     #   socket.

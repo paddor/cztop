@@ -12,6 +12,7 @@ module CZTop
       fptr = dl.find_function("zbeacon")
       break fptr if fptr
     end
+    raise LoadError, "couldn't find zbeacon()" if ZBEACON_FPTR.nil?
 
     def initialize
       @actor = Actor.new(ZBEACON_FPTR)

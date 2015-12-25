@@ -96,9 +96,21 @@ describe CZTop::Actor do
         assert_raises(ArgumentError) { actor.__send__(:mk_callback_shim, "foo") }
       end
     end
-  end
-  describe "#process_messages" do
 
+    context "with faulty handler" do
+      let(:actor) { CZTop::Actor.new { raise } }
+      it "warns about it" do
+        expect(actor).to receive(:signal_handler_termination)
+          .and_call_original
+        assert_output nil, /handler.*raised exception/i do
+          actor << "foo"
+          actor.terminate
+        end
+      end
+    end
+  end
+
+  describe "#process_messages" do
     it "breaks on $TERM" do
       actor << "$TERM" << "foo"
       actor.terminate

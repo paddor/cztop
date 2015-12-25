@@ -4,7 +4,7 @@ module CZTop
   # @see http://api.zeromq.org/czmq3-0:zsock-option
   module ZsockOptions
     # Access to the options of this socket.
-    # @return [Options]
+    # @return [OptionsAccessor]
     def options
       OptionsAccessor.new(self)
     end
@@ -33,9 +33,11 @@ module CZTop
       def rcvhwm=(value) Z.set_rcvhwm(@zocket, value) end
 
 
-      # @return [Boolean]
+      # @return [Boolean] whether this zocket is a CURVE server
       def curve_server?() Z.curve_server(@zocket) > 0 end
-      # @param bool [Boolean] make this zocket a CURVE server
+
+      # Make this zocket a CURVE server.
+      # @param bool [Boolean]
       def curve_server=(bool) Z.set_curve_server(@zocket, bool ? 1 : 0) end
 
       # @return [String] Z85 encoded server key set
@@ -47,6 +49,9 @@ module CZTop
         return nil if ptr.null?
         ptr.read_string
       end
+
+      # Sets the server's public key, so the zocket can authenticate the
+      # remote server.
       # @param key [String] Z85 (40 bytes) or binary (32 bytes) server key
       # @raise [ArgumentError] if key has wrong size
       def curve_serverkey=(key)
@@ -86,23 +91,23 @@ module CZTop
 #void zsock_set_curve_publickey (void *self, const char * curve_publickey);
 #void zsock_set_curve_publickey_bin (void *self, const byte *curve_publickey);
 
-      # @return [Integer]
+      # @return [Integer] the timeout when receiving a message
       def rcvtimeo
         #int zsock_rcvtimeo (void *self);
         Z.rcvtimeo(@zocket)
       end
-      # @param timeout [Integer]
+      # @param timeout [Integer] new timeout
       def rcvtimeo=(timeout)
         #void zsock_set_rcvtimeo (void *self, int rcvtimeo);
         Z.set_rcvtimeo(@zocket, timeout)
       end
 
-      # @return [Integer]
+      # @return [Integer] the timeout when sending a message
       def sndtimeo
         #int zsock_sndtimeo (void *self);
         Z.sndtimeo(@zocket)
       end
-      # @param timeout [Integer]
+      # @param timeout [Integer] new timeout
       def sndtimeo=(timeout)
         #void zsock_set_sndtimeo (void *self, int sndtimeo);
         Z.set_sndtimeo(@zocket, timeout)

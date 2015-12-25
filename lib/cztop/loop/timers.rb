@@ -1,6 +1,7 @@
 class CZTop::Loop
 
   # @abstract
+  # Shared functionality of {SimpleTimer}s and {TicketTimer}s.
   class Timer
     include ::CZMQ::FFI
 

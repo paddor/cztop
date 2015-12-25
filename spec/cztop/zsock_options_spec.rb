@@ -114,5 +114,21 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+
+    describe "sndtimeo" do
+      it "behaves correctly" do
+        assert_equal -1, options.sndtimeo
+        options.sndtimeo = 7
+        assert_equal 7, options.sndtimeo
+      end
+    end
+
+    describe "rcvtimeo" do
+      it "behaves correctly" do
+        assert_equal -1, options.rcvtimeo
+        options.rcvtimeo = 7
+        assert_equal 7, options.rcvtimeo
+      end
+    end
   end
 end

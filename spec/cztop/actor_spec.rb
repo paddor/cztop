@@ -15,87 +15,111 @@ describe CZTop::Actor do
     assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
   end
 
+  after(:each) { actor.terminate }
   let(:actor) do
-    CZTop::Actor.new do |msg, pipe_delegate|
-      received_messages << msg
+    CZTop::Actor.new do |msg, pipe|
+      received_messages << msg.to_a
+      yielded << [msg, pipe]
     end
   end
   let(:received_messages) { [] }
+  let(:yielded) { [] }
 
-  describe "#initialize" do
-    let(:ffi_delegate) { double "ffi delegate" }
-    let(:ffi_callback) { double("ffi callback") }
-
-    before(:each) do
-      expect(::CZMQ::FFI::Zactor).to receive(:new).with(ffi_callback, nil)
-        .and_return(ffi_delegate)
-      expect_any_instance_of(CZTop::Actor).to receive(:attach_ffi_delegate)
-        .with(ffi_delegate)
-    end
-
-    context "with FFI callback" do
-      let(:actor) { CZTop::Actor.new(ffi_callback) }
-
-      it "remembers callback" do
-        assert_same ffi_callback, actor.instance_variable_get(:@callback)
-      end
-
-      it "doesn't create another callback" do
-        expect_any_instance_of(CZTop::Actor).not_to receive(:make_default_callback)
-        actor
-      end
-    end
-
-    context "with no FFI callback given" do
-      let(:actor) { CZTop::Actor.new {} }
-
-      before(:each) do
-        expect_any_instance_of(CZTop::Actor).to receive(:make_default_callback)
-          .and_return(ffi_callback)
-      end
-
-      it "creates a default callback" do
-        actor
+  let(:ffi_function) do
+    ::CZMQ::FFI::Zactor.fn do |pipe_delegate, args|
+      pipe = ::CZTop::Socket::PAIR.from_ffi_delegate(pipe_delegate)
+      pipe.signal # mandatory handshake
+      while true
+        begin
+          msg = pipe.receive
+          msg = msg.to_a
+        rescue Interrupt
+          break
+        end
+        break if "$TERM" == msg[0]
+        received_messages << msg
       end
     end
   end
 
-  describe "#make_default_callback" do
-    let(:actor) do
-      CZTop::Actor.new do |*args|
-        yielded.replace(args)
-        received_messages << args[0]
+  describe "#initialize" do
+
+    before(:each) do
+      expect(::CZMQ::FFI::Zactor).to receive(:new)
+        .with(kind_of(FFI::Function), nil)
+        .and_call_original
+      expect_any_instance_of(CZTop::Actor).to receive(:attach_ffi_delegate)
+        .with(kind_of(::CZMQ::FFI::Zactor))
+        .and_call_original
+      expect_any_instance_of(CZTop::Actor).to receive(:mk_callback_shim)
+        .and_call_original
+    end
+
+    let(:shim) { actor.instance_variable_get(:@callback) }
+
+    context "with FFI callback" do
+      let(:actor) { CZTop::Actor.new(ffi_function) }
+
+      it "shims it" do
+        refute_nil shim
+        refute_same ffi_function, shim
       end
     end
-    let(:yielded) { [] }
-    let(:received_messages) { [] }
 
-    it "recognizes $TERM" do
-      actor.terminate
-      pass
+    context "with Proc callback" do
+      let(:proc_) { ->(msg, pipe) { received_messages << msg.to_a } }
+      it "shims it" do
+        refute_nil shim
+        refute_same ffi_function, shim
+      end
+
+      it "works" do
+        actor << "FOO"
+        actor.terminate
+        assert_equal [["FOO"]], received_messages
+      end
     end
 
-    context "with no block" do
+    context "with block" do
+      # can use default actor
+      it "works" do
+        actor << "FOO"
+        actor.terminate
+        assert_equal [["FOO"]], received_messages
+      end
+    end
+  end
+
+  describe "#mk_callback_shim" do
+    context "with invalid handler" do
       it "raises" do
-        assert_raises(ArgumentError) { actor.__send__(:make_default_callback) }
+        assert_raises(ArgumentError) { actor.__send__(:mk_callback_shim, "foo") }
       end
+    end
+  end
+  describe "#process_messages" do
+
+    it "breaks on $TERM" do
+      actor << "$TERM" << "foo"
+      actor.terminate
+      assert_empty received_messages
     end
 
     context "when interrupted" do
       it "terminates actor" do
         expect(actor).to receive(:next_message).and_raise(Interrupt).once
-        actor << "foo"
-        actor.__send__(:wait)
-        assert_operator actor, :terminated?
+        actor << "foo" << "INTERRUPTED" << "bar"
+        actor.terminate
+        assert_equal [["foo"]], received_messages
       end
     end
 
     it "yields message and pipe" do
       actor << "foo"
       actor.terminate
-      assert_equal 2, yielded.size
-      assert_kind_of CZTop::Message, yielded[0]
-      assert_kind_of CZTop::Socket::PAIR, yielded[1]
+      assert_equal 2, yielded[0].size
+      assert_kind_of CZTop::Message, yielded[0][0]
+      assert_kind_of CZTop::Socket::PAIR, yielded[0][1]
     end
   end
 
@@ -116,14 +140,19 @@ describe CZTop::Actor do
 
   describe "#<<" do
 
-    let(:actor) do
-      CZTop::Actor.new {}
+    context "threads" do
+      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      it "is thread-safe" do
+        expect(mutex).to receive(:synchronize).at_least(1)
+          .and_call_original
+        actor << "foo"
+      end
     end
 
     context "with commands" do
       let(:commands) { %w[ PRINT SHOW DO ] }
       let(:received_commands) do
-        received_messages.map { |msg| msg.frames.first.to_s }
+        received_messages.map(&:first)
       end
       before(:each) do
         commands.each { |c| actor << c }
@@ -139,12 +168,6 @@ describe CZTop::Actor do
     end
 
     context "with array" do
-      let(:actor) do
-        CZTop::Actor.new do |msg, pipe|
-          received_messages << msg
-        end
-      end
-      let(:received_messages) { [] }
       let(:msg) { %w[ SHOW foo bar ] }
 
       before(:each) do
@@ -154,7 +177,7 @@ describe CZTop::Actor do
 
       it "sends one message" do
         assert_equal 1, received_messages.size
-        assert_equal msg, received_messages.first.frames.map(&:to_s)
+        assert_equal msg, received_messages.first
       end
     end
 
@@ -168,6 +191,38 @@ describe CZTop::Actor do
     end
   end
 
+  describe "#request" do
+    let(:actor) do
+      CZTop::Actor.new do |msg, pipe|
+        pipe << msg.to_a.map{|s| s.downcase }
+      end
+    end
+    let(:word) { "FOO" }
+    let(:response) do
+      actor.request(word).to_a[0]
+    end
+    it "returns response" do
+      assert_equal word.downcase, response
+    end
+
+    context "threads" do
+      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      it "is thread-safe" do
+        expect(mutex).to receive(:synchronize).at_least(1)
+          .and_call_original
+        response
+      end
+    end
+    context "with dead actor" do
+      before(:each) { actor.terminate }
+      it "raises DeadActorError" do
+        assert_raises(CZTop::Actor::DeadActorError) do
+          response
+        end
+      end
+    end
+  end
+
   describe "#terminate" do
     context "when actor is alive" do
       it "tells actor to terminate" do
@@ -175,8 +230,13 @@ describe CZTop::Actor do
         actor.terminate
       end
 
-      it "waits for death signal" do
-        expect(actor).to receive(:wait).and_call_original
+      it "returns true" do
+        assert_equal true, actor.terminate
+      end
+
+      it "waits for handler to terminate" do
+        expect(actor.instance_variable_get(:@termination_signal)).to(
+          receive(:pop).and_call_original)
         actor.terminate
       end
     end
@@ -184,10 +244,8 @@ describe CZTop::Actor do
     context "with dead actor" do
       before(:each) { actor.terminate }
 
-      it "raises DeadActorError" do
-        assert_raises(CZTop::Actor::DeadActorError) do
-          actor.terminate
-        end
+      it "returns false" do
+        assert_equal false, actor.terminate
       end
     end
   end

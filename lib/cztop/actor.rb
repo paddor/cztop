@@ -1,6 +1,18 @@
 module CZTop
   # Represents a CZMQ::FFI::Zactor.
-  # @note Mainly because Proxy and Authenticator are actors.
+  #
+  # = About Thread-Safety
+  # The instance methods of this class are thread-safe. So it's safe to call
+  # {#<<}, {#request} or even {#terminate} from different threads. Caution:
+  # Use only these methods to communicate with the low-level zactor. Don't use
+  # {Message#send_to} directly to send itself to an {Actor} instance, as it
+  # wouldn't be thread-safe.
+  #
+  # = About termination
+  # Actors should be terminated explicitly, either by sending them the "$TERM"
+  # command or by calling {#terminate} (which does the same). Not terminating
+  # them explicitly might make the process block at exit.
+  #
   # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
     include HasFFIDelegate
@@ -13,20 +25,23 @@ module CZTop
     # Raised when trying to interact with a terminated actor.
     class DeadActorError < RuntimeError; end
 
-    # Creates a new actor. If no callback is given, it'll create a generic one
-    # which will yield every received command (first frame of an arriving
-    # message).
-    # @param callback [FFI::Function]
+    # Creates a new actor. Either pass a callback directly or a block. The
+    # block will be called for every received message.
+    #
+    # @param callback [FFI::Pointer, Proc, #call] pointer to a C function or
+    #   just anything callable
+    # @param ffi_args [FFI::Pointer, nil] args, only useful if callback is an
+    #   FFI::Function
     # @yieldparam message [Message]
     # @yieldparam pipe [Socket::PAIR]
     # @see #process_messages
-    def initialize(callback = nil, &task)
+    def initialize(callback = nil, ffi_args = nil, &handler)
       @running = true
-      @ptr_mtx = Mutex.new # mutex for zactor_t resource
-      @state_mtx = Mutex.new # mutex for state of this object, like @running
-      # NOTE: retain reference on callback
-      @callback = callback || make_default_callback(task)
-      ffi_delegate = Zactor.new(@callback, _args = nil)
+      @zactor_mtx = Mutex.new # mutex for zactor_t resource
+      @state_mtx = Mutex.new # mutex for actor state (like @running)
+      @termination_signal = Queue.new # used for signaling
+      @callback = mk_callback_shim(callback || handler)
+      ffi_delegate = Zactor.new(@callback, ffi_args)
       attach_ffi_delegate(ffi_delegate)
     end
 
@@ -36,62 +51,78 @@ module CZTop
     # @raise [DeadActorError] if actor is terminated
     def <<(message)
       raise DeadActorError if not @running
-      @ptr_mtx.synchronize do
+      @zactor_mtx.synchronize do
         super
       end
       self
     end
 
-    # Tells the actor to terminate and waits for it.
-    # @return [void]
-    # @raise [DeadActorError] if actor is already terminated
+    # Same as {#<<}, but also waits for a response from the actor and returns
+    # it.
+    # @param message [Message] the request to the actor
+    # @return [Message] the actor's response
+    def request(message)
+      raise DeadActorError if not @running
+      message = Message.coerce(message)
+      @zactor_mtx.synchronize do
+        message.send_to(self)
+        Message.receive_from(self)
+      end
+    end
+
+    # Tells the actor to terminate and waits for it. Idempotent.
+    # @return [Boolean] whether it died just now (+false+ if it was dead
+    #   already)
     def terminate
       @state_mtx.synchronize do
-        raise DeadActorError if not @running
+        return false if not @running
         self << "$TERM"
-        @running = false
+        @termination_signal.pop # wait for handler to return
+        true
       end
-      wait
     end
 
     # @return [Boolean] whether this actor has been terminated
     def terminated?
-      @state_mtx.synchronize do
-        !@running
-      end
+      !@running
     end
 
     private
 
-    # Waits for a signal from the backend pipe.
-    # @return [void]
-    def wait
-      @ptr_mtx.synchronize do
-        super
-      end
-    end
-
-    # Creates a new general purpose callback. Signals the low-level actor that
-    # it's ready to process messages and then calls {#process_messages}.
+    # Creates the callback shim. The shim is used to ensure we're notified
+    # when the handler has terminated.
     #
-    # @param task [Proc] the user-defined block which is passed to
-    #   {#process_messages}
-    # @return [FFI::Function] the callback function for the low-level actor
-    # @raise [ArgumentError] if no task is given
-    def make_default_callback(task)
-      raise ArgumentError, "no task given" if not task
-      Zactor.fn do |pipe_delegate, _args|
+    # In case the given handler is an FFI::Function, it's used as-is. The shim
+    # will just pass through the pipe and args. The handler has to do the
+    # handshake (signal) itself.
+    #
+    # Otherwise (if it's a Proc or anything else responding to #call), does
+    # the handshake then starts receiving messages, passing them to the
+    # handler (see {#process_messages}).
+    #
+    # @param handler [Proc, FFI::Pointer, #call] the handler used to process
+    #   messages
+    # @return [FFI::Function] the callback function to be passed to the zactor
+    # @raise [ArgumentError] if no handler is given
+    def mk_callback_shim(handler)
+      if !handler.respond_to?(:call) && !handler.is_a?(::FFI::Pointer)
+        raise ArgumentError, "invalid handler"
+      end
+      Zactor.fn do |pipe_delegate, args|
         begin
-          @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)
-          @pipe.signal # handshake, so zactor_new() returns
-          process_messages(&task)
-        rescue
-          p $!
+          if handler.is_a? ::FFI::Function
+            # pass callback through
+            handler.call(pipe_delegate, args)
+          else
+            @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)
+            @pipe.signal # handshake, so zactor_new() returns
+            process_messages(handler)
+          end
+        rescue Exception
+          warn "Handler of #{self} raised exception: #{$!.inspect}"
           # TODO: store it?
         ensure
-          @state_mtx.synchronize do
-            @running = false
-          end
+          signal_handler_termination
         end
       end
     end
@@ -104,22 +135,20 @@ module CZTop
     # When waiting for a message is interrupted, execution is aborted and the
     # actor will terminate.
     #
+    # @param handler [Proc, #call] the handler used to process messages
     # @yieldparam message [Message] message (e.g. command) received
     # @yieldparam pipe [Socket::PAIR] pipe to write back something into the actor
-    def process_messages
+    def process_messages(handler)
       while true
         begin
           message = next_message
         rescue Interrupt
           break
+        else
+          break if "$TERM" == message.frames.first.to_s
         end
 
-        if "$TERM" == message.frames.first.to_s
-          # NOTE: No explicit signal needed. A dying actor sends signal 0.
-          break
-        end
-
-        yield message, @pipe
+        handler.call(message, @pipe)
       end
     end
 
@@ -127,6 +156,27 @@ module CZTop
     # @return [Message] the next message
     def next_message
       @pipe.receive
+    end
+
+    # Creates a new thread that will signal the definitive termination of the
+    # handler. It does this by checking when its thread is dead and signalling
+    # it to {#terminate} through a condition variable.
+    #
+    # This is needed to avoid the race condition between zactor_destroy()
+    # which will wait for a signal from the handler in case it was able to
+    # send the "$TERM" command, and the @callback which might still haven't
+    # returned, but doesn't receive any messages anymore.
+    #
+    # @return [void]
+    def signal_handler_termination
+      Thread.new(Thread.current) do |handler_thread|
+        sleep 0.01 while handler_thread.alive?
+        @running = false
+
+        # can't use ConditionVariable, as this code might run BEFORE the main
+        # thread #waits for it
+        @termination_signal.push(nil)
+      end
     end
   end
 end

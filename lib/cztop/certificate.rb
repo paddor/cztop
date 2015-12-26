@@ -8,6 +8,13 @@ module CZTop
     # various errors around {Certificate}s
     class Error < RuntimeError; end
 
+    # Warns if CURVE security isn't available.
+    # @return [void]
+    def self.check_curve_availability
+      return if Zproc.has_curve
+      warn "CZTop: CURVE isn't available. Consider installing libsodium."
+    end
+
     # Loads a certificate from a file.
     # @param filename [String, Pathname, #to_s] path to certificate file
     # @return [Certificate] the loaded certificate

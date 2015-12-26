@@ -33,6 +33,10 @@ require_relative 'cztop/loop/timers'
 require_relative 'cztop/message/frames'
 require_relative 'cztop/socket/types'
 
+
+# make Ctrl-C work in case a low-level call hangs
+CZMQ::FFI::Signals.disable_default_handling
+
 ##
 # Probably useless in this Ruby binding.
 #

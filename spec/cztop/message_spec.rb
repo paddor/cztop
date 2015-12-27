@@ -4,7 +4,7 @@ describe CZTop::Message do
   include_examples "has FFI delegate"
   let(:msg) { described_class.new }
 
-  context "new Message" do
+  describe "#initialize" do
     subject { CZTop::Message.new }
     it "is empty" do
       assert_empty subject
@@ -29,21 +29,24 @@ describe CZTop::Message do
       end
     end
 
-    context "with multiple parts" do
-      Given(:parts) { [ "foo", "", "bar"] }
-      Given(:msg) { described_class.new(parts) }
-      Then { msg.size == parts.size }
+    context "with array of strings" do
+      let(:parts) { [ "foo", "", "bar"] }
+      let(:msg) { described_class.new(parts) }
+      it "takes them as frames" do
+        assert_equal parts.size, msg.size
+        assert_equal parts, msg.frames.map(&:to_s)
+      end
     end
   end
 
   describe ".coerce" do
-    context "given a Message" do
+    context "with a Message" do
       it "takes the Message as is" do
         assert_same msg, described_class.coerce(msg)
       end
     end
 
-    context "given a String" do
+    context "with a String" do
       let(:content) { "foobar" }
       let(:coerced_msg) { described_class.coerce(content) }
       it "creates a new Message from the String" do
@@ -53,13 +56,22 @@ describe CZTop::Message do
       end
     end
 
-    context "given a Frame" do
+    context "with a Frame" do
       Given(:frame_content) { "foobar special content" }
       Given(:frame) { CZTop::Frame.new(frame_content) }
       When(:coerced_msg) { described_class.coerce(frame) }
       Then { coerced_msg.kind_of? described_class }
       And { coerced_msg.size == 1 }
       And { coerced_msg.frames.first.to_s == frame_content }
+    end
+
+    context "with array of strings" do
+      let(:parts) { [ "foo", "", "bar"] }
+      let(:coerced_msg) { described_class.coerce(parts) }
+      it "takes them as frames" do
+        assert_equal parts.size, coerced_msg.size
+        assert_equal parts, coerced_msg.frames.map(&:to_s)
+      end
     end
 
     context "given something else" do
@@ -106,6 +118,16 @@ describe CZTop::Message do
       assert_kind_of CZTop::Message, received_message
       refute_same msg, received_message
       assert_same msg.ffi_delegate, received_message.ffi_delegate
+    end
+
+    context "when interrupted" do
+      let(:nullptr) { ::FFI::Pointer::NULL }
+      before(:each) do
+        expect(CZMQ::FFI).to(receive(:zmsg_recv).and_return(nullptr))
+      end
+      it "raises Interrupt" do
+        assert_raises(Interrupt) { received_message }
+      end
     end
   end
 

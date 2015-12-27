@@ -3,6 +3,7 @@ require_relative '../spec_helper'
 describe CZTop::Beacon do
   subject { described_class.new }
   let(:actor) { subject.actor }
+  after(:each) { subject.terminate }
 
   describe "CZTop::Beacon::ZBEACON_FPTR" do
     it "points to a dynamic library symbol" do

@@ -146,6 +146,29 @@ describe CZTop::Certificate do
         end
       end
 
+      describe ".check_curve_availability" do
+        context "with CURVE available" do
+          before(:each) do
+            expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(true)
+          end
+          it "doesn't warn" do
+            assert_output("", "") do
+              described_class.check_curve_availability
+            end
+          end
+        end
+        context "with CURVE not available" do
+          before(:each) do
+            expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(false)
+          end
+          it "warns" do
+            assert_output("", /curve.*libsodium/i) do
+              described_class.check_curve_availability
+            end
+          end
+        end
+      end
+
       describe ".new_from" do
         Given(:public_key) { cert.public_key }
         Given(:secret_key) { cert.secret_key }
@@ -200,6 +223,20 @@ describe CZTop::Certificate do
             assert_raises(CZTop::Certificate::Error) do
               cert.apply(zocket)
             end
+          end
+        end
+
+        context "with invalid socket" do
+          let(:zocket) { nil }
+          it "raises" do
+            assert_raises(ArgumentError) { cert.apply(zocket) }
+          end
+        end
+
+        context "with real socket" do
+          let(:zocket) { CZTop::Socket::REQ.new }
+          it "works" do
+            cert.apply(zocket)
           end
         end
       end

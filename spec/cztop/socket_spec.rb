@@ -45,23 +45,13 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#send" do
-    let(:content) { "foobar" }
-    it "sends content" do
-      req_socket.send content # REQ => REP
-    end
-
-    it "has alias #<<" do
-      req_socket << content # REQ => REP
-    end
-  end
-
-  describe "#receive" do
+  describe "#<< and #receive" do
     context "given a sent content" do
       let(:content) { "foobar" }
       it "receives the content" do
         connecting_pair_socket << content # REQ => REP
-        assert_equal content, binding_pair_socket.receive.frames.first.to_s
+        msg = binding_pair_socket.receive # REQ <= REP
+        assert_equal content, msg.frames.first.to_s
       end
     end
   end
@@ -131,7 +121,7 @@ describe CZTop::Socket do
         And { socket.last_tcp_port > 0 }
       end
       context "with explicit TCP port endpoint" do
-        Given(:port) { 55755 }
+        Given(:port) { rand(55_755..58_665) }
         Given(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
         When { socket.bind(another_endpoint) }
         Then { socket.last_tcp_port == port }

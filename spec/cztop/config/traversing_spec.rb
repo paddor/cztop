@@ -51,6 +51,14 @@ main
           assert_equal 0, first_level
         end
       end
+
+      it "returns last executed block's value" do
+        called = 0
+        ret = config.execute do |_, _|
+          called += 1
+        end
+        assert_equal called, ret
+      end
     end
 
     context "with a block that breaks" do
@@ -61,12 +69,24 @@ main
       end
 
       it "doesn't raise" do
-        config.execute { |_| break }
+        config.execute do |_|
+          break
+        end
       end
 
-      it "returns break value" do
+      it "returns nil" do
         assert_nil config.execute { |_| break }
-        assert_equal :foo, config.execute { |_| break :foo }
+      end
+
+      context "with break value" do
+        # NOTE: broken on JRuby and Rubinius
+        # see https://github.com/rubinius/rubinius/issues/3546
+        # and https://github.com/jruby/jruby/issues/3559 (JRuby only because
+        # it keeps calling the block, even though it break'd)
+        it "returns break value", skip: (%w[jruby rbx].include?(RUBY_ENGINE)\
+                                         && "broken on JRuby and Rubinius") do
+          assert_equal :foo, config.execute { |_| break :foo }
+        end
       end
     end
 
@@ -92,17 +112,6 @@ main
     context "with no block" do
       it "raises" do
         assert_raises(CZTop::Config::Traversing::Error) { config.execute }
-      end
-    end
-
-    context "with failure code from zconfig_execute()" do
-      let(:ffi_delegate) { config.ffi_delegate }
-      before(:each) do
-        expect(ffi_delegate).to(
-          receive(:execute).with(kind_of(FFI::Function), nil)).and_return(-1)
-      end
-      it "raises" do
-        assert_raises(CZTop::Config::Traversing::Error) { config.execute {} }
       end
     end
   end

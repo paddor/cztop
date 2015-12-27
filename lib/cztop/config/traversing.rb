@@ -10,32 +10,38 @@ module CZTop::Config::Traversing
   # @yieldparam config [Config] the config item
   # @yieldparam level [Integer] level of the item (self has level 0,
   #   its direct children have level 1)
-  # @return [self]
+  # @return [Object] the block's return value
   # @raise [Exception] the block's exception, in case it raises (it won't
   #   call the block any more after that)
-  # @raise [Error] if zconfig_execute() returns an error code
   def execute
     raise Error, "no block given" if !block_given?
     exception = nil
+    block_value = nil
+    ret = nil
     callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
       begin
-        config = from_ffi_delegate(zconfig)
-        yield config, level
-
-        0 # report success to keep zconfig_execute() going
+        # NOTE: work around JRuby and Rubinius bug, where it'd keep calling
+        # this FFI::Function, even when the block `break`ed
+        if ret != -1
+          config = from_ffi_delegate(zconfig)
+          block_value = yield config, level
+          ret = 0 # report success to keep zconfig_execute() going
+        end
       rescue
         # remember exception, so we can raise it later to the ruby code
         # (it can't be raised now, as we have to report failure to
         # zconfig_execute())
         exception = $!
 
-        -1 # report failure to stop zconfig_execute() immediately
+        ret = -1 # report failure to stop zconfig_execute() immediately
+      ensure
+        ret ||= -1 # in case of 'break'
       end
+      ret
     end
-    rc = ffi_delegate.execute(callback, _arg = nil)
+    ffi_delegate.execute(callback, _arg = nil)
     raise exception if exception
-    raise Error, "zconfig_execute() returned failure code" if rc.nonzero?
-    return self
+    return block_value
   end
 
   # Access to this config item's direct children.

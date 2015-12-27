@@ -3,16 +3,17 @@ module CZTop
   class Message
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
+    include ::CZMQ::FFI
 
     # Coerces an object into a {Message}.
-    # @param msg [Message, String, Frame]
+    # @param msg [Message, String, Frame, Array<String>, Array<Frame>]
     # @return [Message]
     # @raise [ArgumentError] if it can't be coerced
     def self.coerce(msg)
       case msg
       when Message
         return msg
-      when String, Frame
+      when String, Frame, Array
         return new(msg)
       else
         raise ArgumentError, "cannot coerce message: %p" % msg
@@ -22,7 +23,7 @@ module CZTop
     # @param parts [String, Frame, Array<String>, Array<Frame>] initial parts
     #   of the message
     def initialize(parts = nil)
-      attach_ffi_delegate(CZMQ::FFI::Zmsg.new)
+      attach_ffi_delegate(Zmsg.new)
       Array(parts).each { |part| self << part } if parts
     end
 
@@ -37,14 +38,17 @@ module CZTop
     #   counterpart will have been destroyed.
     # @return [void]
     def send_to(destination)
-      CZMQ::FFI::Zmsg.send(ffi_delegate, destination)
+      Zmsg.send(ffi_delegate, destination)
     end
 
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
     # @return [Message]
+    # @raise [Interrupt] if interrupted while waiting for a message
     def self.receive_from(source)
-      from_ffi_delegate(CZMQ::FFI::Zmsg.recv(source))
+      delegate = Zmsg.recv(source)
+      raise Interrupt if delegate.null?
+      from_ffi_delegate(delegate)
     end
 
     # Append something to this message.
@@ -68,6 +72,15 @@ module CZTop
     # @see size
     def content_size
       ffi_delegate.content_size
+    end
+
+    # Returns all frames as strings in an array. This is useful if for quick
+    # inspection of the message.
+    # @note It'll read all frames in the message and turn them into Ruby
+    #   strings. This can be a problem if the message is huge/has huge frames.
+    # @return [Array<String>] all frames
+    def to_a
+      frames.map(&:to_s)
     end
 
     # Gets the routing ID.

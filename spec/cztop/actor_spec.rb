@@ -114,7 +114,7 @@ describe CZTop::Actor do
       CZTop::Message.new("$TERM").send_to(actor)
       begin
         actor << "foo"
-      rescue DeadActorError
+      rescue CZTop::Actor::DeadActorError
         # that's okay
       end
       sleep 0.01 until actor.terminated?

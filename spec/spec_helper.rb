@@ -1,5 +1,10 @@
 require 'bundler/setup'
-require 'coveralls'; Coveralls.wear!
+if RUBY_ENGINE == "ruby"
+  # no need for additional coverage reports on other Rubies. Doesn't seem to
+  # work on JRuby anyway.
+  require 'coveralls'
+  Coveralls.wear!
+end
 require 'rspec'
 require 'rspec/given'
 

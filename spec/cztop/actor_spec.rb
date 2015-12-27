@@ -131,7 +131,7 @@ describe CZTop::Actor do
           # @running = false
         end
         sleep 0.01 until actor.terminated?
-        assert_equal [["foo"]], received_messages
+        refute_includes received_messages, ["bar"]
       end
     end
 

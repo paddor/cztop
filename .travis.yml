@@ -4,6 +4,7 @@ sudo: required
 rvm:
   - 2.2.4
   - jruby-head
+  - rubinius
 before_install:
   - ci-scripts/install-deps
   - gem install bundler -v 1.10.6

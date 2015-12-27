@@ -39,10 +39,13 @@ module CZTop
       @running = true
       @zactor_mtx = Mutex.new # mutex for zactor_t resource
       @state_mtx = Mutex.new # mutex for actor state (like @running)
-      @termination_signal = Queue.new # used for signaling
+      @handler_thread = nil
+      @handler_dead_signal = Queue.new # used for signaling
+      @handler_dying_signal = Queue.new # used for signaling
       @callback = mk_callback_shim(callback || handler)
       ffi_delegate = Zactor.new(@callback, ffi_args)
       attach_ffi_delegate(ffi_delegate)
+      signal_handler_termination
     end
 
     # Same as {SendReceiveMethods#<<}, but raises if actor is terminated.
@@ -77,7 +80,7 @@ module CZTop
       @state_mtx.synchronize do
         return false if not @running
         self << "$TERM"
-        @termination_signal.pop # wait for handler to return
+        @handler_dead_signal.pop # wait for handler to return
         true
       end
     end
@@ -96,7 +99,7 @@ module CZTop
     # will just pass through the pipe and args. The handler has to do the
     # handshake (signal) itself.
     #
-    # Otherwise (if it's a Proc or anything else responding to #call), does
+    # Otherwise, if it's a Proc or anything else responding to #call, does
     # the handshake then starts receiving messages, passing them to the
     # handler (see {#process_messages}).
     #
@@ -110,6 +113,7 @@ module CZTop
       end
       Zactor.fn do |pipe_delegate, args|
         begin
+          @handler_thread = Thread.current
           if handler.is_a? ::FFI::Function
             # pass callback through
             handler.call(pipe_delegate, args)
@@ -122,7 +126,7 @@ module CZTop
           warn "Handler of #{self} raised exception: #{$!.inspect}"
           # TODO: store it?
         ensure
-          signal_handler_termination
+          @handler_dying_signal.push(nil)
         end
       end
     end
@@ -159,8 +163,7 @@ module CZTop
     end
 
     # Creates a new thread that will signal the definitive termination of the
-    # handler. It does this by checking when its thread is dead and signalling
-    # it to {#terminate} through a condition variable.
+    # handler.
     #
     # This is needed to avoid the race condition between zactor_destroy()
     # which will wait for a signal from the handler in case it was able to
@@ -169,13 +172,21 @@ module CZTop
     #
     # @return [void]
     def signal_handler_termination
-      Thread.new(Thread.current) do |handler_thread|
-        sleep 0.01 while handler_thread.alive?
+      # NOTE: has to be called in the main thread directly after starting the
+      # handler. If started in the `ensure` block, it won't work on Rubinius.
+      # See https://github.com/rubinius/rubinius/issues/3545
+
+      # NOTE: can't just use ConditionVariable, as the signaling code might be
+      # run BEFORE the waiting code.
+
+      Thread.new do
+        @handler_dying_signal.pop
+        while @handler_thread.alive?
+          sleep 0.1
+        end
         @running = false
 
-        # can't use ConditionVariable, as this code might run BEFORE the main
-        # thread #waits for it
-        @termination_signal.push(nil)
+        @handler_dead_signal.push(nil)
       end
     end
   end

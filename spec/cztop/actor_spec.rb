@@ -100,8 +100,6 @@ describe CZTop::Actor do
     context "with faulty handler" do
       let(:actor) { CZTop::Actor.new { raise } }
       it "warns about it" do
-        expect(actor).to receive(:signal_handler_termination)
-          .and_call_original
         assert_output nil, /handler.*raised exception/i do
           actor << "foo"
           actor.terminate
@@ -120,7 +118,12 @@ describe CZTop::Actor do
     context "when interrupted" do
       it "terminates actor" do
         expect(actor).to receive(:next_message).and_raise(Interrupt).once
-        actor << "foo" << "INTERRUPTED" << "bar"
+        begin
+          actor << "foo" << "INTERRUPTED" << "bar"
+        rescue CZTop::Actor::DeadActorError
+          # Thread which waits for handler death has already set
+          # @running = false
+        end
         actor.terminate
         assert_equal [["foo"]], received_messages
       end
@@ -247,7 +250,7 @@ describe CZTop::Actor do
       end
 
       it "waits for handler to terminate" do
-        expect(actor.instance_variable_get(:@termination_signal)).to(
+        expect(actor.instance_variable_get(:@handler_dead_signal)).to(
           receive(:pop).and_call_original)
         actor.terminate
       end

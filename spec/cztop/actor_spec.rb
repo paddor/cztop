@@ -254,6 +254,19 @@ describe CZTop::Actor do
           receive(:pop).and_call_original)
         actor.terminate
       end
+
+      context "with slow handler death" do
+        let(:handler_thread) { actor.instance_variable_get(:@handler_thread) }
+        it "waits repeatedly" do
+          checked = 0
+          expect(handler_thread).to receive(:alive?) do
+            checked += 1
+            checked < 5 # handler thread will be alive for a while
+          end.exactly(5)
+          expect(actor).to receive(:sleep).exactly(4)
+          actor.terminate
+        end
+      end
     end
 
     context "with dead actor" do

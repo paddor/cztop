@@ -181,9 +181,7 @@ module CZTop
 
       Thread.new do
         @handler_dying_signal.pop
-        while @handler_thread.alive?
-          sleep 0.1
-        end
+        sleep 0.01 while @handler_thread.alive?
         @running = false
 
         @handler_dead_signal.push(nil)

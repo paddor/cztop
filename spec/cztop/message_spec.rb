@@ -6,22 +6,12 @@ describe CZTop::Message do
 
   describe "#initialize" do
     subject { CZTop::Message.new }
-    it "is empty" do
-      assert_empty subject
-    end
-    it "has content size zero" do
-      assert_equal 0, subject.content_size
-    end
 
     context "with initial string" do
       let(:content) { "foo" }
       subject { described_class.new(content) }
-      it "gets that string" do
+      it "sets content" do
         assert_equal content, subject.frames.first.to_s
-      end
-
-      it "has non-zero content size" do
-        assert_operator subject.content_size, :>, 0
       end
 
       it "has one frame" do
@@ -128,6 +118,53 @@ describe CZTop::Message do
       it "raises Interrupt" do
         assert_raises(Interrupt) { received_message }
       end
+    end
+  end
+
+  describe "#empty?" do
+    context "with no content" do
+      Then { subject.empty? }
+    end
+    context "with content" do
+      subject { CZTop::Message.new "foo" }
+      Then { ! subject.empty? }
+    end
+  end
+
+  describe "#content_size" do
+    context "with no content" do
+      it "has content size zero" do
+        assert_equal 0, subject.content_size
+      end
+    end
+    context "with content" do
+      subject { CZTop::Message.new "foo" }
+      it "returns correct content size" do
+        assert_equal 3, subject.content_size
+      end
+    end
+  end
+
+  describe "#to_a" do
+    context "with no frames" do
+      Then { [] == subject.to_a }
+    end
+    context "with frames" do
+      Given(:parts) { %w[ foo bar ] }
+      subject { CZTop::Message.new parts }
+      Then { parts == subject.to_a }
+    end
+  end
+
+  describe "#[]" do
+    context "with existing frame" do
+      subject { CZTop::Message.new %w[ foo ] }
+      Then { "foo" == subject[0] }
+    end
+
+    context "with non-existing frame" do
+      subject { CZTop::Message.new %w[ foo ] }
+      Then { subject[1].nil? }
     end
   end
 

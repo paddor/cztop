@@ -83,6 +83,14 @@ module CZTop
       frames.map(&:to_s)
     end
 
+    # Return a frame's content.
+    # @return [String] the frame's content, if it exists
+    # @return [nil] if frame doesn't exist at given index
+    def [](frame_index)
+      frame = frames[frame_index] or return nil
+      frame.to_s
+    end
+
     # Gets the routing ID.
     # @note This only set when the frame came from a {CZTop::Socket::SERVER}
     #   socket.

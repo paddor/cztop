@@ -110,7 +110,15 @@ describe CZTop::Actor do
 
   describe "#process_messages" do
     it "breaks on $TERM" do
-      actor.terminate # that's how #terminate works ...
+      # can't use #<<
+      CZTop::Message.new("$TERM").send_to(actor)
+      begin
+        actor << "foo"
+      rescue DeadActorError
+        # that's okay
+      end
+      sleep 0.01 until actor.terminated?
+      assert_empty received_messages
     end
 
     context "when interrupted" do
@@ -122,7 +130,7 @@ describe CZTop::Actor do
           # Thread which waits for handler death has already set
           # @running = false
         end
-        actor.terminate
+        sleep 0.01 until actor.terminated?
         assert_equal [["foo"]], received_messages
       end
     end

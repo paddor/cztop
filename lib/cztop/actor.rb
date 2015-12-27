@@ -52,10 +52,21 @@ module CZTop
     # @param message [Object] message to send to the actor, see {Message.coerce}
     # @return [self]
     # @raise [DeadActorError] if actor is terminated
+    # @note Normally this method is asynchronous, but if the message is
+    #   "$TERM", it blocks until the actor is terminated.
     def <<(message)
-      raise DeadActorError if not @running
-      @zactor_mtx.synchronize do
-        super
+      message = Message.coerce(message)
+
+      if TERM == message[0]
+        # NOTE: can't just send this to the actor. The sender might call
+        # #terminate immediately, which most likely causes a hang due to race
+        # conditions.
+        terminate
+      else
+        @state_mtx.synchronize do
+          raise DeadActorError if not @running
+          @zactor_mtx.synchronize { super }
+        end
       end
       self
     end
@@ -64,9 +75,11 @@ module CZTop
     # it.
     # @param message [Message] the request to the actor
     # @return [Message] the actor's response
+    # @raise [ArgumentError] if the message is "$TERM" (use {#terminate})
     def request(message)
       raise DeadActorError if not @running
       message = Message.coerce(message)
+      raise ArgumentError, "use #terminate" if TERM == message[0]
       @zactor_mtx.synchronize do
         message.send_to(self)
         Message.receive_from(self)
@@ -79,7 +92,7 @@ module CZTop
     def terminate
       @state_mtx.synchronize do
         return false if not @running
-        self << "$TERM"
+        Message.new(TERM).send_to(self)
         @handler_dead_signal.pop # wait for handler to return
         true
       end
@@ -131,13 +144,16 @@ module CZTop
       end
     end
 
+    # the command which causes an actor handler to terminate
+    TERM = "$TERM".freeze
+
     # Successively receive messages that were sent to the actor and
-    # yield them to the given block to process them. The block
-    # also gets access to the pipe (a {Socket::PAIR} socket) to the actor so
-    # it can send back the result of a command, if needed.
+    # yield them to the given handler to process them. The a pipe (a
+    # {Socket::PAIR} socket) is also passed to the handler so it can send back
+    # the result of a command, if needed.
     #
-    # When waiting for a message is interrupted, execution is aborted and the
-    # actor will terminate.
+    # When a message is "$TERM", or when the waiting for a message is
+    # interrupted, execution is aborted and the actor will terminate.
     #
     # @param handler [Proc, #call] the handler used to process messages
     # @yieldparam message [Message] message (e.g. command) received
@@ -149,7 +165,7 @@ module CZTop
         rescue Interrupt
           break
         else
-          break if "$TERM" == message.frames.first.to_s
+          break if TERM == message[0]
         end
 
         handler.call(message, @pipe)

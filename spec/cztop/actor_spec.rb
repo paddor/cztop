@@ -110,9 +110,7 @@ describe CZTop::Actor do
 
   describe "#process_messages" do
     it "breaks on $TERM" do
-      actor << "$TERM" << "foo"
-      actor.terminate
-      assert_empty received_messages
+      actor.terminate # that's how #terminate works ...
     end
 
     context "when interrupted" do
@@ -204,6 +202,15 @@ describe CZTop::Actor do
         end
       end
     end
+
+    context "with $TERM" do
+      it "calls #terminate" do
+        # one more call from the #after filter
+        expect(actor).to receive(:terminate).twice.and_call_original
+        actor << "$TERM"
+        assert_operator actor, :terminated?
+      end
+    end
   end
 
   describe "#request" do
@@ -236,12 +243,23 @@ describe CZTop::Actor do
         end
       end
     end
+
+    context "with $TERM message" do
+      let(:word) { "$TERM" }
+      it "raises" do
+        assert_raises(ArgumentError) do
+          response
+        end
+      end
+    end
   end
 
   describe "#terminate" do
     context "when actor is alive" do
       it "tells actor to terminate" do
-        expect(actor).to receive(:<<).with("$TERM").and_call_original
+        msg = CZTop::Message.new "$TERM"
+        expect(CZTop::Message).to receive(:new).with("$TERM").and_return(msg)
+        expect(msg).to receive(:send_to).with(actor).and_call_original
         actor.terminate
       end
 

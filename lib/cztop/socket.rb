@@ -10,6 +10,30 @@ module CZTop
     # Used for various errors.
     class Error < RuntimeError; end
 
+    # @!group CURVE Security
+
+    # Enables CURVE security and makes this socket a CURVE server.
+    # @param server_certificate [Certificate] the (local) server's public key,
+    #   so remote client sockets are able to authenticate this server
+    # @param domain [String] domain used in authentication
+    def make_secure_server(server_certificate, domain)
+      # TODO
+    end
+
+    # Enables CURVE security and makes this socket a CURVE client.
+    # @param client_certificate [Certificate] the (local) client's key (public
+    #   and secret), to secure communication and possibly be authenticated by
+    #   the server
+    # @param server_certificate [Certificate] the remote server's public key,
+    #   so this socket is able to authenticate the server
+    # @param domain [String] domain used in authentication
+    def make_secure_client(client_certificate = Certificate.new,
+                           server_certificate, domain)
+      # TODO
+    end
+
+    # @!endgroup
+
     # @return [String] last bound endpoint, if any
     def last_endpoint
       ffi_delegate.endpoint

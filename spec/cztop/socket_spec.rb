@@ -56,6 +56,22 @@ describe CZTop::Socket do
     end
   end
 
+  describe "#make_secure_server" do
+    it "sets server certificate"
+    it "sets domain"
+    it "sets CURVE server"
+  end
+  describe "#make_secure_client" do
+    context "with client certificate" do
+      it "sets client certificate"
+    end
+    conetxt "with no client certificate" do
+      it "generates a new one"
+    end
+    it "sets server public certificate"
+    it "doesn't set CURVE server"
+  end
+
   describe "#last_endpoint" do
     context "unbound socket" do
       let(:socket) { CZTop::Socket.new_by_type(:REP) }

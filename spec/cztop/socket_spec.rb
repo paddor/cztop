@@ -65,7 +65,7 @@ describe CZTop::Socket do
     context "with client certificate" do
       it "sets client certificate"
     end
-    conetxt "with no client certificate" do
+    context "with no client certificate" do
       it "generates a new one"
     end
     it "sets server public certificate"

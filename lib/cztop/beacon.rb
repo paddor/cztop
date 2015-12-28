@@ -1,5 +1,8 @@
 module CZTop
   # Used for LAN discovery and presence.
+  #
+  # This is implemented using an {Actor}.
+  #
   # @see http://api.zeromq.org/czmq3-0:zbeacon
   class Beacon
     include ::CZMQ::FFI

@@ -1,4 +1,10 @@
 module CZTop
+
+  # Authentication for ZeroMQ security mechanisms.
+  #
+  # This is implemented using an {Actor}.
+  #
+  # @see http://api.zeromq.org/czmq3-0:zauth
   class Authenticator
     def allow(*addrs)
       # TODO

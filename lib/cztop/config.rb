@@ -97,6 +97,8 @@ module CZTop
     end
     alias_method :get, :[]
 
+    # @!endgroup
+
     # Compares this config item to another. Only the name and value are
     # considered. If you need to compare a config tree, use {#tree_equal?}.
     # @param other [Config] the other config item

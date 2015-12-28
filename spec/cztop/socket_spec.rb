@@ -57,9 +57,17 @@ describe CZTop::Socket do
   end
 
   describe "#make_secure_server" do
+    let(:domain) { "test" }
+    let(:server_certificate) { CZTop::Certificate.new }
+    before(:each) do
+      rep_socket.make_secure_server(server_certificate, domain)
+    end
+
     it "sets server certificate"
     it "sets domain"
-    it "sets CURVE server"
+    it "sets CURVE server" do
+      assert rep_socket.options.curve_server?
+    end
   end
   describe "#make_secure_client" do
     context "with client certificate" do

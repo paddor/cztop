@@ -17,6 +17,7 @@ module CZTop
     #   so remote client sockets are able to authenticate this server
     # @param domain [String] domain used in authentication
     def make_secure_server(server_certificate, domain)
+      options.curve_server = true
       # TODO
     end
 

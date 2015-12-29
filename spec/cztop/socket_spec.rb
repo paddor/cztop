@@ -57,7 +57,7 @@ describe CZTop::Socket do
   end
 
   describe "#make_secure_server" do
-    let(:domain) { "test" }
+    let(:domain) { "foo realm" }
     let(:server_certificate) { CZTop::Certificate.new }
     before(:each) do
       rep_socket.make_secure_server(server_certificate, domain)
@@ -70,14 +70,25 @@ describe CZTop::Socket do
     end
   end
   describe "#make_secure_client" do
+    let(:domain) { "foo realm" }
+    let(:server_certificate) { CZTop::Certificate.new }
     context "with client certificate" do
-      it "sets client certificate"
+      let(:client_certificate) { CZTop::Certificate.new }
+      before(:each) do
+        req_socket.make_secure_client(client_certificate, server_certificate, domain)
+      end
+      context "with complete client certificate" do
+        it "sets client certificate"
+      end
+      it "sets server public certificate" do
+        assert_equal server_certificate.public_key, req_socket.options.curve_serverkey
+      end
+      it "doesn't set CURVE server"
     end
-    context "with no client certificate" do
-      it "generates a new one"
+
+    context "with incomplete certificate" do # public key only
+      it "raises"
     end
-    it "sets server public certificate"
-    it "doesn't set CURVE server"
   end
 
   describe "#last_endpoint" do

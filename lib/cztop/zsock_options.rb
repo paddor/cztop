@@ -32,6 +32,7 @@ module CZTop
       # @param value [Integer] the new receive high water mark
       def rcvhwm=(value) Z.set_rcvhwm(@zocket, value) end
 
+      # @!group (CURVE) Security
 
       # @return [Boolean] whether this zocket is a CURVE server
       def curve_server?() Z.curve_server(@zocket) > 0 end
@@ -83,6 +84,34 @@ module CZTop
           raise "unknown ZMQ security mechanism code: %i" % code
       end
 
+      # Sets the secret key, so the zocket can authenticate itself to a remote
+      # server or client.
+      # @param key [String] Z85 (40 bytes) or binary (32 bytes) secret key
+      # @raise [ArgumentError] if key has wrong size
+      # TODO: does it also set the public key?
+      def curve_secretkey=(key)
+        if key.bytesize == 40
+          Z.set_curve_secretkey(@zocket, key)
+        elsif key.bytesize == 32
+          ptr = ::FFI::MemoryPointer.from_string(key)
+          Z.set_curve_secretkey_bin(@zocket, ptr)
+        else
+          raise ArgumentError, "invalid secret key: %p" % key
+        end
+      end
+
+      # @return [String] Z85 encoded secret key set
+      # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
+      #   supported
+      # TODO: check if empty string is returned if mechanism == curve, but
+      # secret key not set
+      def curve_secretkey
+        return nil if mechanism != :curve
+        ptr = Z.curve_secretkey(@zocket)
+        return nil if ptr.null?
+        ptr.read_string
+      end
+
 #char * zsock_curve_secretkey (void *self);
 #void zsock_set_curve_secretkey (void *self, const char * curve_secretkey);
 #void zsock_set_curve_secretkey_bin (void *self, const byte *curve_secretkey);
@@ -90,6 +119,8 @@ module CZTop
 #char * zsock_curve_publickey (void *self);
 #void zsock_set_curve_publickey (void *self, const char * curve_publickey);
 #void zsock_set_curve_publickey_bin (void *self, const byte *curve_publickey);
+
+      # @!endgroup
 
       # @return [Integer] the timeout when receiving a message
       def rcvtimeo

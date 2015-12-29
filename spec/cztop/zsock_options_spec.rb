@@ -86,6 +86,20 @@ describe CZTop::ZsockOptions do
       end
     end
 
+    describe "#curve_secretkey" do
+      context "with key not set" do
+      end
+      context "with valid key" do
+        it "sets and gets key"
+      end
+      context "with invalid key" do
+        it "raises" do
+          assert_raises(ArgumentError) { options.curve_secretkey = "foo" }
+          assert_raises { options.curve_secretkey = nil }
+        end
+      end
+    end
+
     describe "mechanism" do
       context "with no security" do
         it "returns :null" do

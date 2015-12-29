@@ -47,31 +47,40 @@ module CZTop
     # length of a binary key in bytes
     KEY_BYTES = 32
 
-    # Returns the public key in binary form.
-    # @return [String] binary public key
-    def public_key
-      ffi_delegate.public_key.read_string(KEY_BYTES)
+    # Returns the public key either as Z85-encoded ASCII string (default) or
+    # binary string.
+    # @param format [Symbol] +:z85+ for Z85, +:binary+ for binary
+    # @return [String] public key
+    def public_key(format: :z85)
+      case format
+      when :z85
+        ffi_delegate.public_txt.read_string.force_encoding(Encoding::ASCII)
+      when :binary
+        ffi_delegate.public_key.read_string(KEY_BYTES)
+      else
+        raise ArgumentError, "invalid format: %p" % format
+      end
     end
 
-    # Returns the secret key in binary form.
-    # @return [String] binary secret key
+    # Returns the secret key either as Z85-encoded ASCII string (default) or
+    # binary string.
+    # @param format [Symbol] +:z85+ for Z85, +:binary+ for binary
+    # @return [String] secret key
     # @return [nil] if secret key is undefined (like after loading from a file
     #   created using {#save_public})
-    def secret_key
-      key = ffi_delegate.secret_key.read_string(KEY_BYTES)
-      return nil if key.count("\0") == KEY_BYTES
-      key
-    end
-
-    # Returns the public key in Z85 form.
-    # @return [String] Z85-encoded public key
-    def public_key_txt
-      ffi_delegate.public_txt.read_string.force_encoding(Encoding::ASCII)
-    end
-    # Returns the secret key in Z85 form.
-    # @return [String] Z85-encoded secret key
-    def secret_key_txt
-      ffi_delegate.secret_txt.read_string.force_encoding(Encoding::ASCII)
+    def secret_key(format: :z85)
+      case format
+      when :z85
+        key = ffi_delegate.secret_txt.read_string.force_encoding(Encoding::ASCII)
+        return nil if key.count("\0") >= KEY_BYTES # NOTE: 32 when key unset
+        key
+      when :binary
+        key = ffi_delegate.secret_key.read_string(KEY_BYTES)
+        return nil if key.count("\0") == KEY_BYTES
+        key
+      else
+        raise ArgumentError, "invalid format: %p" % format
+      end
     end
 
     # Get metadata.

@@ -9,34 +9,49 @@ describe CZTop::Certificate do
     let(:cert) { CZTop::Certificate.new }
     let(:ffi_delegate) { cert.ffi_delegate }
     describe "#initialize" do
-      it "initializes" do
-        cert
-      end
+      Then { cert }
     end
 
     describe "#public_key" do
-      let(:key) { cert.public_key }
-      it "returns key" do
-        assert_kind_of String, key
+      context "with :z85 format" do
+        Given(:key) { cert.public_key(format: :z85) }
+        Then { Encoding::ASCII == key.encoding }
+        And { 40 == key.size }
+        And { CZTop::Z85.new.encode(cert.public_key(format: :binary)) == key }
       end
-      it "is binary" do
-        assert_equal Encoding::BINARY, key.encoding
+
+      context "with no format" do
+        let(:key) { cert.public_key }
+        Then { cert.public_key(format: :z85) == key } # same as with no format
       end
-      it "has correct length" do
-        assert_equal 32, key.bytesize
+
+      context "with :binary format" do
+        Given(:key) { cert.public_key(format: :binary) }
+        Then { Encoding::BINARY == key.encoding }
+        And { 32 == key.bytesize }
+      end
+
+      context "with invalid format" do
+        When(:result) { cert.public_key(format: :foo) }
+        Then { result == Failure(ArgumentError) }
       end
     end
 
     describe "#secret_key" do
-      let(:key) { cert.secret_key }
-      it "returns key" do
-        assert_kind_of String, key
+      context "with :z85 format" do
+        Given(:key) { cert.secret_key(format: :z85) }
+        Then { Encoding::ASCII == key.encoding }
+        And { 40 == key.size }
+        And { CZTop::Z85.new.encode(cert.secret_key(format: :binary)) == key }
       end
-      it "is binary" do
-        assert_equal Encoding::BINARY, key.encoding
+      context "with no format" do
+        let(:key) { cert.secret_key }
+        Then { cert.secret_key(format: :z85) == key } # same as with no format
       end
-      it "has correct length" do
-        assert_equal 32, key.bytesize
+      context "with :binary format" do
+        Given(:key) { cert.secret_key(format: :binary) }
+        Then { Encoding::BINARY == key.encoding }
+        And { 32 == key.bytesize }
       end
       context "with undefined secret key" do
         # NOTE: this happens when cert was loaded from file created with
@@ -45,42 +60,16 @@ describe CZTop::Certificate do
         let(:pointer) { double(read_string: undefined_key) }
         before(:each) do
           expect(ffi_delegate).to(receive(:secret_key).and_return(pointer))
+          expect(ffi_delegate).to(receive(:secret_txt).and_return(pointer))
         end
         it "returns nil" do
-          assert_nil cert.secret_key
+          assert_nil cert.secret_key(format: :z85)
+          assert_nil cert.secret_key(format: :binary)
         end
       end
-    end
-
-    describe "#public_key_txt" do
-      let(:key) { cert.public_key_txt }
-      it "returns key" do
-        assert_kind_of String, key
-      end
-      it "is ASCII" do
-        assert_equal Encoding::ASCII, key.encoding
-      end
-      it "has correct length" do
-        assert_equal 40, key.size
-      end
-      it "is Z85 and correct" do
-        assert_equal cert.public_key, CZTop::Z85.new.decode(key)
-      end
-    end
-
-    describe "#secret_key_txt" do
-      let(:key) { cert.secret_key_txt }
-      it "returns key" do
-        assert_kind_of String, key
-      end
-      it "is ASCII" do
-        assert_equal Encoding::ASCII, key.encoding
-      end
-      it "has correct length" do
-        assert_equal 40, key.size
-      end
-      it "is Z85 and correct" do
-        assert_equal cert.secret_key, CZTop::Z85.new.decode(key)
+      context "with invalid format" do
+        When(:result) { cert.secret_key(format: :foo) }
+        Then { result == Failure(ArgumentError) }
       end
     end
 
@@ -170,8 +159,8 @@ describe CZTop::Certificate do
       end
 
       describe ".new_from" do
-        Given(:public_key) { cert.public_key }
-        Given(:secret_key) { cert.secret_key }
+        Given(:public_key) { cert.public_key(format: :binary) }
+        Given(:secret_key) { cert.secret_key(format: :binary) }
         When(:new_cert) do
           CZTop::Certificate.new_from(public_key, secret_key)
         end

@@ -55,24 +55,24 @@ describe CZTop::ZsockOptions do
       end
     end
 
-    describe "curve_serverkey" do
-      context "unset key" do
+    describe "#curve_serverkey" do
+      context "with key not set" do
         it "returns nil" do
           assert_nil options.curve_serverkey
         end
       end
       context "with valid key" do
         let(:cert) { CZTop::Certificate.new }
-        let(:key_bin) { cert.public_key }
-        let(:key_z85) { cert.public_key_txt }
+        let(:key_bin) { cert.public_key(format: :binary) }
+        let(:key_z85) { cert.public_key(format: :z85) }
         context "as binary" do
-          it "behaves correctly" do
+          it "sets and gets key" do
             options.curve_serverkey = key_bin
             assert_equal key_z85, options.curve_serverkey
           end
         end
         context "as Z85" do
-          it "sets behaves correctly" do
+          it "sets and gets key" do
             options.curve_serverkey = key_z85
             assert_equal key_z85, options.curve_serverkey
           end

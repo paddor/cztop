@@ -13,23 +13,29 @@ module CZTop
     # @!group CURVE Security
 
     # Enables CURVE security and makes this socket a CURVE server.
-    # @param secret_key [String] this socket's secret key,
-    #   so remote client sockets are able to authenticate this server
-    # @param zap_domain [String] ZAP domain used in authentication
-    def make_secure_server(secret_key, zap_domain)
+    # @param certificate [Certificate] this server's certificate,
+    #   so remote clients are able to authenticate this server
+    def make_secure_server(cert)
       options.curve_server = true
-      options.zap_domain = zap_domain
-      options.curve_secretkey = secret_key
+      cert.apply(self) # NOTE: desired: raises if no secret key in cert
     end
 
     # Enables CURVE security and makes this socket a CURVE client.
-    # @param secret_key [String] client's secret key, to secure communication
-    #   (and be authenticated by the server)
-    # @param server_public_key [String] the remote server's public key, so
-    #   this socket is able to authenticate the server
-    def make_secure_client(secret_key, server_public_key)
-      options.curve_secretkey = secret_key
-      options.curve_serverkey = server_public_key
+    # @param client_certificate [Certificate] client's certificate, to secure
+    #   communication (and be authenticated by the server)
+    # @param server_certificate [Certificate] the remote server's certificate,
+    #   so this socket is able to authenticate the server
+    # @raise [SecurityError] if the server's secret key is set in server_cert,
+    #   which means it's not secret anymore
+    # @raise [Certificate::Error] if the secret key in client_certificate is
+    #   missing
+    def make_secure_client(client_cert, server_cert)
+      if server_cert.secret_key
+        raise SecurityError, "server's secret key not secret"
+      end
+
+      client_cert.apply(self) # NOTE: desired: raises if no secret key in cert
+      options.curve_serverkey = server_cert.public_key
     end
 
     # @!endgroup

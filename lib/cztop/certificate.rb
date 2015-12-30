@@ -24,15 +24,15 @@ module CZTop
     end
 
     # Creates a new certificate from the given keys.
-    # @param public_key [String] binary public key
-    # @param secret_key [String] binary secret key
+    # @param public_key [String] binary public key (32 bytes)
+    # @param secret_key [String] binary secret key (32 bytes)
     # @return [Certificate] the fresh certificate
     def self.new_from(public_key, secret_key)
       raise Error, "no public key given" unless public_key
       raise Error, "no secret key given" unless secret_key
 
-      raise Error, "invalid public key size" if public_key.bytesize!=KEY_BYTES
-      raise Error, "invalid secret key size" if secret_key.bytesize!=KEY_BYTES
+      raise Error, "invalid public key size" if public_key.bytesize != 32
+      raise Error, "invalid secret key size" if secret_key.bytesize != 32
 
       ptr = Zcert.new_from(public_key, secret_key)
       raise Error if ptr.null?
@@ -44,9 +44,6 @@ module CZTop
       attach_ffi_delegate(Zcert.new)
     end
 
-    # length of a binary key in bytes
-    KEY_BYTES = 32
-
     # Returns the public key either as Z85-encoded ASCII string (default) or
     # binary string.
     # @param format [Symbol] +:z85+ for Z85, +:binary+ for binary
@@ -56,7 +53,7 @@ module CZTop
       when :z85
         ffi_delegate.public_txt.read_string.force_encoding(Encoding::ASCII)
       when :binary
-        ffi_delegate.public_key.read_string(KEY_BYTES)
+        ffi_delegate.public_key.read_string(32)
       else
         raise ArgumentError, "invalid format: %p" % format
       end
@@ -72,15 +69,14 @@ module CZTop
       case format
       when :z85
         key = ffi_delegate.secret_txt.read_string.force_encoding(Encoding::ASCII)
-        return nil if key.count("\0") >= KEY_BYTES # NOTE: 32 when key unset
-        key
+        return nil if key.count("0") == 40
       when :binary
-        key = ffi_delegate.secret_key.read_string(KEY_BYTES)
-        return nil if key.count("\0") == KEY_BYTES
-        key
+        key = ffi_delegate.secret_key.read_string(32)
+        return nil if key.count("\0") == 32
       else
         raise ArgumentError, "invalid format: %p" % format
       end
+      key
     end
 
     # Get metadata.

@@ -85,28 +85,9 @@ module CZTop
           raise "unknown ZMQ security mechanism code: %i" % code
       end
 
-      # Sets the secret key, so the zocket can authenticate itself to a remote
-      # server or client.
-      # @param key [String] Z85 (40 bytes) or binary (32 bytes) secret key
-      # @raise [ArgumentError] if key has wrong size
-      # TODO: does it also set the public key?
-      def curve_secretkey=(key)
-        case key.bytesize
-        when 40
-          Z.set_curve_secretkey(@zocket, key)
-        when 32
-          ptr = ::FFI::MemoryPointer.from_string(key)
-          Z.set_curve_secretkey_bin(@zocket, ptr)
-        else
-          raise ArgumentError, "invalid secret key: %p" % key
-        end
-      end
-
       # @return [String] Z85 encoded secret key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
-      # TODO: check if empty string is returned if mechanism == curve, but
-      # secret key not set
       def curve_secretkey
         return nil if mechanism != :curve
         ptr = Z.curve_secretkey(@zocket)
@@ -114,63 +95,72 @@ module CZTop
         ptr.read_string
       end
 
-#      def curve_publickey
-#        return nil if mechanism != :curve
-#        ptr = Z.curve_publickey(@zocket)
-#        return nil if ptr.null?
-#        ptr.read_string
-#      end
-
-
-#char * zsock_curve_publickey (void *self);
-#void zsock_set_curve_publickey (void *self, const char * curve_publickey);
-#void zsock_set_curve_publickey_bin (void *self, const byte *curve_publickey);
+      # @return [String] Z85 encoded public key set
+      # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
+      #   supported
+      def curve_publickey
+        return nil if mechanism != :curve
+        ptr = Z.curve_publickey(@zocket)
+        return nil if ptr.null?
+        ptr.read_string
+      end
 
       # Gets the ZAP domain used for authentication.
       # @see http://rfc.zeromq.org/spec:27
       # @return [String]
       def zap_domain
-#char * zsock_zap_domain (void *self);
         Z.zap_domain(@zocket).read_string
       end
       # Sets the ZAP domain used for authentication.
       # @param domain [String] the new ZAP domain
       def zap_domain=(domain)
-#void zsock_set_zap_domain (void *self, const char * zap_domain);
         raise ArgumentError, "domain too long" if domain.bytesize > 254
         Z.set_zap_domain(@zocket, domain)
+      end
+
+      # @return [Boolean] whether this zocket is a PLAIN server
+      def plain_server?() Z.plain_server(@zocket) > 0 end
+
+      # Make this zocket a PLAIN server.
+      # @param bool [Boolean]
+      def plain_server=(bool) Z.set_plain_server(@zocket, bool ? 1 : 0) end
+
+      # @return [String] username set for PLAIN mechanism
+      # @return [nil] if the current mechanism isn't PLAIN
+      def plain_username
+        return nil if mechanism != :plain
+        Z.plain_username(@zocket).read_string
+      end
+      # @param username [String] set username for PLAIN mechanism
+      def plain_username=(username)
+        Z.set_plain_username(@zocket, username)
+      end
+      # @return [String] password set for PLAIN mechanism
+      # @return [nil] if the current mechanism isn't PLAIN
+      def plain_password
+        return nil if mechanism != :plain
+        Z.plain_password(@zocket).read_string
+      end
+      # @param username [String] set password for PLAIN mechanism
+      def plain_password=(password)
+        Z.set_plain_password(@zocket, password)
       end
 
       # @!endgroup
 
       # @return [Integer] the timeout when receiving a message
-      def rcvtimeo
-        #int zsock_rcvtimeo (void *self);
-        Z.rcvtimeo(@zocket)
-      end
+      def rcvtimeo() Z.rcvtimeo(@zocket) end
       # @param timeout [Integer] new timeout
-      def rcvtimeo=(timeout)
-        #void zsock_set_rcvtimeo (void *self, int rcvtimeo);
-        Z.set_rcvtimeo(@zocket, timeout)
-      end
+      def rcvtimeo=(timeout) Z.set_rcvtimeo(@zocket, timeout) end
 
       # @return [Integer] the timeout when sending a message
-      def sndtimeo
-        #int zsock_sndtimeo (void *self);
-        Z.sndtimeo(@zocket)
-      end
+      def sndtimeo() Z.sndtimeo(@zocket) end
       # @param timeout [Integer] new timeout
-      def sndtimeo=(timeout)
-        #void zsock_set_sndtimeo (void *self, int sndtimeo);
-        Z.set_sndtimeo(@zocket, timeout)
-      end
+      def sndtimeo=(timeout) Z.set_sndtimeo(@zocket, timeout) end
 
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_tos (void *self);
-#int zsock_plain_server (void *self);
-#char * zsock_plain_username (void *self);
-#char * zsock_plain_password (void *self);
 #int zsock_gssapi_server (void *self);
 #int zsock_gssapi_plaintext (void *self);
 #char * zsock_gssapi_principal (void *self);
@@ -209,9 +199,6 @@ module CZTop
 #void zsock_set_req_relaxed (void *self, int req_relaxed);
 #void zsock_set_req_correlate (void *self, int req_correlate);
 #void zsock_set_conflate (void *self, int conflate);
-#void zsock_set_plain_server (void *self, int plain_server);
-#void zsock_set_plain_username (void *self, const char * plain_username);
-#void zsock_set_plain_password (void *self, const char * plain_password);
 #void zsock_set_gssapi_server (void *self, int gssapi_server);
 #void zsock_set_gssapi_plaintext (void *self, int gssapi_plaintext);
 #void zsock_set_gssapi_principal (void *self, const char * gssapi_principal);

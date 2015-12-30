@@ -56,11 +56,13 @@ describe CZTop::Certificate do
       context "with undefined secret key" do
         # NOTE: this happens when cert was loaded from file created with
         # #save_public
-        let(:undefined_key) { "\0" * 32 }
-        let(:pointer) { double(read_string: undefined_key) }
+        let(:undefined_z85) { "0" * 40 }
+        let(:undefined_bin) { "\0" * 32 }
+        let(:pointer_z85) { double(read_string: undefined_z85) }
+        let(:pointer_bin) { double(read_string: undefined_bin) }
         before(:each) do
-          expect(ffi_delegate).to(receive(:secret_key).and_return(pointer))
-          expect(ffi_delegate).to(receive(:secret_txt).and_return(pointer))
+          expect(ffi_delegate).to(receive(:secret_txt).and_return(pointer_z85))
+          expect(ffi_delegate).to(receive(:secret_key).and_return(pointer_bin))
         end
         it "returns nil" do
           assert_nil cert.secret_key(format: :z85)
@@ -262,6 +264,12 @@ describe CZTop::Certificate do
         context "with invalid path" do
           Given(:path) { "/" }
           Then { result == Failure(CZTop::Certificate::Error) }
+        end
+        context "reading such a file" do
+          Given { cert.save_public(path) }
+          Given(:loaded_cert) { CZTop::Certificate.load(path) }
+          Then { loaded_cert.secret_key.nil? }
+          And { loaded_cert.public_key }
         end
       end
       describe "#save_secret" do

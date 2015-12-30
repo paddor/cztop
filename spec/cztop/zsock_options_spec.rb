@@ -53,6 +53,12 @@ describe CZTop::ZsockOptions do
         options.curve_server = false
         refute options.curve_server?
       end
+
+      it "is mutually exclusive with PLAIN" do
+        options.curve_server = true
+        options.plain_server = true
+        refute_operator options, :curve_server?
+      end
     end
 
     describe "#curve_serverkey" do
@@ -88,22 +94,15 @@ describe CZTop::ZsockOptions do
       end
       context "with valid key" do
         let(:cert) { CZTop::Certificate.new }
-        let(:key_bin) { cert.public_key(format: :binary) }
-        let(:key_z85) { cert.public_key(format: :z85) }
-        context "as binary" do
-          When { options.curve_secretkey = key_bin }
-          Then { key_z85 == options.curve_secretkey }
-        end
-        context "as Z85" do
-          When { options.curve_secretkey = key_z85 }
-          Then { key_z85 == options.curve_secretkey }
-        end
+        let(:key_bin) { cert.secret_key(format: :binary) }
+        let(:key_z85) { cert.secret_key(format: :z85) }
+        When { cert.apply(socket) }
+        Then { key_z85 == options.curve_secretkey }
       end
-      context "with invalid key" do
-        it "raises" do
-          assert_raises(ArgumentError) { options.curve_secretkey = "foo" }
-          assert_raises { options.curve_secretkey = nil }
-        end
+      context "with only CURVE mechanism enabled but no key set" do
+        When { options.curve_server = true } # just enable CURVE
+        Then { options.curve_secretkey.is_a? String }
+        And { not options.curve_secretkey.empty? }
       end
     end
 
@@ -114,13 +113,12 @@ describe CZTop::ZsockOptions do
         end
       end
       context "with PLAIN security" do
-        it "returns :plain"
+        When { options.plain_server = true }
+        Then { :plain == options.mechanism }
       end
       context "with CURVE security" do
-        before(:each) { options.curve_serverkey = "X" * 40 }
-        it "returns :curve" do
-          assert_equal :curve, options.mechanism
-        end
+        When { options.curve_server = true }
+        Then {:curve == options.mechanism }
       end
       context "with GSSAPI security" do
         it "returns :gssapi"
@@ -149,6 +147,46 @@ describe CZTop::ZsockOptions do
         Given(:domain) { "o" * 255 }
         When(:result) { options.zap_domain = domain }
         Then { result == Failure(ArgumentError) }
+      end
+    end
+
+    describe "#plain_server" do
+      it "sets and gets PLAIN server flag" do
+        refute options.plain_server?
+        options.plain_server = true
+        assert options.plain_server?
+        options.plain_server = false
+        refute options.plain_server?
+      end
+
+      it "is mutually exclusive with CURVE" do
+        options.plain_server = true
+        options.curve_server = true
+        refute_operator options, :plain_server?
+      end
+    end
+    describe "#plain_username" do
+      context "with no username set" do
+        Then { options.plain_username.nil? }
+      end
+      context "setting and getting" do
+        Given(:username) { "foo" }
+        When { options.plain_username = username }
+        Then { username == options.plain_username }
+      end
+    end
+    describe "#plain_password" do
+      context "with not PLAIN mechanism" do
+        Then { options.plain_password.nil? }
+      end
+      context "with only username set" do
+        When { options.plain_username = "foo" }
+        Then { "" == options.plain_password }
+      end
+      context "setting and getting" do
+        Given(:password) { "foo" }
+        When { options.plain_password = password }
+        When { password == options.plain_password }
       end
     end
 

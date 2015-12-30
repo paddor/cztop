@@ -56,9 +56,10 @@ module CZTop
       # @param key [String] Z85 (40 bytes) or binary (32 bytes) server key
       # @raise [ArgumentError] if key has wrong size
       def curve_serverkey=(key)
-        if key.bytesize == 40
+        case key.bytesize
+        when 40
           Z.set_curve_serverkey(@zocket, key)
-        elsif key.bytesize == 32
+        when 32
           ptr = ::FFI::MemoryPointer.from_string(key)
           Z.set_curve_serverkey_bin(@zocket, ptr)
         else
@@ -90,9 +91,10 @@ module CZTop
       # @raise [ArgumentError] if key has wrong size
       # TODO: does it also set the public key?
       def curve_secretkey=(key)
-        if key.bytesize == 40
+        case key.bytesize
+        when 40
           Z.set_curve_secretkey(@zocket, key)
-        elsif key.bytesize == 32
+        when 32
           ptr = ::FFI::MemoryPointer.from_string(key)
           Z.set_curve_secretkey_bin(@zocket, ptr)
         else

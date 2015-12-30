@@ -179,6 +179,11 @@ describe CZTop::ZsockOptions do
       context "with not PLAIN mechanism" do
         Then { options.plain_password.nil? }
       end
+      context "with password set" do
+        Given(:password) { "secret" }
+        When { options.plain_password = password }
+        Then { options.plain_password == password }
+      end
       context "with only username set" do
         When { options.plain_username = "foo" }
         Then { "" == options.plain_password }

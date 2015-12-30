@@ -112,13 +112,32 @@ module CZTop
         ptr.read_string
       end
 
-#char * zsock_curve_secretkey (void *self);
-#void zsock_set_curve_secretkey (void *self, const char * curve_secretkey);
-#void zsock_set_curve_secretkey_bin (void *self, const byte *curve_secretkey);
-#
+#      def curve_publickey
+#        return nil if mechanism != :curve
+#        ptr = Z.curve_publickey(@zocket)
+#        return nil if ptr.null?
+#        ptr.read_string
+#      end
+
+
 #char * zsock_curve_publickey (void *self);
 #void zsock_set_curve_publickey (void *self, const char * curve_publickey);
 #void zsock_set_curve_publickey_bin (void *self, const byte *curve_publickey);
+
+      # Gets the ZAP domain used for authentication.
+      # @see http://rfc.zeromq.org/spec:27
+      # @return [String]
+      def zap_domain
+#char * zsock_zap_domain (void *self);
+        Z.zap_domain(@zocket).read_string
+      end
+      # Sets the ZAP domain used for authentication.
+      # @param domain [String] the new ZAP domain
+      def zap_domain=(domain)
+#void zsock_set_zap_domain (void *self, const char * zap_domain);
+        raise ArgumentError, "domain too long" if domain.bytesize > 254
+        Z.set_zap_domain(@zocket, domain)
+      end
 
       # @!endgroup
 
@@ -147,7 +166,6 @@ module CZTop
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_tos (void *self);
-#char * zsock_zap_domain (void *self);
 #int zsock_plain_server (void *self);
 #char * zsock_plain_username (void *self);
 #char * zsock_plain_password (void *self);
@@ -189,7 +207,6 @@ module CZTop
 #void zsock_set_req_relaxed (void *self, int req_relaxed);
 #void zsock_set_req_correlate (void *self, int req_correlate);
 #void zsock_set_conflate (void *self, int conflate);
-#void zsock_set_zap_domain (void *self, const char * zap_domain);
 #void zsock_set_plain_server (void *self, int plain_server);
 #void zsock_set_plain_username (void *self, const char * plain_username);
 #void zsock_set_plain_password (void *self, const char * plain_password);

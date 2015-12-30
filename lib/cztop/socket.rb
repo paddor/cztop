@@ -13,23 +13,23 @@ module CZTop
     # @!group CURVE Security
 
     # Enables CURVE security and makes this socket a CURVE server.
-    # @param server_certificate [Certificate] this socket's key (secret and
-    #   public), so remote client sockets are able to authenticate this server
-    # @param domain [String] domain used in authentication
-    def make_secure_server(server_certificate, domain)
+    # @param secret_key [String] this socket's secret key,
+    #   so remote client sockets are able to authenticate this server
+    # @param zap_domain [String] ZAP domain used in authentication
+    def make_secure_server(secret_key, zap_domain)
       options.curve_server = true
-      # TODO
+      options.zap_domain = zap_domain
+      options.curve_secretkey = secret_key
     end
 
     # Enables CURVE security and makes this socket a CURVE client.
-    # @param client_certificate [Certificate] this socket's key (public and
-    #   secret), to secure communication (and be authenticated by the server)
-    # @param server_certificate [Certificate] the remote socket's public key,
-    #   so this socket is able to authenticate the server
-    # @param domain [String] domain used in authentication
-    def make_secure_client(client_certificate, server_certificate, domain)
-      # TODO
-      options.curve_serverkey = server_certificate.public_key
+    # @param secret_key [String] client's secret key, to secure communication
+    #   (and be authenticated by the server)
+    # @param server_public_key [String] the remote server's public key, so
+    #   this socket is able to authenticate the server
+    def make_secure_client(secret_key, server_public_key)
+      options.curve_secretkey = secret_key
+      options.curve_serverkey = server_public_key
     end
 
     # @!endgroup

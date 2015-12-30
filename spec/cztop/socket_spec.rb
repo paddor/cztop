@@ -59,36 +59,51 @@ describe CZTop::Socket do
   describe "#make_secure_server" do
     let(:domain) { "foo realm" }
     let(:server_certificate) { CZTop::Certificate.new }
-    before(:each) do
-      rep_socket.make_secure_server(server_certificate, domain)
+    let(:server_skey) { server_certificate.secret_key }
+    let(:options) { rep_socket.options }
+    When do
+      rep_socket.make_secure_server(server_skey, domain)
     end
-
-    it "sets server certificate"
-    it "sets domain"
-    it "sets CURVE server" do
-      assert rep_socket.options.curve_server?
-    end
+    Then { options.curve_secretkey == server_skey }
+    Then { rep_socket.options.curve_server? }
+    Then { options.zap_domain == domain }
   end
   describe "#make_secure_client" do
-    let(:domain) { "foo realm" }
     let(:server_certificate) { CZTop::Certificate.new }
+    let(:server_public_key) { server_certificate.public_key }
     context "with client certificate" do
       let(:client_certificate) { CZTop::Certificate.new }
+      let(:client_secret_key) { client_certificate.secret_key }
       before(:each) do
-        req_socket.make_secure_client(client_certificate, server_certificate, domain)
+        req_socket.make_secure_client(client_secret_key, server_public_key)
       end
-      context "with complete client certificate" do
-        it "sets client certificate"
+
+      it "sets client secret key" do
+        assert_equal client_secret_key, req_socket.options.curve_secretkey
       end
-      it "sets server public certificate" do
+#      it "sets client public key" do # TODO
+#        assert_equal client_certificate.public_key,
+#          req_socket.options.curve_publickey
+#      end
+      it "sets server's public key" do
         assert_equal server_certificate.public_key, req_socket.options.curve_serverkey
       end
-      it "doesn't set CURVE server"
+      it "doesn't set CURVE server" do
+        refute req_socket.options.curve_server?
+      end
+      it "changes mechanism to :curve" do
+        assert_equal :curve, req_socket.options.mechanism
+      end
     end
 
-    context "with incomplete certificate" do # public key only
-      it "raises"
-    end
+    # TODO: IFF certificates used directly
+#    context "with incomplete certificate" do # public key only
+#      it "raises"
+#    end
+#
+#    context "with secret key in server certificate" do
+#      it "raises" # server's secret key compromised
+#    end
   end
 
   describe "#last_endpoint" do

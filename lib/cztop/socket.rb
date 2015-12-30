@@ -13,18 +13,20 @@ module CZTop
     # @!group CURVE Security
 
     # Enables CURVE security and makes this socket a CURVE server.
-    # @param certificate [Certificate] this server's certificate,
+    # @param cert [Certificate] this server's certificate,
     #   so remote clients are able to authenticate this server
+    # @return [void]
     def make_secure_server(cert)
       options.curve_server = true
       cert.apply(self) # NOTE: desired: raises if no secret key in cert
     end
 
     # Enables CURVE security and makes this socket a CURVE client.
-    # @param client_certificate [Certificate] client's certificate, to secure
+    # @param client_cert [Certificate] client's certificate, to secure
     #   communication (and be authenticated by the server)
-    # @param server_certificate [Certificate] the remote server's certificate,
-    #   so this socket is able to authenticate the server
+    # @param server_cert [Certificate] the remote server's certificate, so
+    #   this socket is able to authenticate the server
+    # @return [void]
     # @raise [SecurityError] if the server's secret key is set in server_cert,
     #   which means it's not secret anymore
     # @raise [Certificate::Error] if the secret key in client_certificate is

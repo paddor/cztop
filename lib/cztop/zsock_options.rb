@@ -131,7 +131,7 @@ module CZTop
         return nil if mechanism != :plain
         Z.plain_username(@zocket).read_string
       end
-      # @param username [String] set username for PLAIN mechanism
+      # @param username [String] username for PLAIN mechanism
       def plain_username=(username)
         Z.set_plain_username(@zocket, username)
       end
@@ -141,7 +141,7 @@ module CZTop
         return nil if mechanism != :plain
         Z.plain_password(@zocket).read_string
       end
-      # @param username [String] set password for PLAIN mechanism
+      # @param password [String] password for PLAIN mechanism
       def plain_password=(password)
         Z.set_plain_password(@zocket, password)
       end

@@ -44,12 +44,20 @@ module CZTop
       # @return [String] Z85 encoded server key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
-      def curve_serverkey()
+      def curve_serverkey
+        curve_key(:curve_serverkey)
+      end
+
+      # Get one of the CURVE keys.
+      # @param key_name [Symbol] something like +:curve_serverkey+
+      # @return [String, nil] key, if CURVE is supported and active, or nil
+      def curve_key(key_name)
         return nil if mechanism != :curve
-        ptr = Z.curve_serverkey(@zocket)
+        ptr = Z.__send__(key_name, @zocket)
         return nil if ptr.null?
         ptr.read_string
       end
+      private :curve_key
 
       # Sets the server's public key, so the zocket can authenticate the
       # remote server.
@@ -89,20 +97,14 @@ module CZTop
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
       def curve_secretkey
-        return nil if mechanism != :curve
-        ptr = Z.curve_secretkey(@zocket)
-        return nil if ptr.null?
-        ptr.read_string
+        curve_key(:curve_secretkey)
       end
 
       # @return [String] Z85 encoded public key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
       def curve_publickey
-        return nil if mechanism != :curve
-        ptr = Z.curve_publickey(@zocket)
-        return nil if ptr.null?
-        ptr.read_string
+        curve_key(:curve_publickey)
       end
 
       # Gets the ZAP domain used for authentication.

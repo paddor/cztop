@@ -25,28 +25,11 @@ describe CZTop::Actor do
   let(:received_messages) { [] }
   let(:yielded) { [] }
 
-  let(:ffi_function) do
-    ::CZMQ::FFI::Zactor.fn do |pipe_delegate, args|
-      pipe = ::CZTop::Socket::PAIR.from_ffi_delegate(pipe_delegate)
-      pipe.signal # mandatory handshake
-      while true
-        begin
-          msg = pipe.receive
-          msg = msg.to_a
-        rescue Interrupt
-          break
-        end
-        break if "$TERM" == msg[0]
-        received_messages << msg
-      end
-    end
-  end
-
   describe "#initialize" do
 
     before(:each) do
       expect(::CZMQ::FFI::Zactor).to receive(:new)
-        .with(kind_of(FFI::Function), nil)
+        .with(kind_of(FFI::Pointer), nil)
         .and_call_original
       expect_any_instance_of(CZTop::Actor).to receive(:attach_ffi_delegate)
         .with(kind_of(::CZMQ::FFI::Zactor))
@@ -55,22 +38,30 @@ describe CZTop::Actor do
         .and_call_original
     end
 
-    let(:shim) { actor.instance_variable_get(:@callback) }
+    let(:callback_shim) { actor.instance_variable_get(:@callback) }
 
-    context "with FFI callback" do
-      let(:actor) { CZTop::Actor.new(ffi_function) }
+    context "with C callback" do # pointer to C function
+      let(:c_function) { CZTop::Beacon::ZBEACON_FPTR }
+      let(:actor) { CZTop::Actor.new(c_function) }
 
-      it "shims it" do
-        refute_nil shim
-        refute_same ffi_function, shim
+      it "doesn't shim it" do
+        assert_same c_function, callback_shim
       end
     end
 
     context "with Proc callback" do
-      let(:proc_) { ->(msg, pipe) { received_messages << msg.to_a } }
+      let(:proc_) do
+        lambda do |msg, pipe|
+          received_messages << msg.to_a
+          yielded << [msg, pipe]
+        end
+      end
+      let(:actor) do
+        CZTop::Actor.new(proc_)
+      end
       it "shims it" do
-        refute_nil shim
-        refute_same ffi_function, shim
+        refute_nil callback_shim
+        refute_same proc_, callback_shim
       end
 
       it "works" do
@@ -98,7 +89,7 @@ describe CZTop::Actor do
     end
 
     context "with faulty handler" do
-      let(:actor) { CZTop::Actor.new { raise } }
+      let(:actor) { CZTop::Actor.new { raise "foobar" } }
       it "warns about it" do
         assert_output nil, /handler.*raised exception/i do
           actor << "foo"

@@ -30,22 +30,19 @@ module CZTop
     #
     # @param callback [FFI::Pointer, Proc, #call] pointer to a C function or
     #   just anything callable
-    # @param ffi_args [FFI::Pointer, nil] args, only useful if callback is an
-    #   FFI::Function
+    # @param c_args [FFI::Pointer, nil] args, only useful if callback is an
+    #   FFI::Pointer
     # @yieldparam message [Message]
     # @yieldparam pipe [Socket::PAIR]
     # @see #process_messages
-    def initialize(callback = nil, ffi_args = nil, &handler)
+    def initialize(callback = nil, c_args = nil, &handler)
       @running = true
       @zactor_mtx = Mutex.new # mutex for zactor_t resource
       @state_mtx = Mutex.new # mutex for actor state (like @running)
-      @handler_thread = nil
-      @handler_dead_signal = Queue.new # used for signaling
-      @handler_dying_signal = Queue.new # used for signaling
       @callback = mk_callback_shim(callback || handler)
-      ffi_delegate = Zactor.new(@callback, ffi_args)
+      ffi_delegate = Zactor.new(@callback, c_args)
       attach_ffi_delegate(ffi_delegate)
-      signal_handler_termination
+      signal_handler_termination if shimmed_handler?
     end
 
     # Same as {SendReceiveMethods#<<}, but raises if actor is terminated.
@@ -93,7 +90,7 @@ module CZTop
       @state_mtx.synchronize do
         return false if not @running
         Message.new(TERM).send_to(self)
-        @handler_dead_signal.pop # wait for handler to return
+        wait_for_handler_to_die
         true
       end
     end
@@ -105,12 +102,12 @@ module CZTop
 
     private
 
-    # Creates the callback shim. The shim is used to ensure we're notified
-    # when the handler has terminated.
+    # Creates the callback shim, in case the handler isn't already an
+    # FFI::Pointer. The shim is used to ensure we're notified when the handler
+    # has terminated.
     #
-    # In case the given handler is an FFI::Function, it's used as-is. The shim
-    # will just pass through the pipe and args. The handler has to do the
-    # handshake (signal) itself.
+    # In case the given handler is an FFI::Pointer (to a C function), it's
+    # used as-is.  The handler has to do the handshake (signal) itself.
     #
     # Otherwise, if it's a Proc or anything else responding to #call, does
     # the handshake then starts receiving messages, passing them to the
@@ -121,27 +118,36 @@ module CZTop
     # @return [FFI::Function] the callback function to be passed to the zactor
     # @raise [ArgumentError] if no handler is given
     def mk_callback_shim(handler)
-      if !handler.respond_to?(:call) && !handler.is_a?(::FFI::Pointer)
-        raise ArgumentError, "invalid handler"
-      end
-      Zactor.fn do |pipe_delegate, args|
-        begin
-          @handler_thread = Thread.current
-          if handler.is_a? ::FFI::Function
-            # pass callback through
-            handler.call(pipe_delegate, args)
-          else
+      if handler.is_a? ::FFI::Pointer
+        handler # use it as-is
+
+      elsif handler.respond_to?(:call)
+        @handler_thread = nil
+        @handler_dead_signal = Queue.new # used for signaling
+        @handler_dying_signal = Queue.new # used for signaling
+
+        Zactor.fn do |pipe_delegate, args|
+          begin
+            @handler_thread = Thread.current
             @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)
             @pipe.signal # handshake, so zactor_new() returns
             process_messages(handler)
+          rescue Exception
+            warn "Handler of #{self} raised exception: #{$!.inspect}"
+            # TODO: store it?
+          ensure
+            @handler_dying_signal.push(nil)
           end
-        rescue Exception
-          warn "Handler of #{self} raised exception: #{$!.inspect}"
-          # TODO: store it?
-        ensure
-          @handler_dying_signal.push(nil)
         end
+      else
+        raise ArgumentError, "invalid handler"
       end
+    end
+
+    # @return [Boolean] whether the handler is a Ruby object (as opposed to
+    #   a C function)
+    def shimmed_handler?
+      !!@handler_thread # if it exists, it's shimmed
     end
 
     # the command which causes an actor handler to terminate
@@ -179,7 +185,7 @@ module CZTop
     end
 
     # Creates a new thread that will signal the definitive termination of the
-    # handler.
+    # Ruby handler.
     #
     # This is needed to avoid the race condition between zactor_destroy()
     # which will wait for a signal from the handler in case it was able to
@@ -198,9 +204,24 @@ module CZTop
       Thread.new do
         @handler_dying_signal.pop
         sleep 0.01 while @handler_thread.alive?
+
+        # NOTE: we do this here and not in #terminate, so it also works when
+        # actor isn't terminated using #terminate, and #terminated? won't
+        # block forever
         @running = false
 
         @handler_dead_signal.push(nil)
+      end
+    end
+
+    # Waits for the C or Ruby handler to die.
+    # @return [void]
+    def wait_for_handler_to_die
+      if shimmed_handler?
+        @handler_dead_signal.pop
+      else
+        wait # relying on normal death signal
+        @running = false
       end
     end
   end

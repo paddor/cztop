@@ -45,7 +45,8 @@ module CZTop
       signal_handler_termination if shimmed_handler?
     end
 
-    # Same as {SendReceiveMethods#<<}, but raises if actor is terminated.
+    # Same as {SendReceiveMethods#<<}, but thread-safe and raises if actor is
+    # terminated.
     # @param message [Object] message to send to the actor, see {Message.coerce}
     # @return [self]
     # @raise [DeadActorError] if actor is terminated
@@ -80,6 +81,27 @@ module CZTop
       @zactor_mtx.synchronize do
         message.send_to(self)
         Message.receive_from(self)
+      end
+    end
+
+    # Sends a message according to a "picture".
+    # @see zsock_send() on http://api.zeromq.org/czmq3-0:zsock
+    # @param picture [String] message's part types
+    # @param args [String, Integer, ...] values, in FFI style (each one
+    #   preceeded with it's type, like <tt>:string, "foo"</tt>)
+    # @return [void]
+    def send_picture(picture, *args)
+      raise DeadActorError if not @running
+      @zactor_mtx.synchronize do
+        Zsock.send(ffi_delegate, picture, *args)
+      end
+    end
+
+    # Thread-safe {PolymorphicZsockMethods#wait}.
+    # @return [Integer]
+    def wait
+      @zactor_mtx.synchronize do
+        super
       end
     end
 

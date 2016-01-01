@@ -99,6 +99,46 @@ describe CZTop::Actor do
     end
   end
 
+  describe "#send_picture" do
+    let(:ffi_delegate) { actor.ffi_delegate }
+    let(:picture) { "si" }
+    let(:ffi_args) { [ :string, "foo", :int, 42 ] }
+    it "sends picture" do
+      expect(::CZMQ::FFI::Zsock).to receive(:send)
+        .with(ffi_delegate, picture, *ffi_args)
+      actor.send_picture(picture, *ffi_args)
+    end
+
+    context "with dead actor" do
+      before(:each) { actor.terminate }
+      it "raises DeadActorError" do
+        assert_raises(CZTop::Actor::DeadActorError) do
+          actor.send_picture("s", :string, "foo")
+        end
+      end
+    end
+  end
+
+  describe "#wait" do
+    let(:actor) do
+      CZTop::Actor.new do |msg, pipe|
+        case msg[0]
+        when "SIGNAL0"
+          pipe.signal(0)
+        when "SIGNAL1"
+          pipe.signal(1)
+        end
+      end
+    end
+
+    it "waits for signal" do
+      actor << "SIGNAL0"
+      assert_equal 0, actor.wait
+      actor << "SIGNAL1"
+      assert_equal 1, actor.wait
+    end
+  end
+
   describe "#process_messages" do
     it "breaks on $TERM" do
       # can't use #<<

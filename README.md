@@ -84,47 +84,50 @@ your central server (broker), so they're ready to get tasks to assigned to them
 #!/usr/bin/env ruby
 # worker.rb
 
-config = CZTop::Config.load(ENV[:WORKER_CONFIG])
-endpoint = config["broker/address"]
-socket = CZTop::Socket::DEALER.new(endpoint)
+endpoint = ENV[:BROKER_ADDRESS]
+broker_cert = CZTop::Certificate.load ENV[:BROKER_CERT] # public only
+clint_cert = CZTop::Certificate.load ENV[:CLIENT_CERT]
+
+socket = CZTop::Socket::DEALER.new
+socket.make_secure_client(client_cert, broker_cert)
+socket.connect(endpoint)
 
 while message = socket.receive
   puts "received message with #{message.size} frames"
-  message.frames.each.with_index do |frame, i|
-    puts "frame #%i: %p" % [ i, frame.to_s ]
-  end
+  p message.to_a
 end
-
-# TODO:
-# * describe security
-#   - loading broker's public key (CZTop::Certificate)
-#   - loading client's certificate (CZTop::Certificate)
 ```
 
 ```ruby
 #!/usr/bin/env ruby
 # server.rb
 
-config = CZTop::Config.load(ENV[:BROKER_CONFIG])
-endpoint = config["broker/address"]
-socket = CZTop::Socket::ROUTER.new(endpoint)
+endpoint = ENV[:BROKER_ADDRESS]
+broker_cert = CZTop::Certificate.load ENV[:BROKER_CERT] # secret+public
+client_certs = ENV[:CLIENT_CERTS] # /path/to/client_certs/
+workers = Pathname.new(client_certs).children.map(&:to_s)
+
+authenticator = CZTop::Authenticator.new
+authenticator.curve(client_certs)
+
+socket = CZTop::Socket::ROUTER
+socket.make_secure_server(broker_cert)
+socket.bind(endpoint)
 
 # ...
 
 ##
 # assuming all workers have connected by now
 #
-config["workers"].direct_children.each do |worker|
-  message = CZTop::Message.new([ worker.name, "", "take a break"])
-  socket << message
+workers.each do |worker|
+  socket << [ worker, "", "take a break"]
 end
 
 # TODO:
-# * describe security
-#   - loading broker's certificate (CZTop::Certificate)
-#   - allowing all client public keys from a directory (CZTop::CertificateStore)
 # * nicer way to send a message to a specific worker
 #   - CZTop::Socket::ROUTER#send_to(receiver, message)
+# * heartbeating
+# * raise when sending message to a client that isn't connected
 ```
 
 ## Documentation

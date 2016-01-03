@@ -1,13 +1,19 @@
 require_relative '../spec_helper'
 
+describe "CZTop::Beacon::ZBEACON_FPTR" do
+  it "points to a dynamic library symbol" do
+    assert_kind_of FFI::DynamicLibrary::Symbol, CZTop::Beacon::ZBEACON_FPTR
+  end
+end
+
 describe CZTop::Beacon do
-  subject { described_class.new }
+  subject { CZTop::Beacon.new }
   let(:actor) { subject.actor }
   after(:each) { subject.terminate }
 
-  describe "CZTop::Beacon::ZBEACON_FPTR" do
-    it "points to a dynamic library symbol" do
-      assert_kind_of FFI::DynamicLibrary::Symbol, CZTop::Beacon::ZBEACON_FPTR
+  describe "#initialize" do
+    it "initializes" do
+      subject
     end
   end
 
@@ -26,7 +32,7 @@ describe CZTop::Beacon do
         receive(:recv).with(actor).and_return(hostname))
       subject.configure(port)
     end
-    context "when system doesn't support UDP broadcasts" do
+    context "no support for UDP broadcasts" do
       let(:hostname) { "" }
       it "raises" do
         allow(CZMQ::FFI::Zsock).to receive(:send)

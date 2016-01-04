@@ -1,5 +1,6 @@
 module CZTop
   # Represents a CZMQ::FFI::Zframe.
+  # @see http://api.zeromq.org/czmq3-0:zframe
   class Frame
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods

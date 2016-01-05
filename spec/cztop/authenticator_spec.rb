@@ -1,14 +1,18 @@
 require_relative '../spec_helper'
 
+describe "CZTop::Authenticator::ZAUTH_FPTR" do
+  it "points to a dynamic library symbol" do
+    assert_kind_of FFI::DynamicLibrary::Symbol, CZTop::Authenticator::ZAUTH_FPTR
+  end
+end
+
 describe CZTop::Authenticator do
   subject { CZTop::Authenticator.new }
   let(:actor) { subject.actor }
   after(:each) { subject.terminate }
 
-  describe "CZTop::Authenticator::ZAUTH_FPTR" do
-    it "points to a dynamic library symbol" do
-      assert_kind_of FFI::DynamicLibrary::Symbol, CZTop::Authenticator::ZAUTH_FPTR
-    end
+  it "initializes" do
+    subject
   end
 
   describe "#actor" do

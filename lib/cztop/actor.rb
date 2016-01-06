@@ -240,8 +240,12 @@ module CZTop
     # @return [void]
     def wait_for_handler_to_die
       if shimmed_handler?
+        # for Ruby block/Proc object handlers
         @handler_dead_signal.pop
+
       else
+        # for handlers that are passed as C functions
+
         wait # relying on normal death signal
         @running = false
       end

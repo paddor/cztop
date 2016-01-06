@@ -156,7 +156,6 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Monitor [ ]
   - Authenticator [x]
   - Certificate [X]
-  - CertificateStore [ ]
   - Config [x]
   - Proxy [ ]
   - Z85 [x]

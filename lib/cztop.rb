@@ -16,7 +16,6 @@ require_relative 'cztop/actor'
 require_relative 'cztop/authenticator'
 require_relative 'cztop/beacon'
 require_relative 'cztop/certificate'
-require_relative 'cztop/certificate_store'
 require_relative 'cztop/config'
 require_relative 'cztop/frame'
 require_relative 'cztop/message'
@@ -40,6 +39,7 @@ CZMQ::FFI::Signals.disable_default_handling
 ##
 # Probably useless in this Ruby binding.
 #
+#  class CertificateStore; end
 #  class Poller; end
 #  class UUID; end
 #  class Dir; end

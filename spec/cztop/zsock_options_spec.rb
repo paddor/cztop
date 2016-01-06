@@ -210,5 +210,20 @@ describe CZTop::ZsockOptions do
         assert_equal 7, options.rcvtimeo
       end
     end
+
+    describe "#router_mandatory=" do
+      let(:socket) { CZTop::Socket::ROUTER.new }
+
+      it "can set the flag" do
+        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory)
+          .with(socket, 1)
+        options.router_mandatory = true
+      end
+      it "can unset the flag" do
+        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory)
+          .with(socket, 0)
+        options.router_mandatory = false
+      end
+    end
   end
 end

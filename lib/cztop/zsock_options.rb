@@ -160,6 +160,12 @@ module CZTop
       # @param timeout [Integer] new timeout
       def sndtimeo=(timeout) Z.set_sndtimeo(@zocket, timeout) end
 
+      # Accept only routable messages on ROUTER sockets. Default is off.
+      # @param bool [Boolean] whether to error if a message isn't routable
+      #   (either if the that peer isn't connected or its SNDHWM is reached)
+      def router_mandatory=(bool) Z.set_router_mandatory(@zocket, bool ? 1 : 0) end
+
+
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_tos (void *self);
@@ -196,7 +202,6 @@ module CZTop
 #//  Set socket options
 #void zsock_set_tos (void *self, int tos);
 #void zsock_set_router_handover (void *self, int router_handover);
-#void zsock_set_router_mandatory (void *self, int router_mandatory);
 #void zsock_set_probe_router (void *self, int probe_router);
 #void zsock_set_req_relaxed (void *self, int req_relaxed);
 #void zsock_set_req_correlate (void *self, int req_correlate);

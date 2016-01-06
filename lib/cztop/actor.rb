@@ -86,6 +86,9 @@ module CZTop
 
     # Sends a message according to a "picture".
     # @see zsock_send() on http://api.zeromq.org/czmq3-0:zsock
+    # @note Mainly added for {Beacon}. If implemented there, it wouldn't be
+    #   thread safe. And it's not that useful to be added to
+    #   {SendReceiveMethods}.
     # @param picture [String] message's part types
     # @param args [String, Integer, ...] values, in FFI style (each one
     #   preceeded with it's type, like <tt>:string, "foo"</tt>)

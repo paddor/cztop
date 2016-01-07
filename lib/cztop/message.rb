@@ -32,13 +32,22 @@ module CZTop
       content_size.zero?
     end
 
+    # Used when a message couldn't be sent, particularly when the
+    # ROUTER_MANDATORY flag is set on a {Socket::ROUTER} socket and the peer
+    # isn't connected or its SNDHWM is reached.
+    # @see ZsockOptions#router_mandatory=
+    class SendError < RuntimeError; end
+
     # Send {Message} to a {Socket} or {Actor}.
     # @param destination [Socket, Actor]
     # @note Do not use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
     # @return [void]
+    # @raise [SendError] if the message can't be sent/routed right now
     def send_to(destination)
-      Zmsg.send(ffi_delegate, destination)
+      rc = Zmsg.send(ffi_delegate, destination)
+      # TODO: Check zmq_errno for EAGAIN. If so, raise WaitWritable.
+      raise SendError, "unable to send message" if rc == -1
     end
 
     # Receive a {Message} from a {Socket} or {Actor}.

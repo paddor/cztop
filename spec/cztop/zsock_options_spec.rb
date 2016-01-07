@@ -224,6 +224,15 @@ describe CZTop::ZsockOptions do
           .with(socket, 0)
         options.router_mandatory = false
       end
+      context "with flag set and message unroutable" do
+        before(:each) { options.router_mandatory = true }
+        let(:identity) { "receiver identity" }
+        let(:content) { "foobar" }
+        let(:msg) { [ identity, "", content ] }
+        it "raises" do
+          assert_raises(CZTop::Message::SendError) { socket << msg }
+        end
+      end
     end
   end
 end

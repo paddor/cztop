@@ -165,6 +165,10 @@ module CZTop
       #   (either if the that peer isn't connected or its SNDHWM is reached)
       def router_mandatory=(bool) Z.set_router_mandatory(@zocket, bool ? 1 : 0) end
 
+      # @return [String] current socket identity
+      def identity() Z.identity(@zocket).read_string end
+      # @param identity [String] new socket identity
+      def identity=(identity) Z.set_identity(@zocket, identity) end
 
 # TODO: a reasonable subset of these
 #//  Get socket options
@@ -178,7 +182,6 @@ module CZTop
 #int zsock_ipv4only (void *self);
 #int zsock_type (void *self);
 #int zsock_affinity (void *self);
-#char * zsock_identity (void *self);
 #int zsock_rate (void *self);
 #int zsock_recovery_ivl (void *self);
 #int zsock_sndbuf (void *self);
@@ -218,7 +221,6 @@ module CZTop
 #void zsock_set_affinity (void *self, int affinity);
 #void zsock_set_subscribe (void *self, const char * subscribe);
 #void zsock_set_unsubscribe (void *self, const char * unsubscribe);
-#void zsock_set_identity (void *self, const char * identity);
 #void zsock_set_rate (void *self, int rate);
 #void zsock_set_recovery_ivl (void *self, int recovery_ivl);
 #void zsock_set_sndbuf (void *self, int sndbuf);

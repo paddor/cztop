@@ -234,5 +234,20 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+
+    describe "#identity" do
+      context "with no identity set" do
+        it "returns empty string" do
+          assert_equal "", options.identity
+        end
+      end
+      context "with identity set" do
+        let(:identity) { "foobar" }
+        before(:each) { options.identity = identity }
+        it "returns identity" do
+          assert_equal identity, options.identity
+        end
+      end
+    end
   end
 end

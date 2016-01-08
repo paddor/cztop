@@ -97,7 +97,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Actor [x]
   - Beacon [x]
   - Socket [x]
-    - Options to encapsulate all option setters and getters [ ]
+    - Options to encapsulate all option setters and getters [50%]
     - Security mechanisms [x]
   - Message [x]
   - Frame [x]
@@ -110,8 +110,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Config [x]
   - Proxy [ ]
   - Z85 [x]
-* specify runnable specs
-  - lot of outlining already done
+* specs [x]
 * write the missing XML API files in CZMQ
   - zarmour.xml [x]
   - zconfig.xml [x]

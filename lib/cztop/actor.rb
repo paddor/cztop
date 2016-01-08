@@ -45,10 +45,9 @@ module CZTop
       signal_handler_termination if shimmed_handler?
     end
 
-    # Same as {SendReceiveMethods#<<}, but thread-safe and raises if actor is
-    # terminated.
+    # Send a message to the actor.
     # @param message [Object] message to send to the actor, see {Message.coerce}
-    # @return [self]
+    # @return [self] so it's chainable
     # @raise [DeadActorError] if actor is terminated
     # @note Normally this method is asynchronous, but if the message is
     #   "$TERM", it blocks until the actor is terminated.
@@ -67,6 +66,16 @@ module CZTop
         end
       end
       self
+    end
+
+    # Receive a message from the actor.
+    # @return [Message]
+    # @raise [DeadActorError] if actor is terminated
+    def receive
+      raise DeadActorError if not @running
+      @zactor_mtx.synchronize do
+        super
+      end
     end
 
     # Same as {#<<}, but also waits for a response from the actor and returns

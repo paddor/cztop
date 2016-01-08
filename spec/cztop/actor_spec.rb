@@ -252,6 +252,45 @@ describe CZTop::Actor do
     end
   end
 
+  describe "#receive" do
+    let(:actor) do
+      # echo actor
+      CZTop::Actor.new do |msg, pipe|
+        pipe << msg
+      end
+    end
+
+    context "threads" do
+      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      it "is thread-safe" do
+        expect(mutex).to receive(:synchronize).at_least(1)
+          .and_call_original
+        actor << "foo"
+        actor.receive
+      end
+    end
+
+    context "with messages available" do
+      before(:each) do
+        actor << "foo" << "bar"
+      end
+
+      it "returns messages" do
+        assert_equal "foo", actor.receive[0]
+        assert_equal "bar", actor.receive[0]
+      end
+    end
+
+    context "with dead actor" do
+      before(:each) { actor.terminate }
+      it "raises DeadActorError" do
+        assert_raises(CZTop::Actor::DeadActorError) do
+          actor.receive
+        end
+      end
+    end
+  end
+
   describe "#request" do
     let(:actor) do
       CZTop::Actor.new do |msg, pipe|

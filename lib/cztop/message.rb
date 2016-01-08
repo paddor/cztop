@@ -60,20 +60,37 @@ module CZTop
       from_ffi_delegate(delegate)
     end
 
-    # Append something to this message.
-    # @param obj [String, Frame]
-    # @raise [ArgumentError] if obj has an invalid type
+    # Append a frame to this message.
+    # @param frame [String, Frame] what to append
+    # @raise [ArgumentError] if frame has an invalid type
     # @note If you provide a {Frame}, do NOT use that frame afterwards
     #   anymore, as its native counterpart will have been destroyed.
     # @return [void]
-    def <<(obj)
-      case obj
+    def <<(frame)
+      case frame
       when String
-        ffi_delegate.addstr(obj)
+        ffi_delegate.addstr(frame)
       when Frame
-        ffi_delegate.append(obj.ffi_delegate)
+        ffi_delegate.append(frame.ffi_delegate)
       else
-        raise ArgumentError, "invalid object: %p" % obj
+        raise ArgumentError, "invalid frame: %p" % frame
+      end
+    end
+
+    # Prepend a frame to this message.
+    # @param frame [String, Frame] what to prepend
+    # @raise [ArgumentError] if frame has an invalid type
+    # @note If you provide a {Frame}, do NOT use that frame afterwards
+    #   anymore, as its native counterpart will have been destroyed.
+    # @return [void]
+    def prepend(frame)
+      case frame
+      when String
+        ffi_delegate.pushstr(frame)
+      when Frame
+        ffi_delegate.prepend(frame.ffi_delegate)
+      else
+        raise ArgumentError, "invalid frame: %p" % frame
       end
     end
 

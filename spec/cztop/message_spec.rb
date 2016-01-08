@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 
 describe CZTop::Message do
   include_examples "has FFI delegate"
-  let(:msg) { described_class.new }
+  let(:msg) { CZTop::Message.new }
 
   describe "#initialize" do
     subject { CZTop::Message.new }
@@ -72,20 +72,45 @@ describe CZTop::Message do
   end
 
   describe "#<<" do
-    Then { msg.size == 0 }
+    Given(:msg) { CZTop::Message.new "foo" }
+    Then { msg.size == 1 }
     context "with a string" do
-      Given(:obj) { "foo" }
-      When { msg << obj }
-      Then { msg.size == 1 }
+      Given(:frame) { "bar" }
+      When { msg << frame }
+      Then { msg.size == 2 }
+      And { msg.to_a == %w[foo bar] }
     end
     context "with a frame" do
-      Given(:obj) { CZTop::Frame.new("foo") }
-      When { msg << obj }
-      Then { msg.size == 1 }
+      Given(:frame) { CZTop::Frame.new("bar") }
+      When { msg << frame }
+      Then { msg.size == 2 }
+      And { msg.to_a == %w[foo bar] }
     end
     context "with something else" do
-      Given(:obj) { Object.new }
-      When(:result) { msg << obj }
+      Given(:frame) { Object.new }
+      When(:result) { msg << frame }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
+
+  describe "#prepend" do
+    Given(:msg) { CZTop::Message.new "foo" }
+    Then { msg.size == 1 }
+    context "with a string" do
+      Given(:frame) { "bar" }
+      When { msg.prepend frame }
+      Then { msg.size == 2 }
+      And { msg.to_a == %w[bar foo] }
+    end
+    context "with a frame" do
+      Given(:frame) { CZTop::Frame.new("bar") }
+      When { msg.prepend frame }
+      Then { msg.size == 2 }
+      And { msg.to_a == %w[bar foo] }
+    end
+    context "with something else" do
+      Given(:frame) { Object.new }
+      When(:result) { msg.prepend frame }
       Then { result == Failure(ArgumentError) }
     end
   end

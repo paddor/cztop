@@ -39,7 +39,7 @@ module CZTop
     class SendError < RuntimeError; end
 
     # Send {Message} to a {Socket} or {Actor}.
-    # @param destination [Socket, Actor]
+    # @param destination [Socket, Actor] where to send this message to
     # @note Do not use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
     # @return [void]

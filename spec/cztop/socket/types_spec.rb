@@ -131,6 +131,17 @@ end
 describe CZTop::Socket::ROUTER do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe "#send_to" do
+    let(:receiver) { "mike" }
+    let(:content) { "foobar" }
+    it "sends message to receiver" do
+      expect(socket).to receive(:<<) do |msg|
+        assert_equal [receiver, "", content], msg.to_a
+      end
+      socket.send_to(receiver, content)
+    end
+  end
 end
 
 describe CZTop::Socket::PUB do

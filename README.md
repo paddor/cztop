@@ -75,59 +75,10 @@ Or install it yourself as:
 
 ## Usage
 
-Suppose you have a set of devices (workers) and you want to connect them to
-your central server (broker), so they're ready to get tasks to assigned to them
-(to specific workers) and complete them. You could do something like this, as
-`worker.rb`:
+See the examples directory for some examples. Here's a very simple one:
 
 ```ruby
-#!/usr/bin/env ruby
-# worker.rb
-
-endpoint = ENV[:BROKER_ADDRESS]
-broker_cert = CZTop::Certificate.load ENV[:BROKER_CERT] # public only
-clint_cert = CZTop::Certificate.load ENV[:CLIENT_CERT]
-
-socket = CZTop::Socket::DEALER.new
-socket.make_secure_client(client_cert, broker_cert)
-socket.connect(endpoint)
-
-while message = socket.receive
-  puts "received message with #{message.size} frames"
-  p message.to_a
-end
-```
-
-```ruby
-#!/usr/bin/env ruby
-# server.rb
-
-endpoint = ENV[:BROKER_ADDRESS]
-broker_cert = CZTop::Certificate.load ENV[:BROKER_CERT] # secret+public
-client_certs = ENV[:CLIENT_CERTS] # /path/to/client_certs/
-workers = Pathname.new(client_certs).children.map(&:to_s)
-
-authenticator = CZTop::Authenticator.new
-authenticator.curve(client_certs)
-
-socket = CZTop::Socket::ROUTER
-socket.make_secure_server(broker_cert)
-socket.bind(endpoint)
-
-# ...
-
-##
-# assuming all workers have connected by now
-#
-workers.each do |worker|
-  socket << [ worker, "", "take a break"]
-end
-
-# TODO:
-# * nicer way to send a message to a specific worker
-#   - CZTop::Socket::ROUTER#send_to(receiver, message)
-# * heartbeating
-# * raise when sending message to a client that isn't connected
+# TODO: Simple PAIR socket example.
 ```
 
 ## Documentation

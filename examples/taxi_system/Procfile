@@ -1,0 +1,3 @@
+driver1: env BROKER_ADDRESS=tcp://127.0.0.1:4455 BROKER_CERT=public_keys/broker CLIENT_CERT=secret_keys/drivers/driver1_secret ./client.rb
+driver2: env BROKER_ADDRESS=tcp://127.0.0.1:4455 BROKER_CERT=public_keys/broker CLIENT_CERT=secret_keys/drivers/driver2_secret ./client.rb
+driver3: env BROKER_ADDRESS=tcp://127.0.0.1:4455 BROKER_CERT=public_keys/broker CLIENT_CERT=secret_keys/drivers/driver3_secret ./client.rb

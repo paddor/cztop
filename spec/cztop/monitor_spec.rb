@@ -74,8 +74,8 @@ describe CZTop::Monitor do
       Thread.new do
         req_socket << "bla"
         warn "sent to REQ"
+        req_socket.disconnect(endpoint)
       end
-      #req_socket.disconnect(endpoint)
       t = Thread.new do
         while event = subject.next
           warn "got event: #{event.inspect}"

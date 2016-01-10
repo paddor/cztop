@@ -67,7 +67,7 @@ module CZTop
     # @raise [ArgumentError] if frame has an invalid type
     # @note If you provide a {Frame}, do NOT use that frame afterwards
     #   anymore, as its native counterpart will have been destroyed.
-    # @return [void]
+    # @return [self] so it can be chained
     def <<(frame)
       case frame
       when String
@@ -77,6 +77,7 @@ module CZTop
       else
         raise ArgumentError, "invalid frame: %p" % frame
       end
+      self
     end
 
     # Prepend a frame to this message.

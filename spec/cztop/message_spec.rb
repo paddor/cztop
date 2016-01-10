@@ -91,6 +91,10 @@ describe CZTop::Message do
       When(:result) { msg << frame }
       Then { result == Failure(ArgumentError) }
     end
+    context "method chaining" do
+      When { msg << "FOO" << "BAR" }
+      Then { msg.to_a == %w[ foo FOO BAR ] }
+    end
   end
 
   describe "#prepend" do

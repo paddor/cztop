@@ -53,7 +53,9 @@ module CZTop
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
     # @return [Message]
-    # @raise [Interrupt] if interrupted while waiting for a message
+    # @raise [Interrupt] if interrupted while waiting for a message, for
+    #   example when the {ZsockOptions::OptionsAccessor#rcvtimeo} has been
+    #   reached
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
       raise Interrupt if delegate.null?

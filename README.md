@@ -104,7 +104,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
     - enumerable Frames [x]
   - Loop [X]
   - Poller [ ]
-  - Monitor [ ]
+  - Monitor [X]
   - Authenticator [x]
   - Certificate [X]
   - Config [x]

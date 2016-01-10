@@ -58,18 +58,18 @@ describe CZTop::Socket do
     end
   end
 
-  describe "#make_secure_server" do
+  describe "#CURVE_server!" do
     let(:certificate) { CZTop::Certificate.new }
     let(:options) { rep_socket.options }
     When do
-      rep_socket.make_secure_server(certificate)
+      rep_socket.CURVE_server!(certificate)
     end
-    Then { rep_socket.options.curve_server? }
-    Then { options.curve_secretkey == certificate.secret_key }
-    Then { options.curve_publickey == certificate.public_key }
+    Then { rep_socket.options.CURVE_server? }
+    Then { options.CURVE_secretkey == certificate.secret_key }
+    Then { options.CURVE_publickey == certificate.public_key }
   end
 
-  describe "#make_secure_client" do
+  describe "#CURVE_client!" do
     let(:tmpdir) do
       Pathname.new(Dir.mktmpdir("zsock_test"))
     end
@@ -84,30 +84,30 @@ describe CZTop::Socket do
 
     context "with client certificate" do
       before(:each) do
-        req_socket.make_secure_client(client_cert, server_cert)
+        req_socket.CURVE_client!(client_cert, server_cert)
       end
 
       it "sets client secret key" do
-        assert_equal client_cert.secret_key, options.curve_secretkey
+        assert_equal client_cert.secret_key, options.CURVE_secretkey
       end
       it "sets client public key" do
-        assert_equal client_cert.public_key, options.curve_publickey
+        assert_equal client_cert.public_key, options.CURVE_publickey
       end
       it "sets server's public key" do
-        assert_equal server_cert.public_key, options.curve_serverkey
+        assert_equal server_cert.public_key, options.CURVE_serverkey
       end
       it "doesn't set CURVE server" do
-        refute options.curve_server?
+        refute options.CURVE_server?
       end
-      it "changes mechanism to :curve" do
-        assert_equal :curve, options.mechanism
+      it "changes mechanism to :CURVE" do
+        assert_equal :CURVE, options.mechanism
       end
     end
     context "with secret key in server certificate" do
       let(:server_cert) { CZTop::Certificate.new }
       it "raises" do # server's secret key compromised
         assert_raises(SecurityError) do
-          req_socket.make_secure_client(client_cert, server_cert)
+          req_socket.CURVE_client!(client_cert, server_cert)
         end
       end
     end

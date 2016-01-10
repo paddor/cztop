@@ -9,7 +9,7 @@ client_cert = CZTop::Certificate.load ENV["CLIENT_CERT"]
 socket = CZTop::Socket::DEALER.new
 socket.options.identity = client_cert["driver_name"]
 puts "set socket identity to: %p" % client_cert["driver_name"]
-socket.make_secure_client(client_cert, broker_cert)
+socket.CURVE_client!(client_cert, broker_cert)
 socket.connect(endpoint)
 puts "connected."
 

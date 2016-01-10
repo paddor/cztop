@@ -35,7 +35,7 @@ authenticator.verbose!
 authenticator.curve(client_certs)
 
 socket = CZTop::Socket::ROUTER.new
-socket.make_secure_server(broker_cert)
+socket.CURVE_server!(broker_cert)
 socket.options.router_mandatory = true # raise when message unroutable
 socket.bind(endpoint)
 puts "bound."
@@ -86,7 +86,7 @@ client_cert = CZTop::Certificate.load ENV["CLIENT_CERT"]
 socket = CZTop::Socket::DEALER.new
 socket.options.identity = client_cert["driver_name"]
 puts "set socket identity to: %p" % client_cert["driver_name"]
-socket.make_secure_client(client_cert, broker_cert)
+socket.CURVE_client!(client_cert, broker_cert)
 socket.connect(endpoint)
 puts "connected."
 

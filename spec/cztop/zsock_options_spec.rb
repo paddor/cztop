@@ -45,26 +45,26 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#curve_server" do
+    describe "#CURVE_server" do
       it "sets and gets CURVE server flag" do
-        refute options.curve_server?
-        options.curve_server = true
-        assert options.curve_server?
-        options.curve_server = false
-        refute options.curve_server?
+        refute options.CURVE_server?
+        options.CURVE_server = true
+        assert options.CURVE_server?
+        options.CURVE_server = false
+        refute options.CURVE_server?
       end
 
       it "is mutually exclusive with PLAIN" do
-        options.curve_server = true
-        options.plain_server = true
-        refute_operator options, :curve_server?
+        options.CURVE_server = true
+        options.PLAIN_server = true
+        refute_operator options, :CURVE_server?
       end
     end
 
-    describe "#curve_serverkey" do
+    describe "#CURVE_serverkey" do
       context "with key not set" do
         it "returns nil" do
-          assert_nil options.curve_serverkey
+          assert_nil options.CURVE_serverkey
         end
       end
       context "with valid key" do
@@ -72,56 +72,56 @@ describe CZTop::ZsockOptions do
         let(:key_bin) { cert.public_key(format: :binary) }
         let(:key_z85) { cert.public_key(format: :z85) }
         context "as binary" do
-          When { options.curve_serverkey = key_bin }
-          Then { key_z85 == options.curve_serverkey }
+          When { options.CURVE_serverkey = key_bin }
+          Then { key_z85 == options.CURVE_serverkey }
         end
         context "as Z85" do
-          When { options.curve_serverkey = key_z85 }
-          Then { key_z85 == options.curve_serverkey }
+          When { options.CURVE_serverkey = key_z85 }
+          Then { key_z85 == options.CURVE_serverkey }
         end
       end
       context "with invalid key" do
         it "raises" do
-          assert_raises(ArgumentError) { options.curve_serverkey = "foo" }
-          assert_raises { options.curve_serverkey = nil }
+          assert_raises(ArgumentError) { options.CURVE_serverkey = "foo" }
+          assert_raises { options.CURVE_serverkey = nil }
         end
       end
     end
 
-    describe "#curve_secretkey" do
+    describe "#CURVE_secretkey" do
       context "with key not set" do
-        Then { options.curve_secretkey.nil? }
+        Then { options.CURVE_secretkey.nil? }
       end
       context "with valid key" do
         let(:cert) { CZTop::Certificate.new }
         let(:key_bin) { cert.secret_key(format: :binary) }
         let(:key_z85) { cert.secret_key(format: :z85) }
         When { cert.apply(socket) }
-        Then { key_z85 == options.curve_secretkey }
+        Then { key_z85 == options.CURVE_secretkey }
       end
       context "with only CURVE mechanism enabled but no key set" do
-        When { options.curve_server = true } # just enable CURVE
-        Then { options.curve_secretkey.is_a? String }
-        And { not options.curve_secretkey.empty? }
+        When { options.CURVE_server = true } # just enable CURVE
+        Then { options.CURVE_secretkey.is_a? String }
+        And { not options.CURVE_secretkey.empty? }
       end
     end
 
     describe "#mechanism" do
       context "with no security" do
-        it "returns :null" do
-          assert_equal :null, options.mechanism
+        it "returns :NULL" do
+          assert_equal :NULL, options.mechanism
         end
       end
       context "with PLAIN security" do
-        When { options.plain_server = true }
-        Then { :plain == options.mechanism }
+        When { options.PLAIN_server = true }
+        Then { :PLAIN == options.mechanism }
       end
       context "with CURVE security" do
-        When { options.curve_server = true }
-        Then {:curve == options.mechanism }
+        When { options.CURVE_server = true }
+        Then { :CURVE == options.mechanism }
       end
       context "with GSSAPI security" do
-        it "returns :gssapi"
+        it "returns :GSSAPI"
       end
       context "with unknown security mechanism" do
         before(:each) do
@@ -150,48 +150,48 @@ describe CZTop::ZsockOptions do
       end
     end
 
-    describe "#plain_server" do
+    describe "#PLAIN_server" do
       it "sets and gets PLAIN server flag" do
-        refute options.plain_server?
-        options.plain_server = true
-        assert options.plain_server?
-        options.plain_server = false
-        refute options.plain_server?
+        refute options.PLAIN_server?
+        options.PLAIN_server = true
+        assert options.PLAIN_server?
+        options.PLAIN_server = false
+        refute options.PLAIN_server?
       end
 
       it "is mutually exclusive with CURVE" do
-        options.plain_server = true
-        options.curve_server = true
-        refute_operator options, :plain_server?
+        options.PLAIN_server = true
+        options.CURVE_server = true
+        refute_operator options, :PLAIN_server?
       end
     end
-    describe "#plain_username" do
+    describe "#PLAIN_username" do
       context "with no username set" do
-        Then { options.plain_username.nil? }
+        Then { options.PLAIN_username.nil? }
       end
       context "setting and getting" do
         Given(:username) { "foo" }
-        When { options.plain_username = username }
-        Then { username == options.plain_username }
+        When { options.PLAIN_username = username }
+        Then { username == options.PLAIN_username }
       end
     end
-    describe "#plain_password" do
+    describe "#PLAIN_password" do
       context "with not PLAIN mechanism" do
-        Then { options.plain_password.nil? }
+        Then { options.PLAIN_password.nil? }
       end
       context "with password set" do
         Given(:password) { "secret" }
-        When { options.plain_password = password }
-        Then { options.plain_password == password }
+        When { options.PLAIN_password = password }
+        Then { options.PLAIN_password == password }
       end
       context "with only username set" do
-        When { options.plain_username = "foo" }
-        Then { "" == options.plain_password }
+        When { options.PLAIN_username = "foo" }
+        Then { "" == options.PLAIN_password }
       end
       context "setting and getting" do
         Given(:password) { "foo" }
-        When { options.plain_password = password }
-        When { password == options.plain_password }
+        When { options.PLAIN_password = password }
+        When { password == options.PLAIN_password }
       end
     end
 

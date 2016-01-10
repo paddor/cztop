@@ -12,7 +12,7 @@ authenticator.verbose!
 authenticator.curve(client_certs)
 
 socket = CZTop::Socket::ROUTER.new
-socket.make_secure_server(broker_cert)
+socket.CURVE_server!(broker_cert)
 socket.options.router_mandatory = true # raise when message unroutable
 socket.bind(endpoint)
 puts "bound."

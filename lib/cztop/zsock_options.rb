@@ -34,37 +34,37 @@ module CZTop
       # @!group (CURVE) Security
 
       # @return [Boolean] whether this zocket is a CURVE server
-      def curve_server?() Zsock.curve_server(@zocket) > 0 end
+      def CURVE_server?() Zsock.curve_server(@zocket) > 0 end
 
       # Make this zocket a CURVE server.
       # @param bool [Boolean]
-      def curve_server=(bool)
+      def CURVE_server=(bool)
         Zsock.set_curve_server(@zocket, bool ? 1 : 0)
       end
 
       # @return [String] Z85 encoded server key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
-      def curve_serverkey
-        curve_key(:curve_serverkey)
+      def CURVE_serverkey
+        CURVE_key(:curve_serverkey)
       end
 
       # Get one of the CURVE keys.
       # @param key_name [Symbol] something like +:curve_serverkey+
       # @return [String, nil] key, if CURVE is supported and active, or nil
-      def curve_key(key_name)
-        return nil if mechanism != :curve
+      def CURVE_key(key_name)
+        return nil if mechanism != :CURVE
         ptr = Zsock.__send__(key_name, @zocket)
         return nil if ptr.null?
         ptr.read_string
       end
-      private :curve_key
+      private :CURVE_key
 
       # Sets the server's public key, so the zocket can authenticate the
       # remote server.
       # @param key [String] Z85 (40 bytes) or binary (32 bytes) server key
       # @raise [ArgumentError] if key has wrong size
-      def curve_serverkey=(key)
+      def CURVE_serverkey=(key)
         case key.bytesize
         when 40
           Zsock.set_curve_serverkey(@zocket, key)
@@ -78,10 +78,10 @@ module CZTop
 
       # supported security mechanisms and their macro value equivalent
       MECHANISMS = {
-        0 => :null,  # ZMQ_NULL
-        1 => :plain, # ZMQ_PLAIN
-        2 => :curve, # ZMQ_CURVE
-        3 => :gssapi # ZMQ_GSSAPI
+        0 => :NULL,  # ZMQ_NULL
+        1 => :PLAIN, # ZMQ_PLAIN
+        2 => :CURVE, # ZMQ_CURVE
+        3 => :GSSAPI # ZMQ_GSSAPI
       }
 
       # @return [Symbol] the current security mechanism in use
@@ -97,15 +97,15 @@ module CZTop
       # @return [String] Z85 encoded secret key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
-      def curve_secretkey
-        curve_key(:curve_secretkey)
+      def CURVE_secretkey
+        CURVE_key(:curve_secretkey)
       end
 
       # @return [String] Z85 encoded public key set
       # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
       #   supported
-      def curve_publickey
-        curve_key(:curve_publickey)
+      def CURVE_publickey
+        CURVE_key(:curve_publickey)
       end
 
       # Gets the ZAP domain used for authentication.
@@ -122,32 +122,32 @@ module CZTop
       end
 
       # @return [Boolean] whether this zocket is a PLAIN server
-      def plain_server?() Zsock.plain_server(@zocket) > 0 end
+      def PLAIN_server?() Zsock.plain_server(@zocket) > 0 end
 
       # Make this zocket a PLAIN server.
       # @param bool [Boolean]
-      def plain_server=(bool)
+      def PLAIN_server=(bool)
         Zsock.set_plain_server(@zocket, bool ? 1 : 0)
       end
 
       # @return [String] username set for PLAIN mechanism
       # @return [nil] if the current mechanism isn't PLAIN
-      def plain_username
-        return nil if mechanism != :plain
+      def PLAIN_username
+        return nil if mechanism != :PLAIN
         Zsock.plain_username(@zocket).read_string
       end
       # @param username [String] username for PLAIN mechanism
-      def plain_username=(username)
+      def PLAIN_username=(username)
         Zsock.set_plain_username(@zocket, username)
       end
       # @return [String] password set for PLAIN mechanism
       # @return [nil] if the current mechanism isn't PLAIN
-      def plain_password
-        return nil if mechanism != :plain
+      def PLAIN_password
+        return nil if mechanism != :PLAIN
         Zsock.plain_password(@zocket).read_string
       end
       # @param password [String] password for PLAIN mechanism
-      def plain_password=(password)
+      def PLAIN_password=(password)
         Zsock.set_plain_password(@zocket, password)
       end
 

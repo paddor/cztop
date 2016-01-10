@@ -16,8 +16,8 @@ module CZTop
     # @param cert [Certificate] this server's certificate,
     #   so remote clients are able to authenticate this server
     # @return [void]
-    def make_secure_server(cert)
-      options.curve_server = true
+    def CURVE_server!(cert)
+      options.CURVE_server = true
       cert.apply(self) # NOTE: desired: raises if no secret key in cert
     end
 
@@ -31,13 +31,13 @@ module CZTop
     #   which means it's not secret anymore
     # @raise [Certificate::Error] if the secret key in client_certificate is
     #   missing
-    def make_secure_client(client_cert, server_cert)
+    def CURVE_client!(client_cert, server_cert)
       if server_cert.secret_key
         raise SecurityError, "server's secret key not secret"
       end
 
       client_cert.apply(self) # NOTE: desired: raises if no secret key in cert
-      options.curve_serverkey = server_cert.public_key
+      options.CURVE_serverkey = server_cert.public_key
     end
 
     # @!endgroup

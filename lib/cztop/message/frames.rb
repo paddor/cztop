@@ -13,6 +13,14 @@ module CZTop
       FramesAccessor.new(self)
     end
 
+    # Removes first frame from message and returns it.
+    # @return [Frame, nil] first frame, if any, or nil
+    def pop
+      ptr = ffi_delegate.pop
+      return nil if ptr.null?
+      Frame.from_ffi_delegate(ptr)
+    end
+
     # Used to access a {Message}'s {Frame}s.
     class FramesAccessor
       include Enumerable

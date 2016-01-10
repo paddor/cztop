@@ -15,6 +15,16 @@ describe CZTop::Message do
       assert_kind_of CZTop::Message::FramesAccessor, frames
     end
   end
+  describe "#pop" do
+    before(:each) { subject << "FOO" << "BAR" }
+    it "returns first part" do
+      assert_equal "FOO", subject.pop.to_s
+    end
+    it "removes it from message" do
+      subject.pop
+      assert_equal %w[BAR], subject.to_a
+    end
+  end
 end
 
 describe CZTop::Message::FramesAccessor do

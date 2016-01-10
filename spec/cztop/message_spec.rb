@@ -119,6 +119,17 @@ describe CZTop::Message do
     end
   end
 
+  describe "#pop" do
+    before(:each) { subject << "FOO" << "BAR" }
+    it "returns first part" do
+      assert_equal "FOO", subject.pop
+    end
+    it "removes it from message" do
+      subject.pop
+      assert_equal %w[BAR], subject.to_a
+    end
+  end
+
   describe "#send_to" do
     let(:delegate) { msg.ffi_delegate }
     let(:destination) { double "destination socket" }

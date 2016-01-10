@@ -97,6 +97,15 @@ module CZTop
       end
     end
 
+    # Removes first part from message and returns it as a string.
+    # @return [String, nil] first part, if any, or nil
+    def pop
+      # NOTE: can't use popstr because the data might be binary
+      ptr = ffi_delegate.pop
+      return nil if ptr.null?
+      Frame.from_ffi_delegate(ptr).to_s
+    end
+
     # @return [Integer] size of this message in bytes
     # @see size
     def content_size

@@ -142,7 +142,11 @@ describe CZTop::Actor do
   describe "#process_messages" do
     it "breaks on $TERM" do
       # can't use #<<
-      CZTop::Message.new("$TERM").send_to(actor)
+      actor.instance_eval do
+        @zactor_mtx.synchronize do
+          CZTop::Message.new("$TERM").send_to(self)
+        end
+      end
       begin
         actor << "foo"
       rescue CZTop::Actor::DeadActorError

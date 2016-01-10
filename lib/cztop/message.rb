@@ -112,6 +112,18 @@ module CZTop
       frames.map(&:to_s)
     end
 
+    # Inspects this {Message}.
+    # @return [String] shows class, number of frames, content size, and
+    #   content (only if it's up to 200 bytes)
+    def inspect
+      s = "#<#{self.class.name}: frames=#{size} content_size=#{content_size}"
+      if content_size <= 200
+        s << " content=" << to_a.inspect
+      end
+      s << ">"
+      s
+    end
+
     # Return a frame's content.
     # @return [String] the frame's content, if it exists
     # @return [nil] if frame doesn't exist at given index

@@ -185,6 +185,28 @@ describe CZTop::Message do
     end
   end
 
+  describe "#inspect" do
+    context "with empty message" do
+      it "has a nice output" do
+        assert_match /Message: frames=0 content_size=0/, msg.inspect
+      end
+    end
+
+    context "with content" do
+      before(:each) { msg << "FOO" << "BAR" }
+      it "has a nice output" do
+        assert_match /Message: frames=2 content_size=6/, msg.inspect
+      end
+    end
+
+    context "with huge message" do
+      before(:each) { msg << "FOO" * 100 } # 300 byte message
+      it "doesn't print the whole content" do
+        assert_operator msg.inspect.size, :<, 50 # shouldn't contain content
+      end
+    end
+  end
+
   describe "#[]" do
     context "with existing frame" do
       subject { CZTop::Message.new %w[ foo ] }

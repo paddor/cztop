@@ -42,7 +42,6 @@ module CZTop
     # @return [void]
     def verbose!
       @actor << VERBOSE
-      @event_handler = nil
     end
 
     # @return [Array<String>] types of valid events

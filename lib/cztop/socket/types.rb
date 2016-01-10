@@ -121,7 +121,8 @@ module CZTop
         attach_ffi_delegate(CZMQ::FFI::Zsock.new_router(endpoints))
       end
 
-      # Send a message to a specific receiver.
+      # Send a message to a specific receiver. This is a shorthand for when
+      # you send a message to a specific receiver with no hops in between.
       # @param receiver [String] receiving peer's socket identity
       # @param message [Message] the message to send
       # @note Do NOT use the message afterwards. It'll have been modified and

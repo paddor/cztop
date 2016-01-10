@@ -5,7 +5,10 @@ module CZTop
   #
   # This is implemented using an {Actor}.
   #
+  # @note This works only on connection oriented transports, like TCP, IPC,
+  #   and TIPC.
   # @see http://api.zeromq.org/czmq3-0:zmonitor
+  # @see http://api.zeromq.org/4-1:zmq-socket-monitor
   class Monitor
     include ::CZMQ::FFI
 
@@ -86,8 +89,8 @@ module CZTop
     #   Thread.new do
     #     monitor = CZTop::Monitor.new(socket)
     #     monitor.listen "CONNECTED", "DISCONNECTED"
-    #     while event = monitor.read
-    #       case event
+    #     while event = monitor.next
+    #       case event[0]
     #       when "CONNECTED"
     #         puts "a client has connected"
     #       when "DISCONNECTED"
@@ -96,7 +99,8 @@ module CZTop
     #     end
     #   end
     #
-    # @return [String] one of the events from {EVENTS}
+    # @return [String] one of the events from {EVENTS}, something like
+    #   <tt>["ACCEPTED", "73", "tcp://127.0.0.1:55585"]</tt>
     def next
       @actor.receive
     end

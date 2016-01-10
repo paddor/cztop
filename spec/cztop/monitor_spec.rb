@@ -9,8 +9,8 @@ end
 describe CZTop::Monitor do
   subject { CZTop::Monitor.new(rep_socket) }
   let(:actor) { subject.actor }
-  i = 0
-  let(:endpoint) { "inproc://endpoint_monitor_spec_#{i+=1}" }
+  i = 55578
+  let(:endpoint) { "tcp://127.0.0.1:#{i+=1}" }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
   let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
 
@@ -65,26 +65,18 @@ describe CZTop::Monitor do
     end
   end
 
-  describe "#next", skip: "WIP" do # FIXME
+  describe "#next" do
     it "gets the next event" do
       subject.verbose!
       subject.listen(*%w[ALL])
       subject.start
-      warn "started"
-      Thread.new do
-        req_socket << "bla"
-        warn "sent to REQ"
-        req_socket.disconnect(endpoint)
-      end
-      t = Thread.new do
-        while event = subject.next
-          warn "got event: #{event.inspect}"
-          break if event == "DISCONNECTED"
-        end
-      end
-      rep_socket.receive
-      warn "received from REP"
-      t.join
+      req_socket # connects
+      req_socket.disconnect(endpoint)
+      subject.actor.options.rcvtimeo = 100
+      assert_equal "ACCEPTED", subject.next[0]
+      rep_socket.ffi_delegate.destroy
+      assert_equal "CLOSED", subject.next[0]
+      assert_equal "MONITOR_STOPPED", subject.next[0]
     end
   end
 end

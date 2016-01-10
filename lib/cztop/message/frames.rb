@@ -8,7 +8,7 @@ module CZTop
     end
 
     # Access to this {Message}'s {Frame}s.
-    # @return [Frames]
+    # @return [FramesAccessor]
     def frames
       FramesAccessor.new(self)
     end

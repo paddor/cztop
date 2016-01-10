@@ -74,7 +74,6 @@ describe CZTop::Monitor do
 
   describe "#next" do
     it "gets the next event" do
-      subject.verbose!
       subject.listen(*%w[ALL])
       subject.start
       req_socket # connects

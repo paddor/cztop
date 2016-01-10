@@ -20,9 +20,12 @@ describe CZTop::Authenticator do
   end
 
   describe "#verbose!" do
+    after(:each) { subject.verbose! }
     it "sends correct message to actor" do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original
-      subject.verbose!
+    end
+    it "waits for signal" do
+      expect(actor).to receive(:wait).at_least(2).and_call_original
     end
   end
 

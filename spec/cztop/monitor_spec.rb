@@ -32,6 +32,13 @@ describe CZTop::Monitor do
     end
   end
 
+  describe "#verbose" do
+    it "sends correct message to actor" do
+      expect(actor).to receive(:<<).with("VERBOSE").and_call_original
+      subject.verbose!
+    end
+  end
+
   describe "#listen" do
     context "with one valid event" do
       let(:event) { "CONNECTED" }

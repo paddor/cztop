@@ -14,5 +14,6 @@ socket.connect(endpoint)
 puts "connected."
 
 while message = socket.receive
+  msg.pop # remove delimiter frame
   puts "received message: #{message.to_a.inspect}"
 end

@@ -49,6 +49,7 @@ module CZTop
       return hostname
     end
 
+    # @return [Integer] maximum length of data to {#publish}
     MAX_BEACON_DATA = 255
 
     # Start broadcasting a beacon.

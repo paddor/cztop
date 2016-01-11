@@ -89,6 +89,7 @@ module CZTop
       @actor.wait
     end
 
+    # Configure GSSAPI authentication.
     # @return [void]
     def gssapi
       @actor << "GSSAPI"

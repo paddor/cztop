@@ -38,6 +38,7 @@ module CZTop
 
       # Make this zocket a CURVE server.
       # @param bool [Boolean]
+      # @note You'll have to use a {CZTop::Authenticator}.
       def CURVE_server=(bool)
         Zsock.set_curve_server(@zocket, bool ? 1 : 0)
       end
@@ -126,6 +127,7 @@ module CZTop
 
       # Make this zocket a PLAIN server.
       # @param bool [Boolean]
+      # @note You'll have to use a {CZTop::Authenticator}.
       def PLAIN_server=(bool)
         Zsock.set_plain_server(@zocket, bool ? 1 : 0)
       end
@@ -137,6 +139,7 @@ module CZTop
         Zsock.plain_username(@zocket).read_string
       end
       # @param username [String] username for PLAIN mechanism
+      # @note You'll have to use a {CZTop::Authenticator}.
       def PLAIN_username=(username)
         Zsock.set_plain_username(@zocket, username)
       end

@@ -15,6 +15,7 @@ module CZTop
     # Enables CURVE security and makes this socket a CURVE server.
     # @param cert [Certificate] this server's certificate,
     #   so remote clients are able to authenticate this server
+    # @note You'll have to use a {CZTop::Authenticator}.
     # @return [void]
     def CURVE_server!(cert)
       options.CURVE_server = true

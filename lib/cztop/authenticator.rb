@@ -31,12 +31,10 @@ module CZTop
       @actor.terminate
     end
 
-    VERBOSE = "VERBOSE".freeze
-
     # Enable verbose logging of commands and activity.
     # @return [void]
     def verbose!
-      @actor << VERBOSE
+      @actor << "VERBOSE"
       @actor.wait
     end
 
@@ -53,8 +51,6 @@ module CZTop
       @actor.wait
     end
 
-    DENY = "DENY".freeze
-
     # Add a list of IP addresses to the blacklist. For all security
     # mechanisms, this rejects the connection without any further
     # authentication. Use either a whitelist, or a blacklist, not not both. If
@@ -64,11 +60,9 @@ module CZTop
     # @param addrs [String] IP address(es) to deny
     # @return [void]
     def deny(*addrs)
-      @actor << [DENY, *addrs]
+      @actor << ["DENY", *addrs]
       @actor.wait
     end
-
-    PLAIN = "PLAIN".freeze
 
     # Configure PLAIN security mechanism using a plain-text password file. The
     # password file will be reloaded automatically if modified externally.
@@ -76,12 +70,11 @@ module CZTop
     # @param filename [String] path to the password file
     # @return [void]
     def plain(filename)
-      @actor << [PLAIN, *filename]
+      @actor << ["PLAIN", *filename]
       @actor.wait
     end
 
     ANY_CERTIFICATE = "*"
-    CURVE = "CURVE".freeze
 
     # Configure CURVE authentication, using a directory that holds all public
     # client certificates, i.e. their public keys. The certificates must have been
@@ -92,15 +85,13 @@ module CZTop
     #   default value will allow any certificate)
     # @return [void]
     def curve(directory = ANY_CERTIFICATE)
-      @actor << [CURVE, directory]
+      @actor << ["CURVE", directory]
       @actor.wait
     end
 
-    GSSAPI = "GSSAPI".freeze
-
     # @return [void]
     def gssapi
-      @actor << GSSAPI
+      @actor << "GSSAPI"
       @actor.wait
     end
   end

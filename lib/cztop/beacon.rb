@@ -31,16 +31,11 @@ module CZTop
       @actor.terminate
     end
 
-    VERBOSE = "VERBOSE".freeze
-
     # Enable verbose logging of commands and activity.
     # @return [void]
     def verbose!
-      @actor << VERBOSE
+      @actor << "VERBOSE"
     end
-
-    CONFIGURE_PIC = "si".freeze
-    CONFIGURE = "CONFIGURE".freeze
 
     # Run the beacon on the specified UDP port.
     # @param port [Integer] port number to
@@ -48,14 +43,12 @@ module CZTop
     #   connections
     # @raise [Error] if the system doesn't support UDP broadcasts
     def configure(port)
-      @actor.send_picture(CONFIGURE_PIC, :string, CONFIGURE, :int, port)
+      @actor.send_picture("si", :string, "CONFIGURE", :int, port)
       hostname = Zstr.recv(@actor)
       raise Error, "system doesn't support UDP broadcasts" if hostname.empty?
       return hostname
     end
 
-    PUBLISH_PIC = "sbi".freeze
-    PUBLISH = "PUBLISH".freeze
     MAX_BEACON_DATA = 255
 
     # Start broadcasting a beacon.
@@ -65,42 +58,35 @@ module CZTop
     # @return [void]
     def publish(data, interval)
       raise Error, "data is too long" if data.bytesize > MAX_BEACON_DATA
-      @actor.send_picture(PUBLISH_PIC, :string, PUBLISH, :string, data,
+      @actor.send_picture("sbi", :string, "PUBLISH", :string, data,
                               :int, data.bytesize, :int, interval)
     end
-
-    SILENCE = "SILENCE".freeze
 
     # Stop broadcasting the beacon.
     # @return [void]
     def silence
-      @actor << SILENCE
+      @actor << "SILENCE"
     end
-
-    SUBSCRIBE_PIC = "sb".freeze
-    SUBSCRIBE = "SUBSCRIBE".freeze
 
     # Start listening to beacons from peers.
     # @param filter [String] do a prefix match on received beacons
     # @return [void]
     def subscribe(filter)
-      @actor.send_picture(SUBSCRIBE_PIC, :string, SUBSCRIBE,
+      @actor.send_picture("sb", :string, "SUBSCRIBE",
                           :string, filter, :int, filter.bytesize)
     end
 
     # Just like {#subscribe}, but subscribe to all peer beacons.
     # @return [void]
     def listen
-      @actor.send_picture(SUBSCRIBE_PIC, :string, SUBSCRIBE,
+      @actor.send_picture("sb", :string, "SUBSCRIBE",
                           :string, nil, :int, 0)
     end
-
-    UNSUBSCRIBE = "UNSUBSCRIBE".freeze
 
     # Stop listening to other peers.
     # @return [void]
     def unsubscribe
-      @actor << UNSUBSCRIBE
+      @actor << "UNSUBSCRIBE"
     end
 
     # Receive next beacon from a peer.

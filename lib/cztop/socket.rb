@@ -6,6 +6,7 @@ module CZTop
     include ZsockOptions
     include SendReceiveMethods
     include PolymorphicZsockMethods
+    include CZMQ::FFI
 
     # Used for various errors.
     class Error < RuntimeError; end

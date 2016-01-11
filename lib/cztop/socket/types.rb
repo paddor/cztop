@@ -43,7 +43,7 @@ module CZTop
       else
         raise ArgumentError, "invalid socket type: %p" % type
       end
-      ffi_delegate = CZMQ::FFI::Zsock.new(type_code)
+      ffi_delegate = Zsock.new(type_code)
       sock = type_class.allocate
       sock.attach_ffi_delegate(ffi_delegate)
       sock
@@ -54,7 +54,7 @@ module CZTop
     class CLIENT < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_client(endpoints))
+        attach_ffi_delegate(Zsock.new_client(endpoints))
       end
     end
 
@@ -63,7 +63,7 @@ module CZTop
     class SERVER < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_server(endpoints))
+        attach_ffi_delegate(Zsock.new_server(endpoints))
       end
 
       # Gets the routing ID.
@@ -91,7 +91,7 @@ module CZTop
     class REQ < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_req(endpoints))
+        attach_ffi_delegate(Zsock.new_req(endpoints))
       end
     end
 
@@ -100,7 +100,7 @@ module CZTop
     class REP < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_rep(endpoints))
+        attach_ffi_delegate(Zsock.new_rep(endpoints))
       end
     end
 
@@ -109,7 +109,7 @@ module CZTop
     class DEALER < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_dealer(endpoints))
+        attach_ffi_delegate(Zsock.new_dealer(endpoints))
       end
     end
 
@@ -118,7 +118,7 @@ module CZTop
     class ROUTER < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_router(endpoints))
+        attach_ffi_delegate(Zsock.new_router(endpoints))
       end
 
       # Send a message to a specific receiver. This is a shorthand for when
@@ -140,7 +140,7 @@ module CZTop
     class PUB < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_pub(endpoints))
+        attach_ffi_delegate(Zsock.new_pub(endpoints))
       end
     end
 
@@ -150,7 +150,7 @@ module CZTop
       # @param endpoints [String] endpoints to connect to
       # @param subscription [String] what to subscribe to
       def initialize(endpoints = nil, subscription = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_sub(endpoints, subscription))
+        attach_ffi_delegate(Zsock.new_sub(endpoints, subscription))
       end
 
       # Subscribes to the given prefix string.
@@ -173,7 +173,7 @@ module CZTop
     class XPUB < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_xpub(endpoints))
+        attach_ffi_delegate(Zsock.new_xpub(endpoints))
       end
     end
 
@@ -182,7 +182,7 @@ module CZTop
     class XSUB < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_xsub(endpoints))
+        attach_ffi_delegate(Zsock.new_xsub(endpoints))
       end
     end
 
@@ -191,7 +191,7 @@ module CZTop
     class PUSH < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_push(endpoints))
+        attach_ffi_delegate(Zsock.new_push(endpoints))
       end
     end
 
@@ -200,7 +200,7 @@ module CZTop
     class PULL < Socket
       # @param endpoints [String] endpoints to bind to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_pull(endpoints))
+        attach_ffi_delegate(Zsock.new_pull(endpoints))
       end
     end
 
@@ -209,7 +209,7 @@ module CZTop
     class PAIR < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_pair(endpoints))
+        attach_ffi_delegate(Zsock.new_pair(endpoints))
       end
     end
 
@@ -219,7 +219,7 @@ module CZTop
     class STREAM < Socket
       # @param endpoints [String] endpoints to connect to
       def initialize(endpoints = nil)
-        attach_ffi_delegate(CZMQ::FFI::Zsock.new_stream(endpoints))
+        attach_ffi_delegate(Zsock.new_stream(endpoints))
       end
     end
   end

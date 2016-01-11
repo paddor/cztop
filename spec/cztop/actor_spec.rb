@@ -164,7 +164,16 @@ describe CZTop::Actor do
         rescue CZTop::Actor::DeadActorError
           # that's okay
         end
-        sleep 0.01 until actor.terminated?
+        start_time = Time.now
+        until actor.terminated?
+          sleep 0.01
+          if start_time + 1 < Time.now
+            warn "test example hanging"
+            warn "received messages so far: #{received_messages.inspect}"
+            warn "terminating actor manually"
+            actor.terminate
+          end
+        end
         refute_includes received_messages, ["bar"]
       end
     end

@@ -167,11 +167,14 @@ describe CZTop::Actor do
         start_time = Time.now
         until actor.terminated?
           sleep 0.01
+
+          # NOTE: This test example sometimes hangs on Travis JRuby...
+          # This should help find the problem.
           if start_time + 1 < Time.now
             warn "test example hanging"
             warn "received messages so far: #{received_messages.inspect}"
             warn "terminating actor manually"
-            actor.terminate
+            flunk "hangs, check messages above"
           end
         end
         refute_includes received_messages, ["bar"]

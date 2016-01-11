@@ -108,7 +108,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   - Authenticator [x]
   - Certificate [X]
   - Config [x]
-  - Proxy [ ]
+  - Proxy [x]
   - Z85 [x]
 * specs [x]
 * write the missing XML API files in CZMQ

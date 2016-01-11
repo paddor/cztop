@@ -162,8 +162,7 @@ describe CZTop::Actor do
         begin
           actor << "foo" << "INTERRUPTED" << "bar"
         rescue CZTop::Actor::DeadActorError
-          # Thread which waits for handler death has already set
-          # @running = false
+          # that's okay
         end
         sleep 0.01 until actor.terminated?
         refute_includes received_messages, ["bar"]

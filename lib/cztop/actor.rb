@@ -160,7 +160,7 @@ module CZTop
         @handler_dead_signal = Queue.new # used for signaling
         @handler_dying_signal = Queue.new # used for signaling
 
-        Zactor.fn do |pipe_delegate, args|
+        Zactor.fn do |pipe_delegate, _args|
           begin
             @handler_thread = Thread.current
             @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)

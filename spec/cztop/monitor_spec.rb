@@ -57,7 +57,7 @@ describe CZTop::Monitor do
     context "with invalid event" do
       let(:event) { "FOO" }
       it "raises" do
-        assert_raises(CZTop::Monitor::Error) do
+        assert_raises(ArgumentError) do
           subject.listen(event)
         end
       end

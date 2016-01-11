@@ -57,7 +57,7 @@ module CZTop
     # @raise [Error] if data is longer than {MAX_BEACON_DATA} bytes
     # @return [void]
     def publish(data, interval)
-      raise Error, "data is too long" if data.bytesize > MAX_BEACON_DATA
+      raise ArgumentError, "data too long" if data.bytesize > MAX_BEACON_DATA
       @actor.send_picture("sbi", :string, "PUBLISH", :string, data,
                               :int, data.bytesize, :int, interval)
     end

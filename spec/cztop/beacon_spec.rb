@@ -75,7 +75,7 @@ describe CZTop::Beacon do
     context "with data too long" do
       let(:data) { "x" * 256 } # max = 255 bytes
       it "raises" do
-        assert_raises(CZTop::Beacon::Error) do
+        assert_raises(ArgumentError) do
           subject.publish(data, interval)
         end
       end

@@ -12,9 +12,6 @@ module CZTop
   class Monitor
     include ::CZMQ::FFI
 
-    # Used for {Monitor} errors.
-    class Error < RuntimeError; end
-
     # function pointer to the `zmonitor()` function
     ZMONITOR_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zmonitor")
@@ -64,7 +61,7 @@ module CZTop
     def listen(*events)
       events.each do |event|
         EVENTS.include?(event) or
-          raise Error, "invalid event: #{event.inspect}"
+          raise ArgumentError, "invalid event: #{event.inspect}"
       end
       @actor << [ "LISTEN", *events ]
     end

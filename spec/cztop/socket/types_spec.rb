@@ -62,17 +62,14 @@ describe CZTop::Socket do
   end
 end
 
-describe CZTop::Socket::CLIENT, skip: true do
+describe CZTop::Socket::CLIENT do
   Given(:socket) { described_class.new }
   it "instanciates" do
     socket
   end
-
-  # * endpoints can be nil
-  # * if not nil, expect call to Zsock.new_client
 end
 
-describe CZTop::Socket::SERVER, skip: true do
+describe CZTop::Socket::SERVER do
   Given(:socket) { described_class.new }
 
   it "instanciates" do

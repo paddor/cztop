@@ -81,6 +81,7 @@ module CZTop
       @actor.wait
     end
 
+    # Used to configure the socket on one side of a {Proxy}.
     class Configurator
       # @return [Array<Symbol>] supported socket types
       SOCKET_TYPES = %i[

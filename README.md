@@ -40,7 +40,7 @@ binding of [CZMQ](https://github.com/zeromq/czmq).
 
 Here are some some of the goals I have in mind for this library:
 
-* as easy as possible API
+* as easy as possible, Ruby-esque API
 * first class support for security (CURVE mechanism)
   * including handling of certificates
 * support MRI, Rubinius, and JRuby
@@ -81,9 +81,15 @@ See the examples directory for some examples. Here's a very simple one:
 # TODO: Simple PAIR socket example.
 ```
 
+## Supported Ruby versions
+
+See [.travis.yml](.travis.yml) for a list of Ruby versions against which CZTop
+is tested.
+
 ## Documentation
 
-The following API documentation is currently available:
+The API should be fairly straight-forward to anyone who is familiar with CZMQ
+and Ruby.  The following API documentation is currently available:
 
 * [YARD API documentation](http://www.rubydoc.info/github/paddor/cztop)
 

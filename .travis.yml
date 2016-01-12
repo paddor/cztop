@@ -12,4 +12,13 @@ matrix:
 before_install:
   - ci-scripts/install-deps
   - gem install bundler -v 1.10.6
-script: bundle exec rake spec
+script:
+   - RESULT=0
+   - bundle exec rake spec || RESULT=$?
+   - if [[ ${RESULT} == 0 ]]; then echo "\\o/ our test worked without problems"; else echo "ruhroh test returned an errorcode of $RESULT"; fi;
+   # If the program returned an error code, now we check for a
+   # core file in the current working directory and dump the backtrace out
+   - for i in $(find ./ -maxdepth 1 -name 'core*' -print); do gdb $(pwd)/test core* -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
+   # now we should present travis with the original
+   # error code so the run cleanly stops
+   - if [[ ${RESULT} != 0 ]]; then exit $RESULT ; fi;

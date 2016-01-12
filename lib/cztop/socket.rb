@@ -8,7 +8,7 @@ module CZTop
     include PolymorphicZsockMethods
     include CZMQ::FFI
 
-    # Used for various errors.
+    # Used for various {Socket} errors.
     class Error < RuntimeError; end
 
     # @!group CURVE Security

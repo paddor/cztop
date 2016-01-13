@@ -16,10 +16,13 @@ module CZTop
     # @param reader [Socket, Actor] socket to poll for input
     # @param readers [Socket, Actor] any additional sockets to poll for input
     def initialize(reader, *readers)
-      @sockets = {}
-      attach_ffi_delegate(Zpoller.new(reader, :pointer, nil))
+      @sockets = {} # to keep references and return same instances
+      ptr = Zpoller.new(reader,
+                        *readers.flat_map {|r| [ :pointer, r ] },
+                        :pointer, nil)
+      attach_ffi_delegate(ptr)
       remember_socket(reader)
-      readers.each { |r| add(r) }
+      readers.each { |r| remember_socket(r) }
     end
 
     # Adds another reader socket to the poller.
@@ -47,67 +50,66 @@ module CZTop
     # @param timeout [Integer] how long to wait in ms, or 0 to avoid blocking,
     #   or -1 to wait indefinitely
     # @return [Socket, Actor]
+    # @return [nil] if the timeout expired or
+    # @raise [Interrupt] if the timeout expired or
     def wait(timeout = -1)
-# //  Poll the registered readers for I/O, return first reader that has input.
-# //  The reader will be a libzmq void * socket, or a zsock_t or zactor_t
-# //  instance as specified in zpoller_new/zpoller_add. The timeout should be
-# //  zero or greater, or -1 to wait indefinitely. Socket priority is defined
-# //  by their order in the poll list. If you need a balanced poll, use the low
-# //  level zmq_poll method directly. If the poll call was interrupted (SIGINT),
-# //  or the ZMQ context was destroyed, or the timeout expired, returns NULL.
-# //  You can test the actual exit condition by calling zpoller_expired () and
-# //  zpoller_terminated (). The timeout is in msec.
-# CZMQ_EXPORT void *
-#     zpoller_wait (zpoller_t *self, int timeout);
       ptr = ffi_delegate.wait(timeout)
       if ptr.null?
-        raise Interrupt if terminated?
-        return nil if expired?
+        raise Interrupt if ffi_delegate.terminated
+        return nil
       end
       return socket_by_ptr(ptr)
     end
 
-    # @return [Boolean]
-    def expired?
-# //  Return true if the last zpoller_wait () call ended because the timeout
-# //  expired, without any error.
-# CZMQ_EXPORT bool
-#     zpoller_expired (zpoller_t *self);
-      ffi_delegate.expired
-    end
-
-    # @return [Boolean]
-    def terminated?
-# //  Return true if the last zpoller_wait () call ended because the process
-# //  was interrupted, or the parent context was destroyed.
-# CZMQ_EXPORT bool
-#     zpoller_terminated (zpoller_t *self);
-      ffi_delegate.terminated
-    end
-
+    # Tells the zpoller to ignore interrupts. By default, {#wait} will return
+    # immediately if it detects an interrupt (when +zsys_interrupted+ is set
+    # to something other than zero). Calling this method will supress this
+    # behavior.
     # @return [void]
     def ignore_interrupts
-# //  Ignore zsys_interrupted flag in this poller. By default, a zpoller_wait will
-# //  return immediately if detects zsys_interrupted is set to something other than
-# //  zero. Calling zpoller_ignore_interrupts will supress this behavior.
-# 
-# CZMQ_EXPORT void
-#     zpoller_ignore_interrupts(zpoller_t *self);
       ffi_delegate.ignore_interrupts
+    end
+
+    # By default the poller stops if the process receives a SIGINT or SIGTERM
+    # signal. This makes it impossible to shut-down message based architectures
+    # like zactors. This method lets you switch off break handling. The default
+    # nonstop setting is off (false).
+    #
+    # Setting this will cause {#wait} to never raise.
+    #
+    # @param flag [Boolean] whether
+    def nonstop=(flag)
+      ffi_delegate.set_nonstop(flag)
     end
 
     private
 
+    # Remembers the socket so a call to {#wait} can return with the exact same
+    # instance of {Socket}, and it also makes sure the socket won't get
+    # GC'd.
+    # @param [Socket, Actor] the socket instance to remember
     # @return [void]
     def remember_socket(socket)
       @sockets[socket.to_ptr.to_i] = socket
     end
+
+    # Forgets the socket because it has been removed from the poller.
+    # @param [Socket, Actor] the socket instance to forget
     # @return [void]
     def forget_socket(socket)
       @sockets.delete(socket.to_ptr.to_i)
     end
+
+    # Gets the previously remembered socket associated to the given pointer.
+    # @param ptr [FFI::Pointer] the pointer to a socket
+    # @return [Socket, Actor] the socket associated to the given pointer
+    # @raise [ArgumentError] if no socket is registered under given pointer
     def socket_by_ptr(ptr)
-      @sockets[socket.to_ptr.to_i]
+      @sockets[ptr.to_i] or
+        # NOTE: This should never happen, since #wait will return nil if
+        # zpoller_wait returned NULL. But it's better to fail early in case it
+        # ever returns a wrong pointer.
+        raise Error, "no socket known for pointer #{ptr.inspect}"
     end
   end
 end

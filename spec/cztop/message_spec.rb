@@ -197,23 +197,42 @@ describe CZTop::Message do
   end
 
   describe "#inspect" do
+    let(:s) { msg.inspect}
     context "with empty message" do
-      it "has a nice output" do
-        assert_match /Message: frames=0 content_size=0/, msg.inspect
+      it "contains class name" do
+        assert_match /\A#<CZTop::Message:.*>\z/, s
+      end
+      it "contains native address" do
+        assert_match /:0x[[:xdigit:]]+\b/, s
+      end
+      it "contains number of frames" do
+        assert_match /\bframes=0\b/, s
+      end
+      it "contains content size" do
+        assert_match /\bcontent_size=0\b/, s
+      end
+      it "contains empty content description" do
+        assert_match /\bcontent=\[\]/, s
       end
     end
 
     context "with content" do
       before(:each) { msg << "FOO" << "BAR" }
-      it "has a nice output" do
-        assert_match /Message: frames=2 content_size=6/, msg.inspect
+      it "contains number of frames" do
+        assert_match /\bframes=2\b/, s
+      end
+      it "contains content size" do
+        assert_match /\bcontent_size=6\b/, s
+      end
+      it "contains content description" do
+        assert_match /\bcontent=\[.+\]/, s
       end
     end
 
     context "with huge message" do
-      before(:each) { msg << "FOO" * 100 } # 300 byte message
-      it "doesn't print the whole content" do
-        assert_operator msg.inspect.size, :<, 50 # shouldn't contain content
+      before(:each) { msg << "FOO" * 1000 } # 3000 byte message
+      it "contains content placeholder" do
+        assert_match /\bcontent=\[\.\.\.\]/, s
       end
     end
   end

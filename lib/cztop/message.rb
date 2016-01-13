@@ -125,12 +125,13 @@ module CZTop
     # @return [String] shows class, number of frames, content size, and
     #   content (only if it's up to 200 bytes)
     def inspect
-      s = "#<#{self.class.name}: frames=#{size} content_size=#{content_size}"
-      if content_size <= 200
-        s << " content=" << to_a.inspect
-      end
-      s << ">"
-      s
+      "#<%s:0x%x frames=%i content_size=%i content=%s>" % [
+        self.class,
+        to_ptr.address,
+        size,
+        content_size,
+        content_size <= 500 ? to_a.inspect : "[...]"
+      ]
     end
 
     # Return a frame's content.

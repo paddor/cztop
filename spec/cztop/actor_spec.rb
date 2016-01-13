@@ -34,8 +34,6 @@ describe CZTop::Actor do
       expect_any_instance_of(CZTop::Actor).to receive(:attach_ffi_delegate)
         .with(kind_of(::CZMQ::FFI::Zactor))
         .and_call_original
-      expect_any_instance_of(CZTop::Actor).to receive(:mk_callback_shim)
-        .and_call_original
     end
 
     let(:callback_shim) { actor.instance_variable_get(:@callback) }
@@ -59,6 +57,10 @@ describe CZTop::Actor do
       let(:actor) do
         CZTop::Actor.new(proc_)
       end
+      before(:each) do
+        expect_any_instance_of(CZTop::Actor).to receive(:shim)
+          .and_call_original
+      end
       it "shims it" do
         refute_nil callback_shim
         refute_same proc_, callback_shim
@@ -81,10 +83,10 @@ describe CZTop::Actor do
     end
   end
 
-  describe "#mk_callback_shim" do
+  describe "#shim" do
     context "with invalid handler" do
       it "raises" do
-        assert_raises(ArgumentError) { actor.__send__(:mk_callback_shim, "foo") }
+        assert_raises(ArgumentError) { actor.__send__(:shim, "foo") }
       end
     end
 

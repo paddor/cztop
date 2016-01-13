@@ -9,9 +9,10 @@ module CZTop
   # wouldn't be thread-safe.
   #
   # = About termination
-  # Actors should be terminated explicitly, either by sending them the "$TERM"
-  # command or by calling {#terminate} (which does the same). Not terminating
-  # them explicitly might make the process block at exit.
+  # Actors should be terminated explicitly, either by calling {#terminate}
+  # from the current process or sending them the "$TERM" command (from
+  # outside). Not terminating them explicitly might make the process block at
+  # exit.
   #
   # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
@@ -198,7 +199,8 @@ module CZTop
     #
     # @param handler [Proc, #call] the handler used to process messages
     # @yieldparam message [Message] message (e.g. command) received
-    # @yieldparam pipe [Socket::PAIR] pipe to write back something into the actor
+    # @yieldparam pipe [Socket::PAIR] pipe to write back something into the
+    #   actor
     def process_messages(handler)
       while true
         begin

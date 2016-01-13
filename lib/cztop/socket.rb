@@ -90,5 +90,15 @@ module CZTop
       rc = ffi_delegate.unbind("%s", :string, endpoint)
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
+
+    # Inspects this {Socket}.
+    # @return [String] shows class, native address, and {#last_endpoint}
+    def inspect
+      "#<%s:0x%x last_endpoint=%p>" % [
+        self.class,
+        to_ptr.address,
+        last_endpoint
+      ]
+    end
   end
 end

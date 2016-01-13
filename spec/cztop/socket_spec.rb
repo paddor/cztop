@@ -219,4 +219,17 @@ describe CZTop::Socket do
       socket.unbind(double("endpoint"))
     end
   end
+
+  describe "#inspect" do
+    let(:s) { req_socket.inspect }
+    it "contains class name" do
+      assert_match /\A#<CZTop::Socket::[A-Z]\w+:.*>\z/, s
+    end
+    it "contains native address" do
+      assert_match /:0x[[:xdigit:]]+\b/, s
+    end
+    it "contains last endpoint" do
+      assert_match /\blast_endpoint=.+\b/, s
+    end
+  end
 end

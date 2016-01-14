@@ -309,6 +309,17 @@ describe CZTop::Actor do
         assert_operator actor, :dead?
       end
     end
+
+    context "sndtimeo reached" do
+      let(:msg) { CZTop::Message.new("foobar") }
+      after(:each) { actor << msg }
+      it "retries" do
+        expect(msg).to receive(:send_to)
+          .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
+        expect(msg).to receive(:send_to)
+          .with(actor).at_least(:once).and_call_original.ordered
+      end
+    end
   end
 
   describe "#receive" do
@@ -389,6 +400,17 @@ describe CZTop::Actor do
         end
       end
     end
+
+    context "sndtimeo reached" do
+      let(:msg) { CZTop::Message.new("foobar") }
+      after(:each) { actor.request(msg) }
+      it "retries" do
+        expect(msg).to receive(:send_to)
+          .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
+        expect(msg).to receive(:send_to)
+          .with(actor).at_least(:once).and_call_original.ordered
+      end
+    end
   end
 
   describe "#terminate" do
@@ -412,6 +434,19 @@ describe CZTop::Actor do
         let(:handler_thread) { actor.instance_variable_get(:@handler_thread) }
         it "waits for heandler thread to terminate" do
           expect(handler_thread).to receive(:join).and_call_original
+        end
+      end
+
+      context "sndtimeo reached" do
+        let(:term_msg) { CZTop::Message.new("$TERM") }
+        before(:each) do
+          allow(CZTop::Message).to receive(:new).and_return(term_msg)
+        end
+        it "retries" do
+          expect(term_msg).to receive(:send_to)
+            .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
+          expect(term_msg).to receive(:send_to)
+            .with(actor).at_least(:once).and_call_original.ordered
         end
       end
     end

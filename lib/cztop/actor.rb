@@ -73,7 +73,7 @@ module CZTop
         begin
           @mtx.synchronize do
             raise DeadActorError if not @running
-            super
+            message.send_to(self)
           end
         rescue IO::EAGAINWaitWritable
           # The sndtimeo has been reached.
@@ -152,9 +152,10 @@ module CZTop
     # @return [Boolean] whether it died just now (+false+ if it was dead
     #   already)
     def terminate
+      term_msg = Message.new(TERM)
       @mtx.synchronize do
         return false if not @running
-        Message.new(TERM).send_to(self)
+        term_msg.send_to(self)
         await_handler_death
         true
       end

@@ -150,7 +150,7 @@ describe CZTop::Message do
       context "with sndtimeo reached" do
         let(:errno) { Errno::EAGAIN::Errno }
         it "raises IO::EAGAINWaitWritable" do
-          assert_raises(IO::EAGAINWaitReadable) { msg.send_to(destination) }
+          assert_raises(IO::EAGAINWaitWritable) { msg.send_to(destination) }
         end
       end
       context "with host unreachable" do

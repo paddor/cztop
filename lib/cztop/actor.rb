@@ -26,6 +26,9 @@ module CZTop
     # Raised when trying to interact with a terminated actor.
     class DeadActorError < RuntimeError; end
 
+    # @return [Exception] the exception that crashed this actor, if any
+    attr_reader :exception
+
     # Creates a new actor. Either pass a callback directly or a block. The
     # block will be called for every received message.
     #
@@ -152,9 +155,15 @@ module CZTop
       end
     end
 
-    # @return [Boolean] whether this actor has been terminated
-    def terminated?
+    # @return [Boolean] whether this actor is dead (terminated or crashed)
+    def dead?
       !@running
+    end
+
+    # @return [Boolean] whether this actor has crashed
+    # @see #exception
+    def crashed?
+      !!@exception # if set, it has crashed
     end
 
     private
@@ -181,10 +190,8 @@ module CZTop
             @pipe.signal # handshake, so zactor_new() returns
           end
           process_messages(handler)
-        rescue Exception
-          warn "Handler of #{self} raised exception: #{$!.inspect}"
-          # TODO: store it?
         ensure
+          @exception = $! if $! # store exception, if any
           @handler_dying_signal.push(nil)
         end
       end
@@ -253,7 +260,7 @@ module CZTop
         sleep 0.01 while @handler_thread.alive?
 
         # NOTE: we do this here and not in #terminate, so it also works when
-        # actor isn't terminated using #terminate, and #terminated? won't
+        # actor isn't terminated using #terminate, and #dead? won't
         # block forever
         @running = false
 

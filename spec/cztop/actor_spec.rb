@@ -91,12 +91,56 @@ describe CZTop::Actor do
     end
 
     context "with faulty handler" do # TODO: does it still sometimes hang on JRuby?
-      let(:actor) { CZTop::Actor.new { raise "foobar" } }
-      it "warns about it" do
-        assert_output nil, /handler.*raised exception/i do
-          actor << "foo"
-          actor.terminate
-        end
+      let(:error) { RuntimeError.new("foobar") }
+      let(:actor) { CZTop::Actor.new { raise error } }
+      before(:each) do
+        actor << "foo"
+        actor.terminate
+      end
+      it "stores exception" do
+        assert_same error, actor.exception
+      end
+    end
+  end
+
+  describe "#crashed?" do
+    before(:each) do
+      actor << "foo"
+      actor.terminate
+    end
+    context "with crashed actor" do
+      let(:actor) { CZTop::Actor.new { raise } }
+      it "returns true" do
+        assert_operator actor, :crashed?
+      end
+    end
+    context "with normally terminated actor" do
+      it "returns true" do
+        refute_operator actor, :crashed?
+      end
+    end
+  end
+
+  describe "#exception" do
+    before(:each) do
+      actor << "foo"
+      actor.terminate
+    end
+    context "with crashed actor" do
+      let(:error) { RuntimeError.new("foobar") }
+      let(:actor) { CZTop::Actor.new { raise error } }
+      it "returns stored exception" do
+        assert_same error, actor.exception
+      end
+    end
+    context "with alive actor" do
+      it "returns nil" do
+        assert_nil actor.exception
+      end
+    end
+    context "with normally terminated actor" do
+      it "returns nil" do
+        assert_nil actor.exception
       end
     end
   end
@@ -170,7 +214,7 @@ describe CZTop::Actor do
           # Otherwise it tends to hang forever JRuby.
         end
 
-        sleep 0.01 until actor.terminated?
+        sleep 0.01 until actor.dead?
         assert_empty received_messages
       end
     end
@@ -194,7 +238,7 @@ describe CZTop::Actor do
           # NOTE: This happens thanks to the setting of SNDTIMEO above.
           # Otherwise it tends to hang forever JRuby.
         end
-        sleep 0.01 until actor.terminated?
+        sleep 0.01 until actor.dead?
         refute_includes received_messages, ["bar"]
       end
     end
@@ -208,16 +252,16 @@ describe CZTop::Actor do
     end
   end
 
-  describe "#terminated?" do
+  describe "#dead?" do
     context "when terminated" do
       it "returns true" do
         actor.terminate
-        assert actor.terminated?
+        assert actor.dead?
       end
     end
     context "when not yet terminated" do
       it "returns false" do
-        refute actor.terminated?
+        refute actor.dead?
         actor.terminate
       end
     end
@@ -280,7 +324,7 @@ describe CZTop::Actor do
         # one more call from the #after filter
         expect(actor).to receive(:terminate).twice.and_call_original
         actor << "$TERM"
-        assert_operator actor, :terminated?
+        assert_operator actor, :dead?
       end
     end
   end

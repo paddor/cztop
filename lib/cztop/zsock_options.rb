@@ -190,6 +190,14 @@ module CZTop
       # @param identity [String] new socket identity
       def identity=(identity) Zsock.set_identity(@zocket, identity) end
 
+      # @return [Integer] current value of Type of Service
+      def tos() Zsock.tos(@zocket) end
+      # @return [Integer] current value of Type of Service
+      def tos=(new_tos)
+        raise ArgumentError, "invalid TOS" unless new_tos >= 0
+        Zsock.set_tos(@zocket, new_tos)
+      end
+
       # TODO: Add new heartbeat options. Not yet supported by CZMQ though.
       # ZMQ_HEARTBEAT_IVL
       # ZMQ_HEARTBEAT_TTL

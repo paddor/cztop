@@ -249,5 +249,31 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+
+    describe "#tos" do
+      context "with no TOS" do
+        it "returns zero" do
+          assert_equal 0, options.tos
+        end
+      end
+      context "with TOS set" do
+        let(:tos) { 5 }
+        before(:each) { options.tos = tos }
+        it "returns TOS" do
+          assert_equal tos, options.tos
+        end
+      end
+      context "with invalid TOS" do
+        it "raises" do
+          assert_raises(ArgumentError) { options.tos = -5 }
+        end
+      end
+      context "when resetting to zero" do
+        before(:each) { options.tos = 10 }
+        it "doesn't raise" do
+          options.tos = 0
+        end
+      end
+    end
   end
 end

@@ -195,7 +195,6 @@ module CZTop
 #char * zsock_gssapi_service_principal (void *self);
 #int zsock_ipv6 (void *self);
 #int zsock_immediate (void *self);
-#int zsock_ipv4only (void *self);
 #int zsock_type (void *self);
 #int zsock_affinity (void *self);
 #int zsock_rate (void *self);
@@ -212,7 +211,6 @@ module CZTop
 #int zsock_tcp_keepalive_idle (void *self);
 #int zsock_tcp_keepalive_cnt (void *self);
 #int zsock_tcp_keepalive_intvl (void *self);
-#char * zsock_tcp_accept_filter (void *self);
 #int zsock_rcvmore (void *self);
 #SOCKET zsock_fd (void *self);
 #int zsock_events (void *self);
@@ -231,12 +229,8 @@ module CZTop
 #void zsock_set_gssapi_service_principal (void *self, const char * gssapi_service_principal);
 #void zsock_set_ipv6 (void *self, int ipv6);
 #void zsock_set_immediate (void *self, int immediate);
-#void zsock_set_router_raw (void *self, int router_raw);
-#void zsock_set_ipv4only (void *self, int ipv4only);
 #void zsock_set_delay_attach_on_connect (void *self, int delay_attach_on_connect);
 #void zsock_set_affinity (void *self, int affinity);
-#void zsock_set_subscribe (void *self, const char * subscribe);
-#void zsock_set_unsubscribe (void *self, const char * unsubscribe);
 #void zsock_set_rate (void *self, int rate);
 #void zsock_set_recovery_ivl (void *self, int recovery_ivl);
 #void zsock_set_sndbuf (void *self, int sndbuf);
@@ -252,7 +246,6 @@ module CZTop
 #void zsock_set_tcp_keepalive_idle (void *self, int tcp_keepalive_idle);
 #void zsock_set_tcp_keepalive_cnt (void *self, int tcp_keepalive_cnt);
 #void zsock_set_tcp_keepalive_intvl (void *self, int tcp_keepalive_intvl);
-#void zsock_set_tcp_accept_filter (void *self, const char * tcp_accept_filter);
     end
   end
 end

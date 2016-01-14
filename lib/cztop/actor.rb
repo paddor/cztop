@@ -119,6 +119,9 @@ module CZTop
         message.send_to(self)
         Message.receive_from(self)
       end
+    rescue IO::EAGAINWaitWritable
+      # same as in #<<
+      retry
     end
 
     # Sends a message according to a "picture".
@@ -155,6 +158,9 @@ module CZTop
         await_handler_death
         true
       end
+    rescue IO::EAGAINWaitWritable
+      # same as in #<<
+      retry
     end
 
     # @return [Boolean] whether this actor is dead (terminated or crashed)

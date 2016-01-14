@@ -90,7 +90,7 @@ describe CZTop::Actor do
       end
     end
 
-    context "with faulty handler" do # TODO: does it still sometimes hang on JRuby?
+    context "with faulty handler" do
       let(:error) { RuntimeError.new("foobar") }
       let(:actor) { CZTop::Actor.new { raise error } }
       before(:each) do
@@ -188,12 +188,6 @@ describe CZTop::Actor do
   describe "#process_messages" do
     context "when sending $TERM" do
       before(:each) do
-        # Don't wait forever. This mitigates a race condition on JRuby, where
-        # it probably tries sending the next message while the actor was still
-        # @running but its handler was already shutting down and thus can't
-        # receive the message.
-        actor.options.sndtimeo = 500#ms
-
         # can't use #<<
         actor.instance_eval do
           @state_mtx.synchronize do
@@ -206,12 +200,9 @@ describe CZTop::Actor do
 
       it "breaks" do
         begin
-          actor << "foo" # JRuby hangs here
+          actor << "foo"
         rescue CZTop::Actor::DeadActorError
           # that's okay
-        rescue IO::EAGAINWaitWritable
-          # NOTE: This happens thanks to the setting of SNDTIMEO above.
-          # Otherwise it tends to hang forever JRuby.
         end
 
         sleep 0.01 until actor.dead?
@@ -221,12 +212,6 @@ describe CZTop::Actor do
 
     context "when interrupted" do
       before(:each) do
-        # Don't wait forever. This mitigates a race condition on JRuby, where
-        # it probably tries sending the next message while the actor was still
-        # @running but its handler was already shutting down and thus can't
-        # receive the message.
-        actor.options.sndtimeo = 50#ms
-
         expect(actor).to receive(:next_message).and_raise(Interrupt).once
       end
       it "terminates actor" do
@@ -234,9 +219,6 @@ describe CZTop::Actor do
           actor << "foo" << "INTERRUPTED" << "bar"
         rescue CZTop::Actor::DeadActorError
           # that's okay
-        rescue IO::EAGAINWaitWritable
-          # NOTE: This happens thanks to the setting of SNDTIMEO above.
-          # Otherwise it tends to hang forever JRuby.
         end
         sleep 0.01 until actor.dead?
         refute_includes received_messages, ["bar"]

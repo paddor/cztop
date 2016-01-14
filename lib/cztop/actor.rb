@@ -51,6 +51,7 @@ module CZTop
       ffi_delegate = Zactor.new(@callback, c_args)
       attach_ffi_delegate(ffi_delegate)
       signal_shimmed_handler_death if handler_shimmed?
+      options.sndtimeo = 20#ms # see #<<
     end
 
     # Send a message to the actor.
@@ -61,14 +62,6 @@ module CZTop
     #   raised by {Message#send_to}
     # @note Normally this method is asynchronous, but if the message is
     #   "$TERM", it blocks until the actor is terminated.
-    # @note Possibly only on JRuby: if the actor received "$TERM" or has been
-    #   interrupted very shortly before, this call to {#>>} might hang since
-    #   there is a race condition between this actor still thinking it's
-    #   running and the handler being terminated and thus unable to receive
-    #   any messages. To mitigate this, you might wanna set the
-    #   {ZsockOptions::OptionsAccessor#sndtimeo=} to something else than
-    #   0 (which is the default), like 50 (ms). In that case, it'll raise
-    #     IO::EAGAINWaitWritable after that timeout has been reached.
     def <<(message)
       message = Message.coerce(message)
 
@@ -78,9 +71,27 @@ module CZTop
         # conditions.
         terminate
       else
-        @state_mtx.synchronize do
-          raise DeadActorError if not @running
-          @zactor_mtx.synchronize { super }
+        begin
+          @state_mtx.synchronize do
+            raise DeadActorError if not @running
+            @zactor_mtx.synchronize { super }
+          end
+        rescue IO::EAGAINWaitWritable
+          # The sndtimeo has been reached.
+          #
+          # This should fix the race condition between @running not being set
+          # to false yet but the actor handler already terminating and thus
+          # not able to receive messages anymore.
+          #
+          # This shouldn't result in an infinite loop, since it'll stop as
+          # soon as @running is set to false by #signal_shimmed_handler_death,
+          # at least when using a Ruby handler.
+          #
+          # In case of a C function handler, it MUST NOT crash and only
+          # terminate when being sent the "$TERM" message using #terminate (so
+          # #await_handler_death can set
+          # @running to false).
+          retry
         end
       end
       self
@@ -249,7 +260,8 @@ module CZTop
     # @return [void]
     def signal_shimmed_handler_death
       # NOTE: has to be called in the main thread directly after starting the
-      # handler. If started in the `ensure` block, it won't work on Rubinius.
+      # handler. If started in the `ensure` block in #shim, it won't work on
+      # Rubinius.
       # See https://github.com/rubinius/rubinius/issues/3545
 
       # NOTE: can't just use ConditionVariable, as the signaling code might be
@@ -260,8 +272,7 @@ module CZTop
         sleep 0.01 while @handler_thread.alive?
 
         # NOTE: we do this here and not in #terminate, so it also works when
-        # actor isn't terminated using #terminate, and #dead? won't
-        # block forever
+        # actor isn't terminated using #terminate
         @running = false
 
         @handler_dead_signal.push(nil)

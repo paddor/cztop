@@ -203,7 +203,7 @@ describe CZTop::Actor do
           # that's okay
         end
 
-        sleep 0.01 until actor.dead?
+        actor.terminate # idempotent
         assert_empty received_messages
       end
     end
@@ -218,7 +218,7 @@ describe CZTop::Actor do
         rescue CZTop::Actor::DeadActorError
           # that's okay
         end
-        sleep 0.01 until actor.dead?
+        actor.terminate # idempotent
         refute_includes received_messages, ["bar"]
       end
     end

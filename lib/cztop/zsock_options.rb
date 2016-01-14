@@ -186,6 +186,11 @@ module CZTop
       # @param identity [String] new socket identity
       def identity=(identity) Zsock.set_identity(@zocket, identity) end
 
+      # TODO: Add new heartbeat options. Not yet supported by CZMQ though.
+      # ZMQ_HEARTBEAT_IVL
+      # ZMQ_HEARTBEAT_TTL
+      # ZMQ_HEARTBEAT_TIMEOUT
+
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_tos (void *self);

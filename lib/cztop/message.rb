@@ -32,12 +32,6 @@ module CZTop
       content_size.zero?
     end
 
-    # Used when a message couldn't be sent, particularly when the
-    # ROUTER_MANDATORY flag is set on a {Socket::ROUTER} socket and the peer
-    # isn't connected or its SNDHWM is reached.
-    # @see ZsockOptions#router_mandatory=
-    class SendError < RuntimeError; end
-
     # Send {Message} to a {Socket} or {Actor}.
     # @param destination [Socket, Actor] where to send this message to
     # @note Do NOT use this {Message} anymore afterwards. Its native

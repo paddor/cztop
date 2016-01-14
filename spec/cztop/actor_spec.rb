@@ -303,6 +303,9 @@ describe CZTop::Actor do
         # one more call from the #after filter
         expect(actor).to receive(:terminate).twice.and_call_original
         actor << "$TERM"
+      end
+      it "is synchronous" do
+        actor << "$TERM"
         assert_operator actor, :dead?
       end
     end

@@ -107,8 +107,8 @@ module CZTop
     def socket_by_ptr(ptr)
       @sockets[ptr.to_i] or
         # NOTE: This should never happen, since #wait will return nil if
-        # zpoller_wait returned NULL. But it's better to fail early in case it
-        # ever returns a wrong pointer.
+        # +zpoller_wait+ returned NULL. But it's better to fail early in case
+        # it ever returns a wrong pointer.
         raise Error, "no socket known for pointer #{ptr.inspect}"
     end
   end

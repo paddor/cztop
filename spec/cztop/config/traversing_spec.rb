@@ -79,12 +79,11 @@ main
       end
 
       context "with break value" do
-        # NOTE: broken on JRuby and Rubinius
-        # see https://github.com/rubinius/rubinius/issues/3546
-        # and https://github.com/jruby/jruby/issues/3559 (JRuby only because
+        # NOTE: broken on JRuby
+        # see https://github.com/jruby/jruby/issues/3559 (JRuby only because
         # it keeps calling the block, even though it break'd)
-        it "returns break value", skip: (%w[jruby rbx].include?(RUBY_ENGINE)\
-                                         && "broken on JRuby and Rubinius") do
+        it "returns break value", skip: (%w[jruby].include?(RUBY_ENGINE)\
+                                         && "broken on JRuby") do
           assert_equal :foo, config.execute { |_| break :foo }
         end
       end

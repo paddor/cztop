@@ -24,8 +24,7 @@ describe CZTop::Proxy do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original
     end
     it "waits for signal" do
-      # +1 for #terminate
-      expect(actor).to receive(:wait).at_least(2).and_call_original
+      expect(actor).to receive(:wait).and_call_original
     end
   end
 
@@ -56,8 +55,7 @@ describe CZTop::Proxy do
         expect(actor).to receive(:<<).with(["CAPTURE", endpoint]).and_call_original
       end
       it "waits for signal" do
-        # +1 for #terminate
-        expect(actor).to receive(:wait).at_least(2).and_call_original
+        expect(actor).to receive(:wait).and_call_original
       end
     end
 
@@ -68,8 +66,7 @@ describe CZTop::Proxy do
       expect(actor).to receive(:<<).with("PAUSE").and_call_original
     end
     it "waits for signal" do
-      # +1 for #terminate
-      expect(actor).to receive(:wait).at_least(2).and_call_original
+      expect(actor).to receive(:wait).and_call_original
     end
   end
   describe "#resume" do
@@ -78,8 +75,7 @@ describe CZTop::Proxy do
       expect(actor).to receive(:<<).with("RESUME").and_call_original
     end
     it "waits for signal" do
-      # +1 for #terminate
-      expect(actor).to receive(:wait).at_least(2).and_call_original
+      expect(actor).to receive(:wait).and_call_original
     end
   end
 
@@ -131,8 +127,7 @@ describe CZTop::Proxy do
 
       context "with valid arguments" do
         before(:each) do
-          # +1 for #terminate
-          expect(actor).to receive(:wait).at_least(2).and_call_original
+          expect(actor).to receive(:wait).and_call_original
         end
         after(:each) do
           configurator.bind(socket_type, endpoint)
@@ -172,8 +167,7 @@ describe CZTop::Proxy do
             .with(["DOMAIN", "FRONTEND", domain]).and_call_original
         end
         it "waits for signal" do
-          # +1 for #terminate
-          expect(actor).to receive(:wait).at_least(2).and_call_original
+          expect(actor).to receive(:wait).and_call_original
         end
       end
 
@@ -184,8 +178,7 @@ describe CZTop::Proxy do
             .with(["DOMAIN", "BACKEND", domain]).and_call_original
         end
         it "waits for signal" do
-          # +1 for #terminate
-          expect(actor).to receive(:wait).at_least(2).and_call_original
+          expect(actor).to receive(:wait).and_call_original
         end
       end
     end
@@ -199,8 +192,7 @@ describe CZTop::Proxy do
             .with(["PLAIN", "FRONTEND"]).and_call_original
         end
         it "waits for signal" do
-          # +1 for #terminate
-          expect(actor).to receive(:wait).at_least(2).and_call_original
+          expect(actor).to receive(:wait).and_call_original
         end
       end
 
@@ -211,8 +203,7 @@ describe CZTop::Proxy do
             .with(["PLAIN", "BACKEND"]).and_call_original
         end
         it "waits for signal" do
-          # +1 for #terminate
-          expect(actor).to receive(:wait).at_least(2).and_call_original
+          expect(actor).to receive(:wait).and_call_original
         end
       end
     end
@@ -231,8 +222,7 @@ describe CZTop::Proxy do
               .with(["CURVE", "FRONTEND", public_key, secret_key]).and_call_original
           end
           it "waits for signal" do
-            # +1 for #terminate
-            expect(actor).to receive(:wait).at_least(2).and_call_original
+            expect(actor).to receive(:wait).and_call_original
           end
         end
 
@@ -243,8 +233,7 @@ describe CZTop::Proxy do
               .with(["CURVE", "BACKEND", public_key, secret_key]).and_call_original
           end
           it "waits for signal" do
-            # +1 for #terminate
-            expect(actor).to receive(:wait).at_least(2).and_call_original
+            expect(actor).to receive(:wait).and_call_original
           end
         end
       end

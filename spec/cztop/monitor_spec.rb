@@ -65,10 +65,12 @@ describe CZTop::Monitor do
   end
 
   describe "#start" do
+    after(:each) { subject.start }
     it "tells zmonitor to start" do
-      expect(actor).to receive(:<<).with("START")
-      expect(actor).to receive(:wait).at_least(2) # once for termination
-      subject.start
+      expect(actor).to receive(:<<).with("START").and_call_original
+    end
+    it "waits" do
+      expect(actor).to receive(:wait).and_call_original
     end
   end
 

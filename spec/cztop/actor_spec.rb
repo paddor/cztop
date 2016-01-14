@@ -90,7 +90,7 @@ describe CZTop::Actor do
       end
     end
 
-    context "with faulty handler" do
+    context "with faulty handler" do # TODO: does it still sometimes hang on JRuby?
       let(:actor) { CZTop::Actor.new { raise "foobar" } }
       it "warns about it" do
         assert_output nil, /handler.*raised exception/i do
@@ -142,43 +142,59 @@ describe CZTop::Actor do
   end
 
   describe "#process_messages" do
-    it "breaks on $TERM" do
-      # can't use #<<
-      actor.instance_eval do
-        @zactor_mtx.synchronize do
-          CZTop::Message.new("$TERM").send_to(self)
+    context "when sending $TERM" do
+      before(:each) do
+        # Don't wait forever. This mitigates a race condition on JRuby, where
+        # it probably tries sending the next message while the actor was still
+        # @running but its handler was already shutting down and thus can't
+        # receive the message.
+        actor.options.sndtimeo = 500#ms
+
+        # can't use #<<
+        actor.instance_eval do
+          @state_mtx.synchronize do
+            @zactor_mtx.synchronize do
+              CZTop::Message.new("$TERM").send_to(self)
+            end
+          end
         end
       end
-      begin
-        actor << "foo"
-      rescue CZTop::Actor::DeadActorError
-        # that's okay
+
+      it "breaks" do
+        begin
+          actor << "foo" # JRuby hangs here
+        rescue CZTop::Actor::DeadActorError
+          # that's okay
+        rescue IO::EAGAINWaitWritable
+          # NOTE: This happens thanks to the setting of SNDTIMEO above.
+          # Otherwise it tends to hang forever JRuby.
+        end
+
+        sleep 0.01 until actor.terminated?
+        assert_empty received_messages
       end
-      sleep 0.01 until actor.terminated?
-      assert_empty received_messages
     end
 
     context "when interrupted" do
-      it "terminates actor" do
+      before(:each) do
+        # Don't wait forever. This mitigates a race condition on JRuby, where
+        # it probably tries sending the next message while the actor was still
+        # @running but its handler was already shutting down and thus can't
+        # receive the message.
+        actor.options.sndtimeo = 50#ms
+
         expect(actor).to receive(:next_message).and_raise(Interrupt).once
+      end
+      it "terminates actor" do
         begin
           actor << "foo" << "INTERRUPTED" << "bar"
         rescue CZTop::Actor::DeadActorError
           # that's okay
+        rescue IO::EAGAINWaitWritable
+          # NOTE: This happens thanks to the setting of SNDTIMEO above.
+          # Otherwise it tends to hang forever JRuby.
         end
-        start_time = Time.now
-        until actor.terminated?
-          sleep 0.01
-
-          # NOTE: This test example sometimes hangs on Travis JRuby...
-          # This should help find the problem.
-          if start_time + 1 < Time.now
-            warn "test example hanging"
-            warn "received messages so far: #{received_messages.inspect}"
-            warn "terminating actor manually"
-            flunk "hangs, check messages above"
-          end
-        end
+        sleep 0.01 until actor.terminated?
         refute_includes received_messages, ["bar"]
       end
     end

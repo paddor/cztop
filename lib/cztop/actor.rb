@@ -54,8 +54,18 @@ module CZTop
     # @param message [Object] message to send to the actor, see {Message.coerce}
     # @return [self] so it's chainable
     # @raise [DeadActorError] if actor is terminated
+    # @raise [IO::EAGAINWaitWritable, RuntimeError] anything that could be
+    #   raised by {Message#send_to}
     # @note Normally this method is asynchronous, but if the message is
     #   "$TERM", it blocks until the actor is terminated.
+    # @note Possibly only on JRuby: if the actor received "$TERM" or has been
+    #   interrupted very shortly before, this call to {#>>} might hang since
+    #   there is a race condition between this actor still thinking it's
+    #   running and the handler being terminated and thus unable to receive
+    #   any messages. To mitigate this, you might wanna set the
+    #   {ZsockOptions::OptionsAccessor#sndtimeo=} to something else than
+    #   0 (which is the default), like 50 (ms). In that case, it'll raise
+    #     IO::EAGAINWaitWritable after that timeout has been reached.
     def <<(message)
       message = Message.coerce(message)
 

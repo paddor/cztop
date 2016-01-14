@@ -44,8 +44,7 @@ module CZTop
     # @see #process_messages
     def initialize(callback = nil, c_args = nil, &handler)
       @running = true
-      @zactor_mtx = Mutex.new # mutex for zactor_t resource
-      @state_mtx = Mutex.new # mutex for actor state (like @running)
+      @mtx = Mutex.new
       @callback = callback || handler
       @callback = shim(@callback) unless @callback.is_a? ::FFI::Pointer
       ffi_delegate = Zactor.new(@callback, c_args)
@@ -72,16 +71,16 @@ module CZTop
         terminate
       else
         begin
-          @state_mtx.synchronize do
+          @mtx.synchronize do
             raise DeadActorError if not @running
-            @zactor_mtx.synchronize { super }
+            super
           end
         rescue IO::EAGAINWaitWritable
           # The sndtimeo has been reached.
           #
-          # This should fix the race condition between @running not being set
-          # to false yet but the actor handler already terminating and thus
-          # not able to receive messages anymore.
+          # This should fix the race condition (mainly on JRuby) between
+          # @running not being set to false yet but the actor handler already
+          # terminating and thus not able to receive messages anymore.
           #
           # This shouldn't result in an infinite loop, since it'll stop as
           # soon as @running is set to false by #signal_shimmed_handler_death,
@@ -101,11 +100,9 @@ module CZTop
     # @return [Message]
     # @raise [DeadActorError] if actor is terminated
     def receive
-      @state_mtx.synchronize do
+      @mtx.synchronize do
         raise DeadActorError if not @running
-        @zactor_mtx.synchronize do
-          super
-        end
+        super
       end
     end
 
@@ -115,14 +112,12 @@ module CZTop
     # @return [Message] the actor's response
     # @raise [ArgumentError] if the message is "$TERM" (use {#terminate})
     def request(message)
-      @state_mtx.synchronize do
+      @mtx.synchronize do
         raise DeadActorError if not @running
         message = Message.coerce(message)
         raise ArgumentError, "use #terminate" if TERM == message[0]
-        @zactor_mtx.synchronize do
-          message.send_to(self)
-          Message.receive_from(self)
-        end
+        message.send_to(self)
+        Message.receive_from(self)
       end
     end
 
@@ -136,18 +131,16 @@ module CZTop
     #   preceeded with it's type, like <tt>:string, "foo"</tt>)
     # @return [void]
     def send_picture(picture, *args)
-      @state_mtx.synchronize do
+      @mtx.synchronize do
         raise DeadActorError if not @running
-        @zactor_mtx.synchronize do
-          Zsock.send(ffi_delegate, picture, *args)
-        end
+        Zsock.send(ffi_delegate, picture, *args)
       end
     end
 
     # Thread-safe {PolymorphicZsockMethods#wait}.
     # @return [Integer]
     def wait
-      @zactor_mtx.synchronize do
+      @mtx.synchronize do
         super
       end
     end
@@ -156,11 +149,9 @@ module CZTop
     # @return [Boolean] whether it died just now (+false+ if it was dead
     #   already)
     def terminate
-      @state_mtx.synchronize do
+      @mtx.synchronize do
         return false if not @running
-        @zactor_mtx.synchronize do
-          Message.new(TERM).send_to(self)
-        end
+        Message.new(TERM).send_to(self)
         await_handler_death
         true
       end
@@ -195,14 +186,15 @@ module CZTop
 
       Zactor.fn do |pipe_delegate, _args|
         begin
-          @state_mtx.synchronize do
+          @mtx.synchronize do
             @handler_thread = Thread.current
             @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)
             @pipe.signal # handshake, so zactor_new() returns
           end
           process_messages(handler)
+        rescue Exception
+          @exception = $!
         ensure
-          @exception = $! if $! # store exception, if any
           @handler_dying_signal.push(nil)
         end
       end
@@ -269,7 +261,7 @@ module CZTop
 
       Thread.new do
         @handler_dying_signal.pop
-        sleep 0.01 while @handler_thread.alive?
+        @handler_thread.join
 
         # NOTE: we do this here and not in #terminate, so it also works when
         # actor isn't terminated using #terminate
@@ -287,9 +279,12 @@ module CZTop
         @handler_dead_signal.pop
 
       else
-        # for handlers that are passed as C functions
+        # for handlers that are passed as C functions, we rely on normal death
+        # signal
 
-        wait # relying on normal death signal
+        # can't use #wait here because of recursive deadlock
+        Zsock.wait(ffi_delegate)
+
         @running = false
       end
     end

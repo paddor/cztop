@@ -190,10 +190,8 @@ describe CZTop::Actor do
       before(:each) do
         # can't use #<<
         actor.instance_eval do
-          @state_mtx.synchronize do
-            @zactor_mtx.synchronize do
-              CZTop::Message.new("$TERM").send_to(self)
-            end
+          @mtx.synchronize do
+            CZTop::Message.new("$TERM").send_to(self)
           end
         end
       end
@@ -252,7 +250,7 @@ describe CZTop::Actor do
   describe "#<<" do
 
     context "threads" do
-      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
         expect(mutex).to receive(:synchronize).at_least(1)
           .and_call_original
@@ -320,7 +318,7 @@ describe CZTop::Actor do
     end
 
     context "threads" do
-      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
         expect(mutex).to receive(:synchronize).at_least(1)
           .and_call_original
@@ -365,7 +363,7 @@ describe CZTop::Actor do
     end
 
     context "threads" do
-      let(:mutex) { actor.instance_variable_get(:@zactor_mtx) }
+      let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
         expect(mutex).to receive(:synchronize).at_least(1)
           .and_call_original
@@ -412,13 +410,8 @@ describe CZTop::Actor do
 
       context "with slow handler death" do
         let(:handler_thread) { actor.instance_variable_get(:@handler_thread) }
-        it "waits repeatedly" do
-          checked = 0
-          expect(handler_thread).to receive(:alive?) do
-            checked += 1
-            checked < 5 # handler thread will be alive for a while
-          end.exactly(5)
-          expect(actor).to receive(:sleep).exactly(4)
+        it "waits for heandler thread to terminate" do
+          expect(handler_thread).to receive(:join).and_call_original
           actor.terminate
         end
       end

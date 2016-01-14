@@ -252,7 +252,7 @@ describe CZTop::Actor do
     context "threads" do
       let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
-        expect(mutex).to receive(:synchronize).at_least(1)
+        expect(mutex).to receive(:synchronize).at_least(:once)
           .and_call_original
         actor << "foo"
       end
@@ -320,7 +320,7 @@ describe CZTop::Actor do
     context "threads" do
       let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
-        expect(mutex).to receive(:synchronize).at_least(1)
+        expect(mutex).to receive(:synchronize).at_least(:once)
           .and_call_original
         actor << "foo"
         actor.receive
@@ -365,7 +365,7 @@ describe CZTop::Actor do
     context "threads" do
       let(:mutex) { actor.instance_variable_get(:@mtx) }
       it "is thread-safe" do
-        expect(mutex).to receive(:synchronize).at_least(1)
+        expect(mutex).to receive(:synchronize).at_least(:once)
           .and_call_original
         response
       end

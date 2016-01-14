@@ -230,7 +230,7 @@ describe CZTop::ZsockOptions do
         let(:content) { "foobar" }
         let(:msg) { [ identity, "", content ] }
         it "raises" do
-          assert_raises(CZTop::Message::SendError) { socket << msg }
+          assert_raises(Errno::EHOSTUNREACH) { socket << msg }
         end
       end
     end

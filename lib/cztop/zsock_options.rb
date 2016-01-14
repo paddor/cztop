@@ -22,6 +22,8 @@ module CZTop
 
       include CZMQ::FFI
 
+      # @!group High Water Marks
+
       # @return [Integer] the send high water mark
       def sndhwm() Zsock.sndhwm(@zocket) end
       # @param value [Integer] the new send high water mark.
@@ -30,6 +32,8 @@ module CZTop
       def rcvhwm() Zsock.rcvhwm(@zocket) end
       # @param value [Integer] the new receive high water mark
       def rcvhwm=(value) Zsock.set_rcvhwm(@zocket, value) end
+
+      # @!endgroup
 
       # @!group (CURVE) Security
 
@@ -156,6 +160,8 @@ module CZTop
 
       # @!endgroup
 
+      # @!group Send and Receive Timeouts
+
       # @return [Integer] the timeout when receiving a message
       def rcvtimeo() Zsock.rcvtimeo(@zocket) end
       # @param timeout [Integer] new timeout
@@ -165,6 +171,8 @@ module CZTop
       def sndtimeo() Zsock.sndtimeo(@zocket) end
       # @param timeout [Integer] new timeout
       def sndtimeo=(timeout) Zsock.set_sndtimeo(@zocket, timeout) end
+
+      # @!endgroup
 
       # Accept only routable messages on ROUTER sockets. Default is off.
       # @param bool [Boolean] whether to error if a message isn't routable

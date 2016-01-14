@@ -7,8 +7,12 @@ module CZTop
   module SendReceiveMethods
     # Sends a message.
     # @param message [Message, String, Array<parts>] the message to send
+    # @raise [IO::EAGAINWaitWritable] if send timeout has been reached (see
+    #   {ZsockOptions::OptionsAccessor#sndtimeo=})
+    # @raise [SystemCallError] anything raised by {Message#send_to}
     # @return [self]
     # @see Message.coerce
+    # @see Message#send_to
     def <<(message)
       Message.coerce(message).send_to(self)
       self
@@ -16,7 +20,10 @@ module CZTop
 
     # Receives a message.
     # @return [Message]
-    # @raise [Interrupt] if interrupted
+    # @raise [IO::EAGAINWaitReadable] if receive timeout has been reached (see
+    #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
+    # @raise [Interrupt, SystemCallError] anything raised by
+    #   {Message.receive_from}
     # @see Message.receive_from
     def receive
       Message.receive_from(self)

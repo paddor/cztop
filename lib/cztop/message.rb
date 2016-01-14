@@ -40,26 +40,54 @@ module CZTop
 
     # Send {Message} to a {Socket} or {Actor}.
     # @param destination [Socket, Actor] where to send this message to
-    # @note Do not use this {Message} anymore afterwards. Its native
+    # @note Do NOT use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
     # @return [void]
-    # @raise [SendError] if the message can't be sent/routed right now
+    # @raise [IO::EAGAINWaitWritable] if the send timeout has been reached
+    #   (see {ZsockOptions::OptionsAccessor#sndtimeo=})
+    # @raise [Errno::EHOSTUNREACH] if the ROUTER_MANDATORY flag is set on
+    #   a {Socket::ROUTER} socket and the peer isn't connected or its SNDHWM
+    #   is reached (see {ZsockOptions::OptionsAccessor#router_mandatory=})
+    # @raise [SystemCallError] for any other error code set after +zmsg_send+
+    #   returns with failure. Please report as bug.
     def send_to(destination)
       rc = Zmsg.send(ffi_delegate, destination)
-      # TODO: Check zmq_errno for EAGAIN. If so, raise WaitWritable.
-      raise SendError, "unable to send message" if rc == -1
+      return if rc == 0
+
+      case ::CZMQ::FFI::Errors.errno
+      when Errno::EAGAIN::Errno
+        raise IO::EAGAINWaitWritable
+      when Errno::EHOSTUNREACH::Errno
+        raise Errno::EHOSTUNREACH
+      else
+        # NOTE: If this happens, application code is bad, or this case-list
+        # has to be extended.
+        raise SystemCallError, ::CZMQ::FFI::Errors.strerror
+      end
     end
 
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
-    # @return [Message]
-    # @raise [Interrupt] if interrupted while waiting for a message, for
-    #   example when the {ZsockOptions::OptionsAccessor#rcvtimeo} has been
-    #   reached
+    # @return [Message] the newly received message
+    # @raise [IO::EAGAINWaitReadable] if the receive timeout has been reached
+    #   (see {ZsockOptions::OptionsAccessor#rcvtimeo=})
+    # @raise [Interrupt] if interrupted while waiting for a message
+    # @raise [SystemCallError] for any other error code set after +zmsg_recv+
+    #   returns with failure. Please report as bug.
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
-      raise Interrupt if delegate.null?
-      from_ffi_delegate(delegate)
+      return from_ffi_delegate(delegate) if !delegate.null?
+
+      case ::CZMQ::FFI::Errors.errno
+      when Errno::EAGAIN::Errno
+        raise IO::EAGAINWaitReadable
+      when Errno::EINTR::Errno
+        raise Interrupt
+      else
+        # NOTE: If this happens, application code is bad, or this case-list
+        # has to be extended.
+        raise SystemCallError, ::CZMQ::FFI::Errors.strerror
+      end
     end
 
     # Append a frame to this message.

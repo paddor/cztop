@@ -133,30 +133,78 @@ describe CZTop::Message do
   describe "#send_to" do
     let(:delegate) { msg.ffi_delegate }
     let(:destination) { double "destination socket" }
-    it "sends its delegate to the destination" do
-      expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
-      msg.send_to(destination)
+    context "when successful" do
+      after(:each) { msg.send_to(destination) }
+      it "sends its delegate to the destination" do
+        expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
+          .and_return(0)
+      end
+    end
+    context "when NOT successful" do
+      before(:each) do
+        expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
+          .and_return(-1)
+        expect(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(errno)
+      end
+      context "with sndtimeo reached" do
+        let(:errno) { Errno::EAGAIN::Errno }
+        it "raises IO::EAGAINWaitWritable" do
+          assert_raises(IO::EAGAINWaitReadable) { msg.send_to(destination) }
+        end
+      end
+      context "with host unreachable" do
+        let(:errno) { Errno::EHOSTUNREACH::Errno }
+        it "raises IO::EHOSTUNREACH" do
+          assert_raises(Errno::EHOSTUNREACH) { msg.send_to(destination) }
+        end
+      end
+      context "with other error" do
+        let(:errno) { Errno::EINVAL::Errno }
+        it "raises RuntimeError" do
+          assert_raises(SystemCallError) { msg.send_to(destination) }
+        end
+      end
     end
   end
 
   describe ".receive_from" do
-    let(:dlg) { msg.ffi_delegate }
+    let(:msg_delegate) { msg.ffi_delegate }
     let(:received_message) { CZTop::Message.receive_from(src) }
     let(:src) { double "source" }
-    it "receives message from source" do
-      expect(CZMQ::FFI::Zmsg).to(receive(:recv).with(src).and_return(dlg))
-      assert_kind_of CZTop::Message, received_message
-      refute_same msg, received_message
-      assert_same msg.ffi_delegate, received_message.ffi_delegate
+    context "when successful" do
+      it "receives message from source" do
+        expect(CZMQ::FFI::Zmsg).to receive(:recv).with(src)
+          .and_return(msg_delegate)
+        assert_kind_of CZTop::Message, received_message
+        assert_same msg.ffi_delegate, received_message.ffi_delegate
+      end
     end
 
-    context "when interrupted" do
+    context "when NOT successful" do
       let(:nullptr) { ::FFI::Pointer::NULL }
       before(:each) do
-        expect(CZMQ::FFI).to(receive(:zmsg_recv).and_return(nullptr))
+        expect(CZMQ::FFI).to receive(:zmsg_recv).and_return(nullptr)
+        expect(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(errno)
       end
-      it "raises Interrupt" do
-        assert_raises(Interrupt) { received_message }
+      context "when interrupted" do
+        let(:errno) { Errno::EINTR::Errno }
+        it "raises Interrupt" do
+          assert_raises(Interrupt) { received_message }
+        end
+      end
+      context "with rcvtimeo reached" do
+        let(:errno) { Errno::EAGAIN::Errno }
+        it "raises IO::EAGAINWaitReadable" do
+          assert_raises(IO::EAGAINWaitReadable) { received_message }
+        end
+      end
+      context "with other error" do
+        let(:errno) { Errno::EINVAL::Errno }
+        it "raises RuntimeError" do
+          assert_raises(SystemCallError) { received_message }
+        end
       end
     end
   end

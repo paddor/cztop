@@ -242,7 +242,6 @@ describe CZTop::Actor do
     context "when not yet terminated" do
       it "returns false" do
         refute actor.dead?
-        actor.terminate
       end
     end
   end
@@ -395,7 +394,6 @@ describe CZTop::Actor do
         msg = CZTop::Message.new "$TERM"
         expect(CZTop::Message).to receive(:new).with("$TERM").and_return(msg)
         expect(msg).to receive(:send_to).with(actor).and_call_original
-        actor.terminate
       end
 
       it "returns true" do
@@ -405,14 +403,12 @@ describe CZTop::Actor do
       it "waits for handler to terminate" do
         expect(actor.instance_variable_get(:@handler_dead_signal)).to(
           receive(:pop).and_call_original)
-        actor.terminate
       end
 
       context "with slow handler death" do
         let(:handler_thread) { actor.instance_variable_get(:@handler_thread) }
         it "waits for heandler thread to terminate" do
           expect(handler_thread).to receive(:join).and_call_original
-          actor.terminate
         end
       end
     end

@@ -47,8 +47,9 @@ and up-to-date). Unfortunately, they were in pretty bad shape and missing a few
 CZMQ classes.
 
 So I decided to improve the quality and usability of the binding and add the
-missing classes.  [czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) is the
-result and provides a solid foundation for CZTop.
+missing classes. The result is
+[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) which provides a solid
+foundation for CZTop.
 
 ## Goals
 

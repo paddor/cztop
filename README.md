@@ -53,12 +53,12 @@ foundation for CZTop.
 
 ## Goals
 
-Here are some some of the goals I have in mind for this library:
+Here are some some of the goals I have/had in mind for this library:
 
 - [x] as easy as possible, Ruby-esque API
-- [x] first class support for security (CURVE mechanism) [x]
-  - [x] including handling of certificates [x]
-- [x] support MRI, Rubinius, and JRuby [x]
+- [x] first class support for security (CURVE mechanism)
+  - [x] including handling of certificates
+- [x] support MRI, Rubinius, and JRuby
 - [x] high-quality API documentation
 - [x] 100% test coverage
 - [x] provide a portable Z85 implementation

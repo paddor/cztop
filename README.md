@@ -44,10 +44,11 @@ Furthermore, I knew about the generated low-level Ruby FFI binding in the
 [zeromq/czmq](https://github.com/zeromq/czmq) repository. I wanted to make use
 of them because I love that they're generated (and thus, most likely correct
 and up-to-date). Unfortunately, they were in pretty bad shape and missing a few
-CZMQ classes.  So I decided to improve the quality and usability of the binding
-and add the missing classes.
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) is the result and
-provides a solid foundation for CZTop.
+CZMQ classes.
+
+So I decided to improve the quality and usability of the binding and add the
+missing classes.  [czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) is the
+result and provides a solid foundation for CZTop.
 
 ## Goals
 

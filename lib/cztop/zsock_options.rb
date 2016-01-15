@@ -192,16 +192,44 @@ module CZTop
 
       # @return [Integer] current value of Type of Service
       def tos() Zsock.tos(@zocket) end
-      # @return [Integer] current value of Type of Service
-      def tos=(new_tos)
-        raise ArgumentError, "invalid TOS" unless new_tos >= 0
-        Zsock.set_tos(@zocket, new_tos)
+      # @param new_value [Integer] new value for Type of Service
+      def tos=(new_value)
+        raise ArgumentError, "invalid TOS" unless new_value >= 0
+        Zsock.set_tos(@zocket, new_value)
       end
 
-      # TODO: Add new heartbeat options. Not yet supported by CZMQ though.
-      # ZMQ_HEARTBEAT_IVL
-      # ZMQ_HEARTBEAT_TTL
-      # ZMQ_HEARTBEAT_TIMEOUT
+      # @return [Integer] current value of Heartbeat IVL
+      def heartbeat_ivl() Zsock.heartbeat_ivl(@zocket) end
+      # @param new_value [Integer] new value for Heartbeat IVL
+      def heartbeat_ivl=(new_value)
+        raise ArgumentError, "invalid IVL" unless new_value >= 0
+        Zsock.set_heartbeat_ivl(@zocket, new_value)
+      end
+
+      # @return [Integer] current value of Heartbeat TTL, in milliseconds
+      def heartbeat_ttl() Zsock.heartbeat_ttl(@zocket) end
+      # @param new_value [Integer] new value for Heartbeat TTL, in
+      #   milliseconds
+      # @note The value will internally be rounded to the nearest decisecond.
+      #   So a value of less than 100 will have no effect.
+      def heartbeat_ttl=(new_value)
+        unless new_value.is_a? Integer
+          raise ArgumentError, "invalid TTL: #{new_value}"
+        end
+        unless (0..65536).include? new_value
+          raise ArgumentError, "TTL out of range: #{new_value}"
+        end
+        Zsock.set_heartbeat_ttl(@zocket, new_value)
+      end
+
+      # @return [Integer] current value of Heartbeat Timeout
+      def heartbeat_timeout() Zsock.heartbeat_timeout(@zocket) end
+      # @param new_value [Integer] new value for Heartbeat Timeout
+      def heartbeat_timeout=(new_value)
+        raise ArgumentError, "invalid timeout" unless new_value >= 0
+        Zsock.set_heartbeat_timeout(@zocket, new_value)
+      end
+
 
 # TODO: a reasonable subset of these
 #//  Get socket options

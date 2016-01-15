@@ -275,5 +275,66 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+    describe "#heartbeat_ivl" do
+      context "with no IVL" do
+        it "returns zero" do
+          assert_equal 0, options.heartbeat_ivl
+        end
+      end
+      context "with IVL set" do
+        let(:ivl) { 5 }
+        before(:each) { options.heartbeat_ivl = ivl }
+        it "returns IVL" do
+          assert_equal ivl, options.heartbeat_ivl
+        end
+      end
+    end
+    describe "#heartbeat_ttl" do
+      context "with no TTL" do
+        it "returns zero" do
+          assert_equal 0, options.heartbeat_ttl
+        end
+      end
+      context "with TTL set" do
+        let(:ttl) { 500 }
+        before(:each) { options.heartbeat_ttl = ttl }
+        it "returns TTL" do
+          assert_equal ttl, options.heartbeat_ttl
+        end
+      end
+      context "with invalid TTL" do
+        let(:ttl) { 500.3 }
+        it "raises" do
+          assert_raises(ArgumentError) { options.heartbeat_ttl = ttl }
+        end
+      end
+      context "with out-of-range TTL" do
+        let(:ttl) { 100_000 }
+        it "raises" do
+          assert_raises(ArgumentError) { options.heartbeat_ttl = ttl }
+        end
+      end
+      context "with insignificant TTL" do
+        let(:ttl) { 80 } # less than 100
+        before(:each) { options.heartbeat_ttl = ttl }
+        it "has no effect" do
+          assert_equal 0, options.heartbeat_ttl
+        end
+      end
+    end
+    describe "#heartbeat_timeout" do
+      context "with no timeout" do
+        it "returns -1" do
+          assert_equal -1, options.heartbeat_timeout
+        end
+      end
+      context "with timeout set" do
+        let(:timeout) { 5 }
+        before(:each) { options.heartbeat_timeout = timeout }
+        it "returns timeout" do
+          assert_equal timeout, options.heartbeat_timeout
+        end
+      end
+    end
   end
 end

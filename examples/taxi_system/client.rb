@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-puts "bla"
 require_relative '../../lib/cztop'
 
 endpoint = ENV["BROKER_ADDRESS"]
@@ -14,6 +13,5 @@ socket.connect(endpoint)
 puts "connected."
 
 while message = socket.receive
-  msg.pop # remove delimiter frame
   puts "received message: #{message.to_a.inspect}"
 end

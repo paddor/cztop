@@ -22,10 +22,10 @@ module CZTop
       @actor = Actor.new(ZAUTH_FPTR)
     end
 
-    # @return [Actor] the actor behind this Beacon
+    # @return [Actor] the actor behind this authenticator
     attr_reader :actor
 
-    # Terminates the beacon.
+    # Terminates the authenticator.
     # @return [void]
     def terminate
       @actor.terminate

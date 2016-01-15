@@ -24,10 +24,10 @@ module CZTop
       @actor = Actor.new(ZMONITOR_FPTR, socket)
     end
 
-    # @return [Actor] the actor behind this Beacon
+    # @return [Actor] the actor behind this monitor
     attr_reader :actor
 
-    # Terminates the beacon.
+    # Terminates the monitor.
     # @return [void]
     def terminate
       @actor.terminate

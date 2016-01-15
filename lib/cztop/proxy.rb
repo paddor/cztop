@@ -19,10 +19,10 @@ module CZTop
       @actor = Actor.new(ZPROXY_FPTR)
     end
 
-    # @return [Actor] the actor behind this Beacon
+    # @return [Actor] the actor behind this proxy
     attr_reader :actor
 
-    # Terminates the beacon.
+    # Terminates the proxy.
     # @return [void]
     def terminate
       @actor.terminate

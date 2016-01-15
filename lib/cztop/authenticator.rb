@@ -38,8 +38,6 @@ module CZTop
       @actor.wait
     end
 
-    ALLOW = "ALLOW".freeze
-
     # Add a list of IP addresses to the whitelist. For _NULL_, all clients
     # from these addresses will be accepted. For _PLAIN_ and _CURVE_, they
     # will be allowed to continue with authentication.
@@ -47,7 +45,7 @@ module CZTop
     # @param addrs [String] IP address(es) to allow
     # @return [void]
     def allow(*addrs)
-      @actor << [ALLOW, *addrs]
+      @actor << ["ALLOW", *addrs]
       @actor.wait
     end
 

@@ -212,7 +212,7 @@ module CZTop
     end
 
     # the command which causes an actor handler to terminate
-    TERM = "$TERM".freeze
+    TERM = "$TERM"
 
     # Successively receive messages that were sent to the actor and
     # yield them to the given handler to process them. The a pipe (a

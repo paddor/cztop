@@ -28,12 +28,10 @@ module CZTop
       @actor.terminate
     end
 
-    VERBOSE = "VERBOSE".freeze
-
     # Enable verbose logging of commands and activity.
     # @return [void]
     def verbose!
-      @actor << VERBOSE
+      @actor << "VERBOSE"
       @actor.wait
     end
 

@@ -1,5 +1,7 @@
 language: ruby
-cache: bundler
+cache:
+  directories:
+    - vendor/czmq-ffi-gen
 sudo: required
 rvm:
   - 2.3.0

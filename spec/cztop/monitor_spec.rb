@@ -42,20 +42,20 @@ describe CZTop::Monitor do
   describe "#listen" do
     context "with one valid event" do
       let(:event) { "CONNECTED" }
+      after(:each) { subject.listen(event) }
       it "tells zmonitor actor" do
         expect(actor).to receive(:<<).with(["LISTEN", event])
-        subject.listen(event)
       end
     end
     context "with multiple valid events" do
       let(:events) { %w[ CONNECTED DISCONNECTED ] }
+      after(:each) { subject.listen(*events) }
       it "tells zmonitor actor" do
         expect(actor).to receive(:<<).with(["LISTEN", *events])
-        subject.listen(*events)
       end
     end
     context "with invalid event" do
-      let(:event) { "FOO" }
+      let(:event) { :FOO }
       it "raises" do
         assert_raises(ArgumentError) do
           subject.listen(event)
@@ -76,7 +76,7 @@ describe CZTop::Monitor do
 
   describe "#next" do
     it "gets the next event" do
-      subject.listen(*%w[ALL])
+      subject.listen("ALL")
       subject.start
       req_socket # connects
       req_socket.disconnect(endpoint)

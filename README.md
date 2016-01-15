@@ -15,15 +15,21 @@ _________  _____________________
         \/         \/                 |__|
 ```
 
-This is CZTop, an easy-to-use CZMQ Ruby binding. It is based on
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level FFI
-binding of [CZMQ](https://github.com/zeromq/czmq).
+CZTop is a CZMQ Ruby binding. It is based on
+[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
+FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
+easy to use for Rubyists (POLS) and providing first class support for security
+mechanisms (like CURVE).
 
 ## Reasons
 
-* low-level FFI bindings of [zeromq/czmq](https://github.com/zeromq/czmq)
+Why another CZMQ Ruby binding? Here is what I found:
+
+* generated low-level FFI bindings of [zeromq/czmq](https://github.com/zeromq/czmq)
+  * I wanted to make use of them
   * I love the idea because they're generated
-  * but they were in a very bad state (much better now, of course)
+  * they were in a very bad state, though
+    - much better now, of course
 * [Asmod4n/ruby-ffi-czmq](https://github.com/Asmod4n/ruby-ffi-czmq)
   * outdated
   * according to its author, it's an "abomination"
@@ -40,22 +46,16 @@ binding of [CZMQ](https://github.com/zeromq/czmq).
 
 Here are some some of the goals I have in mind for this library:
 
-* as easy as possible, Ruby-esque API
-* first class support for security (CURVE mechanism)
-  * including handling of certificates
-* support MRI, Rubinius, and JRuby
-* use it to replace the Celluloid::ZMQ part of Celluloid
-* being able to implement some of the missing (CZMQ based) Ruby examples in the ZMQ Guide
-* provide a portable Z85 implementation
+- [x] as easy as possible, Ruby-esque API
+- [x] first class support for security (CURVE mechanism) [x]
+  - [x] including handling of certificates [x]
+- [x] support MRI, Rubinius, and JRuby [x]
+- [x] high-quality API documentation
+- [x] 100% test coverage
+- [x] provide a portable Z85 implementation
   * unlike [fpesce/z85](https://github.com/fpesce/z85), which is a C extension
-
-Possibly in another project, which will use this one:
-
-* being able to make well-designed reliability patterns from ZMQ Guide ready to use
-  - ping-pong (a la http://zguide.zeromq.org/page:all#Heartbeating-for-Paranoid-Pirate)
-  - Majordomo
-  - Freelance
-  - (TODO: have a closer look at Malamute/MLDP)
+- [ ] use it to replace the [Celluloid::ZMQ](https://github.com/celluloid/celluloid-zmq) part of [Celluloid](https://github.com/celluloid/celluloid)
+- [ ] implement some of the missing (CZMQ based) Ruby examples in the [ZMQ Guide](http://zguide.zeromq.org/page:all)
 
 ## Installation
 
@@ -97,34 +97,36 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 
 ## TODO
 
-* maybe find a better name for this project
-* pack generated code into its own gem (czmq-ffi-gen) [x]
+* [x] pack generated code into its own gem (czmq-ffi-gen)
 * think of a neat Ruby API, including:
-  - Actor [x]
-  - Beacon [x]
-  - Socket [x]
-    - Options to encapsulate all option setters and getters [50%]
-    - Security mechanisms [x]
-  - Message [x]
-  - Frame [x]
-    - enumerable Frames [x]
-  - Loop [X]
-  - Poller [x]
-  - Monitor [X]
-  - Authenticator [x]
-  - Certificate [X]
-  - Config [x]
-  - Proxy [x]
-  - Z85 [x]
-* specs [x]
+  - [x] Actor
+  - [x] Beacon
+  - [x] Socket
+    - [50%] Options to encapsulate all option setters and getters
+    - [x] Security mechanisms
+  - [x] Message
+  - [x] Frame
+    - [x] enumerable Frames
+  - [x] Loop
+  - [x] Poller
+  - [x] Monitor
+  - [x] Authenticator
+  - [x] Certificate
+  - [x] Config
+  - [x] Proxy
+  - [x] Z85
+* [x] specs
 * write the missing XML API files in CZMQ
-  - zarmour.xml [x]
-  - zconfig.xml [x]
-  - zsock_option.xml [x]
-  - zcert.xml [x]
-  - zcertstore.xml [x]
-* check availability of libsodium [x]
-* read error strings for exceptions (zmq_strerror)
+  - [x] zarmour.xml
+  - [x] zconfig.xml
+  - [x] zsock_option.xml
+  - [x] zcert.xml
+  - [x] zcertstore.xml
+* [x] check availability of libsodium
+* [x] read error strings for exceptions where appropriate (zmq_strerror)
+* [x] add support for ZMTP 3.1 heartbeats in CZMQ
+* [ ] add more examples
+* [ ] add performance benchmarks
 
 ## Contributing
 

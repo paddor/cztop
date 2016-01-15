@@ -110,28 +110,27 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 * think of a neat Ruby API, including:
   - [x] Actor
   - [x] Beacon
+  - [x] Certificate
   - [x] Socket
-    - [50%] Options to encapsulate all option setters and getters
+    - [50%] access to all socket options
     - [x] Security mechanisms
   - [x] Message
   - [x] Frame
     - [x] enumerable Frames
-  - [x] Loop
-  - [x] Poller
-  - [x] Monitor
   - [x] Authenticator
-  - [x] Certificate
-  - [x] Config
+  - [x] Loop
+  - [x] Monitor
+  - [x] Poller
   - [x] Proxy
+  - [x] Config
   - [x] Z85
-* [x] specs
 * write the missing XML API files in CZMQ
   - [x] zarmour.xml
   - [x] zconfig.xml
   - [x] zsock_option.xml
   - [x] zcert.xml
   - [x] zcertstore.xml
-* [x] check availability of libsodium
+* [x] check availability of libsodium within CZTop
 * [x] read error strings for exceptions where appropriate (zmq_strerror)
 * [x] add support for ZMTP 3.1 heartbeats in CZMQ
 * [ ] add more examples

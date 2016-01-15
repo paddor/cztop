@@ -49,7 +49,6 @@ module CZTop
       @callback = shim(@callback) unless @callback.is_a? ::FFI::Pointer
       ffi_delegate = Zactor.new(@callback, c_args)
       attach_ffi_delegate(ffi_delegate)
-      signal_shimmed_handler_death if handler_shimmed?
       options.sndtimeo = 20#ms # see #<<
     end
 
@@ -188,7 +187,6 @@ module CZTop
       raise ArgumentError, "invalid handler" if !handler.respond_to?(:call)
 
       @handler_thread = nil
-      @handler_dying_signal = Queue.new # used for signaling
       @handler_dead_signal = Queue.new # used for signaling
 
       Zactor.fn do |pipe_delegate, _args|
@@ -202,7 +200,7 @@ module CZTop
         rescue Exception
           @exception = $!
         ensure
-          @handler_dying_signal.push(nil)
+          signal_shimmed_handler_death
         end
       end
     end
@@ -258,16 +256,10 @@ module CZTop
     #
     # @return [void]
     def signal_shimmed_handler_death
-      # NOTE: has to be called in the main thread directly after starting the
-      # handler. If started in the `ensure` block in #shim, it won't work on
-      # Rubinius.
-      # See https://github.com/rubinius/rubinius/issues/3545
-
       # NOTE: can't just use ConditionVariable, as the signaling code might be
       # run BEFORE the waiting code.
 
       Thread.new do
-        @handler_dying_signal.pop
         @handler_thread.join
 
         # NOTE: we do this here and not in #terminate, so it also works when

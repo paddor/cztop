@@ -8,10 +8,7 @@ rvm:
   - 2.3.0
   - 2.2.4
   - jruby-head
-  - rubinius
-matrix:
-  allow_failures:
-    - rvm: rubinius # FIXME: https://github.com/travis-ci/travis-ci/issues/3056
+  - rbx
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

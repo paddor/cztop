@@ -230,6 +230,19 @@ module CZTop
         Zsock.set_heartbeat_timeout(@zocket, new_value)
       end
 
+      # @return [Integer] current value of LINGER
+      def linger() Zsock.linger(@zocket) end
+      # This defines the number of milliseconds to wait while
+      # closing/disconnecting a socket if there are outstanding messages to
+      # send.
+      #
+      # Default is 0, which means to not wait at all. -1 means to wait
+      # indefinitely
+      #
+      # @param new_value [Integer] new value for LINGER
+      def linger=(new_value)
+        Zsock.set_linger(@zocket, new_value)
+      end
 
 # TODO: a reasonable subset of these
 #//  Get socket options
@@ -246,7 +259,6 @@ module CZTop
 #int zsock_recovery_ivl (void *self);
 #int zsock_sndbuf (void *self);
 #int zsock_rcvbuf (void *self);
-#int zsock_linger (void *self);
 #int zsock_reconnect_ivl (void *self);
 #int zsock_reconnect_ivl_max (void *self);
 #int zsock_backlog (void *self);
@@ -280,7 +292,6 @@ module CZTop
 #void zsock_set_recovery_ivl (void *self, int recovery_ivl);
 #void zsock_set_sndbuf (void *self, int sndbuf);
 #void zsock_set_rcvbuf (void *self, int rcvbuf);
-#void zsock_set_linger (void *self, int linger);
 #void zsock_set_reconnect_ivl (void *self, int reconnect_ivl);
 #void zsock_set_reconnect_ivl_max (void *self, int reconnect_ivl_max);
 #void zsock_set_backlog (void *self, int backlog);

@@ -335,6 +335,20 @@ describe CZTop::ZsockOptions do
           assert_equal timeout, options.heartbeat_timeout
         end
       end
+
+    describe "#linger" do
+      context "with no LINGER" do
+        it "returns default" do
+          assert_equal 0, options.linger # ZMQ docs say 30_000, but they're wrong
+        end
+      end
+      context "with LINGER set" do
+        let(:linger) { 500 }
+        before(:each) { options.linger = linger }
+        it "returns LINGER" do
+          assert_equal linger, options.linger
+        end
+      end
     end
   end
 end

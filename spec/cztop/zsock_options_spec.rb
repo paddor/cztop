@@ -335,6 +335,57 @@ describe CZTop::ZsockOptions do
           assert_equal timeout, options.heartbeat_timeout
         end
       end
+      context "integration test" do
+        let(:timeout) { 50 }
+        i = 55556
+        let(:endpoint) { "tcp://127.0.0.1:#{i += 1}" }
+        let(:server_socket) do
+          socket = CZTop::Socket::ROUTER.new(endpoint)
+          socket.options.linger = 0
+          socket.options.heartbeat_ivl = 20
+          socket.options.heartbeat_timeout = 50
+          socket
+        end
+        let(:client_socket) do
+          socket = CZTop::Socket::DEALER.new(endpoint)
+          socket
+        end
+        let(:server_mon) do
+          mon = CZTop::Monitor.new(server_socket)
+          mon.listen(*%w[ CONNECTED DISCONNECTED ACCEPTED ])
+          mon.start
+          mon.actor.options.rcvtimeo = 60
+          mon
+        end
+        let(:accepted_event) { assert_equal "ACCEPTED", server_mon.next[0] }
+        let(:disconnected_event) { assert_equal "DISCONNECTD", server_mon.next[0] }
+
+        context "with client connected" do
+          before(:each) do
+            server_socket
+            server_mon
+            client_socket
+          end
+          it "accepts connection" do
+            accepted_event
+          end
+        end
+        context "with client socket dead" do
+          before(:each) do
+            server_socket
+            server_mon
+            client_socket
+            accepted_event
+            client_socket.disconnect(endpoint)
+          end
+          it "closes connection",
+            skip: "https://github.com/zeromq/libzmq/issues/1710" do
+
+            disconnected_event # <-- FAILS
+          end
+        end
+      end
+    end
 
     describe "#linger" do
       context "with no LINGER" do

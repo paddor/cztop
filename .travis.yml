@@ -11,7 +11,7 @@ rvm:
   - rubinius
 matrix:
   allow_failures:
-    - rvm: rubinius # https://github.com/travis-ci/travis-ci/issues/3056
+    - rvm: rubinius # FIXME: https://github.com/travis-ci/travis-ci/issues/3056
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

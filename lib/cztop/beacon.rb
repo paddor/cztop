@@ -7,9 +7,6 @@ module CZTop
   class Beacon
     include ::CZMQ::FFI
 
-    # Used for {Beacon} errors.
-    class Error < RuntimeError; end
-
     # function pointer to the `zbeacon()` function
     ZBEACON_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zbeacon")
@@ -41,12 +38,12 @@ module CZTop
     # @param port [Integer] port number to
     # @return [String] hostname, which can be used as endpoint for incoming
     #   connections
-    # @raise [Error] if the system doesn't support UDP broadcasts
+    # @raise [Errno::ENOTSUP] if the system doesn't support UDP broadcasts
     def configure(port)
       @actor.send_picture("si", :string, "CONFIGURE", :int, port)
       hostname = Zstr.recv(@actor)
-      raise Error, "system doesn't support UDP broadcasts" if hostname.empty?
-      return hostname
+      return hostname unless hostname.empty?
+      raise Errno::ENOTSUP, "system doesn't support UDP broadcasts"
     end
 
     # @return [Integer] maximum length of data to {#publish}

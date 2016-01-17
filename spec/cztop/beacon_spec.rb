@@ -52,7 +52,7 @@ describe CZTop::Beacon do
         expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor).and_return(hostname)
       end
       it "raises" do
-        assert_raises(CZTop::Beacon::Error) do
+        assert_raises(Errno::ENOTSUP) do
           subject.configure(port)
         end
       end

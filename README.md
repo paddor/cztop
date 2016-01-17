@@ -163,12 +163,12 @@ Or install it yourself as:
 
 ### Supported Ruby versions
 
-See [.travis.yml](.travis.yml) for a list of Ruby versions against which CZTop
+See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop
 is tested.
 
 ## Usage
 
-See the [examples](examples) directory for some examples. Here's a very simple one:
+See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples. Here's a very simple one:
 
 ### rep.rb:
 

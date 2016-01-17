@@ -55,7 +55,7 @@ module CZTop
     # Start broadcasting a beacon.
     # @param data [String] data to publish
     # @param interval [Integer] interval in msec
-    # @raise [Error] if data is longer than {MAX_BEACON_DATA} bytes
+    # @raise [ArgumentError] if data is longer than {MAX_BEACON_DATA} bytes
     # @return [void]
     def publish(data, interval)
       raise ArgumentError, "data too long" if data.bytesize > MAX_BEACON_DATA

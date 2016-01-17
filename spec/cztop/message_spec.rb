@@ -155,8 +155,8 @@ describe CZTop::Message do
       end
       context "with host unreachable" do
         let(:errno) { Errno::EHOSTUNREACH::Errno }
-        it "raises IO::EHOSTUNREACH" do
-          assert_raises(Errno::EHOSTUNREACH) { msg.send_to(destination) }
+        it "raises SocketError" do
+          assert_raises(SocketError) { msg.send_to(destination) }
         end
       end
       context "with other error" do

@@ -39,7 +39,7 @@ module CZTop
     # @return [void]
     # @raise [IO::EAGAINWaitWritable] if the send timeout has been reached
     #   (see {ZsockOptions::OptionsAccessor#sndtimeo=})
-    # @raise [Errno::EHOSTUNREACH] if the ROUTER_MANDATORY flag is set on
+    # @raise [SocketError] if the ROUTER_MANDATORY flag is set on
     #   a {Socket::ROUTER} socket and the peer isn't connected or its SNDHWM
     #   is reached (see {ZsockOptions::OptionsAccessor#router_mandatory=})
     # @raise [SystemCallError] for any other error code set after +zmsg_send+
@@ -52,7 +52,7 @@ module CZTop
       when Errno::EAGAIN::Errno
         raise IO::EAGAINWaitWritable
       when Errno::EHOSTUNREACH::Errno
-        raise Errno::EHOSTUNREACH
+        raise SocketError
       else
         # NOTE: If this happens, application code is bad, or this case-list
         # has to be extended.

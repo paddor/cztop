@@ -99,6 +99,8 @@ Here are some some of the goals I have/had in mind for this library:
     * SERVER < Socket
   * Z85
 
+More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
+
 ### Features
 
 * Ruby-like API
@@ -107,26 +109,31 @@ Here are some some of the goals I have/had in mind for this library:
     * `#x=` methods instead of `#set_x` (e.g. socket options)
     * `#[]` where it makes sense (e.g. on a Message, Config, or Certificate)
   * sending a message via a socket is done with `Socket#<<`
+    * `socket << "simple message"`
+    * `socket << ["multi", "frame", "message"]`
   * no manual error checking needed
     * if there's an error, an appropriate exception is raised
-* socket types as Ruby classes
-  * e.g. `#subscribe` only exists on CZTop::Socket::SUB
 * easy security
   * use `Socket#CURVE_server!` and `Socket#CURVE_client!`
-* enumerable Frames
-  * no need to get all received Frames of a Message into Ruby land, if not needed
+* socket types as Ruby classes
+  * no need to manually pass some constant
+    * but you can: `CZTop::Socket.new_by_type(:REP)`
+  * e.g. `#subscribe` only exists on CZTop::Socket::SUB
 * SERVER and CLIENT ready
   * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
   * there are `#routing_id` and `#routing_id=` on the following classes:
     * CZTop::Socket::SERVER
     * CZTop::Message
     * CZTop::Frame
+* ZMTP 3.1 heartbeat ready
+  * `socket.options.heartbeat_ivl = 2000`
+  * `socket.options.heartbeat_timeout = 8000`
 
 ## Installation
 
 This gem requires the presence of the CZMQ library, which in turn requires the
 ZMQ library. For **security mechanisms** like CURVE, you'll need
-[libsodium](https://github.com/jedisct1/libsodium) and at least ZMQ 4.0.
+[libsodium](https://github.com/jedisct1/libsodium).
 
 On OSX using homebrew, run:
 

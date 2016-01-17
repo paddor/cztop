@@ -75,11 +75,11 @@ ZMQ library. For **security mechanisms** like CURVE, you'll need
 On OSX using homebrew, run:
 
     $ brew install libsodium
-    $ brew install zmq --with-libsodium
+    $ brew install zmq  --HEAD --with-libsodium
     $ brew install czmq --HEAD
 
-**Warning**: CZTop currently relies on features of CZMQ that aren't released
-yet. Thus, the `--HEAD` argument is important.
+**Warning**: CZTop currently relies on bug fixes and other improvements of ZMQ
+and CZMQ that aren't released yet. Thus, the `--HEAD` argument is important.
 
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.

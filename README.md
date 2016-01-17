@@ -66,6 +66,62 @@ Here are some some of the goals I have/had in mind for this library:
 - [ ] use it to replace the [Celluloid::ZMQ](https://github.com/celluloid/celluloid-zmq) part of [Celluloid](https://github.com/celluloid/celluloid)
 - [ ] implement some of the missing (CZMQ based) Ruby examples in the [ZMQ Guide](http://zguide.zeromq.org/page:all)
 
+## Overview
+
+### Core Classes
+
+* CZTop
+  * Actor
+  * Authentiator < Actor
+  * Beacon < Actor
+  * Certificate
+  * Config
+  * Frame
+  * Loop
+  * Message
+  * Monitor < Actor
+  * Proxy < Actor
+  * Poller
+  * Socket
+    * REQ < Socket
+    * REP < Socket
+    * ROUTER < Socket
+    * DEALER < Socket
+    * PUSH < Socket
+    * PULL < Socket
+    * PUB < Socket
+    * SUB < Socket
+    * XPUB < Socket
+    * XSUB < Socket
+    * PAIR < Socket
+    * STREAM < Socket
+    * CLIENT < Socket
+    * SERVER < Socket
+  * Z85
+
+### Features
+
+* Ruby-like API
+  * no manual dealing with the ZMQ context
+  * method names
+    * `#x=` methods instead of `#set_x` (e.g. socket options)
+    * `#[]` where it makes sense (e.g. on a Message, Config, or Certificate)
+  * sending a message via a socket is done with `Socket#<<`
+  * no manual error checking needed
+    * if there's an error, an appropriate exception is raised
+* socket types as Ruby classes
+  * e.g. `#subscribe` only exists on CZTop::Socket::SUB
+* easy security
+  * use `Socket#CURVE_server!` and `Socket#CURVE_client!`
+* enumerable Frames
+  * no need to get all received Frames of a Message into Ruby land, if not needed
+* SERVER and CLIENT ready
+  * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
+  * there are `#routing_id` and `#routing_id=` on the following classes:
+    * CZTop::Socket::SERVER
+    * CZTop::Message
+    * CZTop::Frame
+
 ## Installation
 
 This gem requires the presence of the CZMQ library, which in turn requires the
@@ -98,6 +154,11 @@ Or install it yourself as:
 
     $ gem install cztop
 
+### Supported Ruby versions
+
+See [.travis.yml](.travis.yml) for a list of Ruby versions against which CZTop
+is tested.
+
 ## Usage
 
 See the examples directory for some examples. Here's a very simple one:
@@ -105,11 +166,6 @@ See the examples directory for some examples. Here's a very simple one:
 ```ruby
 # TODO: Simple PAIR socket example.
 ```
-
-## Supported Ruby versions
-
-See [.travis.yml](.travis.yml) for a list of Ruby versions against which CZTop
-is tested.
 
 ## Documentation
 

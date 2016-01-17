@@ -73,7 +73,7 @@ module CZTop
     #   returns with failure. Please report as bug.
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
-      return from_ffi_delegate(delegate) if !delegate.null?
+      return from_ffi_delegate(delegate) unless delegate.null?
 
       case errno = ::CZMQ::FFI::Errors.errno
       when Errno::EAGAIN::Errno

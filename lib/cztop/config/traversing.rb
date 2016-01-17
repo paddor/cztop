@@ -14,7 +14,7 @@ module CZTop::Config::Traversing
   # @raise [Exception] the block's exception, in case it raises (it won't
   #   call the block any more after that)
   def execute
-    raise Error, "no block given" if !block_given?
+    raise Error, "no block given" unless block_given?
     exception = nil
     block_value = nil
     ret = nil

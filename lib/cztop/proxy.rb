@@ -111,7 +111,7 @@ module CZTop
       # @raise [ArgumentError] if the given socket type is invalid
       # @return [void]
       def bind(socket_type, endpoint)
-        if !SOCKET_TYPES.include?(socket_type)
+        unless SOCKET_TYPES.include?(socket_type)
           raise ArgumentError, "invalid socket type: #{socket_type}"
         end
         @proxy.actor << [ @side, socket_type.to_s, endpoint ]

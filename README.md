@@ -15,7 +15,7 @@ _________  _____________________
         \/         \/                 |__|
 ```
 
-CZTop is a CZMQ Ruby binding. It is based on
+CZTop is a CZMQ binding for Ruby. It is based on
 [czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
 FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security

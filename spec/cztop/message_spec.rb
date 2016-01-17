@@ -164,7 +164,7 @@ describe CZTop::Message do
       context "with other error" do
         let(:errno) { Errno::EINVAL::Errno }
         it "raises RuntimeError" do
-          assert_raises(SystemCallError) { msg.send_to(destination) }
+          assert_raises(Errno::EINVAL) { msg.send_to(destination) }
         end
       end
     end
@@ -205,7 +205,7 @@ describe CZTop::Message do
       context "with other error" do
         let(:errno) { Errno::EINVAL::Errno }
         it "raises RuntimeError" do
-          assert_raises(SystemCallError) { received_message }
+          assert_raises(Errno::EINVAL) { received_message }
         end
       end
     end

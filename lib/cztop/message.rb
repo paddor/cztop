@@ -48,15 +48,18 @@ module CZTop
       rc = Zmsg.send(ffi_delegate, destination)
       return if rc == 0
 
-      case ::CZMQ::FFI::Errors.errno
+      case errno = ::CZMQ::FFI::Errors.errno
       when Errno::EAGAIN::Errno
         raise IO::EAGAINWaitWritable
       when Errno::EHOSTUNREACH::Errno
         raise SocketError
       else
         # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended.
-        raise SystemCallError, ::CZMQ::FFI::Errors.strerror
+        # has to be extended. If the errno is known, the corresponding
+        # Errno::* exception is automatically constructed. Otherwise, it'll be
+        # a normal SystemCallError. In any case, #errno will return the
+        # corresponding errno.
+        raise SystemCallError.new(::CZMQ::FFI::Errors.strerror, errno)
       end
     end
 
@@ -72,15 +75,18 @@ module CZTop
       delegate = Zmsg.recv(source)
       return from_ffi_delegate(delegate) if !delegate.null?
 
-      case ::CZMQ::FFI::Errors.errno
+      case errno = ::CZMQ::FFI::Errors.errno
       when Errno::EAGAIN::Errno
         raise IO::EAGAINWaitReadable
       when Errno::EINTR::Errno
         raise Interrupt
       else
         # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended.
-        raise SystemCallError, ::CZMQ::FFI::Errors.strerror
+        # has to be extended. If the errno is known, the corresponding
+        # Errno::* exception is automatically constructed. Otherwise, it'll be
+        # a normal SystemCallError. In any case, #errno will return the
+        # corresponding errno.
+        raise SystemCallError.new(::CZMQ::FFI::Errors.strerror, errno)
       end
     end
 

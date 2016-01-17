@@ -68,7 +68,20 @@ Here are some some of the goals I have/had in mind for this library:
 
 ## Installation
 
-Add this line to your application's Gemfile:
+This gem requires the presence of the CZMQ library, which in turn requires the
+ZMQ library. For **security mechanisms** like CURVE, you'll need
+[libsodium](https://github.com/jedisct1/libsodium) and at least ZMQ 4.0.
+
+On OSX using homebrew, run:
+
+    $ brew install libsodium
+    $ brew install zmq --with-libsodium
+    $ brew install czmq
+
+If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
+to get more help. Make sure to install CZMQ, not only ZMQ.
+
+To then use this gem, add this line to your application's Gemfile:
 
 ```ruby
 gem 'cztop'

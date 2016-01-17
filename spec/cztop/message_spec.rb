@@ -154,6 +154,8 @@ describe CZTop::Message do
         end
       end
       context "with host unreachable" do
+        # NOTE: unroutable message given to ROUTER with ROUTER_MANDATORY
+        # option set.
         let(:errno) { Errno::EHOSTUNREACH::Errno }
         it "raises SocketError" do
           assert_raises(SocketError) { msg.send_to(destination) }

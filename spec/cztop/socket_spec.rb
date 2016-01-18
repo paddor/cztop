@@ -61,12 +61,30 @@ describe CZTop::Socket do
   describe "#CURVE_server!" do
     let(:certificate) { CZTop::Certificate.new }
     let(:options) { rep_socket.options }
-    When do
-      rep_socket.CURVE_server!(certificate)
+
+    context "with valid certificate" do
+      When do
+        rep_socket.CURVE_server!(certificate)
+      end
+      Then { rep_socket.options.CURVE_server? }
+      Then { options.CURVE_secretkey == certificate.secret_key }
+      Then { options.CURVE_publickey == certificate.public_key }
     end
-    Then { rep_socket.options.CURVE_server? }
-    Then { options.CURVE_secretkey == certificate.secret_key }
-    Then { options.CURVE_publickey == certificate.public_key }
+
+    context "with no secret key in certificate" do
+      let(:certificate) do
+        tmpdir = Pathname.new(Dir.mktmpdir("zsock_test"))
+        path = tmpdir + "server_cert.txt"
+        # NOTE: ensure only public key is set
+        CZTop::Certificate.new.save_public(path)
+        CZTop::Certificate.load(path)
+      end
+
+      When(:result) do
+        rep_socket.CURVE_server!(certificate)
+      end
+      Then { result == Failure(SystemCallError) }
+    end
   end
 
   describe "#CURVE_client!" do

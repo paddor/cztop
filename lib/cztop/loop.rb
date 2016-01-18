@@ -8,9 +8,6 @@ module CZTop
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
 
-    # used for various Loop errors
-    class Error < RuntimeError; end
-
     # @return [Hash<Socket, Set<FFI::Function>] remembered handlers (callbacks)
     attr_reader :handlers
 
@@ -34,7 +31,7 @@ module CZTop
     def add_reader(socket, &blk)
       handler = Zloop.reader_fn(&blk)
       rc = ffi_delegate.reader(socket.ffi_delegate, handler, nil)
-      raise Error, "adding reader failed" if rc == -1
+      raise_sys_err("adding reader failed") if rc == -1
       @handlers[socket] << handler
     end
 
@@ -85,9 +82,9 @@ module CZTop
 
     # Adds a new ticket timer.
     # @return [TicketTimer]
-    # @raise [Error] if ticket delay isn't set
+    # @raise [RuntimeError] if ticket delay isn't set
     def add_ticket_timer(&blk)
-      raise Error, "ticket delay not set" if @ticket_delay.nil?
+      raise "ticket delay not set" if @ticket_delay.nil?
       TicketTimer.new(self, &blk)
     end
 

@@ -71,12 +71,13 @@ describe CZTop::Frame do
         end
         let(:expected_return_code) { -1 } # fake an error
         it "wraps native counterpart in new Zframe" do
+          # NOTE: This is to avoid a memory leak.
           frame.send_to(socket) rescue nil
           refute_same old_delegate, current_delegate
         end
 
-        it "raises Error" do
-          assert_raises(CZTop::Frame::Error) do
+        it "raises" do
+          assert_raises(SystemCallError) do
             frame.send_to(socket)
           end
         end

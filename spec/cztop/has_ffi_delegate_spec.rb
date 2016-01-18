@@ -69,7 +69,7 @@ describe CZTop::HasFFIDelegate do
     context "with nullified delegate" do
       let(:ptr) { nil } # represents nullpointer
       it "raises" do
-        assert_raises(CZTop::InitializationError) do
+        assert_raises(SystemCallError) do
           delegator.attach_ffi_delegate(delegate)
         end
       end
@@ -111,12 +111,6 @@ describe CZTop::HasFFIDelegate do
       it "won't call the constructor" do
         assert_same delegate, obj.ffi_delegate
       end
-    end
-  end
-
-  describe CZTop::InitializationError do
-    it "is a nullpointer error" do
-      assert_operator described_class, :<, ::FFI::NullPointerError
     end
   end
 end

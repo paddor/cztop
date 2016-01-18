@@ -136,13 +136,13 @@ main
             it "raises" do
               loaded_config
               Pathname.new(filename).delete
-              assert_raises(CZTop::Config::Serialization::Error) { loaded_config.reload }
+              assert_raises(Errno::ENOENT) { loaded_config.reload }
             end
           end
         end
         context "created in-memory" do # or any other problem
           it "raises" do
-            assert_raises(CZTop::Config::Serialization::Error) { config.reload }
+            assert_raises(TypeError) { config.reload }
           end
         end
       end
@@ -163,8 +163,8 @@ main
 
     context "given no config file" do
       let(:nonexistent_filename) { "/foo/bar.zpl" }
-      it "raises CZTop::Config::Serialization::Error" do
-        assert_raises(CZTop::Config::Serialization::Error) do
+      it "raises" do
+        assert_raises(Errno::ENOENT) do
           described_class.load(nonexistent_filename)
         end
       end
@@ -185,12 +185,12 @@ main
     end
     context "with empty path" do
       it "raises" do
-        assert_raises { config.save("") }
+        assert_raises(SystemCallError) { config.save("") }
       end
     end
     context "with invalid path" do
       it "raises" do
-        assert_raises { config.save("/") }
+        assert_raises(SystemCallError) { config.save("/") }
       end
     end
   end

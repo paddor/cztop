@@ -21,19 +21,20 @@ end
 
 describe CZTop::Socket do
   describe ".new_by_type" do
+    let(:socket) { described_class.new_by_type(type) }
     context "given valid type" do
       let(:expected_class) { CZTop::Socket::PUSH }
       context "by integer" do
         let(:type) { CZTop::Socket::Types::PUSH }
         it "returns socket" do
           assert_kind_of Integer, type
-          assert_kind_of expected_class, described_class.new_by_type(type)
+          assert_kind_of expected_class, socket
         end
       end
       context "by symbol" do
         let(:type) { :PUSH }
         it "returns socket" do
-          assert_kind_of expected_class, described_class.new_by_type(type)
+          assert_kind_of expected_class, socket
         end
       end
     end
@@ -42,20 +43,27 @@ describe CZTop::Socket do
       context "by integer" do
         let(:type) { 99 } # non-existent type
         it "raises" do
-          assert_raises(ArgumentError) { described_class.new_by_type(type) }
+          assert_raises(ArgumentError) { socket }
         end
       end
       context "by symbol" do
         let(:type) { :FOOBAR } # non-existent type
         it "raises" do
-          assert_raises(NameError) { described_class.new_by_type(type) }
+          assert_raises(NameError) { socket }
         end
       end
-      context "by other kind" do
-        # NOTE: No support for socket types as Strings for now.
+      context "by string" do
+        # NOTE: No support for Strings as socket types for now.
         let(:type) { "PUB" }
         it "raises" do
-          assert_raises(ArgumentError) { described_class.new_by_type(type) }
+          assert_raises(ArgumentError) { socket }
+        end
+      end
+      context "by Socket::* class" do
+        # NOTE: No support for socket Socket::* classes as types for now.
+        let(:type) { CZTop::Socket::PUB }
+        it "raises" do
+          assert_raises(ArgumentError) { socket }
         end
       end
     end
@@ -209,7 +217,7 @@ describe CZTop::Socket::PAIR do
   it "raises when more than 2 PAIR sockets are connected" do
     binding_socket
     connecting_socket
-    assert_raises(CZTop::InitializationError) do
+    assert_raises(SystemCallError) do
       described_class.new("@#{endpoint}")
     end
     assert_raises do

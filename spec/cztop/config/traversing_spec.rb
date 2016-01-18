@@ -110,7 +110,7 @@ main
 
     context "with no block" do
       it "raises" do
-        assert_raises(CZTop::Config::Traversing::Error) { config.execute }
+        assert_raises(ArgumentError) { config.execute }
       end
     end
   end

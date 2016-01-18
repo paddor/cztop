@@ -5,8 +5,6 @@ module CZTop
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
-    class Error < RuntimeError; end
-
     # Initialize a new {Frame}.
     # @param content [String] initial content
     def initialize(content = nil)
@@ -32,8 +30,8 @@ module CZTop
     # @return [void]
     # @raise [IO::EAGAINWaitWritable] if dontwait was set and the operation
     #   would have blocked right now
-    # @raise [Error] if there was some error. In that case, the native
-    #   counterpart still exists and this {Frame} can be reused.
+    # @raise [SystemCallError] if there was some error. In that case, the
+    #   native counterpart still exists and this {Frame} can be reused.
     def send_to(destination, more: false, reuse: false, dontwait: false)
       flags = 0
       flags |= FLAG_MORE if more
@@ -55,7 +53,7 @@ module CZTop
           raise IO::EAGAINWaitWritable
         end
 
-        raise Error
+        raise_sys_err
       end
     end
 

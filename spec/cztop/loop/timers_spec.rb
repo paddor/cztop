@@ -141,7 +141,7 @@ describe CZTop::Loop do
           expect(ffi_delegate).to receive(:timer).and_return(-1)
         end
         it "raises" do
-          assert_raises(CZTop::Loop::Error) { timer }
+          assert_raises(SystemCallError) { timer }
         end
       end
     end
@@ -198,7 +198,7 @@ describe CZTop::Loop do
             .and_return(::FFI::Pointer::NULL)
         end
         it "raises" do
-          assert_raises(CZTop::Loop::Error) { timer }
+          assert_raises(SystemCallError) { timer }
         end
       end
     end

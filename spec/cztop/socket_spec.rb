@@ -28,7 +28,7 @@ describe CZTop::Socket do
     context "given invalid endpoint" do
       let(:endpoint) { "foo://bar" }
       it "raises" do
-        assert_raises(CZTop::InitializationError) do
+        assert_raises(SystemCallError) do
           CZTop::Socket::REP.new(endpoint)
         end
       end
@@ -40,7 +40,7 @@ describe CZTop::Socket do
       before(:each) { sock1 }
       it "raises" do
         # there can only be one REP socket bound to one endpoint
-        assert_raises(CZTop::InitializationError) do
+        assert_raises(SystemCallError) do
           CZTop::Socket::REP.new(endpoint)
         end
       end
@@ -107,6 +107,19 @@ describe CZTop::Socket do
       let(:server_cert) { CZTop::Certificate.new }
       it "raises" do # server's secret key compromised
         assert_raises(SecurityError) do
+          req_socket.CURVE_client!(client_cert, server_cert)
+        end
+      end
+    end
+    context "with no secret key in certificate" do
+      let(:client_cert) do
+        # NOTE: ensure only public key is set
+        path = tmpdir + "client_cert.txt"
+        CZTop::Certificate.new.save_public(path)
+        CZTop::Certificate.load(path)
+      end
+      it "raises" do
+        assert_raises(SystemCallError) do
           req_socket.CURVE_client!(client_cert, server_cert)
         end
       end
@@ -192,7 +205,7 @@ describe CZTop::Socket do
     context "with invalid endpoint" do
       Given(:another_endpoint) { "foo://bar" }
       When(:result) { socket.bind(another_endpoint) }
-      Then { result == Failure(CZTop::Socket::Error) }
+      Then { result == Failure(SystemCallError) }
     end
 
     it "does safe format handling" do

@@ -5,9 +5,6 @@ module CZTop
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
 
-    # various errors around {Certificate}s
-    class Error < RuntimeError; end
-
     # Warns if CURVE security isn't available.
     # @return [void]
     def self.check_curve_availability
@@ -27,15 +24,16 @@ module CZTop
     # @param public_key [String] binary public key (32 bytes)
     # @param secret_key [String] binary secret key (32 bytes)
     # @return [Certificate] the fresh certificate
+    # @raise [ArgumentError] if keys passed are invalid
+    # @raise [SystemCallError] if this fails
     def self.new_from(public_key, secret_key)
-      raise Error, "no public key given" unless public_key
-      raise Error, "no secret key given" unless secret_key
+      raise ArgumentError, "no public key given" unless public_key
+      raise ArgumentError, "no secret key given" unless secret_key
 
-      raise Error, "invalid public key size" if public_key.bytesize != 32
-      raise Error, "invalid secret key size" if secret_key.bytesize != 32
+      raise ArgumentError, "invalid public key size" if public_key.bytesize != 32
+      raise ArgumentError, "invalid secret key size" if secret_key.bytesize != 32
 
       ptr = Zcert.new_from(public_key, secret_key)
-      raise Error if ptr.null?
       from_ffi_delegate(ptr)
     end
 
@@ -117,51 +115,55 @@ module CZTop
     # Save full certificate (public + secret) to files.
     # @param filename [String, #to_s] path/filename to public file
     # @return [void]
-    # @raise [Error] if this fails
+    # @raise [ArgumentError] if path is invalid
+    # @raise [SystemCallError] if this fails
     # @note This will create two files: one of the public key and one for the
     #   secret key. The secret filename is filename + "_secret".
     def save(filename)
       # see https://github.com/zeromq/czmq/issues/1244
-      raise Error, "filename can't be empty" if filename.to_s.empty?
+      raise ArgumentError, "filename can't be empty" if filename.to_s.empty?
       rc = ffi_delegate.save(filename.to_s)
-      raise Error, "error while saving to file %p" % filename if rc == -1
+      return if rc == 0
+      raise_sys_err("error while saving to file %p" % filename)
     end
 
     # Saves the public key to file in ZPL ({Config}) format.
     # @param filename [String, #to_s] path/filename to public file
     # @return [void]
-    # @raise [Error] if this fails
+    # @raise [SystemCallError] if this fails
     def save_public(filename)
       rc = ffi_delegate.save_public(filename.to_s)
-      raise Error, "error while saving to the file %p" % filename if rc == -1
+      return if rc == 0
+      raise_sys_err("error while saving to the file %p" % filename)
     end
 
     # Saves the secret key to file in ZPL ({Config}) format.
     # @param filename [String, #to_s] path/filename to secret file
     # @return [void]
-    # @raise [Error] if this fails
+    # @raise [SystemCallError] if this fails
     def save_secret(filename)
       rc = ffi_delegate.save_secret(filename.to_s)
-      raise Error, "error while saving to the file %p" % filename if rc == -1
+      return if rc == 0
+      raise_sys_err("error while saving to the file %p" % filename)
     end
 
     # Applies this certificate on a {Socket} or {Actor}.
     # @param zocket [Socket, Actor] path/filename to secret file
     # @return [void]
-    # @raise [Error] if secret key is undefined
+    # @raise [SystemCallError] if secret key is undefined
     def apply(zocket)
       raise ArgumentError, "invalid zocket argument %p" % zocket unless zocket
-      raise Error, "secret key is undefined" if secret_key.nil?
-      ffi_delegate.apply(zocket)
+      return ffi_delegate.apply(zocket) unless secret_key.nil?
+      raise_sys_err("secret key is undefined")
     end
 
     # Duplicates the certificate.
     # @return [Certificate]
-    # @raise [Error] if this fails
+    # @raise [SystemCallError] if this fails
     def dup
       ptr = ffi_delegate.dup
-      raise Error, "unable to duplicate certificate" if ptr.null?
-      from_ffi_delegate(ptr)
+      return from_ffi_delegate(ptr) unless ptr.null?
+      raise_sys_err("unable to duplicate certificate")
     end
 
     # Compares this certificate to another.

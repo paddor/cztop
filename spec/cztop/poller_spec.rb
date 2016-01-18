@@ -58,7 +58,7 @@ describe CZTop::Poller do
     context "with failure" do
       it "raises" do
         allow(ffi_delegate).to receive(:add).and_return(-1)
-        assert_raises(CZTop::Poller::Error) { poller.add(reader2) }
+        assert_raises(SystemCallError) { poller.add(reader2) }
       end
     end
   end
@@ -76,12 +76,12 @@ describe CZTop::Poller do
     context "with failure" do
       it "raises" do
         allow(ffi_delegate).to receive(:remove).and_return(-1)
-        assert_raises(CZTop::Poller::Error) { poller.remove(reader2) }
+        assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
     context "with unknown socket" do
       it "raises" do
-        assert_raises(CZTop::Poller::Error) { poller.remove(reader2) }
+        assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
   end
@@ -129,7 +129,7 @@ describe CZTop::Poller do
         allow(ffi_delegate).to receive(:wait).and_return(wrong_ptr)
       end
       it "raises" do # instead of returning nil
-        assert_raises(CZTop::Poller::Error) { poller.wait(0) }
+        assert_raises(SystemCallError) { poller.wait(0) }
       end
     end
   end

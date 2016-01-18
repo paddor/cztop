@@ -132,7 +132,7 @@ describe CZTop::Certificate do
           it "raises" do
             expect(cert.ffi_delegate).to(
             receive(:dup).and_return(::FFI::Pointer::NULL))
-            assert_raises(CZTop::Certificate::Error) { cert.dup }
+            assert_raises(SystemCallError) { cert.dup }
           end
         end
       end
@@ -169,19 +169,19 @@ describe CZTop::Certificate do
         Then { cert == new_cert && new_cert == cert }
         context "with invalid public key size" do
           Given(:public_key) { "too short" }
-          Then { new_cert == Failure(CZTop::Certificate::Error) }
+          Then { new_cert == Failure(ArgumentError) }
         end
         context "with invalid secret key size" do
           Given(:secret_key) { "too short" }
-          Then { new_cert == Failure(CZTop::Certificate::Error) }
+          Then { new_cert == Failure(ArgumentError) }
         end
         context "with missing public key" do
           Given(:public_key) { nil }
-          Then { new_cert == Failure(CZTop::Certificate::Error) }
+          Then { new_cert == Failure(ArgumentError) }
         end
         context "with missing secret key" do
           Given(:secret_key) { nil }
-          Then { new_cert == Failure(CZTop::Certificate::Error) }
+          Then { new_cert == Failure(ArgumentError) }
         end
       end
 
@@ -211,7 +211,7 @@ describe CZTop::Certificate do
             expect(cert).to(receive(:secret_key).and_return(nil))
           end
           it "raises" do
-            assert_raises(CZTop::Certificate::Error) do
+            assert_raises(SystemCallError) do
               cert.apply(zocket)
             end
           end
@@ -247,11 +247,11 @@ describe CZTop::Certificate do
         end
         context "with invalid path" do
           Given(:path) { "/" }
-          Then { result == Failure(CZTop::Certificate::Error) }
+          Then { result == Failure(Errno::EISDIR) }
         end
         context "with empty path" do
           Given(:path) { "" }
-          Then { result == Failure(CZTop::Certificate::Error) }
+          Then { result == Failure(ArgumentError) }
         end
       end
 
@@ -263,7 +263,7 @@ describe CZTop::Certificate do
         end
         context "with invalid path" do
           Given(:path) { "/" }
-          Then { result == Failure(CZTop::Certificate::Error) }
+          Then { result == Failure(SystemCallError) }
         end
         context "reading such a file" do
           Given { cert.save_public(path) }
@@ -280,7 +280,7 @@ describe CZTop::Certificate do
         end
         context "with invalid path" do
           Given(:path) { "/" }
-          Then { result == Failure(CZTop::Certificate::Error) }
+          Then { result == Failure(SystemCallError) }
         end
       end
 

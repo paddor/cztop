@@ -35,9 +35,12 @@ describe CZTop::Loop do
       end
     end
     context "with wrong socket" do
-      let(:socket) { ::FFI::Pointer::NULL }
+      before(:each) do
+        allow(ffi_delegate).to receive(:reader).and_return(-1)
+        allow(CZMQ::FFI::Errors).to receive(:errno).and_return(Errno::EINVAL::Errno)
+      end
       it "raises" do
-        assert_raises { subject.add_reader(socket) { } }
+        assert_raises(SystemCallError) { subject.add_reader(socket) { } }
       end
     end
   end
@@ -133,7 +136,7 @@ describe CZTop::Loop do
   describe "#add_ticket_timer" do
     context "with no ticket delay set" do
       it "raises" do
-        assert_raises(CZTop::Loop::Error) { subject.add_ticket_timer { } }
+        assert_raises(RuntimeError) { subject.add_ticket_timer { } }
       end
     end
 

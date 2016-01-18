@@ -1,9 +1,6 @@
 # Methods used to traverse a {CZTop::Config} tree.
 module CZTop::Config::Traversing
 
-  # used for various {Traversing} errors
-  class Error < RuntimeError; end
-
   # Calls the given block once for each {Config} item in the tree, starting
   # with self.
   #
@@ -11,10 +8,11 @@ module CZTop::Config::Traversing
   # @yieldparam level [Integer] level of the item (self has level 0,
   #   its direct children have level 1)
   # @return [Object] the block's return value
+  # @raise [ArgumentError] if no block given
   # @raise [Exception] the block's exception, in case it raises (it won't
   #   call the block any more after that)
   def execute
-    raise Error, "no block given" unless block_given?
+    raise ArgumentError, "no block given" unless block_given?
     exception = nil
     block_value = nil
     ret = nil

@@ -3,6 +3,7 @@ require_relative 'spec_helper'
 describe CZTop::Z85 do
   include_examples "has FFI delegate"
   subject { CZTop::Z85.new }
+  let(:ffi_delegate) { subject.ffi_delegate }
 
   it "instantiates" do
     assert_kind_of CZTop::Z85, subject
@@ -50,6 +51,16 @@ describe CZTop::Z85 do
         assert_raises(ArgumentError) { subject.encode(data) }
       end
     end
+
+    context "with failure" do
+      let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+      before(:each) do
+        allow(ffi_delegate).to receive(:encode).and_return(nullptr)
+      end
+      it "raises" do
+        assert_raises(SystemCallError) { subject.encode("abcd") }
+      end
+    end
   end
 
   describe "#decode" do
@@ -78,6 +89,16 @@ describe CZTop::Z85 do
       let(:data) { "w]zPgvQTp1vQTO" } # 14 instead of 15 chars
       it "raises" do
         assert_raises(ArgumentError) { subject.decode(data) }
+      end
+    end
+
+    context "with failure" do
+      let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+      before(:each) do
+        allow(ffi_delegate).to receive(:decode).and_return(nullptr)
+      end
+      it "raises" do
+        assert_raises(SystemCallError) { subject.decode("abcde") }
       end
     end
   end

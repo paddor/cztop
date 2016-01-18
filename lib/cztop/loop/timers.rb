@@ -71,9 +71,10 @@ class CZTop::Loop
 
     # Actually creates the timer using the handler.
     # @return [void]
+    # @raise [SystemCallError] if this fails
     def register
       @id = @loop.ffi_delegate.timer(@delay, @times, @handler, nil)
-      raise Error, "adding timer failed" if @id == -1
+      CZTop::HasFFIDelegate.raise_sys_err("adding timer failed") if @id == -1
       @loop.remember_timer(self)
     end
     private :register
@@ -127,9 +128,12 @@ class CZTop::Loop
 
     # Actually creates the timer using the handler.
     # @return [void]
+    # @raise [SystemCallError] if this fails
     def register
       @ptr = @loop.ffi_delegate.ticket(@handler, nil)
-      raise Error, "couldn't create ticket timer" if @ptr.null?
+      if @ptr.null?
+        CZTop::HasFFIDelegate.raise_sys_err("couldn't create ticket timer")
+      end
       @loop.remember_timer(self)
     end
     private :register

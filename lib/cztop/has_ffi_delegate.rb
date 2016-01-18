@@ -1,12 +1,5 @@
 require 'forwardable'
 
-module CZTop
-  # This is raised when trying to attach an FFI delegate (an instance from one
-  # of the classes in the CZMQ::FFI namespace) whose internal pointer has been
-  # nullified.
-  class InitializationError < ::FFI::NullPointerError; end
-end
-
 # This module is used to attach the low-level objects of classes within the
 # CZMQ::FFI namespace (coming from the _czmq-ffi-gen_ gem) as delegates.
 module CZTop::HasFFIDelegate
@@ -21,10 +14,10 @@ module CZTop::HasFFIDelegate
   # Attaches an FFI delegate to the current (probably new) {CZTop} object.
   # @param ffi_delegate an instance of the corresponding class in the
   #   CZMQ::FFI namespace
-  # @raise [CZTop::InitializationError] if delegate is #null?
+  # @raise [SystemCallError] if the FFI delegate's internal pointer is NULL
   # @return [void]
   def attach_ffi_delegate(ffi_delegate)
-    raise CZTop::InitializationError if ffi_delegate.null?
+    raise_sys_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
     @ffi_delegate = ffi_delegate
   end
 
@@ -34,6 +27,15 @@ module CZTop::HasFFIDelegate
   # @return [CZTop::*] the new object
   def from_ffi_delegate(ffi_delegate)
     self.class.from_ffi_delegate(ffi_delegate)
+  end
+
+  module_function
+
+  # Raises the appropriate SystemCallError.
+  # @param msg [String] error message
+  # @raises [SystemCallError]
+  def raise_sys_err(msg = CZMQ::FFI::Errors.strerror)
+    raise SystemCallError.new(msg, CZMQ::FFI::Errors.errno)
   end
 
   # Some class methods related to FFI delegates.

@@ -8,9 +8,6 @@ module CZTop
     include PolymorphicZsockMethods
     include CZMQ::FFI
 
-    # Used for various {Socket} errors.
-    class Error < RuntimeError; end
-
     # @!group CURVE Security
 
     # Enables CURVE security and makes this socket a CURVE server.
@@ -31,8 +28,7 @@ module CZTop
     # @return [void]
     # @raise [SecurityError] if the server's secret key is set in server_cert,
     #   which means it's not secret anymore
-    # @raise [Certificate::Error] if the secret key in client_certificate is
-    #   missing
+    # @raise [SystemCallError] if there's no secret key in client_cert
     def CURVE_client!(client_cert, server_cert)
       if server_cert.secret_key
         raise SecurityError, "server's secret key not secret"
@@ -75,10 +71,10 @@ module CZTop
     #   {#last_tcp_port}.
     # @param endpoint [String]
     # @return [void]
-    # @raise [Error] in case of failure
+    # @raise [SystemCallError] in case of failure
     def bind(endpoint)
       rc = ffi_delegate.bind("%s", :string, endpoint)
-      raise Error, "unable to bind to %p" % endpoint if rc == -1
+      raise_sys_err("unable to bind to %p" % endpoint) if rc == -1
       @last_tcp_port = rc if rc > 0
     end
 

@@ -7,8 +7,6 @@ module CZTop
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
-    class Error < RuntimeError; end
-
     def initialize
       attach_ffi_delegate(CZMQ::FFI::Zarmour.new)
       ffi_delegate.set_mode(:mode_z85)
@@ -19,11 +17,12 @@ module CZTop
     # @return [String] Z85 encoded data as ASCII string
     # @raise [ArgumentError] if input length isn't divisible by 4 with no
     #   remainder
+    # @raise [SystemCallError] if this fails
     def encode(input)
       raise ArgumentError if input.bytesize % 4 > 0
       input = input.dup.force_encoding(Encoding::BINARY)
       ptr = ffi_delegate.encode(input, input.bytesize)
-      raise Error if ptr.null?
+      raise_sys_err if ptr.null?
       z85 = ptr.read_string
       z85.encode!(Encoding::ASCII)
       return z85
@@ -34,11 +33,12 @@ module CZTop
     # @return [String] original data as binary string
     # @raise [ArgumentError] if input length isn't divisible by 5 with no
     #   remainder
+    # @raise [SystemCallError] if this fails
     def decode(input)
       raise ArgumentError if input.bytesize % 5 > 0
       FFI::MemoryPointer.new(:size_t) do |size_ptr|
         buffer_ptr = ffi_delegate.decode(input, size_ptr)
-        raise Error if buffer_ptr.null?
+        raise_sys_err if buffer_ptr.null?
         decoded_string = buffer_ptr.read_string(_size(size_ptr) - 1)
         return decoded_string
       end

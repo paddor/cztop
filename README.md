@@ -290,7 +290,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 
 ## TODO
 
-* [x] pack generated code into its own gem (czmq-ffi-gen)
+* [x] pack generated code into its own gem ([czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen))
 * think of a neat Ruby API, including:
   - [x] Actor
   - [x] Beacon

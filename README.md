@@ -68,7 +68,9 @@ Here are some some of the goals I have/had in mind for this library:
 
 ## Overview
 
-### Core Classes
+### Class Hierarchy
+
+Here's an overview of the core classes:
 
 * CZTop
   * Actor

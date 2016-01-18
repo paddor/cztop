@@ -78,42 +78,81 @@ describe CZTop::Socket::CLIENT do
 end
 
 describe CZTop::Socket::SERVER do
-  Given(:socket) { described_class.new }
-
+  Given(:server) { CZTop::Socket::SERVER.new }
   it "instanciates" do
-    socket
+    server
   end
 
-  describe "#routing_id" do
-    context "with no routing ID set" do
-      Then { socket.routing_id == 0 }
+  describe "when communicating" do
+    i = 58578
+    Given(:endpoint) { "inproc://server_spec_#{i += 1}" }
+    Given(:server) do
+      s = CZTop::Socket::SERVER.new(endpoint)
+      s.options.sndtimeo = 50
+      s
+    end
+    Given(:client) do
+      s = CZTop::Socket::CLIENT.new(endpoint)
+      s.options.sndtimeo = 50
+      s
+    end
+    Given(:msg_content) { "FOO" }
+    Given(:routing_id) { 23456 }
+
+    Given(:msg) { CZTop::Message.new(msg_content) }
+    Given(:received_msg) { server.receive }
+
+    context "when receiving message from CLIENT" do
+      When { client << msg_content }
+      Then { received_msg[0].to_s == msg_content }
+      And { received_msg.routing_id > 0 }
     end
 
-    context "with routing ID set" do
-      Given(:new_routing_id) { 123456 }
-      When { socket.routing_id = new_routing_id }
-      Then { socket.routing_id == new_routing_id }
+    context "when responding to a message from CLIENT" do
+      Given { client << msg_content }
+      Given { received_msg }
+      Given(:response) { CZTop::Message.new("BAR") }
+      context "with routing_id set" do
+        Given { response.routing_id = received_msg.routing_id }
+        When { server << response }
+        Then { client.receive[0] == "BAR" }
+      end
+      context "with two responses with routing_id set" do
+        Given(:second_response) { CZTop::Message.new("BAZ") }
+        Given { response.routing_id = received_msg.routing_id }
+        Given { second_response.routing_id = received_msg.routing_id }
+        When { server << response << second_response }
+        Then { client.receive[0] == "BAR" && client.receive[0] == "BAZ" }
+      end
+      context "with wrong routing_id set" do
+        Given { response.routing_id = 1234 } # wrong routing_id
+        When(:result) { server << response }
+        Then { result == Failure(SocketError) }
+      end
+      context "without routing_id set" do
+        When(:result) { server << response }
+        Then { result == Failure(SocketError) }
+      end
+      context "with disconnected CLIENT" do
+        Given { client.disconnect(endpoint) }
+        Given { response.routing_id = received_msg.routing_id }
+        When(:result) { server << response }
+        Then { result == Failure(IO::EAGAINWaitWritable) }
+      end
+      describe "with multi-part response" do
+        Given(:response) { CZTop::Message.new(%w[BAR BAZ]) }
+        Given { response.routing_id = received_msg.routing_id }
+        When(:result) { server << response }
+        Then { result == Failure(Errno::EINVAL) }
+      end
     end
-  end
 
-  describe "#routing_id=" do
-    context "with valid routing ID" do
-      # code duplication for completeness' sake
-      Given(:new_routing_id) { 123456 }
-      When { socket.routing_id = new_routing_id }
-      Then { socket.routing_id == new_routing_id }
-    end
-
-    context "with negative routing ID" do
-      Given(:new_routing_id) { -123456 }
-      When(:result) { socket.routing_id = new_routing_id }
-      Then { result == Failure(RangeError) }
-    end
-
-    context "with too big routing ID" do
-      Given(:new_routing_id) { 123456345676543456765 }
-      When(:result) { socket.routing_id = new_routing_id }
-      Then { result == Failure(RangeError) }
+    describe "when SERVER tries to initiate a conversation" do
+      Given { client }
+      Given { server }
+      Given { msg.routing_id = 1234 } # fake routing_id
+      When(:result) { server << msg }
+      Then { result == Failure(SocketError) }
     end
   end
 end

@@ -123,7 +123,6 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 * SERVER and CLIENT ready
   * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
   * there are `#routing_id` and `#routing_id=` on the following classes:
-    * CZTop::Socket::SERVER
     * CZTop::Message
     * CZTop::Frame
 * ZMTP 3.1 heartbeat ready

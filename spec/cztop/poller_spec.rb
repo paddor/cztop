@@ -111,8 +111,8 @@ describe CZTop::Poller do
     end
 
     it "the timeout is in ms" do
-      duration = Benchmark.realtime { poller.wait(1) }
-      assert_in_delta 0.001, duration, 0.01
+      duration = Benchmark.realtime { poller.wait(30) }
+      assert_in_delta 0.03, duration, 0.01
     end
 
     context "with no timeout" do

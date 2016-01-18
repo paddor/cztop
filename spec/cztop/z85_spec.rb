@@ -45,10 +45,11 @@ describe CZTop::Z85 do
 
     context "with odd data" do
       # input length is not divisible by 4 with no remainder
-      let(:data) { "foo bar" } # 7 bytes
+      let(:input) { "foo bar" } # 7 bytes
 
       it "raises" do
-        assert_raises(ArgumentError) { subject.encode(data) }
+        err = assert_raises(ArgumentError) { subject.encode(input) }
+        assert_match /wrong input length/, err.message
       end
     end
 
@@ -86,9 +87,10 @@ describe CZTop::Z85 do
     end
 
     context "with odd data" do
-      let(:data) { "w]zPgvQTp1vQTO" } # 14 instead of 15 chars
+      let(:input) { "w]zPgvQTp1vQTO" } # 14 instead of 15 chars
       it "raises" do
-        assert_raises(ArgumentError) { subject.decode(data) }
+        err = assert_raises(ArgumentError) { subject.decode(input) }
+        assert_match /wrong input length/, err.message
       end
     end
 

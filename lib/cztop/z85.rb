@@ -19,7 +19,7 @@ module CZTop
     #   remainder
     # @raise [SystemCallError] if this fails
     def encode(input)
-      raise ArgumentError if input.bytesize % 4 > 0
+      raise ArgumentError, "wrong input length" if input.bytesize % 4 > 0
       input = input.dup.force_encoding(Encoding::BINARY)
       ptr = ffi_delegate.encode(input, input.bytesize)
       raise_sys_err if ptr.null?
@@ -35,7 +35,7 @@ module CZTop
     #   remainder
     # @raise [SystemCallError] if this fails
     def decode(input)
-      raise ArgumentError if input.bytesize % 5 > 0
+      raise ArgumentError, "wrong input length" if input.bytesize % 5 > 0
       FFI::MemoryPointer.new(:size_t) do |size_ptr|
         buffer_ptr = ffi_delegate.decode(input, size_ptr)
         raise_sys_err if buffer_ptr.null?

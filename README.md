@@ -104,7 +104,6 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 ### Features
 
 * Ruby-like API
-  * no manual dealing with the ZMQ context
   * method names
     * `#x=` methods instead of `#set_x` (e.g. socket options)
     * `#[]` where it makes sense (e.g. on a Message, Config, or Certificate)
@@ -113,8 +112,10 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
     * `socket << ["multi", "frame", "message"]`
   * no manual error checking needed
     * if there's an error, an appropriate exception is raised
+  * of course, no manual dealing with the ZMQ context
 * easy security
-  * use `Socket#CURVE_server!` and `Socket#CURVE_client!`
+  * use `Socket#CURVE_server!(cert)` on the server
+  * and `Socket#CURVE_client!(client_cert, server_cert)` on the client
 * socket types as Ruby classes
   * no need to manually pass some constant
     * but you can: `CZTop::Socket.new_by_type(:REP)`

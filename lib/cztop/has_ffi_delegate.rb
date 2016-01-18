@@ -33,7 +33,7 @@ module CZTop::HasFFIDelegate
 
   # Raises the appropriate SystemCallError.
   # @param msg [String] error message
-  # @raises [SystemCallError]
+  # @raise [SystemCallError]
   def raise_sys_err(msg = CZMQ::FFI::Errors.strerror)
     raise SystemCallError.new(msg, CZMQ::FFI::Errors.errno)
   end

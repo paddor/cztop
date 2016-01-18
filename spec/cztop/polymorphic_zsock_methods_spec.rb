@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 
 describe CZTop::PolymorphicZsockMethods do
   i = 0
-  let(:endpoint) { "inproc://endpoint_send_receive_method_spec_#{i+=1}" }
+  let(:endpoint) { "inproc://send_receive_method_spec_#{i+=1}" }
   let(:socket_a) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:socket_b) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 

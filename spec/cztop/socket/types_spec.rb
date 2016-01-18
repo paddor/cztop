@@ -244,7 +244,7 @@ end
 
 describe CZTop::Socket::PAIR do
   i = 0
-  let(:endpoint) { "inproc://endpoint_socket_types_spec_#{i+=1}" }
+  let(:endpoint) { "inproc://socket_types_spec_#{i+=1}" }
   let(:binding_socket) { described_class.new("@#{endpoint}") }
   let(:connecting_socket) { described_class.new(">#{endpoint}") }
 

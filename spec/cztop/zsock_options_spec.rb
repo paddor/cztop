@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 
 describe CZTop::ZsockOptions do
   i = 0
-  let(:endpoint) { "inproc://endpoint_zsock_options_#{i+=1}" }
+  let(:endpoint) { "inproc://zsock_options_#{i+=1}" }
   let(:socket) { CZTop::Socket::REQ.new(endpoint) }
   let(:options) { socket.options }
 

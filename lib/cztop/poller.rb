@@ -84,14 +84,14 @@ module CZTop
     # Remembers the socket so a call to {#wait} can return with the exact same
     # instance of {Socket}, and it also makes sure the socket won't get
     # GC'd.
-    # @param [Socket, Actor] the socket instance to remember
+    # @param socket [Socket, Actor] the socket instance to remember
     # @return [void]
     def remember_socket(socket)
       @sockets[socket.to_ptr.to_i] = socket
     end
 
     # Forgets the socket because it has been removed from the poller.
-    # @param [Socket, Actor] the socket instance to forget
+    # @param socket [Socket, Actor] the socket instance to forget
     # @return [void]
     def forget_socket(socket)
       @sockets.delete(socket.to_ptr.to_i)

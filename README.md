@@ -166,6 +166,12 @@ Or install it yourself as:
 See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop
 is tested.
 
+At the time of writing, these include:
+
+* MRI (2.3, 2.2.4, 2.1.8)
+* Rubinius (HEAD)
+* JRuby 9000 (HEAD)
+
 ## Usage
 
 See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples. Here's a very simple one:

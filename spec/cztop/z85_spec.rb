@@ -10,7 +10,7 @@ describe CZTop::Z85 do
   end
 
   describe "#encode" do
-    context "empty data" do
+    context "with empty data" do
       it "encodes" do
         assert_equal "", subject.encode("")
       end
@@ -19,7 +19,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context "even data" do
+    context "with even data" do
       # "even" means its length is divisible by 4 with no remainder
 
       # test data from https://github.com/zeromq/rfc/blob/master/src/spec_32.c
@@ -43,7 +43,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context "odd data" do
+    context "with odd data" do
       # input length is not divisible by 4 with no remainder
       let(:data) { "foo bar" } # 7 bytes
 
@@ -64,13 +64,13 @@ describe CZTop::Z85 do
   end
 
   describe "#decode" do
-    context "empty data" do
+    context "with empty data" do
       it "decodes" do
         assert_equal "", subject.decode("")
       end
     end
 
-    context "even data" do
+    context "with even data" do
       let(:input) { "HelloWorld" }
       let(:expected_output) do
         "\x86\x4F\xD2\x6F\xB5\x59\xF7\x5B".force_encoding Encoding::BINARY
@@ -85,7 +85,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context "odd data" do
+    context "with odd data" do
       let(:data) { "w]zPgvQTp1vQTO" } # 14 instead of 15 chars
       it "raises" do
         assert_raises(ArgumentError) { subject.decode(data) }

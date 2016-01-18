@@ -133,7 +133,9 @@ describe CZTop::Socket::SERVER do
         When(:result) { server << response }
         Then { result == Failure(SocketError) }
       end
-      context "with disconnected CLIENT" do
+      context "with disconnected CLIENT",
+          skip: "https://github.com/zeromq/libzmq/issues/1711" do
+
         Given { client.disconnect(endpoint) }
         Given { response.routing_id = received_msg.routing_id }
         When(:result) { server << response }

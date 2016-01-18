@@ -317,7 +317,14 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 * [x] check availability of libsodium within CZTop
 * [x] read error strings for exceptions where appropriate (zmq_strerror)
 * [x] add support for ZMTP 3.1 heartbeats in CZMQ
-* [ ] add more examples
+* [x] add padded variant of Z85
+* add more examples
+  * [x] [simple REQ/REP](https://github.com/paddor/cztop/tree/master/examples/simple_req_rep)
+  * [x] [Taxy System](https://github.com/paddor/cztop/tree/master/examples/taxi_system) with CURVE security and heartbeating
+    * [ ] change from ROUTER/DEALER to SERVER/CLIENT
+  * [x] [Actor](https://github.com/paddor/cztop/tree/master/examples/ruby_actor) with Ruby block
+  * [ ] PUSH/PULL
+  * [ ] PUB/SUB
 * [ ] add performance benchmarks
 
 ## Contributing

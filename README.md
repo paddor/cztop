@@ -98,6 +98,7 @@ Here are some some of the goals I have/had in mind for this library:
     * CLIENT < Socket
     * SERVER < Socket
   * Z85
+    * Padded < Z85
 
 More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
 

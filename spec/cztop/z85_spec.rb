@@ -134,3 +134,72 @@ describe CZTop::Z85 do
     end
   end
 end
+
+describe CZTop::Z85::Padded do
+  subject { CZTop::Z85::Padded.new }
+
+  describe "#encode" do
+    let(:encoded) { subject.encode(input) }
+    context "with empty data" do
+      let(:input) { "" }
+      it "doesn't encode size" do
+        assert_equal "", encoded
+      end
+    end
+
+    context "with even data" do
+      # "even" means its length is divisible by 4 with no remainder
+      let(:input) { "abcd" }
+      let(:expected_length) { (8 + input.bytesize) / 4 * 5 }
+
+      it "encodes size and doesn't add padding" do
+        assert_equal expected_length, subject.encode(input).bytesize
+      end
+
+      it "round trips" do
+        z85 = subject.encode(input)
+        assert_equal input, subject.decode(z85)
+      end
+    end
+
+    context "with odd data" do
+      # input length is not divisible by 4 with no remainder
+      let(:input) { "foo bar" } # 7 bytes
+      let(:expected_length) { (8 + input.bytesize + 1) / 4 * 5 }
+
+      it "encodes size and adds padding" do
+        assert_equal expected_length, encoded.bytesize
+      end
+
+      it "round trips" do
+        z85 = subject.encode(input)
+        assert_equal input, subject.decode(z85)
+      end
+    end
+  end
+
+  describe "#decode" do
+    context "with empty data" do
+      it "decodes without trying to decode length" do
+        assert_equal "", subject.decode("")
+      end
+    end
+
+    context "with invalid input" do  # less than the minimum of 11 bytes
+      let(:input) { subject.encode("foo").byteslice(0, 10) }
+      it "raises" do
+        err = assert_raises(ArgumentError) { subject.decode(input) }
+        assert_match /invalid input/, err.message
+      end
+    end
+
+    context "with truncated payload" do
+      let(:encoded) { subject.encode("a" * 100) }
+      let(:truncated_input) { encoded.byteslice(0, 35) } # Z85-compatible length
+      it "raises" do
+        err = assert_raises(ArgumentError) { subject.decode(truncated_input) }
+        assert_match /truncated/, err.message
+      end
+    end
+  end
+end

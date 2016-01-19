@@ -150,10 +150,18 @@ describe CZTop::Z85::Padded do
     context "with even data" do
       # "even" means its length is divisible by 4 with no remainder
       let(:input) { "abcd" }
-      let(:expected_length) { (8 + input.bytesize) / 4 * 5 }
+      let(:expected_size) { (8 + input.bytesize) / 4 * 5 }
 
-      it "encodes size and doesn't add padding" do
-        assert_equal expected_length, subject.encode(input).bytesize
+      it "encodes to correct size (length but no padding)" do
+        assert_equal expected_size, encoded.bytesize
+      end
+
+      let(:decoded_z85) { CZTop::Z85.new.decode(encoded) } # bare Z85 decoding
+      let(:low_len)  { decoded_z85.byteslice(4, 4).unpack("N")[0] }
+      let(:high_len) { decoded_z85.byteslice(0, 4).unpack("N")[0] }
+      it "encodes correct length" do
+        assert_equal 0, high_len # certainly <4GiB of test data
+        assert_equal input.bytesize, low_len
       end
 
       it "round trips" do
@@ -165,10 +173,10 @@ describe CZTop::Z85::Padded do
     context "with odd data" do
       # input length is not divisible by 4 with no remainder
       let(:input) { "foo bar" } # 7 bytes
-      let(:expected_length) { (8 + input.bytesize + 1) / 4 * 5 }
+      let(:expected_size) { (8 + input.bytesize + 1) / 4 * 5 }
 
-      it "encodes size and adds padding" do
-        assert_equal expected_length, encoded.bytesize
+      it "encodes to correct size (length and padding)" do
+        assert_equal expected_size, encoded.bytesize
       end
 
       it "round trips" do

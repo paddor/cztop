@@ -98,9 +98,9 @@ module CZTop
       def encode(input)
         return super if input.empty?
         length = input.bytesize
-        low_1 = length & 0xFFFFFFFF
-        low_2 = (length >> 32) & 0xFFFFFFFF
-        encoded_length = [ low_2, low_1 ].pack("NN")
+        low = length & 0xFFFFFFFF
+        high = (length >> 32) & 0xFFFFFFFF
+        encoded_length = [ high, low ].pack("NN")
         padding = "\0" * ((4 - (length % 4)) % 4)
         super("#{encoded_length}#{input}#{padding}")
       end

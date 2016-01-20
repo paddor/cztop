@@ -69,15 +69,35 @@ module CZTop
     #
     # = Encoding Procedure
     #
-    # If the data to be encoded isn't empty, its length is prepended as a 64
-    # bit unsigned integer in network byte order. Any padding (NULL bytes)
-    # needed to bring it up to a multiple of 4 bytes is appended. Padding is
-    # always between 0 and 3 bytes. The resulting data is encoded using
-    # {CZTop::Z85#encode}. This will result in at least 11 bytes (unless the
-    # data to be encoded was empty).
-    #
     # If the data to be encoded is empty (0 bytes), it is encoded to the empty
     # string, just like in Z85.
+    #
+    # Otherwise, a length information is prepended and, if needed, padding (1,
+    # 2, or 3 NULL bytes) is appended to bring the resulting blob to
+    # a multiple of 4 bytes.
+    #
+    # The length information is encoded similarly to lengths of messages
+    # (frames) in ZMTP. Up to 127 bytes, the data's length is encoded with
+    # a single byte (specifically, with the 7 least significant bits in it).
+    #
+    #   +--------+-------------------------------+------------+
+    #   | length |              data             |   padding  |
+    #   | 1 byte |        up to 127 bytes        |  0-3 bytes |
+    #   +--------+-------------------------------+------------+
+    #
+    # If the data is 128 bytes or more, the most significant bit will be set
+    # to indicate that fact, and a 64 bit unsigned integer in network byte
+    # order is appended after this first byte to encode the length of the
+    # data.
+    #
+    #   +--------+-------------------------------+------------+
+    #   | large? |              data             |   padding  |
+    #   | 1 byte |        128 bytes or more      |  0-3 bytes |
+    #   +--------+-------------------------------+------------+
+    #
+    #
+    # The resulting blob is encoded using {CZTop::Z85#encode}.
+    # {CZTop::Z85#decode} does the inverse.
     #
     # @note Warning: This won't be compatible with other implementations of
     #   Z85. Only use this if you really need padding, like when you can't
@@ -98,10 +118,15 @@ module CZTop
       def encode(input)
         return super if input.empty?
         length = input.bytesize
-        low = length & 0xFFFFFFFF
-        high = (length >> 32) & 0xFFFFFFFF
-        encoded_length = [ high, low ].pack("NN")
-        padding = "\0" * ((4 - (length % 4)) % 4)
+        if length < 1<<7 # up to 127 bytes
+          encoded_length = [length].pack("C")
+
+        else # larger input
+          low = length & 0xFFFFFFFF
+          high = (length >> 32) & 0xFFFFFFFF
+          encoded_length = [ 1<<7, high, low ].pack("CNN")
+        end
+        padding = "\0" * ((4 - ((length+1) % 4)) % 4)
         super("#{encoded_length}#{input}#{padding}")
       end
 
@@ -114,11 +139,16 @@ module CZTop
       # @raise [SystemCallError] if this fails
       def decode(input)
         return super if input.empty?
-        raise ArgumentError, "invalid input" if input.bytesize < 11
         decoded = super
-        length = decoded.byteslice(0, 8).unpack("NN")
-                   .inject(0) { |sum, i| (sum << 32) + i }
-        decoded = decoded.byteslice(8,length) # extract payload
+        length = decoded.byteslice(0, 1).unpack("C")[0]
+        if (1<<7 & length).zero? # up to 127 bytes
+          decoded = decoded.byteslice(1, length) # extract payload
+
+        else # larger input
+          length = decoded.byteslice(1, 8).unpack("NN")
+                     .inject(0) { |sum, i| (sum << 32) + i }
+          decoded = decoded.byteslice(9, length) # extract payload
+        end
         raise ArgumentError, "input truncated" if decoded.bytesize < length
         return decoded
       end

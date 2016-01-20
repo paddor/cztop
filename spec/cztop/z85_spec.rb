@@ -139,7 +139,11 @@ describe CZTop::Z85::Padded do
   subject { CZTop::Z85::Padded.new }
 
   describe "#encode" do
+    let(:input_size) { input.bytesize }
     let(:encoded) { subject.encode(input) }
+    let(:output_size) { encoded.bytesize }
+    let(:decoded_z85) { CZTop::Z85.new.decode(encoded) } # bare Z85 decoding
+
     context "with empty data" do
       let(:input) { "" }
       it "doesn't encode size" do
@@ -147,41 +151,87 @@ describe CZTop::Z85::Padded do
       end
     end
 
-    context "with even data" do
-      # "even" means its length is divisible by 4 with no remainder
-      let(:input) { "abcd" }
-      let(:expected_size) { (8 + input.bytesize) / 4 * 5 }
+    context "with small data" do
+      let(:encoded_len) { decoded_z85.byteslice(0, 1).unpack("C")[0] }
 
-      it "encodes to correct size (length but no padding)" do
-        assert_equal expected_size, encoded.bytesize
+      context "with no padding needed" do
+        let(:input) { "abc" } # + 1 byte for length => even
+        # "even" means its length is divisible by 4 with no remainder
+        let(:expected_size) { (1 + input_size) / 4 * 5 }
+
+        it "encodes to correct size" do
+          assert_equal expected_size, output_size
+        end
+
+        it "encodes correct length" do
+          assert_equal input_size, encoded_len
+        end
+
+        it "round trips" do
+          z85 = subject.encode(input)
+          assert_equal input, subject.decode(z85)
+        end
       end
 
-      let(:decoded_z85) { CZTop::Z85.new.decode(encoded) } # bare Z85 decoding
-      let(:low_len)  { decoded_z85.byteslice(4, 4).unpack("N")[0] }
-      let(:high_len) { decoded_z85.byteslice(0, 4).unpack("N")[0] }
-      it "encodes correct length" do
-        assert_equal 0, high_len # certainly <4GiB of test data
-        assert_equal input.bytesize, low_len
-      end
+      context "with padding needed" do
+        let(:input) { "abcd" } # will need 3 bytes of padding
+        let(:expected_size) { (1 + input_size + 3) / 4 * 5 }
 
-      it "round trips" do
-        z85 = subject.encode(input)
-        assert_equal input, subject.decode(z85)
+        it "encodes to correct size" do
+          assert_equal expected_size, output_size
+        end
+
+        it "encodes correct length" do
+          assert_equal input_size, encoded_len
+        end
+
+        it "round trips" do
+          z85 = subject.encode(input)
+          assert_equal input, subject.decode(z85)
+        end
       end
     end
 
-    context "with odd data" do
-      # input length is not divisible by 4 with no remainder
-      let(:input) { "foo bar" } # 7 bytes
-      let(:expected_size) { (8 + input.bytesize + 1) / 4 * 5 }
+    context "with large data" do # >127 bytes
+      let(:encoded_low_len)  { decoded_z85.byteslice(5, 4).unpack("N")[0] }
+      let(:encoded_high_len) { decoded_z85.byteslice(1, 4).unpack("N")[0] }
+      let(:encoded_len) { (encoded_high_len << 32) + encoded_low_len }
 
-      it "encodes to correct size (length and padding)" do
-        assert_equal expected_size, encoded.bytesize
+
+      context "with no padding needed" do
+        let(:input) { ("foof" * 300)[0..-2] } # + 1 + 8 bytes => even
+        let(:expected_size) { (1 + 8 + input_size) / 4 * 5 }
+
+        it "encodes to correct size" do
+          assert_equal expected_size, output_size
+        end
+
+        it "encodes correct length" do
+          assert_equal input_size, encoded_len
+        end
+
+        it "round trips" do
+          z85 = subject.encode(input)
+          assert_equal input, subject.decode(z85)
+        end
       end
 
-      it "round trips" do
-        z85 = subject.encode(input)
-        assert_equal input, subject.decode(z85)
+      context "with padding needed" do
+        let(:input) { "foof" * 300 } # + 1 + 8 => odd: 3 bytes of padding
+        let(:expected_size) { (1 + 8 + input_size + 3) / 4 * 5 }
+
+        it "encodes to correct size" do
+          assert_equal expected_size, output_size
+        end
+
+        it "encodes correct length" do
+          assert_equal input_size, encoded_len
+        end
+
+        it "round trips" do
+          z85 = subject.encode(input)
+          assert_equal input, subject.decode(z85)
+        end
       end
     end
   end
@@ -190,14 +240,6 @@ describe CZTop::Z85::Padded do
     context "with empty data" do
       it "decodes without trying to decode length" do
         assert_equal "", subject.decode("")
-      end
-    end
-
-    context "with invalid input" do  # less than the minimum of 11 bytes
-      let(:input) { subject.encode("foo").byteslice(0, 10) }
-      it "raises" do
-        err = assert_raises(ArgumentError) { subject.decode(input) }
-        assert_match /invalid input/, err.message
       end
     end
 

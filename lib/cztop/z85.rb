@@ -88,13 +88,13 @@ module CZTop
     # If the data is 128 bytes or more, the most significant bit will be set
     # to indicate that fact, and a 64 bit unsigned integer in network byte
     # order is appended after this first byte to encode the length of the
-    # data.
+    # data.  This means that up to 16EiB (exbibytes) can be encoded, which
+    # will be enough for the foreseeable future.
     #
-    #   +--------+-------------------------------+------------+
-    #   | large? |              data             |   padding  |
-    #   | 1 byte |        128 bytes or more      |  0-3 bytes |
-    #   +--------+-------------------------------+------------+
-    #
+    #   +--------+-----------+----------------------------------+------------+
+    #   |  big?  |   length  |                data              |   padding  |
+    #   | 1 byte |  8 bytes  |      128 bytes or much more      |  0-3 bytes |
+    #   +--------+-----------+----------------------------------+------------+
     #
     # The resulting blob is encoded using {CZTop::Z85#encode}.
     # {CZTop::Z85#decode} does the inverse.

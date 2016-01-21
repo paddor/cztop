@@ -247,7 +247,7 @@ describe CZTop::Certificate do
         end
         context "with invalid path" do
           Given(:path) { "/" }
-          Then { result == Failure(Errno::EISDIR) }
+          Then { result == Failure(SystemCallError) }
         end
         context "with empty path" do
           Given(:path) { "" }

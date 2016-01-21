@@ -18,10 +18,6 @@ describe CZTop::Beacon do
     subject
   end
 
-  it "can do it again" do
-    subject
-  end
-
   describe "#verbose!" do
     before(:each) do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original

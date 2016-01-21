@@ -14,7 +14,6 @@ env:
   # recognized by czmq-ffi-gen's ci-scripts
   - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
   - CZMQ_VERSION=3.0 ZMQ_VERSION=4.1
-  - CZMQ_VERSION=3.0 ZMQ_VERSION=4.0
 matrix:
   exclude:
     # old ruby versions don't get to test bleeding edge functionality. basta.

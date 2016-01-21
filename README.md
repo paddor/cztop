@@ -117,6 +117,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
     * if there's an error, an appropriate exception is raised
   * of course, no manual dealing with the ZMQ context
 * easy security
+  * requires ZMQ >= 4.0
   * use `Socket#CURVE_server!(cert)` on the server
   * and `Socket#CURVE_client!(client_cert, server_cert)` on the client
 * socket types as Ruby classes
@@ -124,19 +125,24 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
     * but you can: `CZTop::Socket.new_by_type(:REP)`
   * e.g. `#subscribe` only exists on CZTop::Socket::SUB
 * SERVER and CLIENT ready
+  * requires ZMQ >= 4.2
   * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
   * there are `#routing_id` and `#routing_id=` on the following classes:
     * CZTop::Message
     * CZTop::Frame
 * ZMTP 3.1 heartbeat ready
+  * requires ZMQ >= 4.2
   * `socket.options.heartbeat_ivl = 2000`
   * `socket.options.heartbeat_timeout = 8000`
 
-## Installation
+## Requirements
 
-This gem requires the presence of the CZMQ library, which in turn requires the
-ZMQ library. For **security mechanisms** like CURVE, you'll need
-ZMQ >= 4.0 and [libsodium](https://github.com/jedisct1/libsodium).
+* CZMQ >= 3.0.2
+* ZMQ >= 3.2
+
+For security mechanisms like CURVE, you'll need:
+* ZMQ >= 4.0
+* [libsodium](https://github.com/jedisct1/libsodium)
 
 On OSX using homebrew, run:
 
@@ -144,18 +150,53 @@ On OSX using homebrew, run:
     $ brew install zmq  --with-libsodium
     $ brew install czmq
 
-**Warning**: To make use of the full feature set of CZTop, you'll need need to
-install both ZMQ and CZMQ from master, like this:
-
-    $ brew install zmq  --with-libsodium --HEAD
-    $ brew install czmq --HEAD
-
-See below for the known issues if you're using the current stable releases.
-
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.
 
-To then use this gem, add this line to your application's Gemfile:
+**Warning**: To make use of the full feature set of CZTop (including
+CLIENT/SERVER sockets and ZMTP 3.1 heartbeats), you'll need to install both ZMQ
+and CZMQ from master, like this:
+
+    # instead of the last two commands from above
+    $ brew install zmq  --with-libsodium --HEAD
+    $ brew install czmq --HEAD
+
+See next section.
+
+### Known Issues if using the current stable releases
+
+When using ZMQ 4.1/4.0:
+* no CLIENT/SERVER sockets. Don't try.
+* no ZMTP 3.1 heartbeats. Setting the options will have no effect.
+
+When using ZMQ 3.2:
+* no security mechanisms like CURVE. Don't try.
+* no CLIENT/SERVER sockets. Don't try.
+* no ZMTP 3.1 heartbeats. Setting the options will have no effect.
+
+When using CZMQ 3.0:
+* don't use `Certificate#[]=` to unset meta data (by passing `nil`)
+  * `zcert_unset_meta()` was added more recently for that case
+  * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
+* if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
+  * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
+* no CLIENT/SERVER sockets. Don't try.
+* no ZMTP 3.1 heartbeats. Don't try.
+
+### Supported Ruby versions
+
+See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop
+is tested.
+
+At the time of writing, these include:
+
+* MRI (2.3, 2.2.4, 2.1.8)
+* Rubinius (HEAD)
+* JRuby 9000 (HEAD)
+
+## Installation
+
+To use this gem, add this line to your application's Gemfile:
 
 ```ruby
 gem 'cztop'
@@ -168,33 +209,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install cztop
-
-### Known Issues if using the current stable releases
-
-When using ZMQ 4.1/4.0:
-* no CLIENT/SERVER sockets. Don't try.
-
-When using ZMQ 3.2:
-* no security mechanisms like CURVE. Don't try.
-* no CLIENT/SERVER sockets. Don't try.
-
-When using CZMQ 3.0:
-* don't use `Certificate#[]=` to unset meta data (by passing `nil`)
-  * `zcert_unset_meta()` was added more recently for that case
-  * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
-* if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
-  * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
-
-### Supported Ruby versions
-
-See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop
-is tested.
-
-At the time of writing, these include:
-
-* MRI (2.3, 2.2.4, 2.1.8)
-* Rubinius (HEAD)
-* JRuby 9000 (HEAD)
 
 ## Usage
 

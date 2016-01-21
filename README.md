@@ -141,7 +141,6 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 * ZMQ >= 4.0
 
 For security mechanisms like CURVE, you'll need:
-* ZMQ >= 4.0
 * [libsodium](https://github.com/jedisct1/libsodium)
 
 On OSX using homebrew, run:

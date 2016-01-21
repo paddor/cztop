@@ -172,18 +172,18 @@ Or install it yourself as:
 ### Known Issues if using the current stable releases
 
 When using ZMQ 4.1/4.0:
-    * no CLIENT/SERVER sockets. Don't try.
+* no CLIENT/SERVER sockets. Don't try.
 
 When using ZMQ 3.2:
-    * no security mechanisms like CURVE. Don't try.
-    * no CLIENT/SERVER sockets. Don't try.
+* no security mechanisms like CURVE. Don't try.
+* no CLIENT/SERVER sockets. Don't try.
 
 When using CZMQ 3.0:
-  * don't use `Certificate#[]=` to unset meta data (by passing `nil`)
-    * `zcert_unset_meta()` was added more recently for that case
-    * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
-  * if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
-    * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
+* don't use `Certificate#[]=` to unset meta data (by passing `nil`)
+  * `zcert_unset_meta()` was added more recently for that case
+  * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
+* if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
+  * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
 
 ### Supported Ruby versions
 

@@ -10,6 +10,18 @@ rvm:
   - 2.1.8
   - jruby-head
   - rbx
+env:
+  # recognized by czmq-ffi-gen's ci-scripts
+  - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+  - CZMQ_VERSION=3.0 ZMQ_VERSION=4.1
+  - CZMQ_VERSION=3.0 ZMQ_VERSION=4.0
+matrix:
+  exclude:
+    # old ruby versions don't get to test bleeding edge functionality. basta.
+    - rvm: 2.2.4
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+    - rvm: 2.1.8
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

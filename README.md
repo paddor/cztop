@@ -138,7 +138,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 ## Requirements
 
 * CZMQ >= 3.0.2
-* ZMQ >= 3.2
+* ZMQ >= 4.0
 
 For security mechanisms like CURVE, you'll need:
 * ZMQ >= 4.0
@@ -166,11 +166,6 @@ See next section.
 ### Known Issues if using the current stable releases
 
 When using ZMQ 4.1/4.0:
-* no CLIENT/SERVER sockets. Don't try.
-* no ZMTP 3.1 heartbeats. Setting the options will have no effect.
-
-When using ZMQ 3.2:
-* no security mechanisms like CURVE. Don't try.
 * no CLIENT/SERVER sockets. Don't try.
 * no ZMTP 3.1 heartbeats. Setting the options will have no effect.
 
@@ -341,25 +336,25 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   * [ ] PUSH/PULL
   * [ ] PUB/SUB
 * [ ] add performance benchmarks
-* [ ] support older versions of ZMQ
+* [x] support older versions of ZMQ
   * [x] ZMQ HEAD
     * [x] test on CI
   * [x] ZMQ 4.1.4 (untested)
-    * [ ] test on CI
+    * [x] test on CI
   * [x] ZMQ 4.0.5 (untested)
-    * [ ] test on CI
-  * [x] ZMQ 3.2.5 (untested)
-    * [ ] test on CI
-* [ ] support older versions of CZMQ
+    * [x] test on CI
+  * [ ] ZMQ 3.2
+    * too big a pain ([d5172ab](https://github.com/paddor/czmq-ffi-gen/commit/d5172ab6db64999c50ba24f71569acf1dd45af51))
+* [x] support multiple versions of CZMQ
   * [x] CZMQ HEAD
     * [x] test on CI
-  * [x] CZMQ 3.0.2
+  * [x] CZMQ 3.0.2 (current stable)
     * no `zcert_meta_unset()` ([zeromq/czmq#1246](https://github.com/zeromq/czmq/issues/1246))
       * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`
     * no `zproc`(especially no `zproc_has_curve()`)
       * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`, attach `zsys_has_curve()` instead (under same name)
     * [x] adapt test suite to skip affected test examples
-    * [ ] test on CI
+    * [x] test on CI
 
 ## Contributing
 

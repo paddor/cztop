@@ -335,6 +335,10 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   * [ ] PUSH/PULL
   * [ ] PUB/SUB
 * [ ] add performance benchmarks
+  * [x] inproc latency
+  * [ ] inproc throughput
+  * [ ] local/remote latency
+  * [ ] local/remote throughput
 * [x] support older versions of ZMQ
   * [x] ZMQ HEAD
     * [x] test on CI

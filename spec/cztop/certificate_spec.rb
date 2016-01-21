@@ -96,7 +96,7 @@ describe CZTop::Certificate do
             cert[key] = value
           end
         end
-        context "when unsetting" do
+        context "when unsetting", skip: czmq_function?(:zcert_unset_meta) do
           Given { cert[key] = value }
           When { cert[key] = nil }
           Then { cert[key].nil? }

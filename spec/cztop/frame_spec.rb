@@ -236,7 +236,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#routing_id" do
+  describe "#routing_id", skip: czmq_function?(:zframe_routing_id) do
     Given(:frame) { described_class.new }
     context "with no routing ID set" do
       Then { frame.routing_id == 0 }
@@ -249,7 +249,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#routing_id=" do
+  describe "#routing_id=", skip: czmq_function?(:zframe_set_routing_id) do
     Given(:frame) { described_class.new }
 
     context "with valid routing ID" do

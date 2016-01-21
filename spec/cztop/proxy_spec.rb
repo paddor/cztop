@@ -156,7 +156,9 @@ describe CZTop::Proxy do
         end
       end
     end
-    describe "#domain=" do
+    describe "#domain=",
+      skip: czmq_feature?("zproxy: DOMAIN command", :zcert_unset_meta) do
+
       let(:domain) { "foobar" }
       after(:each) { configurator.domain = domain }
 
@@ -182,7 +184,9 @@ describe CZTop::Proxy do
         end
       end
     end
-    describe "#PLAIN!" do
+    describe "#PLAIN!",
+      skip: czmq_feature?("zproxy: PLAIN command", :zcert_unset_meta) do
+
       after(:each) { configurator.PLAIN_server! }
 
       context "for frontend" do
@@ -207,7 +211,9 @@ describe CZTop::Proxy do
         end
       end
     end
-    describe "#CURVE!" do
+    describe "#CURVE!",
+      skip: czmq_feature?("zproxy: CURVE command", :zcert_unset_meta) do
+
       let(:cert) { CZTop::Certificate.new }
       let(:public_key) { cert.public_key }
       let(:secret_key) { cert.secret_key }

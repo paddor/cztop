@@ -79,7 +79,9 @@ describe CZTop::Poller do
         assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
-    context "with unknown socket" do
+    context "with unknown socket", skip: czmq_feature?(
+      "errors from zpoller_remove()", :zcert_unset_meta) do
+
       it "raises" do
         assert_raises(SystemCallError) { poller.remove(reader2) }
       end

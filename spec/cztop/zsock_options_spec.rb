@@ -275,7 +275,9 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_ivl" do
+    describe "#heartbeat_ivl",
+      skip: czmq_function?(:zsock_set_heartbeat_ivl) do
+
       context "with no IVL" do
         it "returns zero" do
           assert_equal 0, options.heartbeat_ivl
@@ -289,7 +291,9 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_ttl" do
+    describe "#heartbeat_ttl",
+      skip: czmq_function?(:zsock_set_heartbeat_ttl) do
+
       context "with no TTL" do
         it "returns zero" do
           assert_equal 0, options.heartbeat_ttl
@@ -322,7 +326,9 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_timeout" do
+    describe "#heartbeat_timeout",
+      skip: czmq_function?(:zsock_heartbeat_timeout) do
+
       context "with no timeout" do
         it "returns -1" do
           assert_equal -1, options.heartbeat_timeout

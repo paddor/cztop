@@ -70,14 +70,15 @@ describe CZTop::Socket do
   end
 end
 
-describe CZTop::Socket::CLIENT do
+describe CZTop::Socket::CLIENT, skip: czmq_function?(:zsock_new_client) do
   Given(:socket) { described_class.new }
   it "instanciates" do
     socket
   end
 end
 
-describe CZTop::Socket::SERVER do
+describe CZTop::Socket::SERVER, skip: czmq_function?(:zsock_new_server) do
+
   Given(:server) { CZTop::Socket::SERVER.new }
   it "instanciates" do
     server

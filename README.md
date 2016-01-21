@@ -136,16 +136,21 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 This gem requires the presence of the CZMQ library, which in turn requires the
 ZMQ library. For **security mechanisms** like CURVE, you'll need
-[libsodium](https://github.com/jedisct1/libsodium).
+ZMQ >= 4.0 and [libsodium](https://github.com/jedisct1/libsodium).
 
 On OSX using homebrew, run:
 
     $ brew install libsodium
-    $ brew install zmq  --HEAD --with-libsodium
+    $ brew install zmq  --with-libsodium
+    $ brew install czmq
+
+**Warning**: To make use of the full feature set of CZTop, you'll need need to
+install both ZMQ and CZMQ from master, like this:
+
+    $ brew install zmq  --with-libsodium --HEAD
     $ brew install czmq --HEAD
 
-**Warning**: CZTop currently relies on bug fixes and other improvements of ZMQ
-and CZMQ that aren't released yet. Thus, the `--HEAD` argument is important.
+See below for the known issues if you're using the current stable releases.
 
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.
@@ -163,6 +168,22 @@ And then execute:
 Or install it yourself as:
 
     $ gem install cztop
+
+### Known Issues if using the current stable releases
+
+When using ZMQ 4.1/4.0:
+    * no CLIENT/SERVER sockets. Don't try.
+
+When using ZMQ 3.2:
+    * no security mechanisms like CURVE. Don't try.
+    * no CLIENT/SERVER sockets. Don't try.
+
+When using CZMQ 3.0:
+  * don't use `Certificate#[]=` to unset meta data (by passing `nil`)
+    * `zcert_unset_meta()` was added more recently for that case
+    * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
+  * if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
+    * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
 
 ### Supported Ruby versions
 
@@ -306,6 +327,25 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
   * [ ] PUSH/PULL
   * [ ] PUB/SUB
 * [ ] add performance benchmarks
+* [ ] support older versions of ZMQ
+  * [x] ZMQ HEAD
+    * [x] test on CI
+  * [x] ZMQ 4.1.4 (untested)
+    * [ ] test on CI
+  * [x] ZMQ 4.0.5 (untested)
+    * [ ] test on CI
+  * [x] ZMQ 3.2.5 (untested)
+    * [ ] test on CI
+* [ ] support older versions of CZMQ
+  * [x] CZMQ HEAD
+    * [x] test on CI
+  * [x] CZMQ 3.0.2
+    * no `zcert_meta_unset()` ([zeromq/czmq#1246](https://github.com/zeromq/czmq/issues/1246))
+      * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`
+    * no `zproc`(especially no `zproc_has_curve()`)
+      * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`, attach `zsys_has_curve()` instead (under same name)
+    * [x] adapt test suite to skip affected test examples
+    * [ ] test on CI
 
 ## Contributing
 

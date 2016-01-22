@@ -49,28 +49,28 @@ average latency: 61.434 [us]
 over inproc, with message sizes from 100 bytes to 100kb, 10,000 each:
 
 ```
-$ ./inproc_thru.rb 100 10000
+$ ./inproc_thru.rb 100 10_000
 message size: 100 [B]
 message count: 10000
 elapsed time: 0.270 [s]
 mean throughput: 37093 [msg/s]
 mean throughput: 29.674 [Mb/s]
 
-$ ./inproc_thru.rb 1000 10000
+$ ./inproc_thru.rb 1_000 10_000
 message size: 1000 [B]
 message count: 10000
 elapsed time: 0.260 [s]
 mean throughput: 38498 [msg/s]
 mean throughput: 307.987 [Mb/s]
 
-$ ./inproc_thru.rb 10000 10000
+$ ./inproc_thru.rb 10_000 10_000
 message size: 10000 [B]
 message count: 10000
 elapsed time: 0.317 [s]
 mean throughput: 31501 [msg/s]
 mean throughput: 2520.102 [Mb/s]
 
-$ ./inproc_thru.rb 100000 10000
+$ ./inproc_thru.rb 100_000 10_000
 message size: 100000 [B]
 message count: 10000
 elapsed time: 0.906 [s]

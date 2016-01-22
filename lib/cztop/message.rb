@@ -172,9 +172,12 @@ module CZTop
     # @note This is used when the message is sent to a {CZTop::Socket::SERVER}
     #   socket.
     # @param new_routing_id [Integer] new routing ID
+    # @raise [ArgumentError] if new routing ID is not an Integer
     # @raise [RangeError] if new routing ID is out of +uint32_t+ range
     # @return [new_routing_id]
     def routing_id=(new_routing_id)
+      raise ArgumentError unless new_routing_id.is_a? Integer
+
       # need to raise manually, as FFI lacks this feature.
       # @see https://github.com/ffi/ffi/issues/473
       raise RangeError if new_routing_id < 0

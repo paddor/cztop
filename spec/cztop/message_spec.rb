@@ -384,5 +384,11 @@ describe CZTop::Message do
       When(:result) { msg.routing_id = new_routing_id }
       Then { result == Failure(RangeError) }
     end
+
+    context "with non-integer" do
+      Given(:new_routing_id) { "foo" }
+      When(:result) { msg.routing_id = new_routing_id }
+      Then { result == Failure(ArgumentError) }
+    end
   end
 end

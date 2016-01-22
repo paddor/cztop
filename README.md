@@ -309,7 +309,8 @@ The measured latency on my laptop ranges from ~20us to ~60us per message for
 1kb messages, depending on whether transport is inproc, IPC, or TCP/IP.
 
 Make sure you check out the
-[perf](https://github.com/paddor/cztop/blob/master/perf) directory.
+[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
+and throughput measurement scripts.
 
 ## TODO
 
@@ -351,7 +352,7 @@ Make sure you check out the
   * [ ] PUB/SUB
 * [ ] add performance benchmarks
   * [x] inproc latency
-  * [ ] inproc throughput
+  * [x] inproc throughput
   * [x] local/remote latency
   * [ ] local/remote throughput
   * see [perf](https://github.com/paddor/cztop/blob/master/perf) directory

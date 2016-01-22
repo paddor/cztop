@@ -75,7 +75,7 @@ module CZTop
     #
     # Setting this will cause {#wait} to never raise.
     #
-    # @param flag [Boolean] whether
+    # @param flag [Boolean] whether the poller should run nonstop
     def nonstop=(flag)
       ffi_delegate.set_nonstop(flag)
     end

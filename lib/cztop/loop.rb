@@ -118,7 +118,12 @@ module CZTop
     # @return [void]
     # @raise [Exception] the exception raised by a handler
     def start
-      reraise_handler_exception { ffi_delegate.start }
+      reraise_handler_exception do
+        rc = ffi_delegate.start
+        # 0 means stopped by interrupt
+        # -1 means stopped by handler
+        # TODO: raise Interrupt?
+      end
     end
 
     private

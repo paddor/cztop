@@ -3,6 +3,7 @@ require_relative 'spec_helper'
 describe CZTop::Message do
   include_examples "has FFI delegate"
   let(:msg) { CZTop::Message.new }
+  let(:ffi_delegate) { msg.ffi_delegate }
 
   describe "#initialize" do
     subject { CZTop::Message.new }
@@ -79,12 +80,40 @@ describe CZTop::Message do
       When { msg << frame }
       Then { msg.size == 2 }
       And { msg.to_a == %w[foo bar] }
+
+      context "when this fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:addmem).and_return(-1)
+          expect(CZMQ::FFI::Errors).to receive(:errno)
+            .and_return(Errno::EINVAL::Errno)
+        end
+        it "raises" do
+          assert_raises(Errno::EINVAL) { msg << frame }
+        end
+      end
+    end
+    context "with binary data" do
+      Given(:frame) { "foo\x08\0\0bar\0\0\0\x11" } # contains NULL bytes
+      When { msg << frame }
+      Then { msg.size == 2 }
+      And { msg[-1] == frame }
     end
     context "with a frame" do
       Given(:frame) { CZTop::Frame.new("bar") }
       When { msg << frame }
       Then { msg.size == 2 }
       And { msg.to_a == %w[foo bar] }
+
+      context "when this fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:append).and_return(-1)
+          expect(CZMQ::FFI::Errors).to receive(:errno)
+            .and_return(Errno::EINVAL::Errno)
+        end
+        it "raises" do
+          assert_raises(Errno::EINVAL) { msg << frame }
+        end
+      end
     end
     context "with something else" do
       Given(:frame) { Object.new }
@@ -106,11 +135,39 @@ describe CZTop::Message do
       Then { msg.size == 2 }
       And { msg.to_a == %w[bar foo] }
     end
+    context "with binary data" do
+      Given(:frame) { "foo\0\0\0bar" } # contains NULL byte
+      When { msg.prepend frame }
+      Then { msg.size == 2 }
+      And { msg[0] == frame }
+
+      context "when this fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:pushmem).and_return(-1)
+          expect(CZMQ::FFI::Errors).to receive(:errno)
+            .and_return(Errno::EINVAL::Errno)
+        end
+        it "raises" do
+          assert_raises(Errno::EINVAL) { msg.prepend frame }
+        end
+      end
+    end
     context "with a frame" do
       Given(:frame) { CZTop::Frame.new("bar") }
       When { msg.prepend frame }
       Then { msg.size == 2 }
       And { msg.to_a == %w[bar foo] }
+
+      context "when this fails" do
+        before(:each) do
+          expect(ffi_delegate).to receive(:prepend).and_return(-1)
+          expect(CZMQ::FFI::Errors).to receive(:errno)
+            .and_return(Errno::EINVAL::Errno)
+        end
+        it "raises" do
+          assert_raises(Errno::EINVAL) { msg.prepend frame }
+        end
+      end
     end
     context "with something else" do
       Given(:frame) { Object.new }
@@ -131,18 +188,17 @@ describe CZTop::Message do
   end
 
   describe "#send_to" do
-    let(:delegate) { msg.ffi_delegate }
     let(:destination) { double "destination socket" }
     context "when successful" do
       after(:each) { msg.send_to(destination) }
       it "sends its delegate to the destination" do
-        expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
+        expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
           .and_return(0)
       end
     end
     context "when NOT successful" do
       before(:each) do
-        expect(CZMQ::FFI::Zmsg).to receive(:send).with(delegate, destination)
+        expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
           .and_return(-1)
         expect(CZMQ::FFI::Errors).to receive(:errno)
           .and_return(errno)
@@ -171,13 +227,12 @@ describe CZTop::Message do
   end
 
   describe ".receive_from" do
-    let(:msg_delegate) { msg.ffi_delegate }
     let(:received_message) { CZTop::Message.receive_from(src) }
     let(:src) { double "source" }
     context "when successful" do
       it "receives message from source" do
         expect(CZMQ::FFI::Zmsg).to receive(:recv).with(src)
-          .and_return(msg_delegate)
+          .and_return(ffi_delegate)
         assert_kind_of CZTop::Message, received_message
         assert_same msg.ffi_delegate, received_message.ffi_delegate
       end

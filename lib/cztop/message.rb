@@ -55,11 +55,8 @@ module CZTop
         raise SocketError
       else
         # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended. If the errno is known, the corresponding
-        # Errno::* exception is automatically constructed. Otherwise, it'll be
-        # a normal SystemCallError. In any case, #errno will return the
-        # corresponding errno.
-        raise SystemCallError.new(::CZMQ::FFI::Errors.strerror, errno)
+        # has to be extended.
+        raise_sys_err(errno: errno)
       end
     end
 
@@ -82,47 +79,52 @@ module CZTop
         raise Interrupt
       else
         # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended. If the errno is known, the corresponding
-        # Errno::* exception is automatically constructed. Otherwise, it'll be
-        # a normal SystemCallError. In any case, #errno will return the
-        # corresponding errno.
-        raise SystemCallError.new(::CZMQ::FFI::Errors.strerror, errno)
+        # has to be extended.
+        HasFFIDelegate.raise_sys_err(errno: errno)
       end
     end
 
     # Append a frame to this message.
     # @param frame [String, Frame] what to append
     # @raise [ArgumentError] if frame has an invalid type
+    # @raise [SystemCallError] if this fails
     # @note If you provide a {Frame}, do NOT use that frame afterwards
     #   anymore, as its native counterpart will have been destroyed.
     # @return [self] so it can be chained
     def <<(frame)
       case frame
       when String
-        ffi_delegate.addstr(frame)
+        # NOTE: can't use addstr because the data might be binary
+        mem = FFI::MemoryPointer.from_string(frame)
+        rc = ffi_delegate.addmem(mem, mem.size - 1) # without NULL byte
       when Frame
-        ffi_delegate.append(frame.ffi_delegate)
+        rc = ffi_delegate.append(frame.ffi_delegate)
       else
         raise ArgumentError, "invalid frame: %p" % frame
       end
+      raise_sys_err unless rc == 0
       self
     end
 
     # Prepend a frame to this message.
     # @param frame [String, Frame] what to prepend
     # @raise [ArgumentError] if frame has an invalid type
+    # @raise [SystemCallError] if this fails
     # @note If you provide a {Frame}, do NOT use that frame afterwards
     #   anymore, as its native counterpart will have been destroyed.
     # @return [void]
     def prepend(frame)
       case frame
       when String
-        ffi_delegate.pushstr(frame)
+        # NOTE: can't use pushstr because the data might be binary
+        mem = FFI::MemoryPointer.from_string(frame)
+        rc = ffi_delegate.pushmem(mem, mem.size - 1) # without NULL byte
       when Frame
-        ffi_delegate.prepend(frame.ffi_delegate)
+        rc = ffi_delegate.prepend(frame.ffi_delegate)
       else
         raise ArgumentError, "invalid frame: %p" % frame
       end
+      raise_sys_err unless rc == 0
     end
 
     # Removes first part from message and returns it as a string.

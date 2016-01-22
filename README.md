@@ -108,16 +108,15 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 * Ruby-like API
   * method names
+    * sending a message via a socket is done with `Socket#<<`
+      * `socket << "simple message"`
+      * `socket << ["multi", "frame", "message"]`
     * `#x=` methods instead of `#set_x` (e.g. socket options)
     * `#[]` where it makes sense (e.g. on a Message, Config, or Certificate)
-  * sending a message via a socket is done with `Socket#<<`
-    * `socket << "simple message"`
-    * `socket << ["multi", "frame", "message"]`
   * no manual error checking needed
     * if there's an error, an appropriate exception is raised
   * of course, no manual dealing with the ZMQ context
 * easy security
-  * requires ZMQ >= 4.0
   * use `Socket#CURVE_server!(cert)` on the server
   * and `Socket#CURVE_client!(client_cert, server_cert)` on the client
 * socket types as Ruby classes
@@ -125,25 +124,28 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
     * but you can: `CZTop::Socket.new_by_type(:REP)`
   * e.g. `#subscribe` only exists on CZTop::Socket::SUB
 * SERVER and CLIENT ready
-  * requires ZMQ >= 4.2
   * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
   * there are `#routing_id` and `#routing_id=` on the following classes:
     * CZTop::Message
     * CZTop::Frame
-* ZMTP 3.1 heartbeat ready
   * requires ZMQ >= 4.2
+* ZMTP 3.1 heartbeat ready
   * `socket.options.heartbeat_ivl = 2000`
   * `socket.options.heartbeat_timeout = 8000`
+  * requires ZMQ >= 4.2
 
 ## Requirements
+
+You'll need:
 
 * CZMQ >= 3.0.2
 * ZMQ >= 4.0
 
 For security mechanisms like CURVE, you'll need:
+
 * [libsodium](https://github.com/jedisct1/libsodium)
 
-On OSX using homebrew, run:
+To install on OSX using homebrew, run:
 
     $ brew install libsodium
     $ brew install zmq  --with-libsodium

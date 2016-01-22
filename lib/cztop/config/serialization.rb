@@ -28,7 +28,7 @@ module CZTop::Config::Serialization
     def load(path)
       ptr = CZMQ::FFI::Zconfig.load(path.to_s)
       return from_ffi_delegate(ptr) unless ptr.null?
-      CZTop::HasFFIDelegate.raise_sys_err(
+      CZTop::HasFFIDelegate.raise_zmq_err(
         "error while reading the file %p" % path.to_s)
     end
 
@@ -48,7 +48,7 @@ module CZTop::Config::Serialization
   def save(path)
     rc = ffi_delegate.save(path.to_s)
     return if rc == 0
-    raise_sys_err("error while saving to the file %s" % path)
+    raise_zmq_err("error while saving to the file %s" % path)
   end
 
   # Reload config tree from same file that it was previously loaded from.
@@ -64,7 +64,7 @@ module CZTop::Config::Serialization
       raise TypeError, "can't reload in-memory config"
     ptr = CZMQ::FFI::Zconfig.load(filename)
     return attach_ffi_delegate(ptr) unless ptr.null?
-    raise_sys_err("error while reloading from the file %p" % filename)
+    raise_zmq_err("error while reloading from the file %p" % filename)
   end
 
   # Serialize (marshal) this Config and all its children.

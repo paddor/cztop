@@ -124,7 +124,7 @@ module CZTop
       raise ArgumentError, "filename can't be empty" if filename.to_s.empty?
       rc = ffi_delegate.save(filename.to_s)
       return if rc == 0
-      raise_sys_err("error while saving to file %p" % filename)
+      raise_zmq_err("error while saving to file %p" % filename)
     end
 
     # Saves the public key to file in ZPL ({Config}) format.
@@ -134,7 +134,7 @@ module CZTop
     def save_public(filename)
       rc = ffi_delegate.save_public(filename.to_s)
       return if rc == 0
-      raise_sys_err("error while saving to the file %p" % filename)
+      raise_zmq_err("error while saving to the file %p" % filename)
     end
 
     # Saves the secret key to file in ZPL ({Config}) format.
@@ -144,7 +144,7 @@ module CZTop
     def save_secret(filename)
       rc = ffi_delegate.save_secret(filename.to_s)
       return if rc == 0
-      raise_sys_err("error while saving to the file %p" % filename)
+      raise_zmq_err("error while saving to the file %p" % filename)
     end
 
     # Applies this certificate on a {Socket} or {Actor}.
@@ -154,7 +154,7 @@ module CZTop
     def apply(zocket)
       raise ArgumentError, "invalid zocket argument %p" % zocket unless zocket
       return ffi_delegate.apply(zocket) unless secret_key.nil?
-      raise_sys_err("secret key is undefined")
+      raise_zmq_err("secret key is undefined")
     end
 
     # Duplicates the certificate.
@@ -163,7 +163,7 @@ module CZTop
     def dup
       ptr = ffi_delegate.dup
       return from_ffi_delegate(ptr) unless ptr.null?
-      raise_sys_err("unable to duplicate certificate")
+      raise_zmq_err("unable to duplicate certificate")
     end
 
     # Compares this certificate to another.

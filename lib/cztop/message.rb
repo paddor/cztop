@@ -53,7 +53,7 @@ module CZTop
     def send_to(destination)
       rc = Zmsg.send(ffi_delegate, destination)
       return if rc == 0
-      raise_sys_err
+      raise_zmq_err
     rescue Errno::EAGAIN
       raise IO::EAGAINWaitWritable
     end
@@ -69,7 +69,7 @@ module CZTop
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
       return from_ffi_delegate(delegate) unless delegate.null?
-      HasFFIDelegate.raise_sys_err
+      HasFFIDelegate.raise_zmq_err
     rescue Errno::EAGAIN
       raise IO::EAGAINWaitReadable
     end
@@ -92,7 +92,7 @@ module CZTop
       else
         raise ArgumentError, "invalid frame: %p" % frame
       end
-      raise_sys_err unless rc == 0
+      raise_zmq_err unless rc == 0
       self
     end
 
@@ -114,7 +114,7 @@ module CZTop
       else
         raise ArgumentError, "invalid frame: %p" % frame
       end
-      raise_sys_err unless rc == 0
+      raise_zmq_err unless rc == 0
     end
 
     # Removes first part from message and returns it as a string.

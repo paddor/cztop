@@ -31,7 +31,7 @@ module CZTop
     def add_reader(socket, &blk)
       handler = Zloop.reader_fn(&blk)
       rc = ffi_delegate.reader(socket.ffi_delegate, handler, nil)
-      raise_sys_err("adding reader failed") if rc == -1
+      raise_zmq_err("adding reader failed") if rc == -1
       @handlers[socket] << handler
     end
 

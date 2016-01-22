@@ -22,7 +22,7 @@ module CZTop
       raise ArgumentError, "wrong input length" if input.bytesize % 4 > 0
       input = input.dup.force_encoding(Encoding::BINARY)
       ptr = ffi_delegate.encode(input, input.bytesize)
-      raise_sys_err if ptr.null?
+      raise_zmq_err if ptr.null?
       z85 = ptr.read_string
       z85.encode!(Encoding::ASCII)
       return z85
@@ -38,7 +38,7 @@ module CZTop
       raise ArgumentError, "wrong input length" if input.bytesize % 5 > 0
       FFI::MemoryPointer.new(:size_t) do |size_ptr|
         buffer_ptr = ffi_delegate.decode(input, size_ptr)
-        raise_sys_err if buffer_ptr.null?
+        raise_zmq_err if buffer_ptr.null?
         decoded_string = buffer_ptr.read_string(_size(size_ptr) - 1)
         return decoded_string
       end

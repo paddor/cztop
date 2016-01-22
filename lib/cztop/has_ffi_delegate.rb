@@ -17,7 +17,7 @@ module CZTop::HasFFIDelegate
   # @raise [SystemCallError] if the FFI delegate's internal pointer is NULL
   # @return [void]
   def attach_ffi_delegate(ffi_delegate)
-    raise_sys_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
+    raise_zmq_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
     @ffi_delegate = ffi_delegate
   end
 
@@ -39,7 +39,7 @@ module CZTop::HasFFIDelegate
   # @raise [SocketError] if EAGAIN was reported
   # @raise [SystemCallError] any other reported error (appropriate
   #   SystemCallError subclass, if errno is known)
-  def raise_sys_err(msg = CZMQ::FFI::Errors.strerror,
+  def raise_zmq_err(msg = CZMQ::FFI::Errors.strerror,
                     errno: CZMQ::FFI::Errors.errno)
 
     # If the errno is known, the corresponding Errno::* exception is

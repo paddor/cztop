@@ -74,7 +74,7 @@ module CZTop
     # @raise [SystemCallError] in case of failure
     def bind(endpoint)
       rc = ffi_delegate.bind("%s", :string, endpoint)
-      raise_sys_err("unable to bind to %p" % endpoint) if rc == -1
+      raise_zmq_err("unable to bind to %p" % endpoint) if rc == -1
       @last_tcp_port = rc if rc > 0
     end
 

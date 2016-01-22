@@ -53,7 +53,7 @@ module CZTop
           raise IO::EAGAINWaitWritable
         end
 
-        raise_sys_err
+        raise_zmq_err
       end
     end
 

@@ -28,7 +28,7 @@ module CZTop
     # @raise [SystemCallError] if this fails
     def add(reader)
       rc = ffi_delegate.add(reader)
-      raise_sys_err("unable to add socket %p" % reader) if rc == -1
+      raise_zmq_err("unable to add socket %p" % reader) if rc == -1
       remember_socket(reader)
     end
 
@@ -40,7 +40,7 @@ module CZTop
     # @raise [SystemCallError] if this fails for another reason
     def remove(reader)
       rc = ffi_delegate.remove(reader)
-      raise_sys_err("unable to remove socket %p" % reader) if rc == -1
+      raise_zmq_err("unable to remove socket %p" % reader) if rc == -1
       forget_socket(reader)
     end
 
@@ -107,7 +107,7 @@ module CZTop
         # NOTE: This should never happen, since #wait will return nil if
         # +zpoller_wait+ returned NULL. But it's better to fail early in case
         # it ever returns a wrong pointer.
-        raise_sys_err("no socket known for pointer #{ptr.inspect}")
+        raise_zmq_err("no socket known for pointer #{ptr.inspect}")
     end
   end
 end

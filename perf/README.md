@@ -11,18 +11,9 @@ This directory contains simple performance measurement utilities:
 
 On my laptop, it currently looks something like this:
 
-inproc latency over PAIR sockets using 10k roundtrips of a repeatedly allocated
-1kb message:
-``
-$ ./inproc_lat_pair.rb 1_000 10_000
-message size: 1000 [B]
-roundtrip count: 10000
-elapsed time: 0.436 [s]
-average latency: 21.801 [us]
-```
+### Latency
 
-inproc latency over REQ/REP sockets using 10k roundtrips of a repeatedly
-allocated 1kb message:
+over inproc, using 10k roundtrips of a repeatedly allocated 1kb message:
 ```
 $ ./inproc_lat_reqrep.rb 1_000 10_000
 message size: 1000 [B]
@@ -31,8 +22,7 @@ elapsed time: 0.469 [s]
 average latency: 23.439 [us]<Paste>
 ```
 
-latency over REQ/REP sockets over IPC using 10k roundtrips of a repeatedly
-allocated 1kb message:
+over IPC, using 10k roundtrips of a repeatedly allocated 1kb message:
 ```
 $ ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000 & ./remote_lat.rb ipc:///tmp/cztop-perf 1000 1000
 [3] 58043
@@ -43,8 +33,8 @@ average latency: 45.482 [us]
 [3]    58043 done       ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000
 ```
 
-latency over REQ/REP sockets over local TCP/IP stack using 10k roundtrips of a repeatedly
-allocated 1kb message:
+over local TCP/IP stack, using 10k roundtrips of a repeatedly allocated
+1kb message:
 ```
 [3] 58064
 message size: 1000 [B]
@@ -52,4 +42,38 @@ roundtrip count: 1000
 elapsed time: 0.123 [s]
 average latency: 61.434 [us]
 [3]    58064 done       ./local_lat.rb tcp://127.0.0.1:55667 1000 1000
+```
+
+### Throughput
+
+over inproc, with message sizes from 100 bytes to 100kb, 10,000 each:
+
+```
+$ ./inproc_thru.rb 100 10000
+message size: 100 [B]
+message count: 10000
+elapsed time: 0.270 [s]
+mean throughput: 37093 [msg/s]
+mean throughput: 29.674 [Mb/s]
+
+$ ./inproc_thru.rb 1000 10000
+message size: 1000 [B]
+message count: 10000
+elapsed time: 0.260 [s]
+mean throughput: 38498 [msg/s]
+mean throughput: 307.987 [Mb/s]
+
+$ ./inproc_thru.rb 10000 10000
+message size: 10000 [B]
+message count: 10000
+elapsed time: 0.317 [s]
+mean throughput: 31501 [msg/s]
+mean throughput: 2520.102 [Mb/s]
+
+$ ./inproc_thru.rb 100000 10000
+message size: 100000 [B]
+message count: 10000
+elapsed time: 0.906 [s]
+mean throughput: 11034 [msg/s]
+mean throughput: 8827.440 [Mb/s]
 ```

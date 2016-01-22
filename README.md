@@ -355,11 +355,11 @@ Make sure you check out the
   * see [perf](https://github.com/paddor/cztop/blob/master/perf) directory
 * [x] support older versions of ZMQ
   * [x] ZMQ HEAD
-    * [x] test on CI
-  * [x] ZMQ 4.1.4 (untested)
-    * [x] test on CI
-  * [x] ZMQ 4.0.5 (untested)
-    * [x] test on CI
+    * [x] tested on CI
+  * [x] ZMQ 4.1
+    * [x] tested on CI
+  * [x] ZMQ 4.0
+    * [x] tested on CI
   * [ ] ZMQ 3.2
     * too big a pain ([d5172ab](https://github.com/paddor/czmq-ffi-gen/commit/d5172ab6db64999c50ba24f71569acf1dd45af51))
 * [x] support multiple versions of CZMQ

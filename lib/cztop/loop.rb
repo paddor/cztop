@@ -26,10 +26,20 @@ module CZTop
     end
 
     # Add a handler for a socket.
+    #
+    # The block can add other readers and timers.
+    # To stop the loop, the block should return -1.
+    #
     # @param socket [Socket] the socket to register and read from
     # @return [void]
-    def add_reader(socket, &blk)
-      handler = Zloop.reader_fn(&blk)
+    # @raise [ArgumentError] if no block given
+    def add_reader(socket)
+      raise ArgumentError, "no block given" unless block_given?
+      handler = Zloop.reader_fn do
+        yield.to_i
+        # -1 ends the reactor
+        # TODO: allow `break` similar to Config#execute
+      end
       rc = ffi_delegate.reader(socket.ffi_delegate, handler, nil)
       raise_zmq_err("adding reader failed") if rc == -1
       @handlers[socket] << handler

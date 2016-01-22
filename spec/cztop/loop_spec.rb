@@ -43,6 +43,11 @@ describe CZTop::Loop do
         assert_raises(Errno::EPERM) { subject.add_reader(socket) { } }
       end
     end
+    context "with no block" do
+      it "raises" do
+        assert_raises(ArgumentError) { subject.add_reader(socket) }
+      end
+    end
   end
 
   describe "#remove_reader" do
@@ -222,6 +227,42 @@ describe CZTop::Loop do
             subject.exception = exception
           end
         end
+      end
+    end
+  end
+
+  describe "integration test" do
+    i = 0
+    let(:endpoint) { "inproc://loop_spec_#{i+=1}" }
+    let(:reader) do
+      s = CZTop::Socket::PAIR.new
+      s.bind(endpoint)
+      s
+    end
+    let(:writer) do
+      s = CZTop::Socket::PAIR.new
+      s.connect(endpoint)
+      s
+    end
+    let(:num) { 5 } # number of messages to send/receive
+    let(:received_messages) { [] }
+    let(:loop) do
+      loop = CZTop::Loop.new
+      loop.add_reader(reader) do
+        received_messages << reader.receive
+        -1 if received_messages.size == num
+      end
+      loop
+    end
+
+    context "with readable socket" do
+      before(:each) do
+        reader
+        num.times { writer << "foobar" }
+        loop.start
+      end
+      it "runs handler" do
+        assert_equal num, received_messages.size
       end
     end
   end

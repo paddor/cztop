@@ -126,6 +126,15 @@ module CZTop
       end
     end
 
+    # By default (nonstop = off), {Loop#start} will exit as soon as it detects
+    # zsys_interrupted is set to something other than zero. Setting nonstop to
+    # true will supress this behavior.
+    #
+    # @param flag [Boolean] whether the reactor should run nonstop
+    def nonstop=(flag)
+      ffi_delegate.set_nonstop(flag)
+    end
+
     private
 
     # Reraises the exception set during the execution of the given block.

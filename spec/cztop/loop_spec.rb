@@ -231,6 +231,22 @@ describe CZTop::Loop do
     end
   end
 
+  describe "#nonstop=" do
+    after(:each) { subject.nonstop = new_flag }
+    context "with true" do
+      let(:new_flag) { true }
+      it "tells zloop to set nonstop flag" do
+        expect(ffi_delegate).to receive(:set_nonstop).with(new_flag)
+      end
+    end
+    context "with true" do
+      let(:new_flag) { false }
+      it "tells zloop to set nonstop flag" do
+        expect(ffi_delegate).to receive(:set_nonstop).with(new_flag)
+      end
+    end
+  end
+
   describe "integration test" do
     i = 0
     let(:endpoint) { "inproc://loop_spec_#{i+=1}" }

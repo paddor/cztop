@@ -75,6 +75,14 @@ describe CZTop::Socket::CLIENT, skip: czmq_function?(:zsock_new_client) do
   it "instanciates" do
     socket
   end
+
+  context "when sending multi-part message" do
+    it "raises" do
+      assert_raises(ArgumentError) do
+        socket << %w[ foo bar ]
+      end
+    end
+  end
 end
 
 describe CZTop::Socket::SERVER, skip: czmq_function?(:zsock_new_server) do

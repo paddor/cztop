@@ -1,7 +1,13 @@
 module CZTop
   # This module adds the ability to access options of a {Socket} or an
   # {Actor}.
+  #
+  # @note Most socket options only take effect for subsequent bind/connects.
+  #
+  # @see http://api.zeromq.org/4-1:zmq-setsockopt
+  # @see http://api.zeromq.org/4-1:zmq-getsockopt
   # @see http://api.zeromq.org/czmq3-0:zsock-option
+  #
   module ZsockOptions
     # Access to the options of this socket.
     # @return [OptionsAccessor]

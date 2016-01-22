@@ -346,25 +346,32 @@ describe CZTop::ZsockOptions do
         i = 55556
         let(:endpoint) { "tcp://127.0.0.1:#{i += 1}" }
         let(:server_socket) do
-          socket = CZTop::Socket::ROUTER.new(endpoint)
+          socket = CZTop::Socket::SERVER.new
           socket.options.linger = 0
           socket.options.heartbeat_ivl = 20
-          socket.options.heartbeat_timeout = 50
+          socket.options.heartbeat_timeout = 100
+          socket.bind(endpoint)
           socket
         end
         let(:client_socket) do
-          socket = CZTop::Socket::DEALER.new(endpoint)
+          socket = CZTop::Socket::CLIENT.new
+          socket.connect(endpoint)
           socket
         end
         let(:server_mon) do
           mon = CZTop::Monitor.new(server_socket)
           mon.listen(*%w[ CONNECTED DISCONNECTED ACCEPTED ])
           mon.start
-          mon.actor.options.rcvtimeo = 60
+          mon.actor.options.rcvtimeo = 50
           mon
         end
-        let(:accepted_event) { assert_equal "ACCEPTED", server_mon.next[0] }
-        let(:disconnected_event) { assert_equal "DISCONNECTD", server_mon.next[0] }
+
+        let(:accepted_event) do
+          assert_equal "ACCEPTED", server_mon.next[0]
+        end
+        let(:disconnected_event) do
+          assert_equal "DISCONNECTED", server_mon.next[0]
+        end
 
         context "with client connected" do
           before(:each) do
@@ -382,12 +389,17 @@ describe CZTop::ZsockOptions do
             server_mon
             client_socket
             accepted_event
-            client_socket.disconnect(endpoint)
-          end
-          it "closes connection",
-            skip: "https://github.com/zeromq/libzmq/issues/1710" do
 
-            disconnected_event # <-- FAILS
+            # NOTE: Disconnecting alone won't do it. It has to be destroyed.
+            client_socket.ffi_delegate.destroy
+          end
+
+          it "closes connection" do
+            begin
+              disconnected_event
+            rescue IO::EAGAINWaitReadable
+              flunk "client wasn't disconnected"
+            end
           end
         end
       end

@@ -296,6 +296,19 @@ and Ruby.  The following API documentation is currently available:
 
 Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 
+## Performance
+
+Performance should be pretty okay since this is based on the very reasonably
+thin FFI binding czmq-ffi-gen and CZTop itself only adds a convenience layer
+with some nice error checking. But hey, it's Ruby. Don't expect 20000 messages
+per second with a latency of 3us.
+
+The measured latency on my laptop ranges from ~20us to ~60us per message for
+1kb messages, depending on whether transport is inproc, IPC, or TCP/IP.
+
+Make sure you check out the
+[perf](https://github.com/paddor/cztop/blob/master/perf) directory.
+
 ## TODO
 
 * [x] pack generated code into its own gem ([czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen))

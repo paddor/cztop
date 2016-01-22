@@ -36,7 +36,9 @@ there's a small usage information, but it's not very well visible due to Pry's
 noisy start. It's simple, though. Inside that shell, you can use the method
 `#send_command(driver, command)`. Example:
 
+```
   pry> send_command("driver1", "foobar")
+```
 
 Depending on whether the driver is connected, it'll send the message or report
 that it cannot do so.
@@ -150,7 +152,7 @@ containing the secret+public keys).
 
 After connecting to the broker and completing the security handshake, the
 client sends a `HELLO` message, after which it immediately expects some answer
-from the broker (see below). After that, it just listens for messages (service
+from the broker (see above). After that, it just listens for messages (service
 requests) and prints them into the terminal.
 
 ```ruby

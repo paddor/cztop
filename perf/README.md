@@ -2,8 +2,7 @@
 
 This directory contains simple performance measurement utilities:
 
-- `inproc_lat_pair.rb` measures the latency of the inproc transport over PAIR sockets
-- `inproc_lat_reqrep.rb` measures the latency of the inproc transport over REQ/REP sockets
+- `inproc_lat.rb` measures the latency of the inproc transport
 - `inproc_thr.rb` measures the throughput of the inproc transport
 - `local_lat.rb` and `remote_lat.rb` measure the latency other transports
 - `local_thr.rb` and `remote_thr.rb` measure the throughput other transports

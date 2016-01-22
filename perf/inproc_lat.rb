@@ -14,7 +14,8 @@ ROUNDTRIP_COUNT = Integer(ARGV[1]) # round trips
 MSG = "X" * MSG_SIZE
 
 Thread.new do
-  s = CZTop::Socket::REP.new("@inproc://lat")
+  s = CZTop::Socket::PAIR.new("@inproc://perf")
+  s.signal
   ROUNDTRIP_COUNT.times do
     msg = s.receive
     raise "wrong message size" if msg.content_size != MSG_SIZE
@@ -22,8 +23,8 @@ Thread.new do
   end
 end
 
-s = CZTop::Socket::REQ.new(">inproc://lat")
-sleep 0.1
+s = CZTop::Socket::PAIR.new(">inproc://perf")
+s.wait
 
 #RubyProf.start
 tms = Benchmark.measure do

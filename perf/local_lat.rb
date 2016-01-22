@@ -14,7 +14,10 @@ ROUNDTRIP_COUNT = Integer(ARGV[2]) # round trips
 MSG = "X" * MSG_SIZE
 
 s = CZTop::Socket::REP.new(ENDPOINT)
-sleep 0.2 # wait for sockets to have bound/connected
+
+# synchronize
+s.wait
+s.signal
 
 tms = Benchmark.measure do
   ROUNDTRIP_COUNT.times do

@@ -15,6 +15,10 @@ MSG = "X" * MSG_SIZE
 
 s = CZTop::Socket::REQ.new(ENDPOINT)
 
+# synchronize
+s.signal
+s.wait
+
 ROUNDTRIP_COUNT.times do
   s << MSG
   msg = s.receive

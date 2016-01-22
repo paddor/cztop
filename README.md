@@ -345,7 +345,7 @@ and throughput measurement scripts.
 * add more examples
   * [x] [simple REQ/REP](https://github.com/paddor/cztop/tree/master/examples/simple_req_rep)
   * [x] [Taxy System](https://github.com/paddor/cztop/tree/master/examples/taxi_system) with CURVE security and heartbeating
-    * [ ] change from ROUTER/DEALER to SERVER/CLIENT
+    * [x] change from ROUTER/DEALER to SERVER/CLIENT
   * [x] [Actor](https://github.com/paddor/cztop/tree/master/examples/ruby_actor) with Ruby block
   * [ ] PUSH/PULL
   * [ ] PUB/SUB

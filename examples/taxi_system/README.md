@@ -1,6 +1,6 @@
 # Taxi System
 
-Suppose you're running a taxi company ("cabs"). You have a set of taxi drivers
+Suppose you're running a taxi company. You have a set of taxi drivers
 working for you.  You'd like to connect them to your central server, so they're
 ready to get service requests from customers who'd like to get picked up by a
 taxi from some place X. As soon as a customer sends his service request, the
@@ -11,7 +11,12 @@ Of course you want the communication between the broker and the taxi drivers to
 be secure, meaning you want encryption and authentication.
 
 You also want ping-pong heartbeating, as you want to have confidence you can
-get in touch with your taxi drivers any time you want. (TODO: not implemented yet)
+get in touch with your taxi drivers any time you want. And if a service
+request can't be delivered to a particular taxi driver, you wanna know
+immediately.
+
+This solution is implemented using CLIENT/SERVER sockets and the CURVE
+security mechanism.
 
 ## Broker
 
@@ -20,8 +25,25 @@ are the environment variables `BROKER_ADDRESS` (the public TCP endpoint),
 `BROKER_CERT` (path to the broker's secret+public keys), and `CLIENT_CERTS`
 (directory to taxi drivers' certificates, public keys only).
 
+After the start, the broker will just start listening for the drivers (CLIENT
+sockets) to connect. After a driver has connected, authenticated, and sent its
+`HELLO` message, the broker answers with a `WELCOME` or `WELCOMEBACK` message,
+depending if the driver was connected before (it might have reconnected and
+been assigned a new routing ID).
+
+The broker will present you with a Pry shell. Right before starting the shell,
+there's a small usage information, but it's not very well visible due to Pry's
+noisy start. It's simple, though. Inside that shell, you can use the method
+`#send_command(driver, command)`. Example:
+
+  pry> send_command("driver1", "foobar")
+
+Depending on whether the driver is connected, it'll send the message or report
+that it cannot do so.
+
 ```ruby
 #!/usr/bin/env ruby
+require 'pry'
 require 'pathname'
 require_relative '../../lib/cztop'
 
@@ -35,52 +57,72 @@ authenticator.verbose!
 authenticator.curve(client_certs)
 
 # create and bind socket
-socket = CZTop::Socket::ROUTER.new
-socket.CURVE_server!(broker_cert)
-socket.options.router_mandatory = true # raise when message unroutable
-socket.bind(endpoint)
-socket.options.heartbeat_ivl = 100#ms # send PING every 100ms
-socket.options.heartbeat_ttl = 320#ms # close connection after 320ms of no life sign
-socket.options.heartbeat_timeout = 220#ms # close connection after 220ms of no life sign
-
-# FIXME: heartbeating seems broken. Wireshark doesn't show any PING/PONG, nor
-# does the monitor deliver a DISCONNECTED event. Also, sending a message to
-# a driver who was connected (but not anymore), will result in a hang (instead
-# of Errno::EHOSTUNREACH). :-(
+@socket = CZTop::Socket::SERVER.new
+@socket.CURVE_server!(broker_cert)
+#socket.options.sndtimeo = 0
+@socket.options.heartbeat_ivl     = 100#ms
+@socket.options.heartbeat_timeout = 300#ms
+@socket.bind(endpoint)
 
 puts ">>> Socket bound to #{endpoint.inspect}"
 
-# wait for all drivers to connect
-monitor = CZTop::Monitor.new(socket)
-monitor.listen(:ALL)
-monitor.start
-monitor.actor.options.rcvtimeo = 5000
-remaining = drivers.size
-begin
-  puts ">>> Waiting for drivers to connect ..."
-  while event = monitor.next
-    puts event.inspect
-    remaining -= 1 if event[0] == "ACCEPTED"
-    break if remaining == 0
-  end
-rescue IO::EAGAINWaitReadable
-  abort "!!! drivers didn't connect in time."
-else
-  puts ">>> All drivers have connected"
-  sleep 0.1 # give ZAP some time to authenticate them
-end
-
-# get and print later socket events
+# get and print socket events
 Thread.new do
-  while msg = monitor.receive
+  monitor = CZTop::Monitor.new(@socket)
+  monitor.listen("ALL")
+  monitor.start
+  while msg = monitor.next
     puts ">>> Socket event: #{msg.inspect}"
   end
 end
 
-# send each driver a example message
-drivers.each do |driver|
-  puts ">>> Sending message to #{driver.inspect}"
-  socket << [ driver, "PICKUP", "(X,Y)" ]
+# receive messages from drivers
+@driver_map = {} # driver name => routing ID
+Thread.new do
+
+  # CZTop::Loop (zloop) doesn't work with SERVER sockets :(
+  poller = CZTop::Poller.new(@socket)
+  while true
+    puts "waiting for socket to become readable ..."
+    socket = poller.wait
+    puts "socket is readable"
+    msg = socket.receive
+    puts "got message"
+    command, argument = msg[0].split("\t", 2)
+
+    case command
+    when "HELLO"
+      driver = argument
+      puts ">>> Driver #{driver.inspect} has connected."
+      welcome = @driver_map.key?(driver) ? "WELCOMEBACK" : "WELCOME"
+
+      # remember driver's assigned message routing ID
+      @driver_map[driver] = msg.routing_id
+
+      # send WELCOME or WELCOMEBACK
+      rep = CZTop::Message.new(welcome)
+      rep.routing_id = @driver_map[driver]
+      socket << rep
+      puts ">>> Sent #{welcome.inspect} to #{driver.inspect}"
+    end
+  end
+end
+
+def send_command(driver, command)
+  if command.nil? || command.empty?
+    puts "!!! No message given."
+    return
+  end
+  if not @driver_map.key?(driver)
+    puts "!!! Driver #{driver.inspect} has never connected."
+    return
+  end
+  puts ">>> Sending message to #{driver.inspect} ..."
+  msg = CZTop::Message.new(command)
+  msg.routing_id = @driver_map[driver]
+  @socket << msg
+rescue SocketError
+  puts "!!! Driver #{driver.inspect} isn't connected anymore."
 end
 
 ##
@@ -88,37 +130,16 @@ end
 #
 puts <<MSG
 You can now send messages to the drivers yourself.
-The command format is:
+The use the method #send_command, like this:
 
-  $ <receiver> <message>
-
-Tabs in <message> are treated as message frame separators.
-
-Example:
-
-  $ driver1 PICKUP	(8.541694,47.376887)
+pry> send_command("driver1", "PICKUP\t(8.541694,47.376887)")
 
 This should show something like this in the client.rb terminal:
 
-  03:17:01 driver1.1 | received message: ["PICKUP", "(8.541694,47.376887)"]
-
+  03:17:01 driver1.1 | received message: "PICKUP\t(8.541694,47.376887)"
 MSG
 
-loop do
-  print "$ "
-  receiver, command = STDIN.gets.chomp.split(" ", 2)
-  redo if receiver.nil? || receiver.empty?
-  if command.nil?
-    puts "!!! No message given."
-    redo
-  end
-  puts ">>> Sending message to #{receiver.inspect} ..."
-  begin
-    socket << [ receiver, *command.split("	") ]
-  rescue Errno::EHOSTUNREACH
-    puts "!!! Driver #{receiver.inspect} isn't connected. Typo?"
-  end
-end
+binding.pry
 ```
 
 ## Client
@@ -126,6 +147,11 @@ end
 Here you have to provide the environment variables `BROKER_ADDRESS` (ditto),
 `BROKER_CERT` (public key only), `CLIENT_CERT` (taxi driver's certificate
 containing the secret+public keys).
+
+After connecting to the broker and completing the security handshake, the
+client sends a `HELLO` message, after which it immediately expects some answer
+from the broker (see below). After that, it just listens for messages (service
+requests) and prints them into the terminal.
 
 ```ruby
 #!/usr/bin/env ruby
@@ -135,15 +161,32 @@ endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # public only
 client_cert = CZTop::Certificate.load ENV["CLIENT_CERT"]
 
-socket = CZTop::Socket::DEALER.new
-socket.options.identity = client_cert["driver_name"]
-puts "set socket identity to: %p" % client_cert["driver_name"]
-socket.CURVE_client!(client_cert, broker_cert)
-socket.connect(endpoint)
-puts "connected."
+@socket = CZTop::Socket::CLIENT.new
+@socket.CURVE_client!(client_cert, broker_cert)
+@socket.options.sndtimeo     = 2000#ms
 
-while message = socket.receive
-  puts "received message: #{message.to_a.inspect}"
+# heartbeating:
+# * send PING every 100ms
+# * close connection after 300ms of no life sign from broker
+# * tell broker to close connection after 500ms of no life sign from client
+@socket.options.heartbeat_ivl     = 100#ms
+@socket.options.heartbeat_timeout = 300#ms
+@socket.options.heartbeat_ttl     = 500#ms
+
+@socket.connect(endpoint)
+puts ">>> connected."
+
+# tell broker who we are
+@socket << "HELLO\t#{client_cert["driver_name"]}"
+puts ">>> sent HELLO."
+welcome = @socket.receive[0]
+puts ">>> got #{welcome}."
+
+poller = CZTop::Poller.new(@socket)
+while true
+  socket = poller.wait
+  message = socket.receive
+  puts ">>> received message: #{message[0].inspect}"
 end
 ```
 
@@ -182,6 +225,7 @@ DRIVERS.each do |driver_name|
   cert.save "secret_keys/drivers/#{driver_name}"
   cert.save_public "public_keys/drivers/#{driver_name}"
 end
+
 ```
 Run it as follows:
 
@@ -189,33 +233,42 @@ Run it as follows:
 ./generate_keys.rb
 ```
 
-### Start driver software instances
-
-To avoid the tedious task of starting multiple driver software instances in
-different terminals, a simple foreman Procfile is provided to conveniently
-start them all at once.
-Run `gem install foreman` if you don't have it yet.
-
-Starting it is simple:
-
-```
-foreman start
-```
-
 ### Start broker
 
-When starting the broker, it'll initially wait for 3 clients to connect before
-sending any commands, otherwise sending an unroutable message would raise an
-exception (because ROUTER_MANDATORY is set to true). In practice, this
-wouldn't be necessary. If a driver, who's on duty, you want to send a command
-to (like "pickup someone from X") cannot be contacted, something's bad and you
-want to know about it.
-
-After the clients are connected (and authenticated), each one of them is sent
-a small message to simulate a command being sent to them. You'll see these pop
-up in the first terminal where you started the driver software.
+Run this:
 
 ```
+./start_broker.sh
+```
+
+which will execute the following script:
+
+```sh
+#!/bin/sh -x
 BROKER_ADDRESS=tcp://127.0.0.1:4455 BROKER_CERT=secret_keys/broker CLIENT_CERTS=public_keys/drivers ./broker.rb
+```
+
+### Start driver software instances
+
+Run this in another terminal:
+
+```
+./start_clients.sh
+```
+
+which will execute the following script:
+
+```sh
+#!/bin/sh -x
+export BROKER_ADDRESS=tcp://127.0.0.1:4455
+export BROKER_CERT=public_keys/broker
+CLIENT_CERT=secret_keys/drivers/driver1_secret ./client.rb &
+CLIENT_CERT=secret_keys/drivers/driver2_secret ./client.rb &
+CLIENT_CERT=secret_keys/drivers/driver3_secret ./client.rb &
+jobs
+jobs -p
+jobs -l
+trap 'kill $(jobs -p)' EXIT
+wait
 ```
 

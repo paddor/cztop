@@ -5,13 +5,30 @@ endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # public only
 client_cert = CZTop::Certificate.load ENV["CLIENT_CERT"]
 
-socket = CZTop::Socket::DEALER.new
-socket.options.identity = client_cert["driver_name"]
-puts "set socket identity to: %p" % client_cert["driver_name"]
-socket.CURVE_client!(client_cert, broker_cert)
-socket.connect(endpoint)
-puts "connected."
+@socket = CZTop::Socket::CLIENT.new
+@socket.CURVE_client!(client_cert, broker_cert)
+@socket.options.sndtimeo     = 2000#ms
 
-while message = socket.receive
-  puts "received message: #{message.to_a.inspect}"
+# heartbeating:
+# * send PING every 100ms
+# * close connection after 300ms of no life sign from broker
+# * tell broker to close connection after 500ms of no life sign from client
+@socket.options.heartbeat_ivl     = 100#ms
+@socket.options.heartbeat_timeout = 300#ms
+@socket.options.heartbeat_ttl     = 500#ms
+
+@socket.connect(endpoint)
+puts ">>> connected."
+
+# tell broker who we are
+@socket << "HELLO\t#{client_cert["driver_name"]}"
+puts ">>> sent HELLO."
+welcome = @socket.receive[0]
+puts ">>> got #{welcome}."
+
+poller = CZTop::Poller.new(@socket)
+while true
+  socket = poller.wait
+  message = socket.receive
+  puts ">>> received message: #{message[0].inspect}"
 end

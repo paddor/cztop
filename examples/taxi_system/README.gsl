@@ -2,7 +2,7 @@
 .template 1
 # Taxi System
 
-Suppose you're running a taxi company ("cabs"). You have a set of taxi drivers
+Suppose you're running a taxi company. You have a set of taxi drivers
 working for you.  You'd like to connect them to your central server, so they're
 ready to get service requests from customers who'd like to get picked up by a
 taxi from some place X. As soon as a customer sends his service request, the
@@ -13,7 +13,12 @@ Of course you want the communication between the broker and the taxi drivers to
 be secure, meaning you want encryption and authentication.
 
 You also want ping-pong heartbeating, as you want to have confidence you can
-get in touch with your taxi drivers any time you want. (TODO: not implemented yet)
+get in touch with your taxi drivers any time you want. And if a service
+request can't be delivered to a particular taxi driver, you wanna know
+immediately.
+
+This solution is implemented using CLIENT/SERVER sockets and the CURVE
+security mechanism.
 
 ## Broker
 
@@ -22,8 +27,24 @@ are the environment variables `BROKER_ADDRESS` (the public TCP endpoint),
 `BROKER_CERT` (path to the broker's secret+public keys), and `CLIENT_CERTS`
 (directory to taxi drivers' certificates, public keys only).
 
+After the start, the broker will just start listening for the drivers (CLIENT
+sockets) to connect. After a driver has connected, authenticated, and sent its
+`HELLO` message, the broker answers with a `WELCOME` or `WELCOMEBACK` message,
+depending if the driver was connected before (it might have reconnected and
+been assigned a new routing ID).
+
+The broker will present you with a Pry shell. Right before starting the shell,
+there's a small usage information, but it's not very well visible due to Pry's
+noisy start. It's simple, though. Inside that shell, you can use the method
+`#send_command(driver, command)`. Example:
+
+  pry> send_command("driver1", "foobar")
+
+Depending on whether the driver is connected, it'll send the message or report
+that it cannot do so.
+
 ```ruby
-.include "broker.rb"
+.literal from "broker.rb"
 ```
 
 ## Client
@@ -32,8 +53,13 @@ Here you have to provide the environment variables `BROKER_ADDRESS` (ditto),
 `BROKER_CERT` (public key only), `CLIENT_CERT` (taxi driver's certificate
 containing the secret+public keys).
 
+After connecting to the broker and completing the security handshake, the
+client sends a `HELLO` message, after which it immediately expects some answer
+from the broker (see below). After that, it just listens for messages (service
+requests) and prints them into the terminal.
+
 ```ruby
-.include "client.rb"
+.literal from "client.rb"
 ```
 
 ## How to run the example
@@ -47,7 +73,8 @@ must not know the broker's secret key. Also, the broker doesn't necessarily
 need to know the clients' secret keys just to authenticate them.
 
 ```ruby
-.include "generate_keys.rb"
+.literal from "generate_keys.rb"
+
 ```
 Run it as follows:
 
@@ -55,34 +82,32 @@ Run it as follows:
 \./generate_keys.rb
 ```
 
-### Start driver software instances
-
-To avoid the tedious task of starting multiple driver software instances in
-different terminals, a simple foreman Procfile is provided to conveniently
-start them all at once.
-Run `gem install foreman` if you don't have it yet.
-
-Starting it is simple:
-
-```
-foreman start
-```
-
 ### Start broker
 
-When starting the broker, it'll initially wait for 3 clients to connect before
-sending any commands, otherwise sending an unroutable message would raise an
-exception (because ROUTER_MANDATORY is set to true). In practice, this
-wouldn't be necessary. If a driver, who's on duty, you want to send a command
-to (like "pickup someone from X") cannot be contacted, something's bad and you
-want to know about it.
-
-After the clients are connected (and authenticated), each one of them is sent
-a small message to simulate a command being sent to them. You'll see these pop
-up in the first terminal where you started the driver software.
+Run this:
 
 ```
-BROKER_ADDRESS=tcp://127.0.0.1:4455 BROKER_CERT=secret_keys/broker CLIENT_CERTS=public_keys/drivers ./broker.rb
+\./start_broker.sh
+```
+
+which will execute the following script:
+
+```sh
+.literal from "start_broker.sh"
+```
+
+### Start driver software instances
+
+Run this in another terminal:
+
+```
+\./start_clients.sh
+```
+
+which will execute the following script:
+
+```sh
+.literal from "start_clients.sh"
 ```
 
 .endtemplate

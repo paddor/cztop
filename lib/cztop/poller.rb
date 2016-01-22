@@ -35,8 +35,9 @@ module CZTop
     # Removes a reader socket from the poller.
     # @param reader [Socket, Actor] socket to remove
     # @return [void]
-    # @raise [SystemCallError] if this fails (e.g. if socket wasn't registered in
-    #   this poller)
+    # @raise [ArgumentError] if socket was invalid, e.g. it wasn't registered
+    #   in this poller
+    # @raise [SystemCallError] if this fails for another reason
     def remove(reader)
       rc = ffi_delegate.remove(reader)
       raise_sys_err("unable to remove socket %p" % reader) if rc == -1

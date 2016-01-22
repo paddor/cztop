@@ -85,10 +85,10 @@ describe CZTop::Message do
         before(:each) do
           expect(ffi_delegate).to receive(:addmem).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EINVAL::Errno)
+            .and_return(Errno::EPERM::Errno)
         end
         it "raises" do
-          assert_raises(Errno::EINVAL) { msg << frame }
+          assert_raises(Errno::EPERM) { msg << frame }
         end
       end
     end
@@ -108,10 +108,10 @@ describe CZTop::Message do
         before(:each) do
           expect(ffi_delegate).to receive(:append).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EINVAL::Errno)
+            .and_return(Errno::EPERM::Errno)
         end
         it "raises" do
-          assert_raises(Errno::EINVAL) { msg << frame }
+          assert_raises(Errno::EPERM) { msg << frame }
         end
       end
     end
@@ -145,10 +145,10 @@ describe CZTop::Message do
         before(:each) do
           expect(ffi_delegate).to receive(:pushmem).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EINVAL::Errno)
+            .and_return(Errno::EPERM::Errno)
         end
         it "raises" do
-          assert_raises(Errno::EINVAL) { msg.prepend frame }
+          assert_raises(Errno::EPERM) { msg.prepend frame }
         end
       end
     end
@@ -162,10 +162,10 @@ describe CZTop::Message do
         before(:each) do
           expect(ffi_delegate).to receive(:prepend).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EINVAL::Errno)
+            .and_return(Errno::EPERM::Errno)
         end
         it "raises" do
-          assert_raises(Errno::EINVAL) { msg.prepend frame }
+          assert_raises(Errno::EPERM) { msg.prepend frame }
         end
       end
     end
@@ -218,9 +218,9 @@ describe CZTop::Message do
         end
       end
       context "with other error" do
-        let(:errno) { Errno::EINVAL::Errno }
+        let(:errno) { Errno::EPERM::Errno }
         it "raises RuntimeError" do
-          assert_raises(Errno::EINVAL) { msg.send_to(destination) }
+          assert_raises(Errno::EPERM) { msg.send_to(destination) }
         end
       end
     end
@@ -258,9 +258,9 @@ describe CZTop::Message do
         end
       end
       context "with other error" do
-        let(:errno) { Errno::EINVAL::Errno }
+        let(:errno) { Errno::EPERM::Errno }
         it "raises RuntimeError" do
-          assert_raises(Errno::EINVAL) { received_message }
+          assert_raises(Errno::EPERM) { received_message }
         end
       end
     end

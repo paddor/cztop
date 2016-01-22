@@ -33,31 +33,29 @@ module CZTop
     end
 
     # Send {Message} to a {Socket} or {Actor}.
-    # @param destination [Socket, Actor] where to send this message to
+    #
     # @note Do NOT use this {Message} anymore afterwards. Its native
     #   counterpart will have been destroyed.
+    #
+    # @param destination [Socket, Actor] where to send this message to
     # @return [void]
+    #
     # @raise [IO::EAGAINWaitWritable] if the send timeout has been reached
     #   (see {ZsockOptions::OptionsAccessor#sndtimeo=})
     # @raise [SocketError] if the ROUTER_MANDATORY flag is set on
     #   a {Socket::ROUTER} socket and the peer isn't connected or its SNDHWM
     #   is reached (see {ZsockOptions::OptionsAccessor#router_mandatory=})
+    # @raise [ArgumentError] if the message is invalid, e.g. when trying to
+    #   send a multi-part message over a CLIENT/SERVER socket
     # @raise [SystemCallError] for any other error code set after +zmsg_send+
     #   returns with failure. Please report as bug.
+    #
     def send_to(destination)
       rc = Zmsg.send(ffi_delegate, destination)
       return if rc == 0
-
-      case errno = ::CZMQ::FFI::Errors.errno
-      when Errno::EAGAIN::Errno
-        raise IO::EAGAINWaitWritable
-      when Errno::EHOSTUNREACH::Errno
-        raise SocketError
-      else
-        # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended.
-        raise_sys_err(errno: errno)
-      end
+      raise_sys_err
+    rescue Errno::EAGAIN
+      raise IO::EAGAINWaitWritable
     end
 
     # Receive a {Message} from a {Socket} or {Actor}.
@@ -71,17 +69,9 @@ module CZTop
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
       return from_ffi_delegate(delegate) unless delegate.null?
-
-      case errno = ::CZMQ::FFI::Errors.errno
-      when Errno::EAGAIN::Errno
-        raise IO::EAGAINWaitReadable
-      when Errno::EINTR::Errno
-        raise Interrupt
-      else
-        # NOTE: If this happens, application code is bad, or this case-list
-        # has to be extended.
-        HasFFIDelegate.raise_sys_err(errno: errno)
-      end
+      HasFFIDelegate.raise_sys_err
+    rescue Errno::EAGAIN
+      raise IO::EAGAINWaitReadable
     end
 
     # Append a frame to this message.

@@ -83,7 +83,7 @@ describe CZTop::Socket do
       When(:result) do
         rep_socket.CURVE_server!(certificate)
       end
-      Then { result == Failure(SystemCallError) }
+      Then { result == Failure(ArgumentError) }
     end
   end
 

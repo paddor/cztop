@@ -144,7 +144,7 @@ describe CZTop::Socket::SERVER, skip: czmq_function?(:zsock_new_server) do
         Given(:response) { CZTop::Message.new(%w[BAR BAZ]) }
         Given { response.routing_id = received_msg.routing_id }
         When(:result) { server << response }
-        Then { result == Failure(Errno::EINVAL) }
+        Then { result == Failure(ArgumentError) }
       end
     end
 

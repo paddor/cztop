@@ -37,10 +37,10 @@ describe CZTop::Loop do
     context "with wrong socket" do
       before(:each) do
         allow(ffi_delegate).to receive(:reader).and_return(-1)
-        allow(CZMQ::FFI::Errors).to receive(:errno).and_return(Errno::EINVAL::Errno)
+        allow(CZMQ::FFI::Errors).to receive(:errno).and_return(Errno::EPERM::Errno)
       end
       it "raises" do
-        assert_raises(SystemCallError) { subject.add_reader(socket) { } }
+        assert_raises(Errno::EPERM) { subject.add_reader(socket) { } }
       end
     end
   end

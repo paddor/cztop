@@ -31,18 +31,27 @@ module CZTop::HasFFIDelegate
 
   module_function
 
-  # Raises the appropriate SystemCallError.
-  #
-  # If the errno is known, the corresponding Errno::* exception is
-  # automatically constructed. Otherwise, it'll be a plain SystemCallError. In
-  # any case, #errno will return the corresponding errno.
+  # Raises the appropriate exception for the reported ZMQ error.
   #
   # @param msg [String] error message
-  # @raise [SystemCallError]
+  # @raise [ArgumentError] if EINVAL was reported
+  # @raise [Interrupt] if EINTR was reported
+  # @raise [SocketError] if EAGAIN was reported
+  # @raise [SystemCallError] any other reported error (appropriate
+  #   SystemCallError subclass, if errno is known)
   def raise_sys_err(msg = CZMQ::FFI::Errors.strerror,
                     errno: CZMQ::FFI::Errors.errno)
 
-    raise SystemCallError.new(msg, errno)
+    # If the errno is known, the corresponding Errno::* exception is
+    # automatically constructed. Otherwise, it'll be a plain SystemCallError.
+    # In any case, #errno will return the corresponding errno.
+    raise SystemCallError.new(msg, errno), nil, caller
+  rescue Errno::EINVAL
+    raise ArgumentError
+  rescue Errno::EINTR
+    raise Interrupt
+  rescue Errno::EHOSTUNREACH
+    raise SocketError
   end
 
   # Some class methods related to FFI delegates.

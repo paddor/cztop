@@ -40,7 +40,6 @@ describe CZTop::Poller do
           .with(reader2)
         expect_any_instance_of(CZTop::Poller).to receive(:remember_socket)
           .with(reader3)
-        poller
       end
     end
   end
@@ -56,8 +55,12 @@ describe CZTop::Poller do
       poller.add(reader2)
     end
     context "with failure" do
-      it "raises" do
+      before(:each) do
         allow(ffi_delegate).to receive(:add).and_return(-1)
+        allow(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(Errno::EPERM::Errno)
+      end
+      it "raises" do
         assert_raises(SystemCallError) { poller.add(reader2) }
       end
     end
@@ -74,8 +77,12 @@ describe CZTop::Poller do
       poller.remove(reader1)
     end
     context "with failure" do
-      it "raises" do
+      before(:each) do
         allow(ffi_delegate).to receive(:remove).and_return(-1)
+        allow(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(Errno::EPERM::Errno)
+      end
+      it "raises" do
         assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
@@ -83,7 +90,7 @@ describe CZTop::Poller do
       "errors from zpoller_remove()", :zcert_unset_meta) do
 
       it "raises" do
-        assert_raises(SystemCallError) { poller.remove(reader2) }
+        assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end
   end
@@ -129,6 +136,8 @@ describe CZTop::Poller do
       let(:wrong_ptr) { double("pointer", to_i: 0, null?: false) }
       before(:each) do
         allow(ffi_delegate).to receive(:wait).and_return(wrong_ptr)
+        allow(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(Errno::EPERM::Errno)
       end
       it "raises" do # instead of returning nil
         assert_raises(SystemCallError) { poller.wait(0) }

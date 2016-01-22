@@ -6,10 +6,12 @@ module CZTop
   # @see http://api.zeromq.org/czmq3-0:zmsg
   module SendReceiveMethods
     # Sends a message.
+    #
     # @param message [Message, String, Array<parts>] the message to send
     # @raise [IO::EAGAINWaitWritable] if send timeout has been reached (see
     #   {ZsockOptions::OptionsAccessor#sndtimeo=})
-    # @raise [SystemCallError] anything raised by {Message#send_to}
+    # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
+    #   {Message#send_to}
     # @return [self]
     # @see Message.coerce
     # @see Message#send_to
@@ -19,10 +21,11 @@ module CZTop
     end
 
     # Receives a message.
+    #
     # @return [Message]
     # @raise [IO::EAGAINWaitReadable] if receive timeout has been reached (see
     #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
-    # @raise [Interrupt, SystemCallError] anything raised by
+    # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
     #   {Message.receive_from}
     # @see Message.receive_from
     def receive

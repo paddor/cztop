@@ -30,6 +30,8 @@ module CZTop
     # The block can add other readers and timers.
     # To stop the loop, the block should return -1.
     #
+    # @note This does NOT work with CLIENT/SERVER sockets. See
+    #   https://github.com/zeromq/czmq/issues/1123. Use {Poller} instead.
     # @param socket [Socket] the socket to register and read from
     # @return [void]
     # @raise [ArgumentError] if no block given

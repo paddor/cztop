@@ -419,5 +419,51 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+
+    describe "#[]" do
+      context "with vague option name" do
+        let(:identity) { "foobar" }
+        before(:each) do
+          options.identity = identity
+        end
+
+        it "gets option" do
+          assert_equal options.CURVE_server?, options[:curve_server]
+          assert_equal identity, options[:IDENTITY]
+          assert_equal identity, options["IDENTITY"]
+          assert_equal options.tos, options[:ToS]
+        end
+      end
+      context "with plain wrong option name" do
+        it "raises" do
+          assert_raises(NoMethodError) { options[:foo] }
+          assert_raises(NoMethodError) { options[5] }
+          assert_raises(NoMethodError) { options['!!'] }
+        end
+      end
+    end
+    describe "#[]=" do
+      let(:identity) { "foobar" }
+      let(:tos) { 5 }
+      before(:each) do
+        options[:curve_server] = true
+        options[:IDENTITY] = identity
+        options[:ToS] = tos
+      end
+      context "with vague option name" do
+        it "sets option" do
+          assert_operator options, :CURVE_server?
+          assert_equal identity, options.identity
+          assert_equal tos, options.tos
+        end
+      end
+      context "with plain wrong option name" do
+        it "raises" do
+          assert_raises(NoMethodError) { options[:foo] = 5 }
+          assert_raises(NoMethodError) { options[5] = "foo" }
+          assert_raises(NoMethodError) { options['!!'] = :bar }
+        end
+      end
+    end
   end
 end

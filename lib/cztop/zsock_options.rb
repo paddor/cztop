@@ -26,6 +26,29 @@ module CZTop
         @zocket = zocket
       end
 
+      # Fuzzy option getter. This is to make it easier when porting
+      # applications from CZMQ libraries to CZTop.
+      # @param option_name [Symbol, String] case insensitive option name
+      # @raise [NoMethodError] if option name can't be recognized
+      def [](option_name)
+        # NOTE: beware of predicates, especially #CURVE_server? & friends
+        m = public_methods.reject { |m| m =~ /=$/ }
+              .find { |m| m =~ /^#{option_name}\??$/i }
+        raise NoMethodError, option_name if m.nil?
+        __send__(m)
+      end
+
+      # Fuzzy option setter. This is to make it easier when porting
+      # applications from CZMQ libraries to CZTop.
+      # @param option_name [Symbol, String] case insensitive option name
+      # @param new_value [String, Integer] new value
+      # @raise [NoMethodError] if option name can't be recognized
+      def []=(option_name, new_value)
+        m = public_methods.find { |m| m =~ /^#{option_name}=$/i }
+        raise NoMethodError, option_name if m.nil?
+        __send__(m, new_value)
+      end
+
       include CZMQ::FFI
 
       # @!group High Water Marks

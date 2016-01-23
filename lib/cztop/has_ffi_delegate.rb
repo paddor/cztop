@@ -46,13 +46,13 @@ module CZTop::HasFFIDelegate
     # If the errno is known, the corresponding Errno::* exception is
     # automatically constructed. Otherwise, it'll be a plain SystemCallError.
     # In any case, #errno will return the corresponding errno.
-    raise SystemCallError.new(msg, errno), nil, caller
+    raise SystemCallError.new(msg, errno), msg, caller
   rescue Errno::EINVAL
-    raise ArgumentError, nil, caller
+    raise ArgumentError, msg, caller
   rescue Errno::EINTR
-    raise Interrupt, nil, caller
+    raise Interrupt, msg, caller
   rescue Errno::EHOSTUNREACH
-    raise SocketError, nil, caller
+    raise SocketError, msg, caller
   end
 
   # Some class methods related to FFI delegates.

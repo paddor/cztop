@@ -380,8 +380,12 @@ and throughput measurement scripts.
   * level-triggered (not sure if `zmq_poll()` itelf is, but it'll be trivial)
   * could then be used in Celluloid::ZMQ
   * want to use `zmq_poller()` because it can deal with CLIENT/SERVER sockets and is the future
-    * but can't use it because it doesn't allow me to get all readable/writable sockets back after one call to `#wait`
+    * but can't use it because
+      * it doesn't allow me to get all readable/writable sockets back after one call to `#wait`
+      * can't just recall `#wait` with zero timeout until it says there are no
+	more, because ZMQ sockets (option ZMQ_FD) are edge-triggered :-(
     * maybe I don't really need that functionality, though
+    * can't use `zpoller`, because it doesn't support polling for writing
 * [ ] add `Message#to_s`
   * return frame as string, if there's only one frame
   * raise if there are multiple frames

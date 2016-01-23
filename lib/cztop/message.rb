@@ -42,9 +42,13 @@ module CZTop
     #
     # @raise [IO::EAGAINWaitWritable] if the send timeout has been reached
     #   (see {ZsockOptions::OptionsAccessor#sndtimeo=})
-    # @raise [SocketError] if the ROUTER_MANDATORY flag is set on
-    #   a {Socket::ROUTER} socket and the peer isn't connected or its SNDHWM
-    #   is reached (see {ZsockOptions::OptionsAccessor#router_mandatory=})
+    # @raise [SocketError] if the message can't be routed to the destination
+    #   (either if ROUTER_MANDATORY flag is set on a {Socket::ROUTER} socket
+    #   and the peer isn't connected or its SNDHWM is reached (see
+    #   {ZsockOptions::OptionsAccessor#router_mandatory=}, or if it's
+    #   a {Socket::SERVER} socket and there's no connected CLIENT
+    #   corresponding
+    #   to the given routing ID)
     # @raise [ArgumentError] if the message is invalid, e.g. when trying to
     #   send a multi-part message over a CLIENT/SERVER socket
     # @raise [SystemCallError] for any other error code set after +zmsg_send+

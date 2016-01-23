@@ -1,5 +1,11 @@
 module CZTop
-  # Represents a CZMQ::FFI::Zframe.
+  # Represents a CZMQ::FFI::Zframe, a part of a message.
+  #
+  # @note Dealing with frames (parts of a message) is pretty low-level. You'll
+  #   probably not really need this functionality. It's only useful when you
+  #   need to be able to receive and send single frames. Just use {Message}
+  #   instead.
+  #
   # @see http://api.zeromq.org/czmq3-0:zframe
   class Frame
     include HasFFIDelegate

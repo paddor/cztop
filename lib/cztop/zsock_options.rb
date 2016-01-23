@@ -252,7 +252,6 @@ module CZTop
 
 # TODO: a reasonable subset of these
 #//  Get socket options
-#int zsock_tos (void *self);
 #int zsock_gssapi_server (void *self);
 #int zsock_gssapi_plaintext (void *self);
 #char * zsock_gssapi_principal (void *self);
@@ -280,7 +279,6 @@ module CZTop
 #char * zsock_last_endpoint (void *self);
 #
 #//  Set socket options
-#void zsock_set_tos (void *self, int tos);
 #void zsock_set_router_handover (void *self, int router_handover);
 #void zsock_set_probe_router (void *self, int probe_router);
 #void zsock_set_req_relaxed (void *self, int req_relaxed);

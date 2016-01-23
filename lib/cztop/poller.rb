@@ -7,13 +7,13 @@ module CZTop
   # Celluloid::ZMQ::Reactor#run_once all readable/writable sockets need to be
   # processed.
   #
-  # This implementation is NOT based on zpoller. Reasons:
+  # This implementation is NOT based on CZMQ's +zpoller+. Reasons:
   #
-  # * zpoller can only poll for reading
+  # * +zpoller+ can only poll for reading
   #
   # It's also NOT based on +zmq_poller()+. Reasons:
   #
-  # * zmq_poller() doesn't exist in older versions of ZMQ < 4.2
+  # * +zmq_poller()+ doesn't exist in older versions of ZMQ < 4.2
   #
   # Possible future implementation on +zmq_poller()+ might work like this, to
   # support getting an array of readable/writable sockets:

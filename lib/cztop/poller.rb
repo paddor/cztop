@@ -103,9 +103,11 @@ module CZTop
     end
 
     # Adds a socket to be polled for reading.
-    # @param socket [CZTop::Socket] the socket
+    # @param socket [Socket, Actor] the socket
     # @return [void]
+    # @raise [ArgumentError] if it's not a socket
     def add_reader(socket)
+      raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
       ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
       @readers[ptr.to_i] = socket
       @rebuild_needed = true
@@ -113,17 +115,21 @@ module CZTop
 
     # Removes a previously registered reader socket. Won't raise if you're
     # trying to remove a socket that's not registered.
-    # @param socket [CZTop::Socket] the socket
+    # @param socket [Socket, Actor] the socket
     # @return [void]
+    # @raise [ArgumentError] if it's not a socket
     def remove_reader(socket)
+      raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
       ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
       @readers.delete(ptr.to_i) and @rebuild_needed = true
     end
 
     # Adds a socket to be polled for writing.
-    # @param socket [CZTop::Socket] the socket
+    # @param socket [Socket, Actor] the socket
     # @return [void]
+    # @raise [ArgumentError] if it's not a socket
     def add_writer(socket)
+      raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
       ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
       @writers[ptr.to_i] = socket
       @rebuild_needed = true
@@ -131,9 +137,11 @@ module CZTop
 
     # Removes a previously registered writer socket. Won't raise if you're
     # trying to remove a socket that's not registered.
-    # @param socket [CZTop::Socket] the socket
+    # @param socket [Socket, Actor] the socket
     # @return [void]
+    # @raise [ArgumentError] if it's not a socket
     def remove_writer(socket)
+      raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
       ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
       @writers.delete(ptr.to_i) and @rebuild_needed = true
     end

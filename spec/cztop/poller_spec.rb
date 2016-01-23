@@ -63,6 +63,11 @@ describe CZTop::Poller do
       poller.add_reader(reader2)
       assert poller.instance_variable_get(:@rebuild_needed)
     end
+    context "with non-socket" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.add_reader("foo") }
+      end
+    end
   end
   describe "#remove_reader" do
     context "with registered reader" do
@@ -88,6 +93,11 @@ describe CZTop::Poller do
         refute poller.instance_variable_get(:@rebuild_needed)
       end
     end
+    context "with non-socket" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_reader("foo") }
+      end
+    end
   end
   describe "#add_writer" do
     before(:each) { poller.add_writer(writer1) }
@@ -99,6 +109,11 @@ describe CZTop::Poller do
       refute poller.instance_variable_get(:@rebuild_needed)
       poller.add_writer(writer2)
       assert poller.instance_variable_get(:@rebuild_needed)
+    end
+    context "with non-socket" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.add_writer("foo") }
+      end
     end
   end
   describe "#remove_writer" do
@@ -123,6 +138,11 @@ describe CZTop::Poller do
       it "doesn't raise" do end
       it "doesn't schedule rebuild" do
         refute poller.instance_variable_get(:@rebuild_needed)
+      end
+    end
+    context "with non-socket" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_writer("foo") }
       end
     end
   end
@@ -211,15 +231,6 @@ describe CZTop::Poller do
       end
       it "returns nil" do
         assert_nil poller.wait(20)
-      end
-    end
-    context "with non-socket pointer" do
-      let(:ptr) { FFI::MemoryPointer.from_string("foobar") } # not a socket
-      before(:each) do
-        poller.add_reader(ptr)
-      end
-      it "raises" do
-        assert_raises(Errno::ENOTSOCK) { poller.wait(0) }
       end
     end
     context "with readable SERVER socket", skip: czmq_function?(:zsock_new_server) do

@@ -374,6 +374,23 @@ and throughput measurement scripts.
       * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`, attach `zsys_has_curve()` instead (under same name)
     * [x] adapt test suite to skip affected test examples
     * [x] test on CI
+* [ ] port Poller to `zmq_poll()`
+  * backwards compatible (`#add_reader`, `#add_writer`, `#wait` behave the same)
+  * but in addition, it has `#readable` and `#writable` which return arrays of sockets
+  * level-triggered (not sure if `zmq_poll()` itelf is, but it'll be trivial)
+  * could then be used in Celluloid::ZMQ
+  * want to use `zmq_poller()` because it can deal with CLIENT/SERVER sockets and is the future
+    * but can't use it because it doesn't allow me to get all readable/writable sockets back after one call to `#wait`
+    * maybe I don't really need that functionality, though
+* [ ] add `Message#to_s`
+  * return frame as string, if there's only one frame
+  * raise if there are multiple frames
+  * only safe to use on messages from SERVER/CLIENT sockets
+  * single-part messages are the future
+* [ ] get rid of Loop
+  * cannot handle SERVER socket
+  * there are other timer libraries for Ruby
+  * Poller can be used to embed in an existing event loop (Celluloid), or make your own trivial one.
 
 ## Contributing
 

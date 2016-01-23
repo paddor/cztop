@@ -14,6 +14,23 @@ module CZTop
   # outside). Not terminating them explicitly might make the process block at
   # exit.
   #
+  # @example Simple Actor with Ruby block
+  #   result = ""
+  #   a = CZTop::Actor.new do |msg, pipe|
+  #     case msg[0]
+  #     when "foo"
+  #       pipe << "bar"
+  #     when "append"
+  #       result << msg[1].to_s
+  #     when "result"
+  #       pipe << result
+  #     end
+  #   end
+  #   a.request("foo")[0] #=> "bar"
+  #   a.request("foo")[0] #=> "bar"
+  #   a << ["append", "baz"] << ["append", "baz"]
+  #   a.request("result")[0] #=> "bazbaz"
+  #
   # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
     include HasFFIDelegate

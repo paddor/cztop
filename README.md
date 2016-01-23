@@ -73,34 +73,34 @@ Here are some some of the goals I have/had in mind for this library:
 
 Here's an overview of the core classes:
 
-* CZTop
-  * Actor
-  * Authentiator < Actor
-  * Beacon < Actor
-  * Certificate
-  * Config
-  * Frame
-  * Message
-  * Monitor < Actor
-  * Proxy < Actor
-  * Poller
-  * Socket
-    * REQ < Socket
-    * REP < Socket
-    * ROUTER < Socket
-    * DEALER < Socket
-    * PUSH < Socket
-    * PULL < Socket
-    * PUB < Socket
-    * SUB < Socket
-    * XPUB < Socket
-    * XSUB < Socket
-    * PAIR < Socket
-    * STREAM < Socket
-    * CLIENT < Socket
-    * SERVER < Socket
-  * Z85
-    * Padded < Z85
+* [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
+  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
+  * [Authentiator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator) < Actor
+  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon) < Actor
+  * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
+  * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
+  * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
+  * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
+  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor) < Actor
+  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy) < Actor
+  * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller)
+  * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
+    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
+    * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket
+    * [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER) < Socket
+    * [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER) < Socket
+    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH) < Socket
+    * [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL) < Socket
+    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB) < Socket
+    * [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB) < Socket
+    * [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB) < Socket
+    * [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB) < Socket
+    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR) < Socket
+    * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
+    * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
+    * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
+  * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
+    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Padded) < Z85
 
 More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
 

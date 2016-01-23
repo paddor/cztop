@@ -185,7 +185,7 @@ is tested.
 
 At the time of writing, these include:
 
-* MRI (2.3, 2.2.4, 2.1.8)
+* MRI (2.3, 2.2.4, 2.1.8, 2.0.0)
 * Rubinius (HEAD)
 * JRuby 9000 (HEAD)
 

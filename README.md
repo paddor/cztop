@@ -100,7 +100,7 @@ Here's an overview of the core classes:
     * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
     * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
   * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
-    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Padded) < Z85
+    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
 
 More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
 

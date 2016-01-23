@@ -5,7 +5,7 @@ This directory contains simple performance measurement utilities:
 - `inproc_lat.rb` measures the latency of the inproc transport
 - `inproc_thr.rb` measures the throughput of the inproc transport
 - `local_lat.rb` and `remote_lat.rb` measure the latency other transports
-- `local_thr.rb` and `remote_thr.rb` measure the throughput other transports
+- `local_thr.rb` and `remote_thr.rb` measure the throughput other transports (TODO)
 
 ## Example Output
 
@@ -15,7 +15,7 @@ On my laptop, it currently looks something like this:
 
 over inproc, using 10k roundtrips of a repeatedly allocated 1kb message:
 ```
-$ ./inproc_lat_reqrep.rb 1_000 10_000
+$ bundle exec ./inproc_lat_reqrep.rb 1_000 10_000
 message size: 1000 [B]
 roundtrip count: 10000
 elapsed time: 0.469 [s]
@@ -24,7 +24,7 @@ average latency: 23.439 [us]<Paste>
 
 over IPC, using 10k roundtrips of a repeatedly allocated 1kb message:
 ```
-$ ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000 & ./remote_lat.rb ipc:///tmp/cztop-perf 1000 1000
+$ bundle exec ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000 & ./remote_lat.rb ipc:///tmp/cztop-perf 1000 1000
 [3] 58043
 message size: 1000 [B]
 roundtrip count: 1000
@@ -36,6 +36,7 @@ average latency: 45.482 [us]
 over local TCP/IP stack, using 10k roundtrips of a repeatedly allocated
 1kb message:
 ```
+$ bundle exec ./local_lat.rb tcp://127.0.0.1:55667 1000 1000 & ./remote_lat.rb tcp://127.0.0.1:55667 1000 1000
 [3] 58064
 message size: 1000 [B]
 roundtrip count: 1000
@@ -49,28 +50,28 @@ average latency: 61.434 [us]
 over inproc, with message sizes from 100 bytes to 100kb, 10,000 each:
 
 ```
-$ ./inproc_thru.rb 100 10_000
+$ bundle exec ./inproc_thru.rb 100 10_000
 message size: 100 [B]
 message count: 10000
 elapsed time: 0.270 [s]
 mean throughput: 37093 [msg/s]
 mean throughput: 29.674 [Mb/s]
 
-$ ./inproc_thru.rb 1_000 10_000
+$ bundle exec ./inproc_thru.rb 1_000 10_000
 message size: 1000 [B]
 message count: 10000
 elapsed time: 0.260 [s]
 mean throughput: 38498 [msg/s]
 mean throughput: 307.987 [Mb/s]
 
-$ ./inproc_thru.rb 10_000 10_000
+$ bundle exec ./inproc_thru.rb 10_000 10_000
 message size: 10000 [B]
 message count: 10000
 elapsed time: 0.317 [s]
 mean throughput: 31501 [msg/s]
 mean throughput: 2520.102 [Mb/s]
 
-$ ./inproc_thru.rb 100_000 10_000
+$ bundle exec ./inproc_thru.rb 100_000 10_000
 message size: 100000 [B]
 message count: 10000
 elapsed time: 0.906 [s]

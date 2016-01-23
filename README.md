@@ -391,7 +391,7 @@ and throughput measurement scripts.
   * raise if there are multiple frames
   * only safe to use on messages from SERVER/CLIENT sockets
   * single-part messages are the future
-* [ ] get rid of Loop
+* [x] get rid of Loop
   * cannot handle SERVER socket
   * there are other timer libraries for Ruby
   * Poller can be used to embed in an existing event loop (Celluloid), or make your own trivial one.

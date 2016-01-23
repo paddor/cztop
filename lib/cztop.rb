@@ -23,14 +23,12 @@ require_relative 'cztop/monitor'
 require_relative 'cztop/poller'
 require_relative 'cztop/proxy'
 require_relative 'cztop/socket'
-require_relative 'cztop/loop'
 require_relative 'cztop/z85'
 
 # additional
 require_relative 'cztop/config/comments'
 require_relative 'cztop/config/traversing'
 require_relative 'cztop/config/serialization'
-require_relative 'cztop/loop/timers'
 require_relative 'cztop/message/frames'
 require_relative 'cztop/socket/types'
 
@@ -39,15 +37,19 @@ require_relative 'cztop/socket/types'
 CZMQ::FFI::Signals.disable_default_handling
 
 ##
-# Probably useless in this Ruby binding.
+# Probably useless in this Ruby binding:
 #
-#  class CertificateStore; end
-#  class UUID; end
-#  class Dir; end
-#  class DirPatch; end
-#  class File; end
-#  class HashX; end
-#  class String; end
-#  class Trie; end
-#  class Hash; end
-#  class List; end
+#  * CertificateStore
+#  * UUID
+#  * Dir
+#  * DirPatch
+#  * File
+#  * HashX
+#  * String
+#  * Trie
+#  * Hash
+#  * List
+
+# Implemented before, but removed because useless:
+#
+#  * Loop

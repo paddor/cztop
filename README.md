@@ -3,6 +3,7 @@
 [![Inline docs](http://inch-ci.org/github/paddor/cztop.svg?branch=master&style=shields)](http://inch-ci.org/github/paddor/cztop)
 [![Dependency Status](https://gemnasium.com/paddor/cztop.svg)](https://gemnasium.com/paddor/cztop)
 [![Coverage Status](https://coveralls.io/repos/paddor/cztop/badge.svg?branch=master&service=github)](https://coveralls.io/github/paddor/cztop?branch=master)
+[![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
 # CZTop
 

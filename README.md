@@ -79,7 +79,6 @@ Here's an overview of the core classes:
   * Certificate
   * Config
   * Frame
-  * Loop
   * Message
   * Monitor < Actor
   * Proxy < Actor

@@ -11,7 +11,7 @@ module CZTop
   #
   # * zpoller can only poll for reading
   #
-  # It's also NOT based on `zmq_poller()`. Reasons:
+  # It's also NOT based on +zmq_poller()+. Reasons:
   #
   # * zmq_poller() doesn't exist in older versions of ZMQ < 4.2
   #
@@ -188,7 +188,7 @@ module CZTop
 
     private
 
-    # Rebuilds the list of `poll_item_t`.
+    # Rebuilds the list of +poll_item_t+.
     # @return [void]
     def rebuild
       @nitems = @readers.size + @writers.size

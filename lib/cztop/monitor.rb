@@ -12,7 +12,7 @@ module CZTop
   class Monitor
     include ::CZMQ::FFI
 
-    # function pointer to the `zmonitor()` function
+    # function pointer to the +zmonitor()+ function
     ZMONITOR_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zmonitor")
       break fptr if fptr

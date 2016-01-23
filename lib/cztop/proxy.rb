@@ -8,7 +8,7 @@ module CZTop
   class Proxy
     include ::CZMQ::FFI
 
-    # function pointer to the `zmonitor()` function
+    # function pointer to the +zmonitor()+ function
     ZPROXY_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zproxy")
       break fptr if fptr

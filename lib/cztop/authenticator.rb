@@ -8,7 +8,7 @@ module CZTop
   class Authenticator
     include ::CZMQ::FFI
 
-    # function pointer to the `zauth()` function
+    # function pointer to the +zauth()+ function
     ZAUTH_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
       fptr = dl.find_function("zauth")
       break fptr if fptr

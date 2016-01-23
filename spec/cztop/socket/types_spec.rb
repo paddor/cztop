@@ -95,14 +95,18 @@ describe CZTop::Socket::SERVER, skip: czmq_function?(:zsock_new_server) do
   describe "when communicating" do
     i = 58578
     Given(:endpoint) { "inproc://server_spec_#{i += 1}" }
+    Given(:server_sndtimeo) { 50 }
     Given(:server) do
-      s = CZTop::Socket::SERVER.new(endpoint)
-      s.options.sndtimeo = 50
+      s = CZTop::Socket::SERVER.new
+      s.options.sndtimeo = server_sndtimeo
+      s.bind(endpoint)
       s
     end
+    Given(:client_sndtimeo) { 50 }
     Given(:client) do
-      s = CZTop::Socket::CLIENT.new(endpoint)
+      s = CZTop::Socket::CLIENT.new
       s.options.sndtimeo = 50
+      s.connect(endpoint)
       s
     end
     Given(:msg_content) { "FOO" }
@@ -134,9 +138,18 @@ describe CZTop::Socket::SERVER, skip: czmq_function?(:zsock_new_server) do
         Then { client.receive[0] == "BAR" && client.receive[0] == "BAZ" }
       end
       context "with wrong routing_id set" do
-        Given { response.routing_id = 1234 } # wrong routing_id
-        When(:result) { server << response }
-        Then { result == Failure(SocketError) }
+        context "with SERVER SNDTIMEO set" do
+          Given(:server_timeo) { 50 }
+          Given { response.routing_id = 1234 } # wrong routing_id
+          When(:result) { server << response }
+          Then { result == Failure(SocketError) }
+        end
+        context "with no SERVER SNDTIMEO set" do
+          Given(:server_timeo) { 0 }
+          Given { response.routing_id = 1234 } # wrong routing_id
+          When(:result) { server << response }
+          Then { result == Failure(SocketError) }
+        end
       end
       context "without routing_id set" do
         When(:result) { server << response }

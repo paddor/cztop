@@ -30,6 +30,8 @@ module CZTop
   # ugly.
   #
   class Poller
+    include ::CZMQ::FFI
+
     # CZTop's interface to the low-level +zmq_poll()+ function.
     module ZMQ
 
@@ -108,7 +110,7 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def add_reader(socket)
       raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
-      ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
+      ptr = Zsock.resolve(socket) # get low-level handle
       @readers[ptr.to_i] = socket
       @rebuild_needed = true
     end
@@ -120,7 +122,7 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def remove_reader(socket)
       raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
-      ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
+      ptr = Zsock.resolve(socket) # get low-level handle
       @readers.delete(ptr.to_i) and @rebuild_needed = true
     end
 
@@ -130,7 +132,7 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def add_writer(socket)
       raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
-      ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
+      ptr = Zsock.resolve(socket) # get low-level handle
       @writers[ptr.to_i] = socket
       @rebuild_needed = true
     end
@@ -142,7 +144,7 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def remove_writer(socket)
       raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
-      ptr = CZMQ::FFI::Zsock.resolve(socket) # get low-level handle
+      ptr = Zsock.resolve(socket) # get low-level handle
       @writers.delete(ptr.to_i) and @rebuild_needed = true
     end
 
@@ -212,7 +214,7 @@ module CZTop
     # @return [ZMQ::PollItem] a new item for
     def new_item(address, socket, events)
       item = ZMQ::PollItem.new(address)
-      item[:socket] = CZMQ::FFI::Zsock.resolve(socket)
+      item[:socket] = Zsock.resolve(socket)
       item[:fd] = 0
       item[:events] = events
       item[:revents] = 0

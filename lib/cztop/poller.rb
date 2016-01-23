@@ -32,58 +32,6 @@ module CZTop
   class Poller
     include ::CZMQ::FFI
 
-    # CZTop's interface to the low-level +zmq_poll()+ function.
-    module ZMQ
-
-      POLL    = 1
-      POLLIN  = 1
-      POLLOUT = 2
-      POLLERR = 4
-
-      extend ::FFI::Library
-      lib_name = 'libzmq'
-      lib_paths = ['/usr/local/lib', '/opt/local/lib', '/usr/lib64']
-        .map { |path| "#{path}/#{lib_name}.#{::FFI::Platform::LIBSUFFIX}" }
-      ffi_lib lib_paths + [lib_name]
-
-      # Represents a struct of type +zmq_pollitem_t+.
-      class PollItem < FFI::Struct
-        ##
-        # shamelessly taken from https://github.com/mtortonesi/ruby-czmq-ffi
-        #
-
-
-        FD_TYPE = if FFI::Platform::IS_WINDOWS && FFI::Platform::ADDRESS_SIZE == 64
-          # On Windows, zmq.h defines fd as a SOCKET, which is 64 bits on x64.
-          :uint64
-        else
-          :int
-        end
-
-        layout  :socket,  :pointer,
-                :fd,      FD_TYPE,
-                :events,  :short,
-                :revents, :short
-
-        # @return [Boolean] whether the socket is readable
-        def readable?
-          (self[:revents] & POLLIN) > 0
-        end
-
-        # @return [Boolean] whether the socket is writable
-        def writable?
-          (self[:revents] & POLLOUT) > 0
-        end
-      end
-
-      opts = {
-        blocking: true  # only necessary on MRI to deal with the GIL.
-      }
-
-      #ZMQ_EXPORT int  zmq_poll (zmq_pollitem_t *items, int nitems, long timeout);
-      attach_function :poll, :zmq_poll, [:pointer, :int, :long], :int, **opts
-    end
-
     # @param readers [Socket, Actor] sockets to poll for input
     def initialize(*readers)
       @readers = {}
@@ -219,6 +167,58 @@ module CZTop
       item[:events] = events
       item[:revents] = 0
       item
+    end
+
+    # CZTop's interface to the low-level +zmq_poll()+ function.
+    module ZMQ
+
+      POLL    = 1
+      POLLIN  = 1
+      POLLOUT = 2
+      POLLERR = 4
+
+      extend ::FFI::Library
+      lib_name = 'libzmq'
+      lib_paths = ['/usr/local/lib', '/opt/local/lib', '/usr/lib64']
+        .map { |path| "#{path}/#{lib_name}.#{::FFI::Platform::LIBSUFFIX}" }
+      ffi_lib lib_paths + [lib_name]
+
+      # Represents a struct of type +zmq_pollitem_t+.
+      class PollItem < FFI::Struct
+        ##
+        # shamelessly taken from https://github.com/mtortonesi/ruby-czmq-ffi
+        #
+
+
+        FD_TYPE = if FFI::Platform::IS_WINDOWS && FFI::Platform::ADDRESS_SIZE == 64
+          # On Windows, zmq.h defines fd as a SOCKET, which is 64 bits on x64.
+          :uint64
+        else
+          :int
+        end
+
+        layout  :socket,  :pointer,
+                :fd,      FD_TYPE,
+                :events,  :short,
+                :revents, :short
+
+        # @return [Boolean] whether the socket is readable
+        def readable?
+          (self[:revents] & POLLIN) > 0
+        end
+
+        # @return [Boolean] whether the socket is writable
+        def writable?
+          (self[:revents] & POLLOUT) > 0
+        end
+      end
+
+      opts = {
+        blocking: true  # only necessary on MRI to deal with the GIL.
+      }
+
+      #ZMQ_EXPORT int  zmq_poll (zmq_pollitem_t *items, int nitems, long timeout);
+      attach_function :poll, :zmq_poll, [:pointer, :int, :long], :int, **opts
     end
 
     # This is the trivial poller based on zpoller. It only supports polling

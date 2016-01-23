@@ -222,7 +222,7 @@ describe CZTop::Poller do
         assert_raises(Errno::ENOTSOCK) { poller.wait(0) }
       end
     end
-    context "with readable server socket" do
+    context "with readable SERVER socket", skip: czmq_function?(:zsock_new_server) do
       let(:server) { CZTop::Socket::SERVER.new(endpoint1) }
       let(:client) { CZTop::Socket::CLIENT.new(endpoint1) }
       before(:each) do

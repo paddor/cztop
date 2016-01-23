@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative '../../lib/cztop'
+require 'cztop'
 
 ##
 # This example shows how to create a simple actor using a Ruby block.

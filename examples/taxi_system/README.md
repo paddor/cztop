@@ -47,7 +47,7 @@ that it cannot do so.
 #!/usr/bin/env ruby
 require 'pry'
 require 'pathname'
-require_relative '../../lib/cztop'
+require 'cztop'
 
 endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # secret+public
@@ -157,7 +157,7 @@ requests) and prints them into the terminal.
 
 ```ruby
 #!/usr/bin/env ruby
-require_relative '../../lib/cztop'
+require 'cztop'
 
 endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # public only
@@ -204,7 +204,7 @@ need to know the clients' secret keys just to authenticate them.
 
 ```ruby
 #!/usr/bin/env ruby
-require_relative '../../lib/cztop'
+require 'cztop'
 require 'fileutils'
 FileUtils.cd(File.dirname(__FILE__))
 FileUtils.mkdir "public_keys"

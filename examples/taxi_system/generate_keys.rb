@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative '../../lib/cztop'
+require 'cztop'
 require 'fileutils'
 FileUtils.cd(File.dirname(__FILE__))
 FileUtils.mkdir "public_keys"

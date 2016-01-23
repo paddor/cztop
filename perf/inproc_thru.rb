@@ -1,5 +1,5 @@
 #! /usr/bin/env ruby
-require_relative "../lib/cztop"
+require "cztop"
 require "benchmark"
 
 if ARGV.size != 2

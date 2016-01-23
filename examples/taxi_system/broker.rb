@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'pry'
 require 'pathname'
-require_relative '../../lib/cztop'
+require 'cztop'
 
 endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # secret+public

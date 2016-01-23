@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative '../../lib/cztop'
+require 'cztop'
 
 # create and bind socket
 socket = CZTop::Socket::REP.new("ipc:///tmp/req_rep_example")

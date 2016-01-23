@@ -375,7 +375,7 @@ and throughput measurement scripts.
     * [x] test on CI
 * [x] port Poller to `zmq_poll()`
   * backwards compatible (`#add_reader`, `#add_writer`, `#wait` behave the same)
-  * but in addition, it has `#readable` and `#writable` which return arrays of sockets
+  * but in addition, it has `#readables` and `#writables` which return arrays of sockets
   * level-triggered (not sure if `zmq_poll()` itelf is, but it'll be trivial)
   * could then be used in Celluloid::ZMQ
   * want to use `zmq_poller()` because it can deal with CLIENT/SERVER sockets and is the future

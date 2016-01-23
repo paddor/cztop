@@ -86,8 +86,8 @@ module CZTop
     def initialize(*readers)
       @readers = {}
       @writers = {}
-      @readable = []
-      @writable = []
+      @readables = []
+      @writables = []
       @rebuild_needed = true
       readers.each { |r| add_reader(r) }
     end
@@ -156,13 +156,13 @@ module CZTop
     # @raise [Interrupt] if the timeout expired or
     def wait(timeout = -1)
       rebuild if @rebuild_needed
-      @readable = @writable = nil
+      @readables = @writables = nil
 
       num = ZMQ.poll(@items_ptr, @nitems, timeout)
       HasFFIDelegate.raise_zmq_err if num == -1
 
       return nil if num == 0
-      return readable[0] if readable.any?
+      return readables[0] if readables.any?
 
       # TODO: handle CLIENT/SERVER sockets using ZPoller
 #      if threadsafe_sockets.any?
@@ -171,16 +171,16 @@ module CZTop
     end
 
     # @return [Array<CZTop::Socket>] readable sockets (memoized)
-    def readable
-      @readable ||= @reader_items.select(&:readable?).map do |item|
+    def readables
+      @readables ||= @reader_items.select(&:readable?).map do |item|
         ptr = item[:socket]
         @readers[ ptr.to_i ]
       end
     end
 
     # @return [Array<CZTop::Socket>] writable sockets (memoized)
-    def writable
-      @writable ||= @writer_items.select(&:writable?).map do |item|
+    def writables
+      @writables ||= @writer_items.select(&:writable?).map do |item|
         ptr = item[:socket]
         @writers[ ptr.to_i ]
       end

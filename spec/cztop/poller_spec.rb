@@ -160,21 +160,21 @@ describe CZTop::Poller do
         poller.add_reader(reader1)
         poller.add_writer(writer1)
         poller.wait(20)
-        assert_includes poller.readable, reader1
+        assert_includes poller.readables, reader1
         readers_before # remember current object
         writers_before # remember current object
       end
-      let(:readers_before) { poller.readable }
-      let(:writers_before) { poller.writable }
+      let(:readers_before) { poller.readables }
+      let(:writers_before) { poller.writables }
       it "forgets readable and writable sockets" do
         reader1.receive # empty it
         poller.wait(0)
-        refute_same readers_before, poller.readable
+        refute_same readers_before, poller.readables
         refute_same writers_before, poller.writers
       end
       it "is level-triggered" do # recognizes the socket as readable again
         poller.wait(0)
-        assert_includes poller.readable, reader1
+        assert_includes poller.readables, reader1
       end
     end
     context "when rebuild is not needed" do
@@ -246,10 +246,10 @@ describe CZTop::Poller do
     end
   end
 
-  describe "#readable" do
+  describe "#readables" do
     context "with no previous call to #wait" do
       it "returns empty array" do
-        assert_equal [], poller.readable
+        assert_equal [], poller.readables
       end
     end
     context "with readable and unreadable socket" do
@@ -261,20 +261,20 @@ describe CZTop::Poller do
         poller.wait(20)
       end
       it "returns array" do
-        assert_kind_of Array, poller.readable
+        assert_kind_of Array, poller.readables
       end
       it "returns readable socket" do
-        assert_equal [reader1], poller.readable
+        assert_equal [reader1], poller.readables
       end
       it "memoizes" do
-        assert_same poller.readable, poller.readable
+        assert_same poller.readables, poller.readables
       end
     end
   end
-  describe "#writable" do
+  describe "#writables" do
     context "with no previous call to #wait" do
       it "returns empty array" do
-        assert_equal [], poller.writable
+        assert_equal [], poller.writables
       end
     end
     context "with writable and unwritable socket" do
@@ -292,13 +292,13 @@ describe CZTop::Poller do
         poller.wait(20)
       end
       it "returns array" do
-        assert_kind_of Array, poller.writable
+        assert_kind_of Array, poller.writables
       end
       it "returns writable socket" do
-        assert_equal [writable], poller.writable
+        assert_equal [writable], poller.writables
       end
       it "memoizes" do
-        assert_same poller.writable, poller.writable
+        assert_same poller.writables, poller.writables
       end
     end
   end

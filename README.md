@@ -206,6 +206,30 @@ Or install it yourself as:
 
     $ gem install cztop
 
+## Documentation
+
+The API should be fairly straight-forward to anyone who is familiar with CZMQ
+and Ruby.  The following API documentation is currently available:
+
+* [YARD API documentation](http://www.rubydoc.info/github/paddor/cztop) (HEAD)
+* [YARD API documentation](http://www.rubydoc.info/gems/cztop) (release)
+
+Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
+
+## Performance
+
+Performance should be pretty okay since this is based on czmq-ffi-gen, which is
+reasonably thin.  CZTop is basically only a convenience layer on top, with some
+nice error checking. But hey, it's Ruby. Don't expect 5M messages per second
+with a latency of 3us.
+
+The measured latency on my laptop ranges from ~20us to ~60us per message for
+1kb messages, depending on whether transport is inproc, IPC, or TCP/IP.
+
+Make sure you check out the
+[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
+and throughput measurement scripts.
+
 ## Usage
 
 See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples. Here's a very simple one:
@@ -288,29 +312,6 @@ $ ./rep.rb & ./req.rb 3
 >>> ["FOOOOOOOOO", "BAAAAAAR"]
 $
 ```
-
-## Documentation
-
-The API should be fairly straight-forward to anyone who is familiar with CZMQ
-and Ruby.  The following API documentation is currently available:
-
-* [YARD API documentation](http://www.rubydoc.info/github/paddor/cztop)
-
-Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
-
-## Performance
-
-Performance should be pretty okay since this is based on czmq-ffi-gen, which is
-reasonably thin.  CZTop is basically only a convenience layer on top, with some
-nice error checking. But hey, it's Ruby. Don't expect 5M messages per second
-with a latency of 3us.
-
-The measured latency on my laptop ranges from ~20us to ~60us per message for
-1kb messages, depending on whether transport is inproc, IPC, or TCP/IP.
-
-Make sure you check out the
-[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
-and throughput measurement scripts.
 
 ## TODO
 

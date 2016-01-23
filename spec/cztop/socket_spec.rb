@@ -198,6 +198,12 @@ describe CZTop::Socket do
     end
   end
 
+  describe "#close" do
+    Given(:socket) { rep_socket }
+    When { rep_socket.close }
+    Then { rep_socket.ffi_delegate.null? }
+  end
+
   describe "#bind" do
     Given(:socket) { rep_socket }
     context "with valid endpoint" do

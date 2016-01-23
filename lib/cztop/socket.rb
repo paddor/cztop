@@ -62,6 +62,12 @@ module CZTop
       raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
     end
 
+    # Closes and destroys the native socket.
+    # @note Don't try to use it anymore afterwards.
+    def close
+      ffi_delegate.destroy
+    end
+
     # @return [Integer] last automatically selected, bound TCP port, if any
     # @return [nil] if not bound to a TCP port yet
     attr_reader :last_tcp_port

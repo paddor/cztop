@@ -135,9 +135,16 @@ describe CZTop::Z85 do
   end
 
   describe ".encode" do
-    let(:input) { "abcd" }
+    let(:input) { "abcd" * 1_000 }
     it "does the same as #encode" do
       assert_equal CZTop::Z85.new.encode(input), CZTop::Z85.encode(input)
+    end
+    it "is thread-safe" do
+      # NOTE: kind of of course, since the data manipulated isn't shared
+      should = CZTop::Z85.new.encode(input)
+      (0 .. 1_000).map { Thread.new { CZTop::Z85.encode(input) } }.each do |t|
+        assert_equal should, t.value
+      end
     end
   end
   describe ".decode" do

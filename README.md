@@ -390,6 +390,35 @@ $
   * cannot handle CLIENT/SERVER sockets
   * there good timer gems for Ruby
   * Poller can be used to embed in an existing event loop (Celluloid), or make your own trivial one
+* `Z85::Padded`
+  * [ ] encode up to 255 bytes with 1 byte length (use 0 as MORE)
+* [ ] provide `z85encode` and `z85decode` utilities
+  * can be used in a pipeline
+  * `z85encode`
+    * read blocks just big enough to produce 64KiB of Z85
+    * if full block size is available, no padding to do
+    * if hit EOF, use padding for the last block
+  * `z85decode`
+    * read blocks of 64KiB
+    * if full block size is available, no padding has been done
+    * if hit EOF, last block has been padded
+  * what if last block is 64KiB and padding was used? :s
+    * maybe just always use padding
+  * parallelized using 3 threads:
+    1. read input, put in queue #1
+    2. get from queue #1, encode/decode, put in queue #2
+    3. get from queue #2, write output
+  * maybe use PUSH/PULL sockets
+    * with RCVHWM set to something low, so it won't read the whole input at once while *coding is slower
+  * otherwise SizedQueue
+    * read directly into an allocated FFI::MemoryPointer for less allocations
+* `Z85::Pipe`
+  * could be used to encapsulate the whole logic above
+  * reusable for application code
+  * could then be used in the two utilities
+    * `CZTop::Z85::Pipe.new(STDIN, STDOUT).encode`
+    * or `CZTop::Z85::Pipe.new(STDIN, STDOUT).decode`
+
 
 ## Contributing
 

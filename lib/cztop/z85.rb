@@ -111,23 +111,24 @@ module CZTop
     # a multiple of 4 bytes.
     #
     # The length information is encoded similarly to lengths of messages
-    # (frames) in ZMTP. Up to 127 bytes, the data's length is encoded with
-    # a single byte (specifically, with the 7 least significant bits in it).
+    # (frames) in early versions of ZMQ. Up to 255 bytes, the data's length is
+    # encoded using a single byte.
     #
     #   +--------+-------------------------------+------------+
     #   | length |              data             |   padding  |
-    #   | 1 byte |        up to 127 bytes        |  0-3 bytes |
+    #   | 1 byte |        up to 255 bytes        |  0-3 bytes |
     #   +--------+-------------------------------+------------+
     #
-    # If the data is 128 bytes or more, the most significant bit will be set
-    # to indicate that fact, and a 64 bit unsigned integer in network byte
-    # order is appended after this first byte to encode the length of the
-    # data.  This means that up to 16EiB (exbibytes) can be encoded, which
-    # will be enough for the foreseeable future.
+    # If the data is 256 bytes or more, the length encoded in the first byte
+    # will be 0 (so it's the NULL byte) to indicate that fact, and a 64 bit
+    # unsigned integer in network byte order is appended after this first byte
+    # to encode the length of the data.  This means that up to 16EiB
+    # (exbibytes) can be encoded, which will be enough for the foreseeable
+    # future.
     #
     #   +--------+-----------+----------------------------------+------------+
-    #   |  big?  |   length  |                data              |   padding  |
-    #   | 1 byte |  8 bytes  |      128 bytes or much more      |  0-3 bytes |
+    #   |  long? |   length  |                data              |   padding  |
+    #   | 1 byte |  8 bytes  |      256 bytes or much more      |  0-3 bytes |
     #   +--------+-----------+----------------------------------+------------+
     #
     # The resulting blob is encoded using {CZTop::Z85#encode}.
@@ -140,11 +141,6 @@ module CZTop
     class Padded < Z85
       # Encododes to Z85, with padding if needed.
       #
-      # If input isn't empty, 8 additional bytes for the encoded length will
-      # be prepended. If needed, 1 to 3 bytes of padding will be appended.
-      #
-      # If input is empty, returns the empty string.
-      #
       # @param input [String] possibly binary input data
       # @return [String] Z85 encoded data as ASCII string, including encoded
       #   length and padding
@@ -152,13 +148,13 @@ module CZTop
       def encode(input)
         return super if input.empty?
         length = input.bytesize
-        if length < 1<<7 # up to 127 bytes
+        if length < 1<<8 # up to 255 bytes
           encoded_length = [length].pack("C")
 
         else # larger input
           low = length & 0xFFFFFFFF
           high = (length >> 32) & 0xFFFFFFFF
-          encoded_length = [ 1<<7, high, low ].pack("CNN")
+          encoded_length = [ 0, high, low ].pack("CNN")
         end
         padding = "\0" * ((4 - ((length+1) % 4)) % 4)
         super("#{encoded_length}#{input}#{padding}")
@@ -175,7 +171,7 @@ module CZTop
         return super if input.empty?
         decoded = super
         length = decoded.byteslice(0, 1).unpack("C")[0]
-        if (1<<7 & length).zero? # up to 127 bytes
+        if length > 0 && length < 1<<8 # up to 255 bytes
           decoded = decoded.byteslice(1, length) # extract payload
 
         else # larger input

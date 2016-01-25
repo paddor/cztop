@@ -133,6 +133,19 @@ describe CZTop::Z85 do
       end
     end
   end
+
+  describe ".encode" do
+    let(:input) { "abcd" }
+    it "does the same as #encode" do
+      assert_equal CZTop::Z85.new.encode(input), CZTop::Z85.encode(input)
+    end
+  end
+  describe ".decode" do
+    let(:input) { "abcde" }
+    it "does the same as #decode" do
+      assert_equal CZTop::Z85.new.decode(input), CZTop::Z85.decode(input)
+    end
+  end
 end
 
 describe CZTop::Z85::Padded do

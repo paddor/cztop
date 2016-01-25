@@ -7,6 +7,40 @@ module CZTop
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
+    class << self
+      # Same as {Z85#encode}, but without the need to create an instance
+      # first.
+      #
+      # @param input [String] possibly binary input data
+      # @return [String] Z85 encoded data as ASCII string
+      # @raise [ArgumentError] if input length isn't divisible by 4 with no
+      #   remainder
+      # @raise [SystemCallError] if this fails
+      def encode(input)
+        default.encode(input)
+      end
+
+      # Same as {Z85#decode}, but without the need to create an instance
+      # first.
+      #
+      # @param input [String] Z85 encoded data
+      # @return [String] original data as binary string
+      # @raise [ArgumentError] if input length isn't divisible by 5 with no
+      #   remainder
+      # @raise [SystemCallError] if this fails
+      def decode(input)
+        default.decode(input)
+      end
+
+      private
+
+      # Default instance of {Z85}.
+      # @return [Z85] memoized default instance
+      def default
+        @default ||= Z85.new
+      end
+    end
+
     def initialize
       attach_ffi_delegate(CZMQ::FFI::Zarmour.new)
       ffi_delegate.set_mode(:mode_z85)

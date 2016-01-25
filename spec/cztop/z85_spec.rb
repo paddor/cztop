@@ -272,4 +272,19 @@ describe CZTop::Z85::Padded do
       end
     end
   end
+
+  describe ".encode" do
+    let(:input) { "abcde" * 1_000 }
+    it "does the same as #encode" do
+      assert_equal CZTop::Z85::Padded.new.encode(input),
+        CZTop::Z85::Padded.encode(input)
+    end
+  end
+  describe ".decode" do
+    let(:input) { CZTop::Z85::Padded.new.encode("abcde" * 1_000) }
+    it "does the same as #decode" do
+      assert_equal CZTop::Z85::Padded.new.decode(input),
+        CZTop::Z85::Padded.decode(input)
+    end
+  end
 end

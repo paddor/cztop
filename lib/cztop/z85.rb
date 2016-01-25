@@ -139,6 +139,39 @@ module CZTop
     #   guarantee the input for {#encode} is always a multiple of 4 bytes.
     #
     class Padded < Z85
+      class << self
+        # Same as {Z85::Padded#encode}, but without the need to create an
+        # instance first.
+        #
+        # @param input [String] possibly binary input data
+        # @return [String] Z85 encoded data as ASCII string, including encoded
+        #   length and padding
+        # @raise [SystemCallError] if this fails
+        def encode(input)
+          default.encode(input)
+        end
+
+        # Same as {Z85::Padded#decode}, but without the need to create an
+        # instance first.
+        #
+        # @param input [String] Z85 encoded data (including encoded length and
+        #   padding, or empty string)
+        # @return [String] original data as binary string
+        # @raise [ArgumentError] if input is invalid or truncated
+        # @raise [SystemCallError] if this fails
+        def decode(input)
+          default.decode(input)
+        end
+
+        private
+
+        # Default instance of {Z85::Padded}.
+        # @return [Z85::Padded] memoized default instance
+        def default
+          @default ||= Z85::Padded.new
+        end
+      end
+
       # Encododes to Z85, with padding if needed.
       #
       # @param input [String] possibly binary input data

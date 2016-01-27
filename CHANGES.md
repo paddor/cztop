@@ -1,3 +1,9 @@
+0.2.0 (xx/01/2016)
+-----
+* simplify CZTop::Z85::Padded
+  * no length encoding
+  * padding similar to PKCS#7
+
 0.1.1 (23/01/2016)
 -----
 * add support for Ruby 2.0

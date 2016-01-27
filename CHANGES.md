@@ -5,6 +5,7 @@
   * padding similar to PKCS#7
 * add utilities `z85encode` and `z85decode`
 * add CZTop::Z85::Pipe
+* CZTop::SUB#subscribe: subscribe to everything if no parameter given
 
 0.1.1 (23/01/2016)
 -----

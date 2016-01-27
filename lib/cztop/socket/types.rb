@@ -134,10 +134,13 @@ module CZTop
         attach_ffi_delegate(Zsock.new_sub(endpoints, subscription))
       end
 
+      # @return [String] subscription prefix to subscribe to everything
+      EVERYTHING = ""
+
       # Subscribes to the given prefix string.
       # @param prefix [String] prefix string to subscribe to
       # @return [void]
-      def subscribe(prefix)
+      def subscribe(prefix = EVERYTHING)
         ffi_delegate.set_subscribe(prefix)
       end
 

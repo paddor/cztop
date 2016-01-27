@@ -231,9 +231,22 @@ describe CZTop::Socket::SUB do
   end
 
   describe "#subscribe" do
-    it "subscribes" do
-      expect(socket.ffi_delegate).to receive(:set_subscribe).with(subscription)
-      socket.subscribe(subscription)
+    context "with subscription prefix" do
+      before(:each) do
+        expect(socket.ffi_delegate).to receive(:set_subscribe)
+          .with(subscription)
+      end
+      it "subscribes" do
+        socket.subscribe(subscription)
+      end
+    end
+    context "without subscription prefix" do
+      before(:each) do
+        expect(socket.ffi_delegate).to receive(:set_subscribe).with("")
+      end
+      it "subscribes to everything" do
+        socket.subscribe
+      end
     end
   end
   describe "#unsubscribe" do

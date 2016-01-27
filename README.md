@@ -1,26 +1,17 @@
-[![Build Status on Travis CI](https://travis-ci.org/paddor/cztop.svg?branch=master)](https://travis-ci.org/paddor/cztop?branch=master)
-[![Code Climate](https://codeclimate.com/repos/56677a7849f50a141c001784/badges/48f3cca3c62df9e4b17b/gpa.svg)](https://codeclimate.com/repos/56677a7849f50a141c001784/feed)
-[![Inline docs](http://inch-ci.org/github/paddor/cztop.svg?branch=master&style=shields)](http://inch-ci.org/github/paddor/cztop)
-[![Dependency Status](https://gemnasium.com/paddor/cztop.svg)](https://gemnasium.com/paddor/cztop)
-[![Coverage Status](https://coveralls.io/repos/paddor/cztop/badge.svg?branch=master&service=github)](https://coveralls.io/github/paddor/cztop?branch=master)
-[![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
-
 # CZTop
-
-```
-_________  _____________________
-\_   ___ \ \____    /\__    ___/____  ______
-/    \  \/   /     /   |    |  /  _ \ \____ \
-\     \____ /     /_   |    | (  <_> )|  |_> >
- \______  //_______ \  |____|  \____/ |   __/
-        \/         \/                 |__|
-```
 
 CZTop is a CZMQ binding for Ruby. It is based on
 [czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
 FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security
 mechanisms (like CURVE).
+
+[![Build Status on Travis CI](https://travis-ci.org/paddor/cztop.svg?branch=master)](https://travis-ci.org/paddor/cztop?branch=master)
+[![Code Climate](https://codeclimate.com/repos/56677a7849f50a141c001784/badges/48f3cca3c62df9e4b17b/gpa.svg)](https://codeclimate.com/repos/56677a7849f50a141c001784/feed)
+[![Inline docs](http://inch-ci.org/github/paddor/cztop.svg?branch=master&style=shields)](http://inch-ci.org/github/paddor/cztop)
+[![Dependency Status](https://gemnasium.com/paddor/cztop.svg)](https://gemnasium.com/paddor/cztop)
+[![Coverage Status](https://coveralls.io/repos/paddor/cztop/badge.svg?branch=master&service=github)](https://coveralls.io/github/paddor/cztop?branch=master)
+[![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
 ## Reasons
 

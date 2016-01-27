@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require 'cztop'
+require 'optparse'
+require 'benchmark'
+
+options = { strategy: CZTop::Z85::Pipe::Strategy::Sequential }
+OptionParser.new do |opts|
+  opts.banner = "Usage: #$0 [options]"
+
+  opts.on("-p", "--parallel", "read, decode, and write in parallel " +
+                              "using 3 threads") do
+    options[:strategy] = CZTop::Z85::Pipe::Strategy::Parallel
+  end
+  opts.on("-v", "--verbose", "print some statistics afterwards") do
+    options[:verbose] = true
+  end
+end.parse!
+
+pipe = CZTop::Z85::Pipe.new(STDIN, STDOUT, strategy: options[:strategy])
+bytes_decoded = nil
+tms = Benchmark.measure { bytes_decoded = pipe.decode }
+exit unless options[:verbose]
+
+if tms.real < 0.1
+  warn "#{$0}: decoding took %.2f us." % (tms.real * 1_000_000)
+else
+  warn "#{$0}: decoding took %.3f seconds." % tms.real
+end
+
+throughput = (bytes_decoded * 8 / tms.real) / 1_000_000
+warn "#{$0}: mean throughput: %.3f [Mb/s]" % throughput

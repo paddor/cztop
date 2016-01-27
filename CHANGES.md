@@ -3,6 +3,8 @@
 * simplify CZTop::Z85::Padded
   * no length encoding
   * padding similar to PKCS#7
+* add utilities `z85encode` and `z85decode`
+* add CZTop::Z85::Pipe
 
 0.1.1 (23/01/2016)
 -----

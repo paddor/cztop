@@ -32,6 +32,7 @@ require_relative 'cztop/config/serialization'
 require_relative 'cztop/message/frames'
 require_relative 'cztop/socket/types'
 require_relative 'cztop/z85/padded'
+require_relative 'cztop/z85/pipe'
 
 
 # make Ctrl-C work in case a low-level call hangs

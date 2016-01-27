@@ -103,7 +103,7 @@ class CZTop::Z85::Pipe
     #
     # 1. reads from source
     # 2. encodes/decodes
-    # 3. thread that writes to sink
+    # 3. writes to sink
     #
     # This might give a performance increase on truly parallel
     # platforms such as Rubinius and JRuby (and multiple CPU cores).

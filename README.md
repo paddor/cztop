@@ -39,6 +39,7 @@ the issues with them, from my point of view:
   * outdated
   * doesn't feel like Ruby
 * [chuckremes/ffi-rzmq](https://github.com/chuckremes/ffi-rzmq)
+  * support discontinued
   * low level ZMQ gem, not CZMQ
 
 Furthermore, I knew about the generated low-level Ruby FFI binding in the

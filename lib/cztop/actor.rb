@@ -168,10 +168,9 @@ module CZTop
     # @return [Boolean] whether it died just now (+false+ if it was dead
     #   already)
     def terminate
-      term_msg = Message.new(TERM)
       @mtx.synchronize do
         return false if not @running
-        term_msg.send_to(self)
+        Message.new(TERM).send_to(self)
         await_handler_death
         true
       end

@@ -275,7 +275,7 @@ puts ">>> #{msg.to_a.inspect}"
 ##
 # This will send 20 additional messages:
 #
-#   ./req.rb 20
+#   $ ./req.rb 20
 #
 if ARGV.first
   ARGV.first.to_i.times do

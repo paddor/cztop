@@ -1,4 +1,9 @@
-0.2.0 (xx/01/2016)
+0.2.1 (31/01/2016)
+-----
+* improve documentation
+* improve test suite
+
+0.2.0 (27/01/2016)
 -----
 * simplify CZTop::Z85::Padded
   * no length encoding

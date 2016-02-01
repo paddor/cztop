@@ -27,6 +27,7 @@ the issues with them, from my point of view:
   * doesn't feel like Ruby
 * [mtortonesi/ruby-czmq](https://github.com/mtortonesi/ruby-czmq)
   * no tests
+  * no documentation
   * outdated
   * doesn't feel like Ruby
 * [chuckremes/ffi-rzmq](https://github.com/chuckremes/ffi-rzmq)

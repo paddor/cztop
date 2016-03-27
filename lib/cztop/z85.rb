@@ -43,7 +43,7 @@ module CZTop
 
     def initialize
       attach_ffi_delegate(CZMQ::FFI::Zarmour.new)
-      ffi_delegate.set_mode(:mode_z85)
+      ffi_delegate.set_mode(CZMQ::FFI::Zarmour::MODE_Z85)
     end
 
     # Encodes to Z85.
@@ -70,32 +70,10 @@ module CZTop
     # @raise [SystemCallError] if this fails
     def decode(input)
       raise ArgumentError, "wrong input length" if input.bytesize % 5 > 0
-      FFI::MemoryPointer.new(:size_t) do |size_ptr|
-        buffer_ptr = ffi_delegate.decode(input, size_ptr)
-        raise_zmq_err if buffer_ptr.null?
-        decoded_string = buffer_ptr.read_string(_size(size_ptr) - 1)
-        return decoded_string
-      end
-    end
-
-    private
-
-    # Gets correct size, depending on the platform.
-    # @return [Integer]
-    # @see https://github.com/ffi/ffi/issues/398
-    # @see https://github.com/ffi/ffi/issues/333
-    def _size(size_ptr)
-      if RUBY_ENGINE == "jruby"
-        # NOTE: JRuby FFI doesn't have #read_uint64, nor does it have
-        # Pointer::SIZE
-        return size_ptr.read_ulong_long
-      end
-
-      if ::FFI::Pointer::SIZE == 8 # 64 bit
-        size_ptr.read_uint64
-      else
-        size_ptr.read_uint32
-      end
+      zchunk = ffi_delegate.decode(input)
+      raise_zmq_err if zchunk.null?
+      decoded_string = zchunk.data.read_string(zchunk.size - 1)
+      return decoded_string
     end
   end
 end

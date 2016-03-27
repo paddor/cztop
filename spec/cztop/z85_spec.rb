@@ -105,35 +105,6 @@ describe CZTop::Z85 do
     end
   end
 
-  describe "#_size" do
-    let(:ptr) { double("pointer") }
-    context "on non-jruby", skip: ("not relevant on JRuby" if RUBY_ENGINE == "jruby") do
-      context "on 64-bit system" do
-        let(:size) { double("uint64") }
-        before(:each) { stub_const "::FFI::Pointer::SIZE", 8 }
-        before(:each) { expect(ptr).to receive(:read_uint64).and_return(size) }
-        it "reads uint64" do
-          assert_same size, subject.__send__(:_size, ptr)
-        end
-      end
-      context "on 32-bit system" do
-        let(:size) { double("uint32") }
-        before(:each) { stub_const "::FFI::Pointer::SIZE", 4 }
-        before(:each) { expect(ptr).to receive(:read_uint32).and_return(size) }
-        it "reads uint32" do
-          assert_same size, subject.__send__(:_size, ptr)
-        end
-      end
-    end
-    context "on jruby", skip: ("only relevant on JRuby" if RUBY_ENGINE != "jruby") do
-      let(:size) { double("ulong_long") }
-      before(:each) { expect(ptr).to receive(:read_ulong_long).and_return(size) }
-      it "reads ulong_long" do
-        assert_same size, subject.__send__(:_size, ptr)
-      end
-    end
-  end
-
   describe ".encode" do
     let(:input) { "abcd" * 1_000 }
     it "does the same as #encode" do

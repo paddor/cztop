@@ -133,7 +133,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 You'll need:
 
-* CZMQ >= 3.0.2
+* CZMQ > 3.0 (master)
 * ZMQ >= 4.0
 
 For security mechanisms like CURVE, you'll need:
@@ -144,7 +144,7 @@ To install on OSX using homebrew, run:
 
     $ brew install libsodium
     $ brew install zmq  --with-libsodium
-    $ brew install czmq
+    $ brew install czmq --HEAD
 
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.
@@ -164,15 +164,6 @@ See next section.
 When using ZMQ 4.1/4.0:
 * no CLIENT/SERVER sockets. Don't try.
 * no ZMTP 3.1 heartbeats. Setting the options will have no effect.
-
-When using CZMQ 3.0:
-* don't use `Certificate#[]=` to unset meta data (by passing `nil`)
-  * `zcert_unset_meta()` was added more recently for that case
-  * see [zeromq/czmq#1248](https://github.com/zeromq/czmq/pull/1248)
-* if you use Beacon, make sure you also call `Beacon#configure`. Otherwise it closes STDIN when being destroyed.
-  * see [zeromq/czmq#1281](https://github.com/zeromq/czmq/issues/1281)
-* no CLIENT/SERVER sockets. Don't try.
-* no ZMTP 3.1 heartbeats. Don't try.
 
 ### Supported Ruby versions
 

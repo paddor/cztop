@@ -1,5 +1,3 @@
-require "pry"
-
 module CZTop
   # CZMQ monitor. Listen for socket events.
   #

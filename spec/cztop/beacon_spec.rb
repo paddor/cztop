@@ -6,8 +6,7 @@ describe "CZTop::Beacon::ZBEACON_FPTR" do
   end
 end
 
-describe CZTop::Beacon, skip: czmq_feature?(
-  "fix for https://github.com/zeromq/czmq/issues/1281", :zcert_unset_meta) do
+describe CZTop::Beacon do
 
   subject { CZTop::Beacon.new }
   let(:actor) { subject.actor }

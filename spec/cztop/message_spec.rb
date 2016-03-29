@@ -354,7 +354,7 @@ describe CZTop::Message do
     end
   end
 
-  describe "#routing_id", skip: czmq_function?(:zmsg_routing_id) do
+  describe "#routing_id", skip: zmq_version?("4.2") do
     context "with no routing ID set" do
       Then { msg.routing_id == 0 }
     end
@@ -365,7 +365,7 @@ describe CZTop::Message do
     end
   end
 
-  describe "#routing_id=", skip: czmq_function?(:zmsg_set_routing_id) do
+  describe "#routing_id=", skip: zmq_version?("4.2") do
     context "with valid routing ID" do
       # code duplication for completeness' sake
       Given(:new_routing_id) { 123456 }

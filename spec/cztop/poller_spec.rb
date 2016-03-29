@@ -233,7 +233,7 @@ describe CZTop::Poller do
         assert_nil poller.wait(20)
       end
     end
-    context "with readable SERVER socket", skip: czmq_function?(:zsock_new_server) do
+    context "with readable SERVER socket", skip: zmq_version?("4.2") do
       let(:server) { CZTop::Socket::SERVER.new(endpoint1) }
       let(:client) { CZTop::Socket::CLIENT.new(endpoint1) }
       before(:each) do
@@ -413,8 +413,7 @@ describe CZTop::Poller::ZPoller do
         assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
-    context "with unknown socket", skip: czmq_feature?(
-      "errors from zpoller_remove()", :zcert_unset_meta) do
+    context "with unknown socket" do
 
       it "raises" do
         assert_raises(ArgumentError) { poller.remove(reader2) }

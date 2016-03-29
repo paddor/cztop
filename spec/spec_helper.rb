@@ -8,12 +8,12 @@ end
 require 'rspec'
 require 'rspec/given'
 
-require_relative 'czmq_helper'
+require_relative 'zmq_helper'
 require_relative '../lib/cztop'
 
 RSpec.configure do |config|
   config.expect_with :minitest
-  include CZMQHelper
+  include ZMQHelper
 end
 
 # NOTE: as of January 28, 2016, the test suite needs opens about ~650 file

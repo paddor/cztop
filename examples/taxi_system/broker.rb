@@ -36,7 +36,6 @@ end
 @driver_map = {} # driver name => routing ID
 Thread.new do
 
-  # CZTop::Loop (zloop) doesn't work with SERVER sockets :(
   poller = CZTop::Poller.new(@socket)
   while true
     puts "waiting for socket to become readable ..."

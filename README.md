@@ -134,7 +134,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 You'll need:
 
 * CZMQ > 3.0.2 (built from master)
-* ZMQ >= 4.0
+* ZMQ >= 4.1
 
 For security mechanisms like CURVE, you'll need:
 
@@ -161,10 +161,13 @@ See next section.
 
 ### Known Issues with older versions of ZMQ
 
-When using ZMQ 4.1/4.0:
+When using ZMQ 4.1:
 * no CLIENT/SERVER sockets. Don't try.
 * no ZMTP 3.1 heartbeats. Setting the options will have no effect.
 * CZTop::Poller::ZPoller#remove with an unknown socket won't raise.
+
+When using ZMQ 4.0:
+* some spec failed due to an assertion in CZMQ's `zsock_set_curve_server()`. Don't know, don't care anymore. See [this build](https://travis-ci.org/paddor/cztop/jobs/119384617)
 
 ### Supported Ruby versions
 
@@ -350,6 +353,7 @@ $
     * [x] tested on CI
   * [x] ZMQ 4.0
     * [x] tested on CI
+    * as of March, 2016, this isn't the case anymore
   * [ ] ZMQ 3.2
     * too big a pain ([d5172ab](https://github.com/paddor/czmq-ffi-gen/commit/d5172ab6db64999c50ba24f71569acf1dd45af51))
 * [x] support multiple versions of CZMQ
@@ -362,6 +366,7 @@ $
       * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`, attach `zsys_has_curve()` instead (under same name)
     * [x] adapt test suite to skip affected test examples
     * [x] test on CI
+    * as of March, 2016, this isn't the case anymore
 * [x] port [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) to `zmq_poll()`
   * backwards compatible (`#add_reader`, `#add_writer`, `#wait` behave the same)
   * but in addition, it has `#readables` and `#writables` which return arrays of sockets

@@ -15,27 +15,21 @@ env:
   # recognized by czmq-ffi-gen's ci-scripts
   - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
   - CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
-  - CZMQ_VERSION=HEAD ZMQ_VERSION=4.0
 matrix:
   exclude:
-    # old MRI versions don't get to test old ZMQ versions. basta.
+    # I wanna keep the CI build time low.
+    # Old MRI versions don't get to test old ZMQ versions. Basta.
     - rvm: 2.2.4
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
-    - rvm: 2.2.4
-      env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.0
     - rvm: 2.1.8
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
-    - rvm: 2.1.8
-      env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.0
-    # non-MRI rubies don't get to test old ZMQ versions. basta.
+    - rvm: 2.0.0-p648
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
+    # Non-MRI rubies don't get to test old ZMQ versions. Basta.
     - rvm: jruby-head
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
-    - rvm: jruby-head
-      env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.0
     - rvm: rbx
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.1
-    - rvm: rbx
-      env: CZMQ_VERSION=HEAD ZMQ_VERSION=4.0
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

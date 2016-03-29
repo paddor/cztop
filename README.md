@@ -159,11 +159,12 @@ and CZMQ from master, like this:
 
 See next section.
 
-### Known Issues if using the current stable releases
+### Known Issues with older versions of ZMQ
 
 When using ZMQ 4.1/4.0:
 * no CLIENT/SERVER sockets. Don't try.
 * no ZMTP 3.1 heartbeats. Setting the options will have no effect.
+* CZTop::Poller::ZPoller#remove with an unknown socket won't raise.
 
 ### Supported Ruby versions
 

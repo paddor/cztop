@@ -133,7 +133,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 You'll need:
 
-* CZMQ > 3.0 (master)
+* CZMQ > 3.0.2 (built from master)
 * ZMQ >= 4.0
 
 For security mechanisms like CURVE, you'll need:

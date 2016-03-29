@@ -415,7 +415,7 @@ describe CZTop::Poller::ZPoller do
     end
     context "with unknown socket" do
 
-      it "raises" do
+      it "raises", skip: zmq_version?("4.2") do
         assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end

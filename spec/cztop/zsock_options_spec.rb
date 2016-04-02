@@ -399,6 +399,37 @@ describe CZTop::ZsockOptions do
             end
           end
         end
+        context "with talking and then dead client socket" do
+          let(:received_msg) { server_socket.receive } # to know the routing ID
+          before(:each) do
+            server_socket
+            server_socket.options.sndtimeo = 30 # so we'll get an exception
+            server_mon
+            client_socket
+            accepted_event
+            client_socket << "foo"
+            assert_equal %w"foo", received_msg.to_a
+
+            # NOTE: Disconnecting alone won't do it. It has to be destroyed.
+            client_socket.ffi_delegate.destroy
+
+            disconnected_event
+          end
+
+          let(:test_msg) do
+            msg = CZTop::Message.new "bar"
+            msg.routing_id = received_msg.routing_id
+            msg
+          end
+
+          context "when server sends message" do
+            it "raises" do
+              assert_raises(IO::EAGAINWaitWritable) do
+                server_socket << test_msg
+              end
+            end
+          end
+        end
       end
     end
 

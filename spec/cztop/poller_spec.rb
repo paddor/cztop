@@ -337,7 +337,7 @@ describe CZTop::Poller do
           assert_equal [], aggpoller.writables
         end
       end
-      context "with writable and unwritable socket" do
+      context "with writable and unwritable sockets" do
 
         let(:writable) { CZTop::Socket::DEALER.new(endpoint1) }
         let(:unwritable) do

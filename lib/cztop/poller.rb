@@ -129,11 +129,16 @@ module CZTop
       Zsock.resolve(socket)
     end
 
+    # Keeps a reference to the given socket, and remembers its event mask.
+    # @param socket [Socket, Actor] the socket
+    # @param events [Integer] the event mask
     def remember_socket(socket, events)
       @sockets[ptr_for_socket(socket).to_i] = socket
       @events[socket] = events
     end
 
+    # Discards the referencel to the given socket, and forgets its event mask.
+    # @param socket [Socket, Actor] the socket
     def forget_socket(socket)
       @sockets.delete(ptr_for_socket(socket).to_i)
       @events.delete(socket)

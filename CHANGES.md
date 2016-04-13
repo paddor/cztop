@@ -1,3 +1,21 @@
+0.4.0 (13/04/2016)
+-----
+* CZTop::Poller learns the following methods for convenience and compatibility:
+  * #add_reader
+  * #add_writer
+  * #remove_reader
+  * #remove_writer
+* CZTop::Poller::Aggregated gets method delegators for the following 8 methods
+  for compatibility:
+  * CZTop::Poller#add
+  * CZTop::Poller#add_reader
+  * CZTop::Poller#add_writer
+  * CZTop::Poller#modify
+  * CZTop::Poller#remove
+  * CZTop::Poller#remove_reader
+  * CZTop::Poller#remove_writer
+  * CZTop::Poller#sockets
+
 0.3.0 (13/04/2016)
 -----
 * port CZTop::Poller to zmq_poller_*() functions so it supports thread-safe

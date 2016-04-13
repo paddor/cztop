@@ -292,19 +292,19 @@ describe CZTop::Poller do
         end
       end
 
-#      context "having been called previously" do
-#        before(:each) do
-#          writer1 << "i'll teach you how to read"
-#          poller.add(reader1)
-#          poller.add(writer1, POLLOUT)
-#          aggpoller.wait(20)
-#          assert_includes aggpoller.readables, reader1
-#        end
-#        it "is level-triggered" do # recognizes the socket as readable again
-#          aggpoller.wait(0)
-#          assert_includes aggpoller.readables, reader1
-#        end
-#      end
+      context "having been called previously" do
+        before(:each) do
+          writer1 << "i'll teach you how to read"
+          poller.add(reader1)
+          poller.add(writer1, POLLOUT)
+          aggpoller.wait(20)
+          assert_includes aggpoller.readables, reader1
+        end
+        it "is level-triggered" do # recognizes the socket as readable again
+          aggpoller.wait(0)
+          assert_includes aggpoller.readables, reader1
+        end
+      end
     end
     describe "#readables" do
       it "returns array" do

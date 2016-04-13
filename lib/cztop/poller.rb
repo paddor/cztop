@@ -229,9 +229,9 @@ module CZTop
   #
   # * in {#wait}, poll with given timeout
   # * in case there was an event:
-  # ** deregister the corresponding event(s) on the registered socket
-  # ** poll again with zero timeout until no more sockets
-  # ** repeat and accumulate results into two lists
+  #   * deregister the corresponding event(s) on the registered socket
+  #   * poll again with zero timeout until no more sockets
+  #   * repeat and accumulate results into two lists
   #
   # = Forwarded Methods
   #

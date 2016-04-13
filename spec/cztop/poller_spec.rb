@@ -485,6 +485,57 @@ describe CZTop::Poller do
         end
       end
     end
+    describe "forwarded methods" do
+      let(:obj) { Object.new }
+      describe "#add" do
+        after(:each) { assert_equal :foo, aggpoller.add(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:add).with(obj).and_return(:foo)
+        end
+      end
+      describe "#add_reader" do
+        after(:each) { assert_equal :foo, aggpoller.add_reader(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:add_reader).with(obj).and_return(:foo)
+        end
+      end
+      describe "#add_writer" do
+        after(:each) { assert_equal :foo, aggpoller.add_writer(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:add_writer).with(obj).and_return(:foo)
+        end
+      end
+      describe "#modify" do
+        after(:each) { assert_equal :foo, aggpoller.modify(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:modify).with(obj).and_return(:foo)
+        end
+      end
+      describe "#remove" do
+        after(:each) { assert_equal :foo, aggpoller.remove(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:remove).with(obj).and_return(:foo)
+        end
+      end
+      describe "#remove_reader" do
+        after(:each) { assert_equal :foo, aggpoller.remove_reader(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:remove_reader).with(obj).and_return(:foo)
+        end
+      end
+      describe "#remove_writer" do
+        after(:each) { assert_equal :foo, aggpoller.remove_writer(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:remove_writer).with(obj).and_return(:foo)
+        end
+      end
+      describe "#sockets" do
+        after(:each) { assert_equal :foo, aggpoller.sockets(obj) }
+        it "forwards to Poller" do
+          expect(poller).to receive(:sockets).with(obj).and_return(:foo)
+        end
+      end
+    end
   end
 end
 

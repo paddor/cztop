@@ -233,6 +233,20 @@ module CZTop
   # ** poll again with zero timeout until no more sockets
   # ** repeat and accumulate results into two lists
   #
+  # = Forwarded Methods
+  #
+  # The following methods are defined on this class too, and calls are
+  # forwarded directly to the actual {CZTop::Poller} instance:
+  #
+  # * {CZTop::Poller#add}
+  # * {CZTop::Poller#add_reader}
+  # * {CZTop::Poller#add_writer}
+  # * {CZTop::Poller#modify}
+  # * {CZTop::Poller#remove}
+  # * {CZTop::Poller#remove_reader}
+  # * {CZTop::Poller#remove_writer}
+  # * {CZTop::Poller#sockets}
+  #
   class Poller::Aggregated
 
     # @return [CZTop::Poller.new] the associated (regular) poller
@@ -243,6 +257,17 @@ module CZTop
 
     # @return [Array<CZTop::Socket>] writable sockets
     attr_reader :writables
+
+    extend Forwardable
+    def_delegators :@poller,
+      :add,
+      :add_reader,
+      :add_writer,
+      :modify,
+      :remove,
+      :remove_reader,
+      :remove_writer,
+      :sockets
 
     # Initializes the aggregated poller.
     # @param poller [CZTop::Poller] the wrapped poller

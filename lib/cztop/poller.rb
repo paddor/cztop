@@ -23,20 +23,34 @@ module CZTop
           ZMQ.poller_destroy(ptr_ptr)
         end)
       @event_ptr = FFI::MemoryPointer.new(ZMQ::PollerEvent)
-      readers.each { |r| add(r) }
+      readers.each { |r| add_reader(r) }
     end
 
     # Adds a socket to be polled for readability.
     # @param socket [Socket, Actor] the socket
-    # @param events [Integer] events you're interested in (see constants in
-    #   {ZMQ}
+    # @param events [Integer] bitwise-OR'd events you're interested in (see
+    #   POLLIN and POLLOUT constants in {CZTop::Poller::ZMQ}
     # @return [void]
     # @raise [ArgumentError] if it's not a socket
-    def add(socket, events = ZMQ::POLLIN)
+    def add(socket, events)
       ptr = ptr_for_socket(socket)
       rc = ZMQ.poller_add(@poller_ptr, ptr, nil, events)
       HasFFIDelegate.raise_zmq_err if rc == -1
       remember_socket(socket, events)
+    end
+
+    # Convenience method to register a socket for readability. See {#add}.
+    # @param socket [Socket, Actor] the socket
+    # @return [void]
+    def add_reader(socket)
+      add(socket, ZMQ::POLLIN)
+    end
+
+    # Convenience method to register a socket for writability. See {#add}.
+    # @param socket [Socket, Actor] the socket
+    # @return [void]
+    def add_writer(socket)
+      add(socket, ZMQ::POLLOUT)
     end
 
     # Modifies the events of interest for the given socket.
@@ -62,6 +76,32 @@ module CZTop
       rc = ZMQ.poller_remove(@poller_ptr, ptr)
       HasFFIDelegate.raise_zmq_err if rc == -1
       forget_socket(socket)
+    end
+
+    # Removes a reader socket that was registered for readability only.
+    #
+    # @param socket [Socket, Actor] the socket
+    # @raise [ArgumentError] if it's not registered, not registered for
+    #   readability, or registered for more than just readability
+    def remove_reader(socket)
+      if event_mask_for_socket(socket) == ZMQ::POLLIN
+        remove(socket)
+        return
+      end
+      raise ArgumentError, "not registered for readability only: %p" % socket
+    end
+
+    # Removes a reader socket that was registered for writability only.
+    #
+    # @param socket [Socket, Actor] the socket
+    # @raise [ArgumentError] if it's not registered, not registered for
+    #   writability, or registered for more than just writability
+    def remove_writer(socket)
+      if event_mask_for_socket(socket) == ZMQ::POLLOUT
+        remove(socket)
+        return
+      end
+      raise ArgumentError, "not registered for writability only: %p" % socket
     end
 
     # Waits for registered sockets to become readable or writable, depending

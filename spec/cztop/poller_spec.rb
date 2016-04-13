@@ -34,17 +34,16 @@ describe CZTop::Poller do
       let(:socket) { reader1 }
       after(:each) { CZTop::Poller.new(socket) }
       it "adds reader" do
-        expect_any_instance_of(CZTop::Poller).to receive(:add).with(socket)
-          .and_call_original
+        expect_any_instance_of(CZTop::Poller).to receive(:add_reader).with(socket)
       end
     end
     context "with multiple readers" do
       after(:each) { CZTop::Poller.new(reader1, reader2) }
       it "adds readers" do
-        expect_any_instance_of(CZTop::Poller).to receive(:add).
-               with(reader1).and_call_original
-        expect_any_instance_of(CZTop::Poller).to receive(:add).
-               with(reader2).and_call_original
+        expect_any_instance_of(CZTop::Poller).to receive(:add_reader).
+               with(reader1)
+        expect_any_instance_of(CZTop::Poller).to receive(:add_reader).
+               with(reader2)
       end
     end
   end
@@ -56,18 +55,6 @@ describe CZTop::Poller do
         assert_includes poller.sockets, reader1 # keeps ref
       end
       it "adds reader socket" do
-        expect(CZTop::Poller::ZMQ).to receive(:poller_add).
-          with(poller_ptr, socket_ptr, nil, POLLIN).
-          and_call_original
-      end
-    end
-    context "with no explicit events" do
-      let(:socket) { reader1 }
-      after(:each) do
-        poller.add(socket)
-        assert_includes poller.sockets, reader1 # keeps ref
-      end
-      it "adds socket as reader" do
         expect(CZTop::Poller::ZMQ).to receive(:poller_add).
           with(poller_ptr, socket_ptr, nil, POLLIN).
           and_call_original
@@ -91,11 +78,23 @@ describe CZTop::Poller do
       end
     end
   end
+  describe "#add_reader" do
+    after(:each) { poller.add_reader(reader1) }
+    it "adds reader" do
+      expect(poller).to receive(:add).with(reader1, POLLIN)
+    end
+  end
+  describe "#add_writer" do
+    after(:each) { poller.add_writer(writer1) }
+    it "adds writer" do
+      expect(poller).to receive(:add).with(writer1, POLLOUT)
+    end
+  end
   describe "#modify" do
     context "with registered socket" do
       let(:socket) { reader1 }
       let(:events) { POLLIN | POLLOUT }
-      before(:each) { poller.add(reader1) }
+      before(:each) { poller.add_reader(reader1) }
       after(:each) { poller.modify(reader1, events) }
       it "modifies events" do
         expect(CZTop::Poller::ZMQ).to receive(:poller_modify).
@@ -110,8 +109,8 @@ describe CZTop::Poller do
   end
   describe "#remove" do
     context "with registered socket" do
-      let(:socket) { writer1 }
-      before(:each) { poller.add(socket) }
+      let(:socket) { reader1 }
+      before(:each) { poller.add_reader(socket) }
       after(:each) do
         poller.remove(socket)
         refute_includes poller.sockets, reader1 # forgets ref
@@ -132,15 +131,79 @@ describe CZTop::Poller do
       end
     end
   end
+  describe "#remove_reader" do
+    context "with socket registered for readability only" do
+      let(:socket) { reader1 }
+      before(:each) { poller.add_reader(socket) }
+      after(:each) do
+        poller.remove_reader(socket)
+      end
+      it "removes reader" do
+        expect(poller).to receive(:remove).
+          with(socket)
+      end
+    end
+    context "with unregistered reader" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_reader(reader1) }
+      end
+    end
+    context "with socket registered for writability" do
+      let(:socket) { writer1 }
+      before(:each) { poller.add_writer(socket) }
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_reader(socket) }
+      end
+    end
+    context "with socket registered for readability and writability" do
+      let(:socket) { CZTop::Socket::DEALER.new(endpoint1) }
+      before(:each) { poller.add(socket, POLLIN | POLLOUT) }
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_reader(socket) }
+      end
+    end
+  end
+  describe "#remove_writer" do
+    context "with socket registered for writability only" do
+      let(:socket) { writer1 }
+      before(:each) { poller.add_writer(socket) }
+      after(:each) do
+        poller.remove_writer(socket)
+      end
+      it "removes writer" do
+        expect(poller).to receive(:remove).
+          with(socket)
+      end
+    end
+    context "with unregistered writer" do
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_writer(writer1) }
+      end
+    end
+    context "with socket registered for readability" do
+      let(:socket) { reader1 }
+      before(:each) { poller.add_reader(socket) }
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_writer(socket) }
+      end
+    end
+    context "with socket registered for readability and writability" do
+      let(:socket) { CZTop::Socket::DEALER.new(endpoint1) }
+      before(:each) { poller.add(socket, POLLIN | POLLOUT) }
+      it "raises" do
+        assert_raises(ArgumentError) { poller.remove_writer(socket) }
+      end
+    end
+  end
   describe "#wait" do
     context "in general" do
       let(:poller_ptr) { poller.instance_variable_get(:@poller_ptr) }
       let(:event_ptr) { poller.instance_variable_get(:@event_ptr) }
 
       before(:each) do
-        poller.add(reader1)
-        poller.add(reader2)
-        poller.add(reader3)
+        poller.add(reader1, POLLIN)
+        poller.add(reader2, POLLIN)
+        poller.add(reader3, POLLIN)
         poller.add(writer1, POLLOUT)
         poller.add(writer2, POLLOUT)
         poller.add(writer3, POLLOUT)
@@ -203,7 +266,7 @@ describe CZTop::Poller do
     context "with event" do
       before(:each) do
         writer1 << "foobar"
-        poller.add(reader1)
+        poller.add_reader(reader1)
       end
       it "returns socket" do
         assert_same reader1, poller.simple_wait(20)
@@ -211,7 +274,7 @@ describe CZTop::Poller do
     end
     context "with timeout expired" do
       before(:each) do
-        poller.add(reader1)
+        poller.add_reader(reader1)
       end
       it "returns nil" do
         assert_nil poller.simple_wait(20)
@@ -225,7 +288,7 @@ describe CZTop::Poller do
     end
 
     before(:each) do
-      poller.add(actor)
+      poller.add_reader(actor)
     end
     after(:each) do
       actor.terminate
@@ -280,7 +343,7 @@ describe CZTop::Poller do
       context "with new event" do
         before(:each) do
           writer1 << "foobar"
-          poller.add(reader1)
+          poller.add_reader(reader1)
         end
         it "returns true" do
           assert aggpoller.wait(20)
@@ -295,8 +358,8 @@ describe CZTop::Poller do
       context "having been called previously" do
         before(:each) do
           writer1 << "i'll teach you how to read"
-          poller.add(reader1)
-          poller.add(writer1, POLLOUT)
+          poller.add_reader(reader1)
+          poller.add_writer(writer1)
           aggpoller.wait(20)
           assert_includes aggpoller.readables, reader1
         end
@@ -318,9 +381,9 @@ describe CZTop::Poller do
       context "with readable and unreadable socket" do
         before(:each) do
           writer1 << "foobar"
-          poller.add(reader1) # readable
-          poller.add(reader2) # unreadable
-          poller.add(writer1, POLLOUT) # a writer
+          poller.add_reader(reader1) # readable
+          poller.add_reader(reader2) # unreadable
+          poller.add_writer(writer1) # a writer
           aggpoller.wait(20)
         end
         it "returns readable socket" do
@@ -346,9 +409,9 @@ describe CZTop::Poller do
           s
         end
         before(:each) do
-          poller.add(writable, POLLOUT) # writable
-          poller.add(unwritable, POLLOUT) # unwritable
-          poller.add(reader3) # a reader
+          poller.add_writer(writable) # writable
+          poller.add_writer(unwritable) # unwritable
+          poller.add_reader(reader3) # a reader
           aggpoller.wait(20)
         end
         it "returns writable socket" do

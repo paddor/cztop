@@ -269,9 +269,7 @@ module CZTop
     # were before the call to {#wait}.
     # @return [void]
     def restore_event_masks
-      @event_masks.each do |socket, mask|
-        poller.modify(socket, mask)
-      end
+      @event_masks.each { |socket, mask| poller.modify(socket, mask) }
     end
   end
 

@@ -28,7 +28,7 @@ puts ">>> got #{welcome}."
 
 poller = CZTop::Poller.new(@socket)
 while true
-  socket = poller.wait
+  socket = poller.simple_wait
   message = socket.receive
   puts ">>> received message: #{message[0].inspect}"
 end

@@ -39,7 +39,7 @@ Thread.new do
   poller = CZTop::Poller.new(@socket)
   while true
     puts "waiting for socket to become readable ..."
-    socket = poller.wait
+    socket = poller.simple_wait
     puts "socket is readable"
     msg = socket.receive
     puts "got message"

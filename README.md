@@ -133,8 +133,8 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 You'll need:
 
-* CZMQ > 3.0.2 (built from master)
-* ZMQ >= 4.1
+* CZMQ > 3.0.2 (currently built from master)
+* ZMQ >= 4.2 (currently built from master)
 
 For security mechanisms like CURVE, you'll need:
 
@@ -143,31 +143,11 @@ For security mechanisms like CURVE, you'll need:
 To install on OSX using homebrew, run:
 
     $ brew install libsodium
-    $ brew install zmq  --with-libsodium
+    $ brew install zmq  --HEAD --with-libsodium
     $ brew install czmq --HEAD
 
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.
-
-**Warning**: To make use of the full feature set of CZTop (including
-CLIENT/SERVER sockets and ZMTP 3.1 heartbeats), you'll need to install both ZMQ
-and CZMQ from master, like this:
-
-    # instead of the last two commands from above
-    $ brew install zmq  --with-libsodium --HEAD
-    $ brew install czmq --HEAD
-
-See next section.
-
-### Known Issues with older versions of ZMQ
-
-When using ZMQ 4.1:
-* no CLIENT/SERVER sockets. Don't try.
-* no ZMTP 3.1 heartbeats. Setting the options will have no effect.
-* CZTop::Poller::ZPoller#remove with an unknown socket won't raise.
-
-When using ZMQ 4.0:
-* some spec failed due to an assertion in CZMQ's `zsock_set_curve_server()`. Don't know, don't care anymore. See [this build](https://travis-ci.org/paddor/cztop/jobs/119384617)
 
 ### Supported Ruby versions
 
@@ -351,9 +331,10 @@ $
     * [x] tested on CI
   * [x] ZMQ 4.1
     * [x] tested on CI
+    * as of April 2016, this isn't the case anymore
   * [x] ZMQ 4.0
     * [x] tested on CI
-    * as of March, 2016, this isn't the case anymore
+    * as of March 2016, this isn't the case anymore
   * [ ] ZMQ 3.2
     * too big a pain ([d5172ab](https://github.com/paddor/czmq-ffi-gen/commit/d5172ab6db64999c50ba24f71569acf1dd45af51))
 * [x] support multiple versions of CZMQ

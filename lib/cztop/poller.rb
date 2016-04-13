@@ -73,10 +73,6 @@ module CZTop
     # @return [nil] if the timeout expired or
     # @raise [SystemCallError] if this failed
     def wait(timeout = -1)
-      # in this case, zmq_poller_wait would also return 0 :s
-      # TODO: remove when https://github.com/zeromq/libzmq/pull/1891 is merged
-      return nil if @sockets.empty?
-
       rc = ZMQ.poller_wait(@poller_ptr, @event_ptr, timeout)
       if rc == -1
         if CZMQ::FFI::Errors.errno != Errno::ETIMEDOUT::Errno

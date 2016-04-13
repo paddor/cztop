@@ -1,12 +1,12 @@
 module CZTop
   # A non-trivial socket poller.
   #
-  # It can poll for reading and writing, and supports thread-safe sockets
-  # (SERVER/CLIENT/RADIO/DISH).
+  # It can poll for readability and writability, and supports thread-safe
+  # sockets (SERVER/CLIENT/RADIO/DISH).
   #
   # This implementation is NOT based on CZMQ's +zpoller+. Reasons:
   #
-  # * +zpoller+ can only poll for reading
+  # * +zpoller+ can only poll for readability
   #
   class Poller
     include ::CZMQ::FFI
@@ -26,7 +26,7 @@ module CZTop
       readers.each { |r| add(r) }
     end
 
-    # Adds a socket to be polled for reading.
+    # Adds a socket to be polled for readability.
     # @param socket [Socket, Actor] the socket
     # @param events [Integer] events you're interested in (see constants in
     #   {ZMQ}
@@ -333,7 +333,7 @@ module CZTop
   end
 
   # This is the trivial poller based on zpoller. It only supports polling
-  # for reading, but it also supports doing that on CLIENT/SERVER sockets,
+  # for readability, but it also supports doing that on CLIENT/SERVER sockets,
   # which is useful for {CZTop::Poller}.
   #
   # @see http://api.zeromq.org/czmq3-0:zpoller

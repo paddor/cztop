@@ -307,6 +307,72 @@ describe CZTop::Poller do
     end
   end
 
+  describe "#socket_for_ptr" do
+    let(:socket) { reader1 }
+    context "with known pointer" do
+      before(:each) { poller.add_reader(socket) }
+      it "returns socket" do
+        assert_same socket, poller.socket_for_ptr(socket_ptr)
+      end
+    end
+    context "with unknown pointer" do
+      it "raises" do
+        assert_raises(ArgumentError) do
+          poller.socket_for_ptr(socket_ptr)
+        end
+      end
+    end
+  end
+
+  describe "#sockets" do
+    context "with no registered sockets" do
+      it "returns empty array" do
+        assert_equal [], poller.sockets
+      end
+    end
+    context "with registered sockets" do
+      before(:each) do
+        poller.add_reader(reader1)
+        poller.add_writer(writer2)
+      end
+      it "returns registered sockets" do
+        assert_equal [reader1, writer2], poller.sockets
+      end
+    end
+  end
+
+  describe "#event_mask_for_socket" do
+    context "for registered reader socket" do
+      before(:each) { poller.add_reader(reader1) }
+      it "returns event mask" do
+        assert_equal POLLIN, poller.event_mask_for_socket(reader1)
+      end
+    end
+    context "for registered writer socket" do
+      before(:each) { poller.add_writer(writer1) }
+      it "returns event mask" do
+        assert_equal POLLOUT, poller.event_mask_for_socket(writer1)
+      end
+    end
+    context "for registered reader/writer socket (in 1 step)" do
+      let(:socket) { CZTop::Socket::DEALER.new(endpoint1) }
+      before(:each) do
+        poller.add(socket, POLLIN | POLLOUT)
+      end
+      it "returns event mask" do
+        assert_equal POLLIN|POLLOUT, poller.event_mask_for_socket(socket)
+      end
+    end
+
+    context "for unregistered socket" do
+      it "raises" do
+        assert_raises(ArgumentError) do
+          poller.event_mask_for_socket(reader1)
+        end
+      end
+    end
+  end
+
   describe CZTop::Poller::Aggregated do
     let(:poller) { CZTop::Poller.new }
     let(:aggpoller) { CZTop::Poller::Aggregated.new(poller) }

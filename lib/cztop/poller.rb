@@ -228,9 +228,10 @@ module CZTop
   # getting an array of readable/writable sockets:
   #
   # * in {#wait}, poll with given timeout
-  # * in case there was an event, poll again with zero timeout until no more
-  #   sockets
-  # * accumulate results into two lists
+  # * in case there was an event:
+  # ** deregister the corresponding event(s) on the registered socket
+  # ** poll again with zero timeout until no more sockets
+  # ** repeat and accumulate results into two lists
   #
   class Poller::Aggregated
 

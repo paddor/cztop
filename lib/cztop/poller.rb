@@ -98,13 +98,10 @@ module CZTop
 
     # @param ptr [FFI::Pointer] pointer to the socket
     # @return [Socket, Actor] socket corresponding to given pointer
+    # @raise [ArgumentError] if pointer is not known
     def socket_for_ptr(ptr)
       @sockets[ptr.to_i] or
-        # NOTE: This should never happen, since #wait will return nil if
-        # +zpoller_wait+ returned NULL. But it's better to fail early in case
-        # it ever returns a wrong pointer.
-        HasFFIDelegate.raise_zmq_err(
-          "no socket known for pointer #{ptr.inspect}")
+        raise ArgumentError, "no socket known for pointer %p" % ptr
     end
 
     # @return [Array<CZTop::Socket>] all sockets registered with this poller
@@ -113,9 +110,13 @@ module CZTop
       @sockets.values
     end
 
+    # Returns the event mask for the given, registered socket.
+    # @param socket [Socket, Actor] which socket's events to return
+    # @return [Integer] event mask for the given socket
+    # @raise [ArgumentError] if socket is not registered
     def event_mask_for_socket(socket)
       @events[socket] or
-        raise "no event mask known for socket %p" % socket
+        raise ArgumentError, "no event mask known for socket %p" % socket
     end
 
     private

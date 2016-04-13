@@ -78,6 +78,7 @@ Here's an overview of the core classes:
   * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor) < Actor
   * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy) < Actor
   * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller)
+    * [Aggregated](http://www.rubydoc.info/gems/cztop/CZTop/Poller/Aggregated)
   * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
     * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
     * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket

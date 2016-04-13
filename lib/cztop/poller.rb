@@ -143,8 +143,6 @@ module CZTop
     # case you're interested in both. For a simpler variant, check out
     # {CZTop::Poller#simple_wait}.
     class Event
-      attr_reader :poller_event
-
       # @param poller [CZTop::Poller] the poller instance
       # @param event_ptr [FFI::Pointer] pointer to the memory allocated for
       #   the event's data (a +zmq_poller_event_t+)

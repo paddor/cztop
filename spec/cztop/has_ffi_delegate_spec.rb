@@ -23,7 +23,8 @@ describe CZTop::HasFFIDelegate do
   describe ".ffi_delegate" do
     let(:method) { :m1 }
     it "defines delegator method" do
-      expect(delegator_class).to receive(:def_delegator).with(:@ffi_delegate, method)
+      expect(delegator_class).to receive(:def_delegator).
+        with(:@ffi_delegate, method)
       delegator_class.ffi_delegate(method)
     end
 

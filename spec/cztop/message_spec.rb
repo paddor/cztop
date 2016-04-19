@@ -213,13 +213,13 @@ describe CZTop::Message do
         # NOTE: unroutable message given to ROUTER with ROUTER_MANDATORY
         # option set.
         let(:errno) { Errno::EHOSTUNREACH::Errno }
-        it "raises SocketError" do
+        it "raises" do
           assert_raises(SocketError) { msg.send_to(destination) }
         end
       end
       context "with other error" do
         let(:errno) { Errno::EPERM::Errno }
-        it "raises RuntimeError" do
+        it "raises" do
           assert_raises(Errno::EPERM) { msg.send_to(destination) }
         end
       end

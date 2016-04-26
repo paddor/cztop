@@ -273,13 +273,23 @@ module CZTop
         Zsock.set_linger(@zocket, new_value)
       end
 
+      # @return [Boolean] current value of ipv6
+      def ipv6?() Zsock.ipv6(@zocket) != 0 end
+      # Set the IPv6 option for the socket. A value of true means IPv6 is
+      # enabled on the socket, while false means the socket will use only
+      # IPv4.  When IPv6 is enabled the socket will connect to, or accept 
+      # connections from, both IPv4 and IPv6 hosts.
+      # Default is false.
+      # @param new_value [Boolean] new value for ipv6
+      def ipv6=(new_value)
+        Zsock.set_ipv6(@zocket, new_value ? 1 : 0)
+      end
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_gssapi_server (void *self);
 #int zsock_gssapi_plaintext (void *self);
 #char * zsock_gssapi_principal (void *self);
 #char * zsock_gssapi_service_principal (void *self);
-#int zsock_ipv6 (void *self);
 #int zsock_immediate (void *self);
 #int zsock_type (void *self);
 #int zsock_affinity (void *self);
@@ -311,7 +321,6 @@ module CZTop
 #void zsock_set_gssapi_plaintext (void *self, int gssapi_plaintext);
 #void zsock_set_gssapi_principal (void *self, const char * gssapi_principal);
 #void zsock_set_gssapi_service_principal (void *self, const char * gssapi_service_principal);
-#void zsock_set_ipv6 (void *self, int ipv6);
 #void zsock_set_immediate (void *self, int immediate);
 #void zsock_set_delay_attach_on_connect (void *self, int delay_attach_on_connect);
 #void zsock_set_affinity (void *self, int affinity);

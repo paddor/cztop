@@ -448,6 +448,38 @@ describe CZTop::ZsockOptions do
       end
     end
 
+    describe "#ipv6=" do
+      it "can enable IPv6" do
+        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6)
+          .with(socket, 1)
+        options.ipv6 = true
+      end
+      it "can disable IPv6" do
+        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6)
+          .with(socket, 0)
+        options.ipv6 = false
+      end
+    end
+    describe "#ipv6?" do
+      context "with default setting" do
+        it "returns false" do
+          refute_operator options, :ipv6?
+        end
+      end
+      context "with ipv6 enabled" do
+        before(:each) {options.ipv6 = true}
+        it "returns true" do
+          assert_operator options, :ipv6?
+        end
+      end
+      context "with ipv6 disabled" do
+        before(:each) {options.ipv6 = false}
+        it "returns false" do
+          refute_operator options, :ipv6?
+        end
+      end
+    end
+	
     describe "#[]" do
       context "with vague option name" do
         let(:identity) { "foobar" }

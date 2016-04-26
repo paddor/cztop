@@ -274,14 +274,15 @@ module CZTop
       end
 
       # @return [Boolean] current value of ipv6
-      def ipv6() Zsock.ipv6(@zocket) != 0 end
+      def ipv6?() Zsock.ipv6(@zocket) != 0 end
       # Set the IPv6 option for the socket. A value of true means IPv6 is
       # enabled on the socket, while false means the socket will use only
       # IPv4.  When IPv6 is enabled the socket will connect to, or accept 
       # connections from, both IPv4 and IPv6 hosts.
+      # Default is false.
       # @param new_value [Boolean] new value for ipv6
       def ipv6=(new_value)
-        Zsock.set_ipv6(@zocket, (new_value == true) ? 1 : 0)
+        Zsock.set_ipv6(@zocket, new_value ? 1 : 0)
       end
 # TODO: a reasonable subset of these
 #//  Get socket options

@@ -479,7 +479,7 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-	
+
     describe "#[]" do
       context "with vague option name" do
         let(:identity) { "foobar" }

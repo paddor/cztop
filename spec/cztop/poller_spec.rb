@@ -38,12 +38,19 @@ describe CZTop::Poller do
       end
     end
     context "with multiple readers" do
-      after(:each) { CZTop::Poller.new(reader1, reader2) }
+      let(:poller) { CZTop::Poller.new(reader1, reader2) }
       it "adds readers" do
-        expect_any_instance_of(CZTop::Poller).to receive(:add_reader).
-               with(reader1)
-        expect_any_instance_of(CZTop::Poller).to receive(:add_reader).
-               with(reader2)
+        # NOTE:
+        # This doesn't work anymore on at least Rubinius 3.28:
+        #   expect_any_instance_of(CZTop::Poller).to receive(:add_reader).with(r1)
+        #   expect_any_instance_of(CZTop::Poller).to receive(:add_reader).with(r2)
+        #
+        assert_equal 2, poller.sockets.size
+        assert_operator poller.sockets, :include?, reader1
+        assert_operator poller.sockets, :include?, reader2
+        poller.sockets.each do |socket|
+          assert_equal POLLIN, poller.event_mask_for_socket(socket)
+        end
       end
     end
   end

@@ -150,6 +150,11 @@ To install on OSX using homebrew, run:
 If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
 to get more help. Make sure to install CZMQ, not only ZMQ.
 
+**Note:** Currently (as of May 2016), when compiling ZMQ from master, it may
+be required to pass `--enable-drafts` to `./configure` to make sure all the
+`zmq_poller_*()` functions are available. However, this doesn't seem to be the
+case on all systems.
+
 ### Supported Ruby versions
 
 See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop

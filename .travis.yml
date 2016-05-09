@@ -12,6 +12,9 @@ rvm:
 env:
   # recognized by czmq-ffi-gen's ci-scripts
   - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+matrix:
+  allow_failures:
+    - rvm: rbx
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

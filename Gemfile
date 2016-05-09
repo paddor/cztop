@@ -8,4 +8,7 @@ gemspec
 group :development do
   gem 'rubocop', require: false
   gem 'coveralls', require: false, platform: :mri
+
+  # >= 3.1 doesn't work on Rubinius, see guard/listen#391
+  gem 'listen', '~> 3.0.x', require: false
 end

@@ -2,7 +2,7 @@
 set -e
 mkdir -p vendor
 cd vendor
-git clone https://github.com/paddor/czmq-ffi-gen
+git clone --depth 1 https://github.com/paddor/czmq-ffi-gen
 cd czmq-ffi-gen
 ci-scripts/install-libsodium
 ci-scripts/install-libzmq

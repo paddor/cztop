@@ -57,7 +57,7 @@ Here are some some of the goals I have/had in mind for this library:
 - [x] 100% test coverage
 - [x] provide a portable Z85 implementation
   * unlike [fpesce/z85](https://github.com/fpesce/z85), which is a C extension
-- [ ] use it to replace the [Celluloid::ZMQ](https://github.com/celluloid/celluloid-zmq) part of [Celluloid](https://github.com/celluloid/celluloid)
+- [x] use it to replace the [Celluloid::ZMQ](https://github.com/celluloid/celluloid-zmq) part of [Celluloid](https://github.com/celluloid/celluloid)
   * [celluloid/celluloid-zmq#56](https://github.com/celluloid/celluloid-zmq/issues/56)
 - [ ] implement some of the missing (CZMQ based) Ruby examples in the [ZMQ Guide](http://zguide.zeromq.org/page:all)
 

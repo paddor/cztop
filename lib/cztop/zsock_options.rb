@@ -32,10 +32,10 @@ module CZTop
       # @raise [NoMethodError] if option name can't be recognized
       def [](option_name)
         # NOTE: beware of predicates, especially #CURVE_server? & friends
-        m = public_methods.reject { |m| m =~ /=$/ }
+        meth = public_methods.reject { |m| m =~ /=$/ }
               .find { |m| m =~ /^#{option_name}\??$/i }
-        raise NoMethodError, option_name if m.nil?
-        __send__(m)
+        raise NoMethodError, option_name if meth.nil?
+        __send__(meth)
       end
 
       # Fuzzy option setter. This is to make it easier when porting
@@ -44,9 +44,9 @@ module CZTop
       # @param new_value [String, Integer] new value
       # @raise [NoMethodError] if option name can't be recognized
       def []=(option_name, new_value)
-        m = public_methods.find { |m| m =~ /^#{option_name}=$/i }
-        raise NoMethodError, option_name if m.nil?
-        __send__(m, new_value)
+        meth = public_methods.find { |m| m =~ /^#{option_name}=$/i }
+        raise NoMethodError, option_name if meth.nil?
+        __send__(meth, new_value)
       end
 
       include CZMQ::FFI

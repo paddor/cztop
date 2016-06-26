@@ -22,7 +22,6 @@ class CZTop::Z85::Pipe
   #
   # @return [Integer] number of bytes read (binary data)
   def encode
-    padded = false
     @strategy.new(@source, @sink, ENCODE_READ_SZ) do |chunk, prev_chunk|
       @bin_bytes += chunk.bytesize if chunk
       if prev_chunk && chunk

@@ -124,11 +124,9 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
   * there are `#routing_id` and `#routing_id=` on the following classes:
     * CZTop::Message
     * CZTop::Frame
-  * requires ZMQ >= 4.2
 * ZMTP 3.1 heartbeat ready
   * `socket.options.heartbeat_ivl = 2000`
   * `socket.options.heartbeat_timeout = 8000`
-  * requires ZMQ >= 4.2
 
 ## Requirements
 

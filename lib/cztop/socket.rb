@@ -41,6 +41,7 @@ module CZTop
     # @!endgroup
 
     # @return [String] last bound endpoint, if any
+    # @return [nil] if not bound
     def last_endpoint
       ffi_delegate.endpoint
     end
@@ -56,6 +57,7 @@ module CZTop
 
     # Disconnects from an endpoint.
     # @param endpoint [String]
+    # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def disconnect(endpoint)
       rc = ffi_delegate.disconnect("%s", :string, endpoint)
@@ -63,6 +65,7 @@ module CZTop
     end
 
     # Closes and destroys the native socket.
+    # @return [void]
     # @note Don't try to use it anymore afterwards.
     def close
       ffi_delegate.destroy

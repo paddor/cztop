@@ -1,3 +1,12 @@
+0.5.0 (28/06/2016)
+-----
+* new example (weather PUB/SUB)
+* add option to enable IPv6 on sockets
+* avoid $DEBUG warnings
+* fix specs on Rubinius
+* better documentation
+* minor CI improvements
+
 0.4.0 (13/04/2016)
 -----
 * CZTop::Poller learns the following methods for convenience and compatibility:

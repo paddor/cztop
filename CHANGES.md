@@ -1,3 +1,11 @@
+0.6.1 (20/09/2016)
+-----
+* no changes, but this release includes up-to-date version of this file
+
+0.6.0 (20/09/2016)
+-----
+* upgrade to czmq-ffi-gen's 0.9.x line (which supports fat gems for Windows)
+
 0.5.0 (28/06/2016)
 -----
 * new example (weather PUB/SUB)

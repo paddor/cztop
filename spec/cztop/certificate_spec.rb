@@ -58,10 +58,13 @@ describe CZTop::Certificate do
         # #save_public
         let(:undefined_z85) { "0" * 40 }
         let(:undefined_bin) { "\0" * 32 }
-        let(:pointer_z85) { double(read_string: undefined_z85) }
+
+        # the zcert API defines zcert_secret_key()'s return value as buffer,
+        # so it'll be a pointer, not a String
         let(:pointer_bin) { double(read_string: undefined_bin) }
+
         before(:each) do
-          expect(ffi_delegate).to(receive(:secret_txt).and_return(pointer_z85))
+          expect(ffi_delegate).to(receive(:secret_txt).and_return(undefined_z85))
           expect(ffi_delegate).to(receive(:secret_key).and_return(pointer_bin))
         end
         it "returns nil" do

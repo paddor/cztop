@@ -49,7 +49,7 @@ module CZTop
     def public_key(format: :z85)
       case format
       when :z85
-        ffi_delegate.public_txt.read_string.force_encoding(Encoding::ASCII)
+        ffi_delegate.public_txt.force_encoding(Encoding::ASCII)
       when :binary
         ffi_delegate.public_key.read_string(32)
       else
@@ -66,7 +66,7 @@ module CZTop
     def secret_key(format: :z85)
       case format
       when :z85
-        key = ffi_delegate.secret_txt.read_string.force_encoding(Encoding::ASCII)
+        key = ffi_delegate.secret_txt.force_encoding(Encoding::ASCII)
         return nil if key.count("0") == 40
       when :binary
         key = ffi_delegate.secret_key.read_string(32)
@@ -82,9 +82,7 @@ module CZTop
     # @return [String] value for meta key
     # @return [nil] if metadata key is not set
     def [](key)
-      ptr = ffi_delegate.meta(key)
-      return nil if ptr.null?
-      ptr.read_string
+      ffi_delegate.meta(key)
     end
     # Set metadata.
     # @param key [String] metadata key

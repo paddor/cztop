@@ -342,7 +342,6 @@ module CZTop
   # CZTop's interface to the low-level +zmq_poll()+ function.
   module Poller::ZMQ
 
-    POLL    = 1
     POLLIN  = 1
     POLLOUT = 2
     POLLERR = 4

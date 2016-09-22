@@ -1,12 +1,17 @@
-0.6.1 (20/09/2016)
+0.7.0 (09/22/2016)
+-----
+* CZTop::ZsockOptions::OptionsAccessor learns #fd and #events
+* fix date format in this file
+
+0.6.1 (09/20/2016)
 -----
 * no changes, but this release includes up-to-date version of this file
 
-0.6.0 (20/09/2016)
+0.6.0 (09/20/2016)
 -----
 * upgrade to czmq-ffi-gen's 0.9.x line (which supports fat gems for Windows)
 
-0.5.0 (28/06/2016)
+0.5.0 (06/28/2016)
 -----
 * new example (weather PUB/SUB)
 * add option to enable IPv6 on sockets
@@ -15,7 +20,7 @@
 * better documentation
 * minor CI improvements
 
-0.4.0 (13/04/2016)
+0.4.0 (04/13/2016)
 -----
 * CZTop::Poller learns the following methods for convenience and compatibility:
   * #add_reader
@@ -33,7 +38,7 @@
   * CZTop::Poller#remove_writer
   * CZTop::Poller#sockets
 
-0.3.0 (13/04/2016)
+0.3.0 (04/13/2016)
 -----
 * port CZTop::Poller to zmq_poller_*() functions so it supports thread-safe
   sockets as well
@@ -41,12 +46,12 @@
 * fix taxi system example
 * drop support for CZMQ 3.0.2, ZMQ 4.0 and ZMQ 4.1
 
-0.2.1 (31/01/2016)
+0.2.1 (01/31/2016)
 -----
 * improve documentation
 * improve test suite
 
-0.2.0 (27/01/2016)
+0.2.0 (01/27/2016)
 -----
 * simplify CZTop::Z85::Padded
   * no length encoding
@@ -55,12 +60,12 @@
 * add CZTop::Z85::Pipe
 * CZTop::SUB#subscribe: subscribe to everything if no parameter given
 
-0.1.1 (23/01/2016)
+0.1.1 (01/23/2016)
 -----
 * add support for Ruby 2.0
 * improve documentation
 * fix require()s in examples
 
-0.1.0 (23/01/2016)
+0.1.0 (01/23/2016)
 -----
 * first release

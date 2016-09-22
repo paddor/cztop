@@ -525,5 +525,47 @@ describe CZTop::ZsockOptions do
         end
       end
     end
+    describe "#fd" do
+      it "FD is of correct type" do
+        fd_type = FFI::Platform.unix? ? Integer : FFI::Pointer
+        assert_kind_of(fd_type, socket.options.fd)
+      end
+    end
+    describe "#events" do
+      let(:writer) { CZTop::Socket::PUSH.new(endpoint) }
+      let(:reader) { CZTop::Socket::PULL.new(endpoint) }
+      context "with readable socket" do
+        before(:each) { writer << "foo" }
+        it "is readable" do
+          assert (reader.options.events & CZTop::Poller::ZMQ::POLLIN) > 0,
+            "should be readable"
+        end
+      end
+      context "with non-readable socket" do
+        it "is not readable" do
+          assert (reader.options.events & CZTop::Poller::ZMQ::POLLIN) == 0,
+            "should not be readable"
+        end
+      end
+      context "with writable socket" do
+        it "is writable" do
+          assert (writer.options.events & CZTop::Poller::ZMQ::POLLOUT) > 0,
+            "should be writable"
+        end
+      end
+      context "with non-writable socket" do
+        let(:full_writer) do
+          sock = CZTop::Socket::PUSH.new
+          sock.options.sndhwm = 1 # set SNDHWM option before connecting
+          sock.connect(endpoint)
+          sock << "is now full"
+          sock
+        end
+        it "is not writable" do
+          assert (full_writer.options.events & CZTop::Poller::ZMQ::POLLOUT) == 0,
+            "should not be writable"
+        end
+      end
+    end
   end
 end

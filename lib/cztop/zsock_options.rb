@@ -284,6 +284,14 @@ module CZTop
       def ipv6=(new_value)
         Zsock.set_ipv6(@zocket, new_value ? 1 : 0)
       end
+
+      # @return [Integer] socket file descriptor
+      def fd() Zsock.fd(@zocket) end
+
+      # @return [Integer] socket events (readable/writable)
+      # @see CZTop::Poller::ZMQ::POLLIN and CZTop::Poller::ZMQ::POLLOUT
+      def events() Zsock.events(@zocket) end
+
 # TODO: a reasonable subset of these
 #//  Get socket options
 #int zsock_gssapi_server (void *self);
@@ -307,8 +315,6 @@ module CZTop
 #int zsock_tcp_keepalive_cnt (void *self);
 #int zsock_tcp_keepalive_intvl (void *self);
 #int zsock_rcvmore (void *self);
-#SOCKET zsock_fd (void *self);
-#int zsock_events (void *self);
 #char * zsock_last_endpoint (void *self);
 #
 #//  Set socket options

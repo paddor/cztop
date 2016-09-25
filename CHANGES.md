@@ -1,3 +1,7 @@
+0.8.0 (09/25/2016)
+-----
+* update dependency of czmq-ffi-gen to "~> 0.10.0"
+
 0.7.0 (09/22/2016)
 -----
 * CZTop::ZsockOptions::OptionsAccessor learns #fd and #events

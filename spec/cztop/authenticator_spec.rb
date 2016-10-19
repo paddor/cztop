@@ -54,10 +54,18 @@ describe CZTop::Authenticator do
   end
 
   describe "#curve" do
-    let(:directory) { "/path/to/directory" }
-    after(:each) { subject.curve(directory) }
-    it "enables CURVE security" do
-      expect(actor).to receive(:<<).with(["CURVE", directory]).and_call_original
+    context "when allowing keys from directory" do
+      let(:directory) { "/path/to/directory" }
+      after(:each) { subject.curve(directory) }
+      it "enables CURVE security for keys in directory" do
+        expect(actor).to receive(:<<).with(["CURVE", directory]).and_call_original
+      end
+    end
+    context "when allowing any key" do
+      after(:each) { subject.curve }
+      it "enables CURVE security for any key" do
+        expect(actor).to receive(:<<).with(["CURVE", "*"]).and_call_original
+      end
     end
   end
 

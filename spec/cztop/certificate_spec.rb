@@ -298,7 +298,7 @@ describe CZTop::Certificate do
         end
         context "with non-existing file" do
           it "raises" do
-            assert_raises do
+            assert_raises(Errno::ENOENT) do
               CZTop::Certificate.load("/does/not/exist")
             end
           end

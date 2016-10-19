@@ -72,17 +72,17 @@ module CZTop
       @actor.wait
     end
 
-    ANY_CERTIFICATE = "*"
+    # used to allow any CURVE client
+    ALLOW_ANY = "*"
 
     # Configure CURVE authentication, using a directory that holds all public
     # client certificates, i.e. their public keys. The certificates must have been
     # created using {Certificate#save}/{Certificate#save_public}. You can add
     # and remove certificates in that directory at any time.
     #
-    # @param directory [String] the directory to take the keys from (the
-    #   default value will allow any certificate)
+    # @param directory [String] the directory to take the keys from
     # @return [void]
-    def curve(directory = ANY_CERTIFICATE)
+    def curve(directory = ALLOW_ANY)
       @actor << ["CURVE", directory]
       @actor.wait
     end

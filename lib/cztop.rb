@@ -16,6 +16,7 @@ require_relative 'cztop/actor'
 require_relative 'cztop/authenticator'
 require_relative 'cztop/beacon'
 require_relative 'cztop/certificate'
+require_relative 'cztop/cert_store'
 require_relative 'cztop/config'
 require_relative 'cztop/frame'
 require_relative 'cztop/message'
@@ -33,6 +34,7 @@ require_relative 'cztop/message/frames'
 require_relative 'cztop/socket/types'
 require_relative 'cztop/z85/padded'
 require_relative 'cztop/z85/pipe'
+require_relative 'cztop/zap'
 
 
 # make Ctrl-C work in case a low-level call hangs

@@ -18,8 +18,18 @@ module CZTop
     # This installs authentication on all {Socket}s and {Actor}s. Until you
     # add policies, all incoming _NULL_ connections are allowed,
     # and all _PLAIN_ and _CURVE_ connections are denied.
-    def initialize
-      @actor = Actor.new(ZAUTH_FPTR)
+    #
+    # @param cert_store [CertStore] a custom certificate store
+    # @note If you pass a {CertStore}, its native object will be owned by the
+    #   actor (and freed by it when the actor terminates). That means you MUST
+    #   disale auto free in the CertStore object.
+    def initialize(cert_store = nil)
+      if cert_store
+        raise ArgumentError unless cert_store.is_a?(CertStore)
+        cert_store = cert_store.ffi_delegate
+        cert_store.__undef_finalizer # native object is now owned by zauth() actor
+      end
+      @actor = Actor.new(ZAUTH_FPTR, cert_store)
     end
 
     # @return [Actor] the actor behind this authenticator

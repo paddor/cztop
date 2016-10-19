@@ -97,6 +97,7 @@ Here's an overview of the core classes:
   * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
     * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
     * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)
+  * [ZAP](http://www.rubydoc.info/gems/cztop/CZTop/ZAP)
 
 More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
 

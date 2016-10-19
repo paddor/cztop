@@ -1,3 +1,9 @@
+0.9.0 (next release)
+-----
+* add CertStore
+* add ability to pass an existing CertStore to Authenticator
+* add ZAP Request/Response classes (useful for testing)
+
 0.8.0 (09/25/2016)
 -----
 * update dependency of czmq-ffi-gen to "~> 0.10.0"

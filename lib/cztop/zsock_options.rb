@@ -64,7 +64,7 @@ module CZTop
 
       # @!endgroup
 
-      # @!group (CURVE) Security
+      # @!group Security Mechanisms
 
       # @return [Boolean] whether this zocket is a CURVE server
       def CURVE_server?() Zsock.curve_server(@zocket) > 0 end

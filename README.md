@@ -13,38 +13,6 @@ mechanisms (like CURVE).
 [![Coverage Status](https://coveralls.io/repos/paddor/cztop/badge.svg?branch=master&service=github)](https://coveralls.io/github/paddor/cztop?branch=master)
 [![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
-## Reasons
-
-Why another CZMQ Ruby binding? Here is a list of existing projects I found and
-the issues with them, from my point of view:
-
-* [Asmod4n/ruby-ffi-czmq](https://github.com/Asmod4n/ruby-ffi-czmq)
-  * outdated
-  * according to its author, it's an "abomination"
-* [methodmissing/rbczmq](https://github.com/methodmissing/rbczmq)
-  * no support for security features (see [methodmissing/rbczmq#28](https://github.com/methodmissing/rbczmq/issues/28))
-  * no JRuby support (see [methodmissing/rbczmq#48](https://github.com/methodmissing/rbczmq/issues/48))
-  * doesn't feel like Ruby
-* [mtortonesi/ruby-czmq](https://github.com/mtortonesi/ruby-czmq)
-  * no tests
-  * no documentation
-  * outdated
-  * doesn't feel like Ruby
-* [chuckremes/ffi-rzmq](https://github.com/chuckremes/ffi-rzmq)
-  * support discontinued
-  * low level ZMQ gem, not CZMQ
-
-Furthermore, I knew about the generated low-level Ruby FFI binding in the
-[zeromq/czmq](https://github.com/zeromq/czmq) repository. I wanted to make use
-of it because I love that it's generated (and thus, most likely correct
-and up-to-date). Unfortunately, it was in pretty bad shape and missing a few
-CZMQ classes.
-
-So I decided to improve the quality and usability of the binding and add the
-missing classes. The result is
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) which provides a solid
-foundation for CZTop.
-
 ## Goals
 
 Here are some some of the goals I have/had in mind for this library:
@@ -370,6 +338,38 @@ $
 * [x] provide `z85encode` and `z85decode` utilities
   * can be used in a pipeline (limited memory usage)
   * reusable interface: `Z85::Pipe`
+
+## Reasons
+
+Why another CZMQ Ruby binding? Here is a list of existing projects I found and
+the issues with them, from my point of view:
+
+* [Asmod4n/ruby-ffi-czmq](https://github.com/Asmod4n/ruby-ffi-czmq)
+  * outdated
+  * according to its author, it's an "abomination"
+* [methodmissing/rbczmq](https://github.com/methodmissing/rbczmq)
+  * no support for security features (see [methodmissing/rbczmq#28](https://github.com/methodmissing/rbczmq/issues/28))
+  * no JRuby support (see [methodmissing/rbczmq#48](https://github.com/methodmissing/rbczmq/issues/48))
+  * doesn't feel like Ruby
+* [mtortonesi/ruby-czmq](https://github.com/mtortonesi/ruby-czmq)
+  * no tests
+  * no documentation
+  * outdated
+  * doesn't feel like Ruby
+* [chuckremes/ffi-rzmq](https://github.com/chuckremes/ffi-rzmq)
+  * support discontinued
+  * low level ZMQ gem, not CZMQ
+
+Furthermore, I knew about the generated low-level Ruby FFI binding in the
+[zeromq/czmq](https://github.com/zeromq/czmq) repository. I wanted to make use
+of it because I love that it's generated (and thus, most likely correct
+and up-to-date). Unfortunately, it was in pretty bad shape and missing a few
+CZMQ classes.
+
+So I decided to improve the quality and usability of the binding and add the
+missing classes. The result is
+[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) which provides a solid
+foundation for CZTop.
 
 
 ## Contributing

@@ -120,9 +120,9 @@ describe CZTop::ZsockOptions do
         When { options.CURVE_server = true }
         Then { :CURVE == options.mechanism }
       end
-      context "with GSSAPI security" do
-        it "returns :GSSAPI"
-      end
+#      context "with GSSAPI security" do
+#        it "returns :GSSAPI" # FIXME: see "GSSAPI" branch
+#      end
       context "with unknown security mechanism" do
         before(:each) do
           expect(CZMQ::FFI::Zsock).to receive(:mechanism)

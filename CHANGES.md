@@ -1,6 +1,6 @@
-0.9.0 (next release)
+0.9.0 (10/20/2016)
 -----
-* add CertStore
+* add CertStore interface to zcertstore
 * add ability to pass an existing CertStore to Authenticator
 * add ZAP Request/Response classes (useful for testing)
 

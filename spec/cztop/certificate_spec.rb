@@ -169,7 +169,14 @@ describe CZTop::Certificate do
         When(:new_cert) do
           CZTop::Certificate.new_from(public_key, secret_key)
         end
-        Then { cert == new_cert && new_cert == cert }
+        context "with valid binary key pair" do
+          Then { cert == new_cert && new_cert == cert }
+        end
+        context "with valid Z85 (text) key pair" do
+          Given(:public_key) { cert.public_key(format: :z85) }
+          Given(:secret_key) { cert.secret_key(format: :z85) }
+          Then { cert == new_cert && new_cert == cert }
+        end
         context "with invalid public key size" do
           Given(:public_key) { "too short" }
           Then { new_cert == Failure(ArgumentError) }
@@ -183,8 +190,9 @@ describe CZTop::Certificate do
           Then { new_cert == Failure(ArgumentError) }
         end
         context "with missing secret key" do
+          # public key only certificate, should work
           Given(:secret_key) { nil }
-          Then { new_cert == Failure(ArgumentError) }
+          Then { cert.public_key == new_cert.public_key }
         end
       end
 

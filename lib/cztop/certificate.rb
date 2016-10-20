@@ -20,15 +20,21 @@ module CZTop
       from_ffi_delegate(ptr)
     end
 
-    # Creates a new certificate from the given keys.
-    # @param public_key [String] binary public key (32 bytes)
-    # @param secret_key [String] binary secret key (32 bytes)
+    # Creates a new certificate from the given keys (either binary or in Z85
+    # format).
+    # @param public_key [String] binary public key (32 or 40 bytes)
+    # @param secret_key [String, nil] binary secret key (32 or 40 bytes), or
+    #   nil to initialize a public key only certificate
     # @return [Certificate] the fresh certificate
     # @raise [ArgumentError] if keys passed are invalid
     # @raise [SystemCallError] if this fails
-    def self.new_from(public_key, secret_key)
+    def self.new_from(public_key, secret_key = nil)
       raise ArgumentError, "no public key given" unless public_key
-      raise ArgumentError, "no secret key given" unless secret_key
+      secret_key ||= "\x00" * 32 # no secret key given, provide 32 null bytes
+
+      # convert Z85 => binary
+      public_key = Z85.decode(public_key) if public_key.bytesize == 40
+      secret_key = Z85.decode(secret_key) if secret_key.bytesize == 40
 
       raise ArgumentError, "invalid public key size" if public_key.bytesize != 32
       raise ArgumentError, "invalid secret key size" if secret_key.bytesize != 32

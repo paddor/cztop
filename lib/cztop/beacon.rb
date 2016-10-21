@@ -41,7 +41,7 @@ module CZTop
     # @raise [SystemCallError] if the system doesn't support UDP broadcasts
     def configure(port)
       @actor.send_picture("si", :string, "CONFIGURE", :int, port)
-      hostname = Zstr.recv(@actor)
+      hostname = Zstr.recv(@actor).read_string
       return hostname unless hostname.empty?
       raise NotImplementedError, "system doesn't support UDP broadcasts"
     end

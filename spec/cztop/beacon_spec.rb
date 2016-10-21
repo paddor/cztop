@@ -31,12 +31,13 @@ describe CZTop::Beacon do
   describe "#configure" do
     let(:port) { 9999 }
     let(:hostname) { "example.com" }
+    let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
     context "with support for UDP broadcasts" do
       before(:each) do
         expect(actor).to receive(:send_picture)
           .with(kind_of(String), :string, "CONFIGURE", :int, port)
         expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
-          .and_return(hostname)
+          .and_return(ptr)
       end
       it "sends correct message to actor" do
         assert_equal hostname, subject.configure(port)
@@ -44,9 +45,10 @@ describe CZTop::Beacon do
     end
     context "no support for UDP broadcasts" do
       let(:hostname) { "" }
+      let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
       before(:each) do
         allow(actor).to receive(:send_picture)
-        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor).and_return(hostname)
+        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor).and_return(ptr)
       end
       it "raises" do
         assert_raises(NotImplementedError) do

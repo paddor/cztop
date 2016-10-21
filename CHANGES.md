@@ -1,3 +1,15 @@
+0.9.3 (10/22/2016)
+-----
+* no changes, but this release includes an up-to-date version of this file
+
+0.9.2 (10/21/2016)
+-----
+* fix Beacon#configure (thanks to Chris Olstrom)
+
+0.9.1 (10/21/2016)
+-----
+* Certificate.new_from: allow constructing a certificate with only a public key
+
 0.9.0 (10/20/2016)
 -----
 * add CertStore interface to zcertstore
@@ -15,7 +27,7 @@
 
 0.6.1 (09/20/2016)
 -----
-* no changes, but this release includes up-to-date version of this file
+* no changes, but this release includes an up-to-date version of this file
 
 0.6.0 (09/20/2016)
 -----

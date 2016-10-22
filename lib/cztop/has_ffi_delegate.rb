@@ -43,16 +43,16 @@ module CZTop::HasFFIDelegate
   def raise_zmq_err(msg = CZMQ::FFI::Errors.strerror,
                     errno: CZMQ::FFI::Errors.errno)
 
+    case errno
+    when Errno::EINVAL::Errno       then raise ArgumentError, msg, caller
+    when Errno::EINTR::Errno        then raise Interrupt, msg, caller
+    when Errno::EHOSTUNREACH::Errno then raise SocketError, msg, caller
+
     # If the errno is known, the corresponding Errno::* exception is
     # automatically constructed. Otherwise, it'll be a plain SystemCallError.
     # In any case, #errno will return the corresponding errno.
-    raise SystemCallError.new(msg, errno), msg, caller
-  rescue Errno::EINVAL
-    raise ArgumentError, msg, caller
-  rescue Errno::EINTR
-    raise Interrupt, msg, caller
-  rescue Errno::EHOSTUNREACH
-    raise SocketError, msg, caller
+    else raise SystemCallError.new(msg, errno), msg, caller
+    end
   end
 
   # Some class methods related to FFI delegates.

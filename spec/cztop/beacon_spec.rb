@@ -56,6 +56,20 @@ describe CZTop::Beacon do
         end
       end
     end
+    context "when interrupted" do
+      let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+      before(:each) do
+        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
+          .and_return(nullptr)
+        expect(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(Errno::EINTR::Errno)
+      end
+      it "raises" do
+        assert_raises(Interrupt) do
+          subject.configure(port)
+        end
+      end
+    end
   end
   describe "#publish" do
     let(:data) { "foobar data" }

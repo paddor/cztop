@@ -35,14 +35,23 @@ module CZTop
     end
 
     # Run the beacon on the specified UDP port.
+    #
     # @param port [Integer] port number to
     # @return [String] hostname, which can be used as endpoint for incoming
     #   connections
-    # @raise [SystemCallError] if the system doesn't support UDP broadcasts
+    # @raise [Interrupt] if the context was terminated or the process
+    #   interrupted
+    # @raise [NotImplementedError] if the system doesn't support UDP broadcasts
     def configure(port)
       @actor.send_picture("si", :string, "CONFIGURE", :int, port)
-      hostname = Zstr.recv(@actor).read_string
+      ptr = Zstr.recv(@actor)
+
+      # NULL if context terminated or interrupted
+      HasFFIDelegate.raise_zmq_err if ptr.null?
+
+      hostname = ptr.read_string
       return hostname unless hostname.empty?
+
       raise NotImplementedError, "system doesn't support UDP broadcasts"
     end
 

@@ -1,3 +1,7 @@
+0.9.4 (10/22/2016)
+-----
+* Beacon#configure: correctly handle interrupt, and fix API doc
+
 0.9.3 (10/22/2016)
 -----
 * no changes, but this release includes an up-to-date version of this file

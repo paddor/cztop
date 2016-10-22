@@ -37,7 +37,7 @@ module CZTop::HasFFIDelegate
   # @param msg [String] error message
   # @raise [ArgumentError] if EINVAL was reported
   # @raise [Interrupt] if EINTR was reported
-  # @raise [SocketError] if EAGAIN was reported
+  # @raise [SocketError] if EHOSTUNREACH was reported
   # @raise [SystemCallError] any other reported error (appropriate
   #   SystemCallError subclass, if errno is known)
   def raise_zmq_err(msg = CZMQ::FFI::Errors.strerror,

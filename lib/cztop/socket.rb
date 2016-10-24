@@ -15,6 +15,7 @@ module CZTop
     #   so remote clients are able to authenticate this server
     # @note You'll have to use a {CZTop::Authenticator}.
     # @return [void]
+    # @raise [ArgumentError] if there's no secret key in certificate
     def CURVE_server!(cert)
       options.CURVE_server = true
       cert.apply(self) # NOTE: desired: raises if no secret key in cert

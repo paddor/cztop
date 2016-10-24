@@ -1,4 +1,4 @@
-0.10.0 (10/xx/2016)
+0.10.0 (10/24/2016)
 -----
 * add Socket#readable? and #writable?
 * Socket#options: memoize the OptionAccessor instance

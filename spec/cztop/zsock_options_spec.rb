@@ -11,6 +11,10 @@ describe CZTop::ZsockOptions do
       assert_kind_of CZTop::ZsockOptions::OptionsAccessor, options
     end
 
+    it "memoizes the options accessor" do
+      assert_same socket.options, socket.options
+    end
+
     it "changes the correct socket's options" do
       assert_same socket, options.zocket
     end

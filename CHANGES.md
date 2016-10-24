@@ -1,3 +1,7 @@
+0.10.0 (10/xx/2016)
+-----
+* Socket#options: memoize the OptionAccessor instance
+
 0.9.4 (10/22/2016)
 -----
 * Beacon#configure: correctly handle interrupt, and fix API doc

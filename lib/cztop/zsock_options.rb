@@ -10,9 +10,9 @@ module CZTop
   #
   module ZsockOptions
     # Access to the options of this socket.
-    # @return [OptionsAccessor]
+    # @return [OptionsAccessor] the memoized options accessor
     def options
-      OptionsAccessor.new(self)
+      @options ||= OptionsAccessor.new(self)
     end
 
     # Used to access the options of a {Socket} or {Actor}.

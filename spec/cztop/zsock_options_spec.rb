@@ -7,7 +7,7 @@ describe CZTop::ZsockOptions do
   let(:options) { socket.options }
 
   describe "#options" do
-    it "returns options proxy" do
+    it "returns options accessor" do
       assert_kind_of CZTop::ZsockOptions::OptionsAccessor, options
     end
 

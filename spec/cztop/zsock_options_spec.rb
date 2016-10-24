@@ -20,6 +20,41 @@ describe CZTop::ZsockOptions do
     end
   end
 
+  describe "event-based methods" do
+    before(:each) do
+      expect(options).to receive(:events).and_return(events)
+    end
+    describe "#readable?" do
+      context "with read event set" do
+        let(:events) { CZTop::Poller::ZMQ::POLLIN }
+        it "returns true" do
+          assert_operator socket, :readable?
+        end
+      end
+      context "with read event unset" do
+        let(:events) { 0 }
+        it "returns false" do
+          refute_operator socket, :readable?
+        end
+      end
+    end
+
+    describe "#writable?" do
+      context "with write event set" do
+        let(:events) { CZTop::Poller::ZMQ::POLLOUT }
+        it "returns true" do
+          assert_operator socket, :writable?
+        end
+      end
+      context "with write event unset" do
+        let(:events) { 0 }
+        it "returns false" do
+          refute_operator socket, :writable?
+        end
+      end
+    end
+  end
+
   describe CZTop::ZsockOptions::OptionsAccessor do
     describe "#sndhwm" do
       context "when getting current value" do

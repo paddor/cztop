@@ -15,6 +15,20 @@ module CZTop
       @options ||= OptionsAccessor.new(self)
     end
 
+    # Checks whether there's a message that can be read from the socket
+    # without blocking.
+    # @return [Boolean] whether the socket is readable
+    def readable?
+      (options.events & Poller::ZMQ::POLLIN) > 0
+    end
+
+    # Checks whether at least one message can be written to the socket without
+    # blocking.
+    # @return [Boolean] whether the socket is writable
+    def writable?
+      (options.events & Poller::ZMQ::POLLOUT) > 0
+    end
+
     # Used to access the options of a {Socket} or {Actor}.
     class OptionsAccessor
       # @return [Socket, Actor] whose options this {OptionsAccessor} instance

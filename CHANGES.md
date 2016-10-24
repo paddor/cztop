@@ -1,5 +1,6 @@
 0.10.0 (10/xx/2016)
 -----
+* add Socket#readable? and #writable?
 * Socket#options: memoize the OptionAccessor instance
 
 0.9.4 (10/22/2016)

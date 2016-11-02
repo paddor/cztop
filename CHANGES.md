@@ -1,3 +1,7 @@
+0.11.0 (11/02/2016)
+-----
+* add CZTop::Metadata to encode/decode ZMTP metadata
+
 0.10.0 (10/24/2016)
 -----
 * add Socket#readable? and #writable?

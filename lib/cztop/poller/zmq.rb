@@ -46,6 +46,20 @@ module CZTop
 #ZMQ_EXPORT int  zmq_poller_remove (void *poller, void *socket);
 #ZMQ_EXPORT int  zmq_poller_wait (void *poller, zmq_poller_event_t *event, long timeout);
 
+    # Gracefully attaches a function. If it's not available, this creates
+    # a placeholder class method which, when called, simply raises
+    # NotImplementedError with a helpful message.
+    def self.attach_function(function_nickname, function_name, *args)
+      super
+    rescue ::FFI::NotFoundError
+      if $VERBOSE || $DEBUG
+        warn "CZTop: The ZMQ function #{function_name}() is not available. Don't use CZTop::Poller."
+      end
+      define_singleton_method(function_nickname) do |*|
+        raise NotImplementedError, "compile ZMQ with --enable-drafts"
+      end
+    end
+
     opts = {
       blocking: true  # only necessary on MRI to deal with the GIL.
     }

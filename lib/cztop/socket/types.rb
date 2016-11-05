@@ -245,5 +245,23 @@ module CZTop
         raise_zmq_err("unable to leave group %p" % group) if rc == -1
       end
     end
+
+    # Scatter/gather pattern.
+    # @see https://github.com/zeromq/libzmq/pull/1909
+    class SCATTER < Socket
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
+        attach_ffi_delegate(Zsock.new_scatter(endpoints))
+      end
+    end
+
+    # Scatter/gather pattern.
+    # @see https://github.com/zeromq/libzmq/pull/1909
+    class GATHER < Socket
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
+        attach_ffi_delegate(Zsock.new_gather(endpoints))
+      end
+    end
   end
 end

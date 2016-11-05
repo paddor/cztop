@@ -248,6 +248,51 @@ describe CZTop::Socket::DISH do
   end
 end
 
+describe CZTop::Socket::SCATTER do
+  Given(:socket) { described_class.new }
+  Then { socket }
+end
+
+describe CZTop::Socket::GATHER do
+  i = 0
+  Given(:endpoint) { "inproc://scatter-gather_spec_#{i += 1}" }
+  Given(:timeout) { 20 }
+  Given(:scatter) do
+    CZTop::Socket::SCATTER.new.tap do |s|
+      s.options.sndtimeo = timeout
+      s.bind(endpoint)
+    end
+  end
+  Given(:gather) do
+    described_class.new.tap do |s|
+      s.options.rcvtimeo = timeout
+      s.connect(endpoint)
+    end
+  end
+
+  context "given message from SCATTER" do
+    Given { gather }
+    Given { scatter << "foo" }
+    When(:msg) { gather.receive }
+    Then { "foo" == msg.to_a[0] }
+  end
+
+  context "given message from SCATTER and multiple GATHER sockets" do
+    Given { gather }
+    Given(:gather2) do
+      described_class.new.tap do |s|
+        s.options.rcvtimeo = timeout
+        s.connect(endpoint)
+      end
+    end
+    Given { scatter << "foo" }
+    When(:result1) { gather.receive }
+    When(:result2) { gather2.receive }
+    Then { result1 == Failure(Errno::EAGAIN) || result2 == Failure(Errno::EAGAIN) }
+    And { result1.is_a?(CZTop::Message) || result2.is_a?(CZTop::Message) }
+  end
+end
+
 describe CZTop::Socket::REQ do
   Given(:socket) { described_class.new }
   Then { socket }

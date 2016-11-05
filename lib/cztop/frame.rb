@@ -137,13 +137,13 @@ module CZTop
     ffi_delegate :size
 
     # Gets the routing ID.
-    # @note This only set when the frame came from a {CZTop::Socket::SERVER}
-    #   socket.
+    # @note This only set when the frame has been read from
+    #   a {CZTop::Socket::SERVER} socket.
     # @return [Integer] the routing ID, or 0 if unset
     ffi_delegate :routing_id
 
     # Sets a new routing ID.
-    # @note This is used when the frame is sent to a {CZTop::Socket::SERVER}
+    # @note This is used when the frame is sent via a {CZTop::Socket::CLIENT}
     #   socket.
     # @param new_routing_id [Integer] new routing ID
     # @raise [RangeError] if new routing ID is out of +uint32_t+ range

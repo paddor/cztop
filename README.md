@@ -44,9 +44,11 @@ Here's an overview of the core classes:
   * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
   * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
   * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor) < Actor
+  * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
   * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy) < Actor
-  * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller)
+  * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) (based on `zmq_poller_*()` functions)
     * [Aggregated](http://www.rubydoc.info/gems/cztop/CZTop/Poller/Aggregated)
+    * [ZPoller](http://www.rubydoc.info/gems/cztop/CZTop/Poller/ZPoller)
   * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
     * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
     * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket

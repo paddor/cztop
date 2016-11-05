@@ -97,17 +97,17 @@ describe CZTop::Socket::SERVER, skip: zmq_version?("4.2") do
     Given(:endpoint) { "inproc://server_spec_#{i += 1}" }
     Given(:server_sndtimeo) { 50 }
     Given(:server) do
-      s = CZTop::Socket::SERVER.new
-      s.options.sndtimeo = server_sndtimeo
-      s.bind(endpoint)
-      s
+      CZTop::Socket::SERVER.new.tap do |s|
+        s.options.sndtimeo = server_sndtimeo
+        s.bind(endpoint)
+      end
     end
     Given(:client_sndtimeo) { 50 }
     Given(:client) do
-      s = CZTop::Socket::CLIENT.new
-      s.options.sndtimeo = 50
-      s.connect(endpoint)
-      s
+      CZTop::Socket::CLIENT.new.tap do |s|
+        s.options.sndtimeo = 50
+        s.connect(endpoint)
+      end
     end
     Given(:msg_content) { "FOO" }
     Given(:routing_id) { 23456 }
@@ -189,16 +189,16 @@ describe CZTop::Socket::DISH do
   Given(:endpoint) { "inproc://radio-dish_spec_#{i += 1}" }
   Given(:timeout) { 20 }
   Given(:radio) do
-    s = CZTop::Socket::RADIO.new
-    s.options.sndtimeo = timeout
-    s.bind(endpoint)
-    s
+    CZTop::Socket::RADIO.new.tap do |s|
+      s.options.sndtimeo = timeout
+      s.bind(endpoint)
+    end
   end
   Given(:dish) do
-    s = described_class.new
-    s.options.rcvtimeo = timeout
-    s.connect(endpoint)
-    s
+    described_class.new.tap do |s|
+      s.options.rcvtimeo = timeout
+      s.connect(endpoint)
+    end
   end
   Given(:group) { "group1" }
 

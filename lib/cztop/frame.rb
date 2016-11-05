@@ -154,5 +154,27 @@ module CZTop
       raise RangeError if new_routing_id < 0
       ffi_delegate.set_routing_id(new_routing_id)
     end
+
+    # Gets the group (radio/dish pattern).
+    # @note This only set when the frame has been read from
+    #   a {CZTop::Socket::DISH} socket.
+    # @return [String] the group
+    # @return [nil] when no group has been set
+    def group
+      group = ffi_delegate.group
+      return nil if group.empty?
+      group
+    end
+
+    # Sets a new group (radio/dish pattern).
+    # @note This is used when the frame is sent via a {CZTop::Socket::RADIO}
+    #   socket.
+    # @param new_group [String] new group
+    # @raise [ArgumentError] if new group name is too long
+    # @return [new_group]
+    def group=(new_group)
+      rc = ffi_delegate.set_group(new_group)
+      raise_zmq_err("unable to set group to %p" % group) if rc == -1
+    end
   end
 end

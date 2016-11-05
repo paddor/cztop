@@ -206,5 +206,44 @@ module CZTop
         attach_ffi_delegate(Zsock.new_stream(endpoints))
       end
     end
+
+    # Group-based pub/sub (vs topic-based). This is the publisher socket.
+    # @see https://github.com/zeromq/libzmq/pull/1727
+    class RADIO < Socket
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
+        attach_ffi_delegate(Zsock.new_radio(endpoints))
+      end
+    end
+
+    # Group-based pub/sub (vs topic-based). This is the subscriber socket.
+    # @see https://github.com/zeromq/libzmq/pull/1727
+    class DISH < Socket
+      # @param endpoints [String] endpoints to connect to
+      def initialize(endpoints = nil)
+        attach_ffi_delegate(Zsock.new_dish(endpoints))
+      end
+
+      # Joins the given group.
+      # @param group [String] group to join, up to 15 characters
+      # @return [void]
+      # @raise [ArgumentError] when group name is invalid or group has already
+      #   been joined before
+      # @raise [SystemCallError] in case of failure
+      def join(group)
+        rc = ffi_delegate.join(group)
+        raise_zmq_err("unable to join group %p" % group) if rc == -1
+      end
+
+      # Leaves the given group.
+      # @param group [String] group to leave
+      # @return [void]
+      # @raise [ArgumentError] when group wasn't joined before
+      # @raise [SystemCallError] in case of another failure
+      def leave(group)
+        rc = ffi_delegate.leave(group)
+        raise_zmq_err("unable to leave group %p" % group) if rc == -1
+      end
+    end
   end
 end

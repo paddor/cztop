@@ -179,6 +179,75 @@ describe CZTop::Socket::SERVER, skip: zmq_version?("4.2") do
   end
 end
 
+describe CZTop::Socket::RADIO do
+  Given(:socket) { described_class.new }
+  Then { socket }
+end
+
+describe CZTop::Socket::DISH do
+  i = 0
+  Given(:endpoint) { "inproc://radio-dish_spec_#{i += 1}" }
+  Given(:timeout) { 20 }
+  Given(:radio) do
+    s = CZTop::Socket::RADIO.new
+    s.options.sndtimeo = timeout
+    s.bind(endpoint)
+    s
+  end
+  Given(:dish) do
+    s = described_class.new
+    s.options.rcvtimeo = timeout
+    s.connect(endpoint)
+    s
+  end
+  Given(:group) { "group1" }
+
+  describe "#join" do
+    context "given a message sent to a joined group" do
+      Given { dish.join group }
+      Given(:msg) { CZTop::Frame.new("foo").tap{ |f| f.group = group } }
+      When { radio << msg }
+      When(:received) { dish.receive }
+      Then { group == received.frames[0].group }
+      And { "foo" == received[0] }
+    end
+
+    context "given a message sent to an unjoined group" do
+      Given { dish.join group }
+      Given(:msg) { CZTop::Frame.new("foo").tap{ |f| f.group = "group2" } }
+      When { radio << msg }
+      When(:result) { dish.receive }
+      Then { result == Failure(Errno::EAGAIN) }
+    end
+
+    context "given an invalid group name" do
+      Given(:group) { "x" * 16 } # 15+1 (null byte) is maximum
+      When(:result) { dish.join group }
+      Then { result == Failure(ArgumentError) }
+    end
+
+    context "given an already joined group" do
+      Given(:group) { "group1" }
+      When { dish.join group }
+      When(:result) { dish.join group }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
+  describe "#leave" do
+    context "leaving an previously joined group" do
+      Given(:group) { "group1" }
+      When { dish.join group }
+      When(:result) { dish.leave group }
+      Then { true }
+    end
+    context "leaving an unjoined group" do
+      Given(:unjoined_group) { "group1" }
+      When(:result) { dish.leave unjoined_group }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
+end
+
 describe CZTop::Socket::REQ do
   Given(:socket) { described_class.new }
   Then { socket }

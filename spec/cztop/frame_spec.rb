@@ -271,4 +271,34 @@ describe CZTop::Frame do
       Then { result == Failure(RangeError) }
     end
   end
+
+  describe "#group", skip: zmq_version?("4.2") do
+    Given(:frame) { described_class.new }
+    context "with no group set" do
+      Then { frame.group == nil }
+    end
+
+    context "with group set" do
+      Given(:new_group) { "group1" }
+      When { frame.group = new_group }
+      Then { frame.group == new_group }
+    end
+  end
+
+  describe "#group=", skip: zmq_version?("4.2") do
+    Given(:frame) { described_class.new }
+
+    context "with valid group" do
+      # code duplication for completeness' sake
+      Given(:new_group) { "group1" }
+      When { frame.group = new_group }
+      Then { frame.group == new_group }
+    end
+
+    context "with too long group" do
+      Given(:new_group) { "x" * 16 }
+      When(:result) { frame.group = new_group }
+      Then { result == Failure(ArgumentError) }
+    end
+  end
 end

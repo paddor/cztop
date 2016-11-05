@@ -330,6 +330,18 @@ module CZTop
 #int zsock_tcp_keepalive_intvl (void *self);
 #int zsock_rcvmore (void *self);
 #char * zsock_last_endpoint (void *self);
+#attach_function :zsock_connect_timeout, [:pointer], :int, **opts
+#attach_function :zsock_handshake_ivl, [:pointer], :int, **opts
+#attach_function :zsock_invert_matching, [:pointer], :int, **opts
+#attach_function :zsock_multicast_maxtpdu, [:pointer], :int, **opts
+#attach_function :zsock_socks_proxy, [:pointer], :pointer, **opts
+#attach_function :zsock_tcp_maxrt, [:pointer], :int, **opts
+#attach_function :zsock_thread_safe, [:pointer], :int, **opts
+#attach_function :zsock_use_fd, [:pointer], :int, **opts
+#attach_function :zsock_vmci_buffer_max_size, [:pointer], :int, **opts
+#attach_function :zsock_vmci_buffer_min_size, [:pointer], :int, **opts
+#attach_function :zsock_vmci_buffer_size, [:pointer], :int, **opts
+#attach_function :zsock_vmci_connect_timeout, [:pointer], :int, **opts
 #
 #//  Set socket options
 #void zsock_set_router_handover (void *self, int router_handover);
@@ -358,6 +370,24 @@ module CZTop
 #void zsock_set_tcp_keepalive_idle (void *self, int tcp_keepalive_idle);
 #void zsock_set_tcp_keepalive_cnt (void *self, int tcp_keepalive_cnt);
 #void zsock_set_tcp_keepalive_intvl (void *self, int tcp_keepalive_intvl);
+#attach_function :zsock_set_connect_rid, [:pointer, :string], :void, **opts
+#attach_function :zsock_set_connect_rid_bin, [:pointer, :pointer], :void, **opts
+#attach_function :zsock_set_connect_timeout, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_handshake_ivl, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_invert_matching, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_multicast_maxtpdu, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_socks_proxy, [:pointer, :string], :void, **opts
+#attach_function :zsock_set_stream_notify, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_tcp_maxrt, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_use_fd, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_vmci_buffer_max_size, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_vmci_buffer_min_size, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_vmci_buffer_size, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_vmci_connect_timeout, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_xpub_manual, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_xpub_nodrop, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_xpub_verboser, [:pointer, :int], :void, **opts
+#attach_function :zsock_set_xpub_welcome_msg, [:pointer, :string], :void, **opts
     end
   end
 end

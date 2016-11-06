@@ -6,6 +6,10 @@ FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security
 mechanisms (like CURVE).
 
+You might wanna check out
+[cztop-patterns](https://github.com/paddor/cztop-patterns). It's still very
+new, but will contain some reusable patterns described in the Zguide.
+
 [![Build Status on Travis CI](https://travis-ci.org/paddor/cztop.svg?branch=master)](https://travis-ci.org/paddor/cztop?branch=master)
 [![Code Climate](https://codeclimate.com/repos/56677a7849f50a141c001784/badges/48f3cca3c62df9e4b17b/gpa.svg)](https://codeclimate.com/repos/56677a7849f50a141c001784/feed)
 [![Inline docs](http://inch-ci.org/github/paddor/cztop.svg?branch=master&style=shields)](http://inch-ci.org/github/paddor/cztop)

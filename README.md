@@ -103,11 +103,11 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 You'll need:
 
-* CZMQ > 4.0.0-rc1
-* ZMQ >= 4.2.0-rc1
+* CZMQ >= 4.0.0
+* ZMQ >= 4.2.0
 
-For security mechanisms like CURVE, you'll need Libsodium, or compile ZMQ with
-tweetnacl enabled.
+For security mechanisms like CURVE, it's recommended to use Libsodium. However,
+ZMQ can be compiled with tweetnacl enabled.
 
 To install on OSX using homebrew, run:
 

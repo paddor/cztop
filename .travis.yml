@@ -12,6 +12,7 @@ rvm:
 env:
   # recognized by czmq-ffi-gen's ci-scripts
   - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+  - CZMQ_VERSION=stable ZMQ_VERSION=stable
 matrix:
   allow_failures:
     - rvm: rbx

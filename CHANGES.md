@@ -1,5 +1,8 @@
-0.11.0 (11/02/2016)
+0.11.0 (11/06/2016)
 -----
+* upgrade to czmq-ffi-gen's 0.12.x line (which includes the CZMQ v4.0.0 release)
+* add support for RADIO/DISH and SCATTER/GATHER sockets
+* add CZTop::Frame#group and #group= methods
 * add CZTop::Metadata to encode/decode ZMTP metadata
 
 0.10.0 (10/24/2016)

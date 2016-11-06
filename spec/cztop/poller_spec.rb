@@ -1,7 +1,7 @@
 require_relative 'spec_helper'
 require 'benchmark'
 
-describe CZTop::Poller do
+describe CZTop::Poller, skip: no_zmq_drafts? do
   let(:poller) { CZTop::Poller.new }
   let(:poller_ptr) { poller.instance_variable_get(:@poller_ptr) }
 
@@ -250,7 +250,7 @@ describe CZTop::Poller do
       end
     end
 
-    context "with thread-safe sockets", skip: zmq_version?("4.2") do
+    context "with thread-safe sockets", skip: no_czmq_drafts? do
       i = 0
       let(:endpoint) { "inproc://poller_spec_srv_client_#{i += 1}" }
       let(:server) { CZTop::Socket::SERVER.new(endpoint) }

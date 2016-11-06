@@ -236,7 +236,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#routing_id", skip: zmq_version?("4.2") do
+  describe "#routing_id", skip: no_czmq_drafts? do
     Given(:frame) { described_class.new }
     context "with no routing ID set" do
       Then { frame.routing_id == 0 }
@@ -249,7 +249,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#routing_id=", skip: zmq_version?("4.2") do
+  describe "#routing_id=", skip: no_czmq_drafts? do
     Given(:frame) { described_class.new }
 
     context "with valid routing ID" do
@@ -272,7 +272,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#group", skip: zmq_version?("4.2") do
+  describe "#group", skip: no_czmq_drafts? do
     Given(:frame) { described_class.new }
     context "with no group set" do
       Then { frame.group == nil }
@@ -285,7 +285,7 @@ describe CZTop::Frame do
     end
   end
 
-  describe "#group=", skip: zmq_version?("4.2") do
+  describe "#group=", skip: no_czmq_drafts? do
     Given(:frame) { described_class.new }
 
     context "with valid group" do

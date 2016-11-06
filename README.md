@@ -64,6 +64,10 @@ Here's an overview of the core classes:
     * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
     * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
     * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
+    * [RADIO](http://www.rubydoc.info/gems/cztop/CZTop/Socket/RADIO) < Socket
+    * [DISH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DISH) < Socket
+    * [SCATTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SCATTER) < Socket
+    * [GATHER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/GATHER) < Socket
   * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
     * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
     * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)
@@ -90,11 +94,12 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
   * no need to manually pass some constant
     * but you can: `CZTop::Socket.new_by_type(:REP)`
   * e.g. `#subscribe` only exists on CZTop::Socket::SUB
-* SERVER and CLIENT ready
-  * see CZTop::Socket::SERVER and CZTop::Socket::CLIENT
-  * there are `#routing_id` and `#routing_id=` on the following classes:
+* DRAFT API ready
+  * CLIENT/SERVER/RADIO/DISH/SCATTER/GATHER and other DRAFT methods are supported if the libraries (ZMQ/CZMQ) have been compiled with DRAFT APIs enabled (`--enable-drafts`)
+  * there is `#routing_id` and `#routing_id=` on the following classes:
     * CZTop::Message
     * CZTop::Frame
+  * there is `#group` and `#group=` on CZTop::Frame
 * ZMTP 3.1 heartbeat ready
   * `socket.options.heartbeat_ivl = 2000`
   * `socket.options.heartbeat_timeout = 8000`

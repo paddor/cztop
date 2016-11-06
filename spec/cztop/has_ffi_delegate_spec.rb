@@ -69,8 +69,12 @@ describe CZTop::HasFFIDelegate do
     end
     context "with nullified delegate" do
       let(:ptr) { nil } # represents nullpointer
+      before(:each) do
+        expect(CZMQ::FFI::Errors).to receive(:errno)
+          .and_return(Errno::EINVAL::Errno)
+      end
       it "raises" do
-        assert_raises(SystemCallError) do
+        assert_raises(ArgumentError) do
           delegator.attach_ffi_delegate(delegate)
         end
       end

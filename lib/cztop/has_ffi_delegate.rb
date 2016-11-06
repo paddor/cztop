@@ -15,8 +15,13 @@ module CZTop::HasFFIDelegate
   # Attaches an FFI delegate to the current (probably new) {CZTop} object.
   # @param ffi_delegate an instance of the corresponding class in the
   #   CZMQ::FFI namespace
-  # @raise [SystemCallError] if the FFI delegate's internal pointer is NULL
+  # @raise [SystemCallError, ArgumentError, ...] if the FFI delegate's
+  #   internal pointer is NULL
   # @return [void]
+  # @note This only raises the correct exception when the creation of the new
+  #   CZMQ object was the most recent thing done with the CZMQ library and
+  #   thus CZMQ::FFI::Errors.errno is still reports the correct error number.
+  # @see raise_zmq_err
   def attach_ffi_delegate(ffi_delegate)
     raise_zmq_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
     @ffi_delegate = ffi_delegate

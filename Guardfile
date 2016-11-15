@@ -28,7 +28,7 @@ group :spec do
     watch(rspec.spec_files)
     spec_files = rspec.spec_files
 
-  #  # Ruby files
+    # Ruby files
     ruby = dsl.ruby
     watch(ruby.lib_files) { |m| rspec.spec.(m[1]) }
     ruby_lib_files = ruby.lib_files

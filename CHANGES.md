@@ -1,3 +1,7 @@
+0.11.1 (11/16/2016)
+-----
+* Metadata.load: check for incomplete property names and values
+
 0.11.0 (11/06/2016)
 -----
 * upgrade to czmq-ffi-gen's 0.12.x line (which includes the CZMQ v4.0.0 release)

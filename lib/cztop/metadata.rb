@@ -22,6 +22,8 @@ module CZTop
 
 
     # @param metadata [Hash<Symbol, #to_s>]
+    # @raise [ArgumentError] when properties have an invalid, too long, or
+    #   duplicated name, or when a value is too long
     # @return [String]
     def self.dump(metadata)
       ic_names = Set.new

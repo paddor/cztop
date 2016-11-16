@@ -48,21 +48,28 @@ module CZTop
 
     # @param data [String, Frame, #to_s] the data representing the metadata
     # @return [Hash]
-    def self.load(string)
+    def self.load(data)
       properties = {}
-      io = StringIO.new(string)
-      until io.eof?
+      consumed = 0
+      while consumed < data.bytesize # while there are bytes to read
         # check for zero length names
-        name_length = io.read(1).unpack("C").first
+        name_length = data.byteslice(consumed).unpack("C").first # never nil
         raise InvalidData, "zero-length property name" if name_length.zero?
-        name = io.read(name_length)
+        name = data.byteslice(consumed + 1, name_length)
+        if name.bytesize != name_length
+          raise InvalidData, "incomplete name"
+        end
         name_sym = name.to_sym.downcase
         if properties.has_key?(name_sym)
           raise InvalidData, "property #{name.inspect}: duplicate name"
         end
+        consumed += 1 + name.bytesize
 
-        value_length = io.read(4).unpack("N").first
-        value = io.read(value_length)
+        value_length = data.byteslice(consumed, 4).unpack("N").first or
+          raise InvalidData, "incomplete length"
+        value = data.byteslice(consumed + 4, value_length)
+        raise InvalidData, "incomplete value" if value.bytesize != value_length
+        consumed += 4 + value.bytesize
 
         properties[name_sym] = value
       end

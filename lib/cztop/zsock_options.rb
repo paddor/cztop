@@ -231,7 +231,13 @@ module CZTop
       # @return [String] current socket identity
       def identity() Zsock.identity(@zocket).read_string end
       # @param identity [String] new socket identity
-      def identity=(identity) Zsock.set_identity(@zocket, identity) end
+      # @raise [ArgumentError] if identity is invalid
+      def identity=(identity)
+        raise ArgumentError, "zero-length identity" if identity.bytesize.zero?
+        raise ArgumentError, "identity too long" if identity.bytesize > 255
+        raise ArgumentError, "invalid identity" if identity.start_with? "\0"
+        Zsock.set_identity(@zocket, identity)
+      end
 
       # @return [Integer] current value of Type of Service
       def tos() Zsock.tos(@zocket) end

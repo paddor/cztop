@@ -289,6 +289,29 @@ describe CZTop::ZsockOptions do
       end
     end
 
+    describe "#identity=" do
+      context "with zero-length identity" do
+        let(:identity) { "" }
+        it "raises" do
+          assert_raises(ArgumentError) { options.identity = identity }
+        end
+      end
+      context "with invalid identity" do
+        # NOTE: leading null byte is reserved for ZMQ
+        let(:identity) { "\x00foobar" }
+        it "raises" do
+          assert_raises(ArgumentError) { options.identity = identity }
+        end
+      end
+      context "with too long identity" do
+        # NOTE: identities are 255 bytes maximum
+        let(:identity) { "x" * 256 }
+        it "raises" do
+          assert_raises(ArgumentError) { options.identity = identity }
+        end
+      end
+    end
+
     describe "#tos" do
       context "with no TOS" do
         it "returns zero" do

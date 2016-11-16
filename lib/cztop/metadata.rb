@@ -52,25 +52,25 @@ module CZTop
       properties = {}
       consumed = 0
       while consumed < data.bytesize # while there are bytes to read
-        # check for zero length names
+        # read property name
         name_length = data.byteslice(consumed).unpack("C").first # never nil
         raise InvalidData, "zero-length property name" if name_length.zero?
         name = data.byteslice(consumed + 1, name_length)
-        if name.bytesize != name_length
-          raise InvalidData, "incomplete name"
-        end
+        raise InvalidData, "incomplete name" if name.bytesize != name_length
         name_sym = name.to_sym.downcase
         if properties.has_key?(name_sym)
           raise InvalidData, "property #{name.inspect}: duplicate name"
         end
         consumed += 1 + name.bytesize
 
+        # read property value
         value_length = data.byteslice(consumed, 4).unpack("N").first or
           raise InvalidData, "incomplete length"
         value = data.byteslice(consumed + 4, value_length)
         raise InvalidData, "incomplete value" if value.bytesize != value_length
         consumed += 4 + value.bytesize
 
+        # remember
         properties[name_sym] = value
       end
       new(properties)

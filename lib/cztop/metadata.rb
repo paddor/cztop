@@ -46,7 +46,7 @@ module CZTop
       end.join
     end
 
-    # @param string [String, Frame, #to_s]
+    # @param data [String, Frame, #to_s] the data representing the metadata
     # @return [Hash]
     def self.load(string)
       properties = {}

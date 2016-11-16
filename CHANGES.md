@@ -1,3 +1,8 @@
+0.11.2 (11/16/2016)
+-----
+* ZsockOptions#identity=: instead of asserting in CZMQ, raise ArgumentError if
+  identity is invalid
+
 0.11.1 (11/16/2016)
 -----
 * Metadata.load: check for incomplete property names and values

@@ -1,3 +1,5 @@
+require 'set'
+
 module CZTop
   # Useful to encode and decode metadata as defined by ZMTP.
   #

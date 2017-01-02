@@ -1,3 +1,7 @@
+0.11.3 (01/02/2017)
+-----
+* upgrade to czmq-ffi-gen's 0.13.x line
+
 0.11.2 (11/16/2016)
 -----
 * ZsockOptions#identity=: instead of asserting in CZMQ, raise ArgumentError if

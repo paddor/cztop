@@ -258,15 +258,22 @@ describe CZTop::Socket do
   end
 
   describe "#inspect" do
-    let(:s) { req_socket.inspect }
-    it "contains class name" do
-      assert_match /\A#<CZTop::Socket::[A-Z]\w+:.*>\z/, s
+    context 'with native object alive' do
+      it "contains class name" do
+        assert_match /\A#<CZTop::Socket::[A-Z]\w+:.*>\z/, req_socket.inspect
+      end
+      it "contains native address" do
+        assert_match /:0x[[:xdigit:]]+\b/, req_socket.inspect
+      end
+      it "contains last endpoint" do
+        assert_match /\blast_endpoint=.+\b/, req_socket.inspect
+      end
     end
-    it "contains native address" do
-      assert_match /:0x[[:xdigit:]]+\b/, s
-    end
-    it "contains last endpoint" do
-      assert_match /\blast_endpoint=.+\b/, s
+    context 'with native object destroyed' do
+      before { req_socket.close }
+      it 'describes socket as invalid' do
+        assert_match /invalid/, req_socket.inspect
+      end
     end
   end
 end

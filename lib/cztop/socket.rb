@@ -105,6 +105,8 @@ module CZTop
         to_ptr.address,
         last_endpoint
       ]
+    rescue Zsock::DestroyedError
+      "#<%s: invalid>" % self.class
     end
   end
 end

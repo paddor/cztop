@@ -1,3 +1,7 @@
+0.11.4 (01/06/2017)
+-----
+* Socket#inspect: don't raise if native object has been destroyed
+
 0.11.3 (01/02/2017)
 -----
 * upgrade to czmq-ffi-gen's 0.13.x line

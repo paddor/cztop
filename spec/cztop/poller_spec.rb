@@ -636,6 +636,8 @@ describe CZTop::Poller::ZPoller do
       # Otherwise, with DRAFT API disabled, CZMQ's zlist-based implementation
       # is used, which doesn't fail before version 4.0.3.
       it "raises", if: (has_zmq_drafts? || has_czmq_version?('4.0.3')) do
+        puts "has ZMQ drafts: #{has_zmq_drafts?}"
+        puts "has CZMQ version 4.0.3: #{has_czmq_version? '4.0.3'}"
         assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end

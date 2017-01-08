@@ -337,7 +337,7 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_ivl", skip: zmq_version?("4.2") do
+    describe "#heartbeat_ivl", skip: (zmq_version?("4.2") || no_czmq_drafts?) do
 
       context "with no IVL" do
         it "returns zero" do
@@ -352,7 +352,7 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_ttl", skip: zmq_version?("4.2") do
+    describe "#heartbeat_ttl", skip: (zmq_version?("4.2") || no_czmq_drafts?) do
 
       context "with no TTL" do
         it "returns zero" do
@@ -386,7 +386,7 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe "#heartbeat_timeout", skip: zmq_version?("4.2") do
+    describe "#heartbeat_timeout", skip: (zmq_version?("4.2") || no_czmq_drafts?) do
 
       context "with no timeout" do
         it "returns -1" do

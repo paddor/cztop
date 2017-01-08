@@ -15,6 +15,16 @@ module ZMQHelper
     end
   end
 
+  # This can be used to skip test examples that require a certain CZMQ version.
+  # @param version [String] minimum CZMQ version
+  # @return [String] if the version requirement isn't met
+  # @return [nil] if the version requirement is met
+  def czmq_version?(version)
+    if ::CZMQ::FFI::CZMQ_VERSION < version
+      "CZMQ >= #{version} required"
+    end
+  end
+
   # This can be used to skip test examples that require CZMQ draft API to be
   # available.
   #

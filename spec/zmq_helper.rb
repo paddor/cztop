@@ -19,7 +19,6 @@ module ZMQHelper
   # @return [Boolean] whether minimal CZMQ version is available
   #
   def has_czmq_version?(version)
-    puts "#{::CZMQ::FFI::CZMQ_VERSION} >= #{version}"
     ::CZMQ::FFI::CZMQ_VERSION >= version
   end
 

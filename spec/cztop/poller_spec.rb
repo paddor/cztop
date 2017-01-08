@@ -630,14 +630,19 @@ describe CZTop::Poller::ZPoller do
         assert_raises(SystemCallError) { poller.remove(reader2) }
       end
     end
-    context "with unknown socket" do
+    context "with unregistered socket" do
       # NOTE: With ZMQ's DRAFT API enabled, its own implementation of a poller
       # is used, which fails with EINVAL in this case.
       # Otherwise, with DRAFT API disabled, CZMQ's zlist-based implementation
       # is used, which doesn't fail before version 4.0.3.
-      it "raises", if: (has_zmq_drafts? || has_czmq_version?('4.0.3')) do
-        puts "has ZMQ drafts: #{has_zmq_drafts?}"
-        puts "has CZMQ version 4.0.3: #{has_czmq_version? '4.0.3'}"
+      # Unfortunately, the way zproject currently generates bindings, is that
+      # it uses the current version in the source, whether released or not,
+      # and more importantly, totally unrelated to what is actually installed.
+      # So checking for 4.0.3 is not that simple.
+      # zproc_version() would return the actually installed version, but it's
+      # still declared DRAFT. As a solution, this test example is simply only
+      # run if ZMQ DRAFT API is enabled. Ain't nobody got time for this.
+      it "raises", if: has_zmq_drafts? do
         assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end

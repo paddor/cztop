@@ -256,9 +256,8 @@ main
     end
     context "with level 99" do
       let(:level) { 99 }
-      let(:expected) { nil }
       it "returns nil" do
-        assert_equal expected, found
+        assert_nil nil, found
       end
     end
   end

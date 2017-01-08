@@ -21,6 +21,8 @@ matrix:
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
     - rvm: 2.2.6
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+    - rvm: jruby-head
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
     - rvm: rubinius-3.69
       env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
   allow_failures:

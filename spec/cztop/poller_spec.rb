@@ -635,7 +635,7 @@ describe CZTop::Poller::ZPoller do
       # is used, which fails with EINVAL in this case.
       # Otherwise, with DRAFT API disabled, CZMQ's zlist-based implementation
       # is used, which doesn't fail before version 4.0.3.
-      it "raises", skip: no_zmq_drafts? && czmq_version?('4.0.3') do
+      it "raises", skip: !no_zmq_drafts? && czmq_version?('4.0.3') do
         assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end

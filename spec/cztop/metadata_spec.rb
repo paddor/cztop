@@ -153,7 +153,7 @@ describe CZTop::Metadata do
     context "with properties" do
       subject { CZTop::Metadata.new(properties) }
       let(:properties_before) { properties.dup }
-      before(:each) { properties_before }
+      before { properties_before }
       it "remembers properties as-is" do
         assert_same properties, subject.to_h
         assert_equal properties_before, subject.to_h
@@ -186,7 +186,7 @@ describe CZTop::Metadata do
   describe "#to_h" do
     subject { CZTop::Metadata.new(properties) }
     let(:properties_before) { properties.dup }
-    before(:each) { properties_before }
+    before { properties_before }
     it "returns properties" do
       assert_equal properties_before, subject.to_h
     end

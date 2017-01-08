@@ -135,7 +135,7 @@ describe CZTop::Z85::Pipe::Strategy do
     describe "#execute" do
       context "with even input" do
         let(:input) { "abcdefgh" } # multiple of chunk
-        before(:each) { strategy.execute }
+        before { strategy.execute }
         it "passes chunks one by one, and trailing nil" do
           assert_equal [
             [    nil, "abcd" ],
@@ -146,7 +146,7 @@ describe CZTop::Z85::Pipe::Strategy do
       end
       context "with uneven input" do
         let(:input) { "abcdef" }
-        before(:each) { strategy.execute }
+        before { strategy.execute }
         it "passes chunks one by one, and trailing nil" do
           assert_equal [
             [    nil, "abcd" ],
@@ -167,7 +167,7 @@ describe CZTop::Z85::Pipe::Strategy do
     describe "#execute" do
       context "with even input" do
         let(:input) { "abcdefgh" } # multiple of chunk
-        before(:each) { strategy.execute }
+        before { strategy.execute }
         it "passes chunks one by one, and trailing nil" do
           assert_equal [
             [    nil, "abcd" ],
@@ -178,7 +178,7 @@ describe CZTop::Z85::Pipe::Strategy do
       end
       context "with uneven input" do
         let(:input) { "abcdef" }
-        before(:each) { strategy.execute }
+        before { strategy.execute }
         it "passes chunks one by one, and trailing nil" do
           assert_equal [
             [    nil, "abcd" ],

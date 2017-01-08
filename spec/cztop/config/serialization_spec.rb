@@ -112,14 +112,14 @@ main
         context "loaded from file" do
           let(:fix_config) { described_class.from_string(config_contents) }
           context "when unchanged" do
-            before(:each) { loaded_config.reload }
+            before { loaded_config.reload }
             it "is still the same" do
               assert_equal fix_config, loaded_config
               assert_operator fix_config, :tree_equal?, loaded_config
             end
           end
           context "when changed" do
-            before(:each) do
+            before do
               changing_config = described_class.from_string(config_contents)
               changing_config["context/verbose"] = 0 # normally 1
               changing_config.save(filename) # overwrite existing file

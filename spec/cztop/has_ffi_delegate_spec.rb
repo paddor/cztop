@@ -42,7 +42,7 @@ describe CZTop::HasFFIDelegate do
       end
     end
     context "with delegate attached" do
-      before(:each) { delegator.attach_ffi_delegate(delegate) }
+      before { delegator.attach_ffi_delegate(delegate) }
       it "returns delegate" do
         assert_same delegator.ffi_delegate, delegate
       end
@@ -50,7 +50,7 @@ describe CZTop::HasFFIDelegate do
   end
 
   describe "#to_ptr" do
-    before(:each) { delegator.attach_ffi_delegate(delegate) }
+    before { delegator.attach_ffi_delegate(delegate) }
     it "returns pointer" do
       assert_same ptr, delegator.to_ptr
     end
@@ -69,7 +69,7 @@ describe CZTop::HasFFIDelegate do
     end
     context "with nullified delegate" do
       let(:ptr) { nil } # represents nullpointer
-      before(:each) do
+      before do
         expect(CZMQ::FFI::Errors).to receive(:errno)
           .and_return(Errno::EINVAL::Errno)
       end
@@ -109,7 +109,7 @@ describe CZTop::HasFFIDelegate do
       #   end
       #
       # And this kind of constructor must not be called in this case.
-      before(:each) do
+      before do
         delegator_class.class_exec { define_method(:initialize) { raise } }
       end
 

@@ -82,7 +82,7 @@ describe CZTop::Message do
       And { msg.to_a == %w[foo bar] }
 
       context "when this fails" do
-        before(:each) do
+        before do
           expect(ffi_delegate).to receive(:addmem).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
             .and_return(Errno::EPERM::Errno)
@@ -105,7 +105,7 @@ describe CZTop::Message do
       And { msg.to_a == %w[foo bar] }
 
       context "when this fails" do
-        before(:each) do
+        before do
           expect(ffi_delegate).to receive(:append).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
             .and_return(Errno::EPERM::Errno)
@@ -142,7 +142,7 @@ describe CZTop::Message do
       And { msg[0] == frame }
 
       context "when this fails" do
-        before(:each) do
+        before do
           expect(ffi_delegate).to receive(:pushmem).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
             .and_return(Errno::EPERM::Errno)
@@ -159,7 +159,7 @@ describe CZTop::Message do
       And { msg.to_a == %w[bar foo] }
 
       context "when this fails" do
-        before(:each) do
+        before do
           expect(ffi_delegate).to receive(:prepend).and_return(-1)
           expect(CZMQ::FFI::Errors).to receive(:errno)
             .and_return(Errno::EPERM::Errno)
@@ -177,7 +177,7 @@ describe CZTop::Message do
   end
 
   describe "#pop" do
-    before(:each) { subject << "FOO" << "BAR" }
+    before { subject << "FOO" << "BAR" }
     it "returns first part" do
       assert_equal "FOO", subject.pop
     end
@@ -190,14 +190,14 @@ describe CZTop::Message do
   describe "#send_to" do
     let(:destination) { double "destination socket" }
     context "when successful" do
-      after(:each) { msg.send_to(destination) }
+      after { msg.send_to(destination) }
       it "sends its delegate to the destination" do
         expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
           .and_return(0)
       end
     end
     context "when NOT successful" do
-      before(:each) do
+      before do
         expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
           .and_return(-1)
         expect(CZMQ::FFI::Errors).to receive(:errno)
@@ -240,7 +240,7 @@ describe CZTop::Message do
 
     context "when NOT successful" do
       let(:nullptr) { ::FFI::Pointer::NULL }
-      before(:each) do
+      before do
         expect(CZMQ::FFI).to receive(:zmsg_recv).and_return(nullptr)
         expect(CZMQ::FFI::Errors).to receive(:errno)
           .and_return(errno)
@@ -322,7 +322,7 @@ describe CZTop::Message do
     end
 
     context "with content" do
-      before(:each) { msg << "FOO" << "BAR" }
+      before { msg << "FOO" << "BAR" }
       it "contains number of frames" do
         assert_match /\bframes=2\b/, s
       end
@@ -335,7 +335,7 @@ describe CZTop::Message do
     end
 
     context "with huge message" do
-      before(:each) { msg << "FOO" * 1000 } # 3000 byte message
+      before { msg << "FOO" * 1000 } # 3000 byte message
       it "contains content placeholder" do
         assert_match /\bcontent=\[\.\.\.\]/, s
       end

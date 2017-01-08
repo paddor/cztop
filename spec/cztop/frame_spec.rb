@@ -64,7 +64,7 @@ describe CZTop::Frame do
       end
 
       describe "when there's an error" do # avoid memory leak
-        before(:each) do
+        before do
           expect(CZMQ::FFI::Zframe).to receive(:send) do |zframe,_,_|
             zframe.__ptr_give_ref # detach, so it won't try to free()
           end.and_return(-1)
@@ -88,7 +88,7 @@ describe CZTop::Frame do
   describe ".receive_from" do
     let(:source) { double("source") }
     let(:frame_delegate) { CZTop::Frame.new.ffi_delegate }
-    before(:each) do
+    before do
       expect(CZMQ::FFI::Zframe).to(
         receive(:recv).with(source).and_return(frame_delegate))
     end

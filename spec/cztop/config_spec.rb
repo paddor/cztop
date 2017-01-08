@@ -188,9 +188,7 @@ c
 
     describe "#value=" do
       let(:item) { config.locate("main/frontend/option/hwm") }
-      before(:each) do
-        item.value = new_value
-      end
+      before { item.value = new_value }
       context "given safe string" do
         let(:new_value) { "foo bar" }
 

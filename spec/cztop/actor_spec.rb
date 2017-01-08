@@ -15,7 +15,7 @@ describe CZTop::Actor do
     assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
   end
 
-  after(:each) { actor.terminate }
+  after { actor.terminate }
   let(:actor) do
     CZTop::Actor.new do |msg, pipe|
       received_messages << msg.to_a
@@ -27,7 +27,7 @@ describe CZTop::Actor do
 
   describe "#initialize" do
 
-    before(:each) do
+    before do
       expect(::CZMQ::FFI::Zactor).to receive(:new)
         .with(kind_of(FFI::Pointer), nil)
         .and_call_original
@@ -57,7 +57,7 @@ describe CZTop::Actor do
       let(:actor) do
         CZTop::Actor.new(proc_)
       end
-      before(:each) do
+      before do
         expect_any_instance_of(CZTop::Actor).to receive(:shim)
           .and_call_original
       end
@@ -93,7 +93,7 @@ describe CZTop::Actor do
     context "with faulty handler" do
       let(:error) { RuntimeError.new("foobar") }
       let(:actor) { CZTop::Actor.new { raise error } }
-      before(:each) do
+      before do
         actor << "foo"
         actor.terminate
       end
@@ -104,7 +104,7 @@ describe CZTop::Actor do
   end
 
   describe "#crashed?" do
-    before(:each) do
+    before do
       actor << "foo"
       actor.terminate
     end
@@ -122,7 +122,7 @@ describe CZTop::Actor do
   end
 
   describe "#exception" do
-    before(:each) do
+    before do
       actor << "foo"
       actor.terminate
     end
@@ -156,7 +156,7 @@ describe CZTop::Actor do
     end
 
     context "with dead actor" do
-      before(:each) { actor.terminate }
+      before { actor.terminate }
       it "raises DeadActorError" do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor.send_picture("s", :string, "foo")
@@ -187,7 +187,7 @@ describe CZTop::Actor do
 
   describe "#process_messages" do
     context "when sending $TERM" do
-      before(:each) do
+      before do
         # can't use #<<
         actor.instance_eval do
           @mtx.synchronize do
@@ -209,7 +209,7 @@ describe CZTop::Actor do
     end
 
     context "when interrupted" do
-      before(:each) do
+      before do
         expect(actor).to receive(:next_message).and_raise(Interrupt).once
       end
       it "terminates actor" do
@@ -262,7 +262,7 @@ describe CZTop::Actor do
       let(:received_commands) do
         received_messages.map(&:first)
       end
-      before(:each) do
+      before do
         commands.each { |c| actor << c }
         actor.terminate
       end
@@ -278,7 +278,7 @@ describe CZTop::Actor do
     context "with array" do
       let(:msg) { %w[ SHOW foo bar ] }
 
-      before(:each) do
+      before do
         actor << msg
         actor.terminate
       end
@@ -290,7 +290,7 @@ describe CZTop::Actor do
     end
 
     context "with dead actor" do
-      before(:each) { actor.terminate }
+      before { actor.terminate }
       it "raises DeadActorError" do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor << "FOO"
@@ -312,7 +312,7 @@ describe CZTop::Actor do
 
     context "sndtimeo reached" do
       let(:msg) { CZTop::Message.new("foobar") }
-      after(:each) { actor << msg }
+      after { actor << msg }
       it "retries" do
         expect(msg).to receive(:send_to)
           .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
@@ -341,7 +341,7 @@ describe CZTop::Actor do
     end
 
     context "with messages available" do
-      before(:each) do
+      before do
         actor << "foo" << "bar"
       end
 
@@ -352,7 +352,7 @@ describe CZTop::Actor do
     end
 
     context "with dead actor" do
-      before(:each) { actor.terminate }
+      before { actor.terminate }
       it "raises DeadActorError" do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor.receive
@@ -384,7 +384,7 @@ describe CZTop::Actor do
       end
     end
     context "with dead actor" do
-      before(:each) { actor.terminate }
+      before { actor.terminate }
       it "raises DeadActorError" do
         assert_raises(CZTop::Actor::DeadActorError) do
           response
@@ -403,7 +403,7 @@ describe CZTop::Actor do
 
     context "sndtimeo reached" do
       let(:msg) { CZTop::Message.new("foobar") }
-      after(:each) { actor.request(msg) }
+      after { actor.request(msg) }
       it "retries" do
         expect(msg).to receive(:send_to)
           .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
@@ -439,7 +439,7 @@ describe CZTop::Actor do
 
       context "sndtimeo reached" do
         let(:term_msg) { CZTop::Message.new("$TERM") }
-        before(:each) do
+        before do
           allow(CZTop::Message).to receive(:new).and_return(term_msg)
         end
         it "retries" do
@@ -452,7 +452,7 @@ describe CZTop::Actor do
     end
 
     context "with dead actor" do
-      before(:each) { actor.terminate }
+      before { actor.terminate }
 
       it "returns false" do
         assert_equal false, actor.terminate

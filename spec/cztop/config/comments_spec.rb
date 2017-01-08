@@ -30,7 +30,7 @@ test
 
       describe "#<<" do
         let(:new_comment) { "foo bar" }
-        before(:each) { comments << new_comment }
+        before { comments << new_comment }
         it "adds a new comment" do
           assert_equal 1, comments.size
         end
@@ -75,7 +75,7 @@ test
 
       describe "#each" do
         let(:block) { ->(_){@called += 1} }
-        before(:each) { @called = 0; comments.each(&block) }
+        before { @called = 0; comments.each(&block) }
         context "with no comment" do
           let(:item) { config.locate("test/has_no_comments") }
           it "does not call block" do

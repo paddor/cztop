@@ -21,7 +21,7 @@ describe CZTop::ZsockOptions do
   end
 
   describe "event-based methods" do
-    before(:each) do
+    before do
       expect(options).to receive(:events).and_return(events)
     end
     describe "#readable?" do
@@ -64,7 +64,7 @@ describe CZTop::ZsockOptions do
       end
       context "when setting new value" do
         let(:new_value) { 99 }
-        before(:each) { options.sndhwm = new_value }
+        before { options.sndhwm = new_value }
         it "sets new value" do
           assert_equal new_value, options.sndhwm
         end
@@ -78,7 +78,7 @@ describe CZTop::ZsockOptions do
       end
       context "when setting new value" do
         let(:new_value) { 99 }
-        before(:each) { options.rcvhwm = new_value }
+        before { options.rcvhwm = new_value }
         it "sets new value" do
           assert_equal new_value, options.rcvhwm
         end
@@ -163,7 +163,7 @@ describe CZTop::ZsockOptions do
 #        it "returns :GSSAPI" # FIXME: see "GSSAPI" branch
 #      end
       context "with unknown security mechanism" do
-        before(:each) do
+        before do
           expect(CZMQ::FFI::Zsock).to receive(:mechanism)
             .with(socket).and_return(99)
         end
@@ -264,7 +264,7 @@ describe CZTop::ZsockOptions do
         options.router_mandatory = false
       end
       context "with flag set and message unroutable" do
-        before(:each) { options.router_mandatory = true }
+        before { options.router_mandatory = true }
         let(:identity) { "receiver identity" }
         let(:content) { "foobar" }
         let(:msg) { [ identity, "", content ] }
@@ -282,7 +282,7 @@ describe CZTop::ZsockOptions do
       end
       context "with identity set" do
         let(:identity) { "foobar" }
-        before(:each) { options.identity = identity }
+        before { options.identity = identity }
         it "returns identity" do
           assert_equal identity, options.identity
         end
@@ -320,7 +320,7 @@ describe CZTop::ZsockOptions do
       end
       context "with TOS set" do
         let(:tos) { 5 }
-        before(:each) { options.tos = tos }
+        before { options.tos = tos }
         it "returns TOS" do
           assert_equal tos, options.tos
         end
@@ -331,7 +331,7 @@ describe CZTop::ZsockOptions do
         end
       end
       context "when resetting to zero" do
-        before(:each) { options.tos = 10 }
+        before { options.tos = 10 }
         it "doesn't raise" do
           options.tos = 0
         end
@@ -346,7 +346,7 @@ describe CZTop::ZsockOptions do
       end
       context "with IVL set" do
         let(:ivl) { 5 }
-        before(:each) { options.heartbeat_ivl = ivl }
+        before { options.heartbeat_ivl = ivl }
         it "returns IVL" do
           assert_equal ivl, options.heartbeat_ivl
         end
@@ -361,7 +361,7 @@ describe CZTop::ZsockOptions do
       end
       context "with TTL set" do
         let(:ttl) { 500 }
-        before(:each) { options.heartbeat_ttl = ttl }
+        before { options.heartbeat_ttl = ttl }
         it "returns TTL" do
           assert_equal ttl, options.heartbeat_ttl
         end
@@ -380,7 +380,7 @@ describe CZTop::ZsockOptions do
       end
       context "with insignificant TTL" do
         let(:ttl) { 80 } # less than 100
-        before(:each) { options.heartbeat_ttl = ttl }
+        before { options.heartbeat_ttl = ttl }
         it "has no effect" do
           assert_equal 0, options.heartbeat_ttl
         end
@@ -395,7 +395,7 @@ describe CZTop::ZsockOptions do
       end
       context "with timeout set" do
         let(:timeout) { 5 }
-        before(:each) { options.heartbeat_timeout = timeout }
+        before { options.heartbeat_timeout = timeout }
         it "returns timeout" do
           assert_equal timeout, options.heartbeat_timeout
         end
@@ -433,7 +433,7 @@ describe CZTop::ZsockOptions do
         end
 
         context "with client connected" do
-          before(:each) do
+          before do
             server_socket
             server_mon
             client_socket
@@ -443,7 +443,7 @@ describe CZTop::ZsockOptions do
           end
         end
         context "with client socket dead" do
-          before(:each) do
+          before do
             server_socket
             server_mon
             client_socket
@@ -463,7 +463,7 @@ describe CZTop::ZsockOptions do
         end
         context "with talking and then dead client socket" do
           let(:received_msg) { server_socket.receive } # to know the routing ID
-          before(:each) do
+          before do
             server_socket
             server_socket.options.sndtimeo = 30 # so we'll get an exception
             server_mon
@@ -503,7 +503,7 @@ describe CZTop::ZsockOptions do
       end
       context "with LINGER set" do
         let(:linger) { 500 }
-        before(:each) { options.linger = linger }
+        before { options.linger = linger }
         it "returns LINGER" do
           assert_equal linger, options.linger
         end
@@ -529,13 +529,13 @@ describe CZTop::ZsockOptions do
         end
       end
       context "with ipv6 enabled" do
-        before(:each) {options.ipv6 = true}
+        before {options.ipv6 = true}
         it "returns true" do
           assert_operator options, :ipv6?
         end
       end
       context "with ipv6 disabled" do
-        before(:each) {options.ipv6 = false}
+        before {options.ipv6 = false}
         it "returns false" do
           refute_operator options, :ipv6?
         end
@@ -545,7 +545,7 @@ describe CZTop::ZsockOptions do
     describe "#[]" do
       context "with vague option name" do
         let(:identity) { "foobar" }
-        before(:each) do
+        before do
           options.identity = identity
         end
 
@@ -567,7 +567,7 @@ describe CZTop::ZsockOptions do
     describe "#[]=" do
       let(:identity) { "foobar" }
       let(:tos) { 5 }
-      before(:each) do
+      before do
         options[:curve_server] = true
         options[:IDENTITY] = identity
         options[:ToS] = tos
@@ -597,7 +597,7 @@ describe CZTop::ZsockOptions do
       let(:writer) { CZTop::Socket::PUSH.new(endpoint) }
       let(:reader) { CZTop::Socket::PULL.new(endpoint) }
       context "with readable socket" do
-        before(:each) { writer << "foo" }
+        before { writer << "foo" }
         it "is readable" do
           assert (reader.options.events & CZTop::Poller::ZMQ::POLLIN) > 0,
             "should be readable"

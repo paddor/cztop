@@ -14,7 +14,7 @@ describe CZTop::Monitor do
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
   let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
 
-  after(:each) do
+  after do
     subject.terminate
   end
 
@@ -42,14 +42,14 @@ describe CZTop::Monitor do
   describe "#listen" do
     context "with one valid event" do
       let(:event) { "CONNECTED" }
-      after(:each) { subject.listen(event) }
+      after { subject.listen(event) }
       it "tells zmonitor actor" do
         expect(actor).to receive(:<<).with(["LISTEN", event])
       end
     end
     context "with multiple valid events" do
       let(:events) { %w[ CONNECTED DISCONNECTED ] }
-      after(:each) { subject.listen(*events) }
+      after { subject.listen(*events) }
       it "tells zmonitor actor" do
         expect(actor).to receive(:<<).with(["LISTEN", *events])
       end
@@ -65,7 +65,7 @@ describe CZTop::Monitor do
   end
 
   describe "#start" do
-    after(:each) { subject.start }
+    after { subject.start }
     it "tells zmonitor to start" do
       expect(actor).to receive(:<<).with("START").and_call_original
     end

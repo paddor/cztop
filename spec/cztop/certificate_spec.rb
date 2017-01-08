@@ -63,7 +63,7 @@ describe CZTop::Certificate do
         # so it'll be a pointer, not a String
         let(:pointer_bin) { double(read_string: undefined_bin) }
 
-        before(:each) do
+        before do
           expect(ffi_delegate).to(receive(:secret_txt).and_return(undefined_z85))
           expect(ffi_delegate).to(receive(:secret_key).and_return(pointer_bin))
         end
@@ -113,7 +113,7 @@ describe CZTop::Certificate do
       describe "#meta_keys" do
         context "with meta keys set" do
           let(:values) { { "key1" => "value1", "key2" => "value2" } }
-          before(:each) do
+          before do
             values.each {|k,v| cert[k] = v }
           end
           it "returns keys" do
@@ -142,7 +142,7 @@ describe CZTop::Certificate do
 
       describe ".check_curve_availability" do
         context "with CURVE available" do
-          before(:each) do
+          before do
             expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(true)
           end
           it "doesn't warn" do
@@ -152,7 +152,7 @@ describe CZTop::Certificate do
           end
         end
         context "with CURVE not available" do
-          before(:each) do
+          before do
             expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(false)
           end
           it "warns" do
@@ -218,7 +218,7 @@ describe CZTop::Certificate do
         end
 
         context "with undefined secret key" do
-          before(:each) do
+          before do
             expect(cert).to(receive(:secret_key).and_return(nil))
           end
           it "raises" do
@@ -297,7 +297,7 @@ describe CZTop::Certificate do
 
       describe ".load" do
         context "with existing file" do
-          before(:each) { cert.save(path) }
+          before { cert.save(path) }
           let(:loaded_cert) { CZTop::Certificate.load(path) }
           it "loads the certificate" do
             assert_kind_of CZTop::Certificate, loaded_cert

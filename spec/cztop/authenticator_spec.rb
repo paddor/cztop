@@ -9,7 +9,7 @@ end
 describe CZTop::Authenticator do
   subject { CZTop::Authenticator.new }
   let(:actor) { subject.actor }
-  after(:each) { subject.terminate }
+  after { subject.terminate }
 
   it "initializes" do
     subject
@@ -20,7 +20,7 @@ describe CZTop::Authenticator do
   end
 
   describe "#verbose!" do
-    after(:each) { subject.verbose! }
+    after { subject.verbose! }
     it "sends correct message to actor" do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original
     end
@@ -31,7 +31,7 @@ describe CZTop::Authenticator do
 
   describe "#allow" do
     let(:addrs) { %w[ 1.1.1.1 2.2.2.2 ] }
-    after(:each) { subject.allow *addrs }
+    after { subject.allow *addrs }
     it "whitelists addresses" do
       expect(actor).to receive(:<<).with(["ALLOW", *addrs]).and_call_original
     end
@@ -39,7 +39,7 @@ describe CZTop::Authenticator do
 
   describe "#deny" do
     let(:addrs) { %w[ 3.3.3.3 4.4.4.4 foobar ] }
-    after(:each) { subject.deny *addrs }
+    after { subject.deny *addrs }
     it "blacklists addresses" do
       expect(actor).to receive(:<<).with(["DENY", *addrs]).and_call_original
     end
@@ -47,7 +47,7 @@ describe CZTop::Authenticator do
 
   describe "#plain" do
     let(:filename) { "/path/to/file" }
-    after(:each) { subject.plain(filename) }
+    after { subject.plain(filename) }
     it "enables PLAIN security" do
       expect(actor).to receive(:<<).with(["PLAIN", filename]).and_call_original
     end
@@ -56,13 +56,13 @@ describe CZTop::Authenticator do
   describe "#curve" do
     context "when allowing keys from directory" do
       let(:directory) { "/path/to/directory" }
-      after(:each) { subject.curve(directory) }
+      after { subject.curve(directory) }
       it "enables CURVE security for keys in directory" do
         expect(actor).to receive(:<<).with(["CURVE", directory]).and_call_original
       end
     end
     context "when allowing any key" do
-      after(:each) { subject.curve }
+      after { subject.curve }
       it "enables CURVE security for any key" do
         expect(actor).to receive(:<<).with(["CURVE", "*"]).and_call_original
       end
@@ -70,7 +70,7 @@ describe CZTop::Authenticator do
   end
 
   describe "#gssapi" do
-    after(:each) { subject.gssapi }
+    after { subject.gssapi }
     it "enables GSSAPI security" do
       expect(actor).to receive(:<<).with("GSSAPI").and_call_original
     end
@@ -83,7 +83,7 @@ describe CZTop::Authenticator do
     let(:pubkey_z85) { cert.public_key(format: :z85) }
     let(:pubkey_bin) { cert.public_key(format: :binary) }
 
-    before(:each) do
+    before do
       # cache key now, as certificate will be gone later
       pubkey_z85
       pubkey_bin
@@ -91,7 +91,7 @@ describe CZTop::Authenticator do
       cert_store.insert(cert)
     end
 
-    after(:each) do
+    after do
       subject.terminate
     end
 
@@ -119,7 +119,7 @@ describe CZTop::Authenticator do
 
       let(:zap_response) { CZTop::ZAP::Response.from_message(req.receive) }
 
-      before(:each) do
+      before do
         subject # start authenticator
         req << zap_request.to_msg
       end

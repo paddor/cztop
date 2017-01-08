@@ -10,7 +10,7 @@ describe CZTop::Proxy do
   let(:proxy) { CZTop::Proxy.new }
   let(:actor) { proxy.actor }
 
-  after(:each) do
+  after do
     proxy.terminate
   end
 
@@ -19,7 +19,7 @@ describe CZTop::Proxy do
   end
 
   describe "#verbose" do
-    after(:each) { proxy.verbose! }
+    after { proxy.verbose! }
     it "sends correct message to actor" do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original
     end
@@ -50,7 +50,7 @@ describe CZTop::Proxy do
     i = 0
     let(:endpoint) { "inproc://proxy_capture_spec_#{i+=1}" }
     context "with endpoint" do
-      after(:each) { proxy.capture(endpoint) }
+      after { proxy.capture(endpoint) }
       it "tells zproxy to capture" do
         expect(actor).to receive(:<<).with(["CAPTURE", endpoint]).and_call_original
       end
@@ -61,7 +61,7 @@ describe CZTop::Proxy do
 
   end
   describe "#pause" do
-    after(:each) { proxy.pause }
+    after { proxy.pause }
     it "tells zproxy to pause" do
       expect(actor).to receive(:<<).with("PAUSE").and_call_original
     end
@@ -70,7 +70,7 @@ describe CZTop::Proxy do
     end
   end
   describe "#resume" do
-    after(:each) { proxy.resume }
+    after { proxy.resume }
     it "tells zproxy to resume" do
       expect(actor).to receive(:<<).with("RESUME").and_call_original
     end
@@ -126,10 +126,10 @@ describe CZTop::Proxy do
       let(:endpoint) { "inproc://proxy_bind_spec_#{i+=1}" }
 
       context "with valid arguments" do
-        before(:each) do
+        before do
           expect(actor).to receive(:wait).and_call_original
         end
-        after(:each) do
+        after do
           configurator.bind(socket_type, endpoint)
         end
         context "for frontend" do
@@ -159,7 +159,7 @@ describe CZTop::Proxy do
     describe "#domain=" do
 
       let(:domain) { "foobar" }
-      after(:each) { configurator.domain = domain }
+      after { configurator.domain = domain }
 
       context "for frontend" do
         let(:side) { :frontend }
@@ -185,7 +185,7 @@ describe CZTop::Proxy do
     end
     describe "#PLAIN!" do
 
-      after(:each) { configurator.PLAIN_server! }
+      after { configurator.PLAIN_server! }
 
       context "for frontend" do
         let(:side) { :frontend }
@@ -216,7 +216,7 @@ describe CZTop::Proxy do
       let(:secret_key) { cert.secret_key }
 
       context "with correct arguments" do
-        after(:each) { configurator.CURVE_server!(cert) }
+        after { configurator.CURVE_server!(cert) }
 
         context "for frontend" do
           let(:side) { :frontend }
@@ -242,7 +242,7 @@ describe CZTop::Proxy do
       end
 
       context "with secret key missing" do
-        before(:each) do
+        before do
           expect(cert).to receive(:secret_key).and_return(nil)
         end
         it "raises" do

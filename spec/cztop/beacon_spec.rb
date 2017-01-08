@@ -11,7 +11,7 @@ describe CZTop::Beacon do
   subject { CZTop::Beacon.new }
   let(:actor) { subject.actor }
 
-  after(:each) do
+  after do
     subject.terminate
   end
 
@@ -20,7 +20,7 @@ describe CZTop::Beacon do
   end
 
   describe "#verbose!" do
-    before(:each) do
+    before do
       expect(actor).to receive(:<<).with("VERBOSE").and_call_original
     end
     it "sends correct message to actor" do
@@ -33,7 +33,7 @@ describe CZTop::Beacon do
     let(:hostname) { "example.com" }
     let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
     context "with support for UDP broadcasts" do
-      before(:each) do
+      before do
         expect(actor).to receive(:send_picture)
           .with(kind_of(String), :string, "CONFIGURE", :int, port)
         expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
@@ -46,7 +46,7 @@ describe CZTop::Beacon do
     context "no support for UDP broadcasts" do
       let(:hostname) { "" }
       let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
-      before(:each) do
+      before do
         allow(actor).to receive(:send_picture)
         expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor).and_return(ptr)
       end
@@ -58,7 +58,7 @@ describe CZTop::Beacon do
     end
     context "when interrupted" do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before(:each) do
+      before do
         expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
           .and_return(nullptr)
         expect(CZMQ::FFI::Errors).to receive(:errno)
@@ -76,7 +76,7 @@ describe CZTop::Beacon do
     let(:data_size) { data.bytesize }
     let(:interval) { 1000 }
     context "with data" do
-      before(:each) do
+      before do
         expect(actor).to receive(:send_picture).
           with(kind_of(String), :string, "PUBLISH", :string, data,
                               :int, data_size, :int, interval)
@@ -103,7 +103,7 @@ describe CZTop::Beacon do
   describe "#subscribe" do
     let(:filter) { "foo filter" }
     let(:filter_size) { filter.bytesize }
-    before(:each) do
+    before do
       expect(actor).to receive(:send_picture)
         .with(kind_of(String), :string, "SUBSCRIBE", :string, filter, :int,
           filter_size)
@@ -113,7 +113,7 @@ describe CZTop::Beacon do
     end
   end
   describe "#listen" do
-    before(:each) do
+    before do
       expect(actor).to receive(:send_picture)
         .with(kind_of(String), :string, "SUBSCRIBE", :string, nil, :int, 0)
     end
@@ -122,7 +122,7 @@ describe CZTop::Beacon do
     end
   end
   describe "#unsubscribe" do
-    before(:each) do
+    before do
       expect(actor).to receive(:<<).with("UNSUBSCRIBE")
     end
     it "sends correct message to actor" do
@@ -131,7 +131,7 @@ describe CZTop::Beacon do
   end
   describe "#receive" do
     let(:msg) { double("message") }
-    before(:each) do
+    before do
       expect(actor).to receive(:receive).and_return(msg)
     end
     it "receives a message from actor" do

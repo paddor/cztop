@@ -10,7 +10,7 @@ describe CZTop::SendReceiveMethods do
     context "when sending message" do
       let(:content) { "foobar" }
       let(:msg) { double("Message") }
-      before(:each) do
+      before do
         expect(CZTop::Message).to receive(:coerce).with(content).and_return(msg)
         expect(msg).to receive(:send_to).with(zocket)
       end

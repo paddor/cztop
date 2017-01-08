@@ -14,7 +14,7 @@ describe CZTop::CertStore do
 
     let(:cert1) { CZTop::Certificate.new }
 
-    before(:each) do
+    before do
       cert1.save(location + "cert1")
     end
 
@@ -42,7 +42,7 @@ describe CZTop::CertStore do
         let(:cert) { CZTop::Certificate.new }
         let(:key) { cert.public_key(format: :z85) }
 
-        before(:each) do
+        before do
           key # cache key now, cert will be gone later
           subject.insert(cert)
         end
@@ -75,7 +75,7 @@ describe CZTop::CertStore do
         let(:cert) { CZTop::Certificate.new }
         let(:key) { cert.public_key(format: :z85) }
 
-        before(:each) do
+        before do
           key # cache key now, cert will be gone later
           subject.insert(cert)
         end

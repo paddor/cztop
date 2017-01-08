@@ -37,7 +37,7 @@ describe CZTop::Socket do
     context "given same binding endpoint to multiple REP sockets" do
       let(:endpoint) { "inproc://the_one_and_only" }
       let(:sock1) { CZTop::Socket::REP.new(endpoint) }
-      before(:each) { sock1 }
+      before { sock1 }
       it "raises" do
         # there can only be one REP socket bound to one endpoint
         assert_raises(SystemCallError) do
@@ -101,7 +101,7 @@ describe CZTop::Socket do
     let(:options) { req_socket.options }
 
     context "with client certificate" do
-      before(:each) do
+      before do
         req_socket.CURVE_client!(client_cert, server_cert)
       end
 

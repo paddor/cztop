@@ -55,7 +55,7 @@ describe CZTop::Z85 do
 
     context "with failure" do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before(:each) do
+      before do
         allow(ffi_delegate).to receive(:encode).and_return(nullptr)
       end
       it "raises" do
@@ -96,7 +96,7 @@ describe CZTop::Z85 do
 
     context "with failure" do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before(:each) do
+      before do
         allow(ffi_delegate).to receive(:decode).and_return(nullptr)
       end
       it "raises" do

@@ -1,21 +1,30 @@
 language: ruby
+dist: trusty
 sudo: false
 cache:
   directories:
     - $HOME/.ccache
     - $HOME/.bundle
 rvm:
-  - 2.3.1
-  - 2.2.5
+  - 2.4.0
+  - 2.3.3
+  - 2.2.6
   - jruby-head
-  - rbx
+  - rubinius-3.69
 env:
-  # recognized by czmq-ffi-gen's ci-scripts
+  # NOTE: These are recognized by czmq-ffi-gen's CI scripts.
   - CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
   - CZMQ_VERSION=stable ZMQ_VERSION=stable
 matrix:
+  exclude:
+    - rvm: 2.3.3
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+    - rvm: 2.2.6
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
+    - rvm: rubinius-3.69
+      env: CZMQ_VERSION=HEAD ZMQ_VERSION=HEAD
   allow_failures:
-    - rvm: rbx
+    - rvm: rubinius-3.69
 before_install:
   - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)

@@ -13,6 +13,7 @@ require_relative '../lib/cztop'
 
 RSpec.configure do |config|
   config.expect_with :minitest
+  config.filter_run_excluding if: false
   include ZMQHelper
 end
 

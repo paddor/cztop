@@ -1,7 +1,7 @@
 require_relative 'spec_helper'
 require 'benchmark'
 
-describe CZTop::Poller, skip: no_zmq_drafts? do
+describe CZTop::Poller, if: has_zmq_drafts? do
   let(:poller) { CZTop::Poller.new }
   let(:poller_ptr) { poller.instance_variable_get(:@poller_ptr) }
 
@@ -250,7 +250,7 @@ describe CZTop::Poller, skip: no_zmq_drafts? do
       end
     end
 
-    context "with thread-safe sockets", skip: no_czmq_drafts? do
+    context "with thread-safe sockets", if: has_czmq_drafts? do
       i = 0
       let(:endpoint) { "inproc://poller_spec_srv_client_#{i += 1}" }
       let(:server) { CZTop::Socket::SERVER.new(endpoint) }
@@ -635,7 +635,7 @@ describe CZTop::Poller::ZPoller do
       # is used, which fails with EINVAL in this case.
       # Otherwise, with DRAFT API disabled, CZMQ's zlist-based implementation
       # is used, which doesn't fail before version 4.0.3.
-      it "raises", skip: !no_zmq_drafts? && czmq_version?('4.0.3') do
+      it "raises", if: (has_zmq_drafts? || has_czmq_version?('4.0.3')) do
         assert_raises(ArgumentError) { poller.remove(reader2) }
       end
     end

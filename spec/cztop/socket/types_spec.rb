@@ -70,7 +70,7 @@ describe CZTop::Socket do
   end
 end
 
-describe CZTop::Socket::CLIENT, skip: no_czmq_drafts? do
+describe CZTop::Socket::CLIENT, if: has_czmq_drafts? do
   Given(:socket) { described_class.new }
   it "instanciates" do
     socket
@@ -85,7 +85,7 @@ describe CZTop::Socket::CLIENT, skip: no_czmq_drafts? do
   end
 end
 
-describe CZTop::Socket::SERVER, skip: no_czmq_drafts? do
+describe CZTop::Socket::SERVER, if: has_czmq_drafts? do
 
   Given(:server) { CZTop::Socket::SERVER.new }
   it "instanciates" do
@@ -179,12 +179,12 @@ describe CZTop::Socket::SERVER, skip: no_czmq_drafts? do
   end
 end
 
-describe CZTop::Socket::RADIO, skip: no_czmq_drafts? do
+describe CZTop::Socket::RADIO, if: has_czmq_drafts? do
   Given(:socket) { described_class.new }
   Then { socket }
 end
 
-describe CZTop::Socket::DISH, skip: no_czmq_drafts? do
+describe CZTop::Socket::DISH, if: has_czmq_drafts? do
   i = 0
   Given(:endpoint) { "inproc://radio-dish_spec_#{i += 1}" }
   Given(:timeout) { 20 }
@@ -248,12 +248,12 @@ describe CZTop::Socket::DISH, skip: no_czmq_drafts? do
   end
 end
 
-describe CZTop::Socket::SCATTER, skip: no_czmq_drafts? do
+describe CZTop::Socket::SCATTER, if: has_czmq_drafts? do
   Given(:socket) { described_class.new }
   Then { socket }
 end
 
-describe CZTop::Socket::GATHER, skip: no_czmq_drafts? do
+describe CZTop::Socket::GATHER, if: has_czmq_drafts? do
   i = 0
   Given(:endpoint) { "inproc://scatter-gather_spec_#{i += 1}" }
   Given(:timeout) { 20 }

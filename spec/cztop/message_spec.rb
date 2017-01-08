@@ -354,7 +354,7 @@ describe CZTop::Message do
     end
   end
 
-  describe "#routing_id", skip: no_czmq_drafts? do
+  describe "#routing_id", if: has_czmq_drafts? do
     context "with no routing ID set" do
       Then { msg.routing_id == 0 }
     end
@@ -365,7 +365,7 @@ describe CZTop::Message do
     end
   end
 
-  describe "#routing_id=", skip: no_czmq_drafts? do
+  describe "#routing_id=", if: has_czmq_drafts? do
     context "with valid routing ID" do
       # code duplication for completeness' sake
       Given(:new_routing_id) { 123456 }

@@ -82,13 +82,13 @@ describe CZTop::Monitor do
       req_socket.disconnect(endpoint)
       subject.actor.options.rcvtimeo = 100
       assert_equal "ACCEPTED", subject.next[0]
-      if no_zmq_drafts?
-        # NOTE: ZMQ stable (without DRAFT API) currently does not generate
-        # more events in this case.
-      else
+      if has_zmq_drafts?
         # NOTE: ZMQ with DRAFT API does generate another event, which is
         # HANDSHAKE_SUCCEED.
         assert_equal "HANDSHAKE_SUCCEED", subject.next[0]
+      else
+        # NOTE: ZMQ stable (without DRAFT API) currently does not generate
+        # more events in this case.
       end
       rep_socket.ffi_delegate.destroy
       assert_equal "CLOSED", subject.next[0]

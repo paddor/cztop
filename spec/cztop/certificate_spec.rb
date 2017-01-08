@@ -99,7 +99,7 @@ describe CZTop::Certificate do
             cert[key] = value
           end
         end
-        context "when unsetting", skip: no_czmq_drafts? do
+        context "when unsetting", if: has_czmq_drafts? do
           Given { cert[key] = value }
           When { cert[key] = nil }
           Then { cert[key].nil? }

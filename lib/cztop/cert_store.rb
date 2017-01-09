@@ -1,3 +1,5 @@
+require 'set'
+
 module CZTop
 
   # A store for CURVE security certificates, either backed by files on disk or
@@ -32,11 +34,20 @@ module CZTop
 
     # Inserts a new certificate into the store.
     #
+    # @note The same public key must not be inserted more than once.
     # @param cert [Certificate] the certificate to insert
     # @return [void]
+    # @raise [ArgumentError] if the given certificate is not a Certificate
+    #   object or has been inserted before already
     def insert(cert)
       raise ArgumentError unless cert.is_a?(Certificate)
+
+      @_inserted_pubkeys ||= Set.new
+      pubkey = cert.public_key
+      raise ArgumentError if @_inserted_pubkeys.include? pubkey
+
       ffi_delegate.insert(cert.ffi_delegate)
+      @_inserted_pubkeys << pubkey
     end
   end
 end

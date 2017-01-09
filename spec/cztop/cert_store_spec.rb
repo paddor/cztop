@@ -52,6 +52,14 @@ describe CZTop::CertStore do
           assert_kind_of CZTop::Certificate, looked_up_cert
           assert_equal key, looked_up_cert.public_key
         end
+
+        context 'when inserting duplicate certificate' do
+          it 'raises ArgumentError' do
+            assert_equal key, subject.lookup(key).public_key
+            dup_cert = CZTop::Certificate.new_from key
+            assert_raises(ArgumentError) { subject.insert(dup_cert) }
+          end
+        end
       end
       context "with invalid argument" do
         it "raises" do

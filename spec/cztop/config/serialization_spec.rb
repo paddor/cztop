@@ -177,6 +177,20 @@ main
       config.save(file.path)
       Pathname.new(file.path)
     end
+    context 'with empty config' do
+      let(:config) { described_class.new }
+      it 'saves' do
+        assert_empty saved_file.read
+      end
+    end
+    context 'with empty config child' do
+      before { config.children.new }
+      it 'saves' do
+        # NOTE: last line will be "(Unnamed)"
+        assert_match /^\(Unnamed\)$/, saved_file.read.lines.last
+      end
+    end
+
     it "saves to that file" do
       assert_operator saved_file, :size?
     end
@@ -185,12 +199,12 @@ main
     end
     context "with empty path" do
       it "raises" do
-        assert_raises(SystemCallError) { config.save("") }
+        assert_raises(Errno::ENOENT) { config.save("") }
       end
     end
     context "with invalid path" do
       it "raises" do
-        assert_raises(SystemCallError) { config.save("/") }
+        assert_raises(Errno::EISDIR) { config.save("/") }
       end
     end
   end

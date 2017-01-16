@@ -135,9 +135,17 @@ main
     end
 
     describe "#name" do
-      it "returns name" do
-        assert_equal "root", config.name
-        assert_equal "context", config.children.first.name
+      context 'with named elements' do
+        it "returns name" do
+          assert_equal "root", config.name
+          assert_equal "context", config.children.first.name
+        end
+      end
+
+      context 'with unnamed elements' do
+        it 'returns nil' do
+          assert_nil config.children.new.name
+        end
       end
     end
 

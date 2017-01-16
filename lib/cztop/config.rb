@@ -37,6 +37,8 @@ module CZTop
 
     # Gets the name.
     # @return [String] name of the config item
+    # @return [nil] for unnamed elements (like freshly initialized without
+    #   a name)
     def name
       ptr = ffi_delegate.name
       return nil if ptr.null? # NOTE: for unnamed elements

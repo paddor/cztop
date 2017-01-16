@@ -197,8 +197,8 @@ module CZTop
       end
     end
 
-    # Stream socket for the native pattern over. This is useful when
-    # communicating with a non-ZMQ peer, done over TCP.
+    # Stream socket for the native pattern. This is useful when
+    # communicating with a non-ZMQ peer over TCP.
     # @see http://api.zeromq.org/4-2:zmq-socket#toc16
     class STREAM < Socket
       # @param endpoints [String] endpoints to connect to

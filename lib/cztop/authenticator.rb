@@ -20,9 +20,6 @@ module CZTop
     # and all _PLAIN_ and _CURVE_ connections are denied.
     #
     # @param cert_store [CertStore] a custom certificate store
-    # @note If you pass a {CertStore}, its native object will be owned by the
-    #   actor (and freed by it when the actor terminates). That means you MUST
-    #   disale auto free in the CertStore object.
     def initialize(cert_store = nil)
       if cert_store
         raise ArgumentError unless cert_store.is_a?(CertStore)

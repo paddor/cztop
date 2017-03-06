@@ -122,7 +122,7 @@ module CZTop::Config::Traversing
     # a block.
     # @param name [String] name for new config item
     # @param value [String] value for new config item
-    # @yieldparam [Config] the new config item, if block was given
+    # @yieldparam config [Config] the new config item, if block was given
     # @return [Config] the new config item
     def new(name = nil, value = nil)
       config = CZTop::Config.new(name, value, parent: @config)

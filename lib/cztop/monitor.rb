@@ -50,6 +50,8 @@ module CZTop
       CLOSE_FAILED
       DISCONNECTED
       MONITOR_STOPPED
+      HANDSHAKE_FAILED
+      HANDSHAKE_SUCCEED
       ALL
     ]
 

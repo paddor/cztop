@@ -32,14 +32,6 @@ module CZTop
       content_size.zero?
     end
 
-    # Support Ruby 2.0
-    unless defined?(::IO::EAGAINWaitWritable)
-      class ::IO::EAGAINWaitWritable < Errno::EAGAIN
-      end
-      class ::IO::EAGAINWaitReadable < Errno::EAGAIN
-      end
-    end
-
     # Send {Message} to a {Socket} or {Actor}.
     #
     # @note Do NOT use this {Message} anymore afterwards. Its native

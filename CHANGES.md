@@ -3,6 +3,7 @@
 * CZTop::Monitor#listen: accept HANDSHAKE_FAILED and HANDSHAKE_SUCCEED events
 * remove shim classes for IO::EAGAINWaitWritable and IO::EAGAINWaitReadable
   missing in Ruby < 2.1
+* CZTop::Poller#wait: handle new error EAGAIN (was ETIMEDOUT) from zmq_poller_wait()
 
 0.11.4 (01/06/2017)
 -----

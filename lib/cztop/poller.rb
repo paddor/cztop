@@ -115,10 +115,14 @@ module CZTop
     def wait(timeout = -1)
       rc = ZMQ.poller_wait(@poller_ptr, @event_ptr, timeout)
       if rc == -1
-        if CZMQ::FFI::Errors.errno != Errno::ETIMEDOUT::Errno
+        case CZMQ::FFI::Errors.errno
+        # NOTE: ETIMEDOUT for backwards compatibility, although this API is
+          # still DRAFT.
+        when Errno::EAGAIN::Errno, Errno::ETIMEDOUT::Errno
+          return nil
+        else
           HasFFIDelegate.raise_zmq_err
         end
-        return nil
       end
       return Event.new(self, @event_ptr)
     end

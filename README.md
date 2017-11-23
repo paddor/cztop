@@ -41,16 +41,16 @@ Here's an overview of the core classes:
 
 * [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
   * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Authentiator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator) < Actor
-  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon) < Actor
+  * [Authentiator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
+  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
   * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
   * [CertStore](http://www.rubydoc.info/gems/cztop/CZTop/CertStore)
   * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
   * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
   * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
-  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor) < Actor
+  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
   * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
-  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy) < Actor
+  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy)
   * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) (based on `zmq_poller_*()` functions)
     * [Aggregated](http://www.rubydoc.info/gems/cztop/CZTop/Poller/Aggregated)
     * [ZPoller](http://www.rubydoc.info/gems/cztop/CZTop/Poller/ZPoller)

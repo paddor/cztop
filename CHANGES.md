@@ -1,3 +1,9 @@
+0.12.0 (11/23/2017)
+-----
+* CZTop::Monitor#listen: accept HANDSHAKE_FAILED and HANDSHAKE_SUCCEED events
+* remove shim classes for IO::EAGAINWaitWritable and IO::EAGAINWaitReadable
+  missing in Ruby < 2.1
+
 0.11.4 (01/06/2017)
 -----
 * Socket#inspect: don't raise if native object has been destroyed

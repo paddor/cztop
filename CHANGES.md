@@ -1,3 +1,13 @@
+0.12.2 (11/24/2017)
+-----
+* no changes, but this release includes an up-to-date version of this file
+
+0.12.1 (11/23/2017)
+-----
+* actually include the change for CZTop::Poller#wait documented in 0.12.0
+* more robust specs around CZTop::Monitor
+* test recent rubies on CI
+
 0.12.0 (11/23/2017)
 -----
 * CZTop::Monitor#listen: accept HANDSHAKE_FAILED and HANDSHAKE_SUCCEED events

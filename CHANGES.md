@@ -1,3 +1,10 @@
+0.13.0 (11/27/2017)
+-----
+* use czmq-ffi-gen 0.14.x
+* CZTop::Monitor#listen: removed HANDSHAKE_FAILED and HANDSHAKE_SUCCEED events
+  and added HANDSHAKE_SUCCEEDED, HANDSHAKE_FAILED_NO_DETAIL,
+  HANDSHAKE:FAILED_PROTOCOL, HANDSHAKE_FAILED_AUTH to reflect upcoming changes
+
 0.12.2 (11/24/2017)
 -----
 * no changes, but this release includes an up-to-date version of this file

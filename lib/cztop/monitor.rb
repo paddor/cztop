@@ -39,6 +39,7 @@ module CZTop
 
     # @return [Array<String>] types of valid events
     EVENTS = %w[
+      ALL
       CONNECTED
       CONNECT_DELAYED
       CONNECT_RETRIED
@@ -50,9 +51,10 @@ module CZTop
       CLOSE_FAILED
       DISCONNECTED
       MONITOR_STOPPED
-      HANDSHAKE_FAILED
-      HANDSHAKE_SUCCEED
-      ALL
+      HANDSHAKE_SUCCEEDED
+      HANDSHAKE_FAILED_NO_DETAIL
+      HANDSHAKE_FAILED_PROTOCOL
+      HANDSHAKE_FAILED_AUTH
     ]
 
     # Configure monitor to listen for specific events.

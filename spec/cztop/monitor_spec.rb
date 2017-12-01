@@ -96,6 +96,13 @@ describe CZTop::Monitor do
   end
 
   describe "#next" do
+    it "returns Message" do
+      subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))
+      subject.actor.options.rcvtimeo = 100
+      subject.start
+      req_socket # connects
+      assert_kind_of CZTop::Message, subject.next
+    end
     it "gets the next event" do
       subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))
       subject.start

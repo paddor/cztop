@@ -75,6 +75,18 @@ module CZTop
       @actor.wait
     end
 
+    # Useful for registration in an event-loop.
+    # @return [Integer] the FD
+    # @see ZsockOptions#fd
+    def fd
+      @actor.fd
+    end
+
+    # @return [Boolean] whether there's at least one event available
+    def readable?
+      @actor.readable?
+    end
+
     # Get next event. This blocks until the next event is available.
     # @example
     #   socket = CZTop::Socket::ROUTER.new("tcp://127.0.0.1:5050")

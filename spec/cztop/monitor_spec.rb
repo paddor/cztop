@@ -74,6 +74,27 @@ describe CZTop::Monitor do
     end
   end
 
+  describe "#fd" do
+    it "returns FD" do
+      assert_equal subject.actor.options.fd, subject.fd
+    end
+  end
+
+  describe "#readable?" do
+    it "returns false if no event is available" do
+      subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))
+      subject.start
+      refute_operator subject, :readable?
+    end
+
+    it "returns true if an event is available" do
+      subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))
+      subject.start
+      req_socket
+      refute_operator subject, :readable?
+    end
+  end
+
   describe "#next" do
     it "gets the next event" do
       subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))

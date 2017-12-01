@@ -234,7 +234,7 @@ describe CZTop::Socket::DISH, if: has_czmq_drafts? do
     end
   end
   describe "#leave" do
-    context "leaving an previously joined group" do
+    context "leaving a previously joined group" do
       Given(:group) { "group1" }
       When { dish.join group }
       When(:result) { dish.leave group }

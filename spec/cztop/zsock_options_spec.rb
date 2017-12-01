@@ -55,6 +55,12 @@ describe CZTop::ZsockOptions do
     end
   end
 
+  describe "#fd" do
+    it "returns socket FD" do
+      assert_equal socket.options.fd, socket.fd
+    end
+  end
+
   describe CZTop::ZsockOptions::OptionsAccessor do
     describe "#sndhwm" do
       context "when getting current value" do

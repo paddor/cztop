@@ -91,7 +91,8 @@ describe CZTop::Monitor do
       subject.listen(*%w(ACCEPTED CLOSED MONITOR_STOPPED))
       subject.start
       req_socket
-      refute_operator subject, :readable?
+      sleep 0.1
+      assert_operator subject, :readable?
     end
   end
 

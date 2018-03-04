@@ -599,6 +599,20 @@ describe CZTop::ZsockOptions do
         assert_kind_of(fd_type, socket.options.fd)
       end
     end
+    fdescribe "#reconnect_ivl" do
+      context "with no RECONNECT_IVL" do
+        it "returns default" do
+          assert_equal 100, options.reconnect_ivl
+        end
+      end
+      context "with RECONNECT_IVL set" do
+        let(:reconnect_ivl) { 500 }
+        before { options.reconnect_ivl = reconnect_ivl }
+        it "returns RECONNECT_IVL" do
+          assert_equal reconnect_ivl, options.reconnect_ivl
+        end
+      end
+    end
     describe "#events" do
       let(:writer) { CZTop::Socket::PUSH.new(endpoint) }
       let(:reader) { CZTop::Socket::PULL.new(endpoint) }

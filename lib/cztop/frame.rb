@@ -156,13 +156,13 @@ module CZTop
     end
 
     # Gets the group (radio/dish pattern).
-    # @note This only set when the frame has been read from
+    # @note This is only set when the frame has been read from
     #   a {CZTop::Socket::DISH} socket.
     # @return [String] the group
     # @return [nil] when no group has been set
     def group
       group = ffi_delegate.group
-      return nil if group.empty?
+      return nil if group.nil? || group.empty?
       group
     end
 

@@ -278,6 +278,16 @@ describe CZTop::Frame do
       Then { frame.group == nil }
     end
 
+    context "with empty group set" do
+      before do
+        subject.ffi_delegate.expect(:group, "")
+      end
+
+      it 'returns nil' do
+        assert_nil subject.group
+      end
+    end
+
     context "with group set" do
       Given(:new_group) { "group1" }
       When { frame.group = new_group }

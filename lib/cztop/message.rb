@@ -142,7 +142,16 @@ module CZTop
     #   strings. This can be a problem if the message is huge/has huge frames.
     # @return [Array<String>] all frames
     def to_a
-      frames.map(&:to_s)
+      ffi_delegate = ffi_delegate()
+      frame = ffi_delegate.first
+      return [] if frame.null?
+
+      arr = [ frame.data.read_bytes(frame.size) ]
+      while frame = ffi_delegate.next and not frame.null?
+        arr << frame.data.read_bytes(frame.size)
+      end
+
+      return arr
     end
 
     # Inspects this {Message}.

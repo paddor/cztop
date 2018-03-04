@@ -280,7 +280,7 @@ describe CZTop::Frame do
 
     context "with empty group set" do
       before do
-        subject.ffi_delegate.expect(:group, "")
+        allow(subject.ffi_delegate).to receive(:group) { "" }
       end
 
       it 'returns nil' do

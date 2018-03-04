@@ -46,7 +46,7 @@ describe CZTop::Message::FramesAccessor do
         assert_equal frames.to_a[1], frames[1]
         assert_equal frames.to_a[2], frames[2]
         assert_equal frames.to_a[-1], frames[-1]
-        assert_equal frames.to_a[99], frames[99]
+        assert_nil frames[99]
       end
     end
     describe "#each" do

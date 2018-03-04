@@ -44,9 +44,9 @@ module ZMQHelper
   def has_czmq_drafts?
     # NOTE: We use some function that is currently declared DRAFT. Another one
     # might be needed in future versions.
-    ::CZMQ::FFI.zproc_czmq_version
+    ::CZMQ::FFI.zsock_new_server(nil)
     true
-  rescue NotImplementedError
+  rescue NotImplementedError, NoMethodError
     false
   end
 end

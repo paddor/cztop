@@ -174,7 +174,7 @@ module CZTop
     # @return [new_group]
     def group=(new_group)
       rc = ffi_delegate.set_group(new_group)
-      raise_zmq_err("unable to set group to %p" % group) if rc == -1
+      raise_zmq_err("unable to set group to %p" % new_group) if rc == -1
     end
   end
 end

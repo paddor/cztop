@@ -9,8 +9,8 @@ module CZTop
 
     extend ::FFI::Library
     lib_name = 'libzmq'
-    env_name = "#{lib_name.upcase}_PATH"
-    lib_dirs = [*ENV[env_name].split(':'), *lib_dirs] if ENV[env_name]
+    lib_dirs = ['/usr/local/lib', '/opt/local/lib', '/usr/lib64']
+    lib_dirs = [*ENV['LIBZMQ_PATH'].split(':'), *lib_dirs] if ENV['LIBZMQ_PATH']
     lib_paths = lib_dirs.map { |path| "#{path}/#{lib_name}.#{::FFI::Platform::LIBSUFFIX}" }
     ffi_lib lib_paths + [lib_name]
 

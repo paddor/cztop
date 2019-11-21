@@ -28,12 +28,7 @@ module ZMQHelper
   # @return [Boolean] whether the ZMQ DRAFT API is available
   #
   def has_zmq_drafts?
-    # NOTE: We use some function that is currently declared DRAFT. Another one
-    # might be needed in future versions.
-    CZTop::Poller::ZMQ.poller_destroy(FFI::Pointer::NULL)
-    true
-  rescue NotImplementedError
-    false
+    CZMQ::FFI::LibZMQ.has_draft?
   end
 
   # This can be used to run certain test examples only if CZMQ draft API is
@@ -42,11 +37,6 @@ module ZMQHelper
   # @return [Boolean] whether the CZMQ DRAFT API is available
   #
   def has_czmq_drafts?
-    # NOTE: We use some function that is currently declared DRAFT. Another one
-    # might be needed in future versions.
-    ::CZMQ::FFI.zsock_new_server(nil)
-    true
-  rescue NotImplementedError, NoMethodError
-    false
+    ::CZMQ::FFI.has_draft?
   end
 end

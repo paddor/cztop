@@ -27,5 +27,6 @@ ruby-latest_with_stable_czmq:
 
 ruby-latest_with_HEAD_czmq:
   extends: .rspec
+  allow_failure: true
   variables:
     CZMQ_VERSION: "HEAD"

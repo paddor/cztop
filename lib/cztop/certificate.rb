@@ -8,7 +8,7 @@ module CZTop
     # Warns if CURVE security isn't available.
     # @return [void]
     def self.check_curve_availability
-      return if Zproc.has_curve
+      return if Zsys.has_curve
       warn "CZTop: CURVE isn't available. Consider installing libsodium."
     end
 

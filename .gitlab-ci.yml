@@ -1,0 +1,23 @@
+ruby-latest_with_stable_czmq:
+  image: ruby:latest
+  stage: test
+  variables:
+    CZMQ_VERSION: "stable"
+    ZMQ_VERSION: "stable"
+    DRAFT_API: "no"
+  before_script:
+    - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
+    - export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
+    - env
+    - ci-scripts/install-libzmq
+    - ci-scripts/install-libczmq
+    - gem install bundler
+    - bundle install
+  script:
+    - bundle exec rspec
+
+ruby-latest_with_HEAD_czmq:
+  extends: ruby-latest_with_stable_czmq
+  variables:
+    CZMQ_VERSION: "HEAD"
+    DRAFT_API: "yes"

@@ -1,25 +1,18 @@
 # CZTop
 
 CZTop is a CZMQ binding for Ruby. It is based on
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
+[czmq-ffi-gen](https://gitlab.com/paddor/czmq-ffi-gen), the generated low-level
 FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security
 mechanisms (like CURVE).
 
-You might wanna check out
-[cztop-patterns](https://github.com/paddor/cztop-patterns). It's still very
-new, but will contain some reusable patterns described in the Zguide.
-
-[![Build Status on Travis CI](https://travis-ci.org/paddor/cztop.svg?branch=master)](https://travis-ci.org/paddor/cztop?branch=master)
-[![Code Climate](https://codeclimate.com/repos/56677a7849f50a141c001784/badges/48f3cca3c62df9e4b17b/gpa.svg)](https://codeclimate.com/repos/56677a7849f50a141c001784/feed)
-[![Inline docs](http://inch-ci.org/github/paddor/cztop.svg?branch=master&style=shields)](http://inch-ci.org/github/paddor/cztop)
-[![Dependency Status](https://gemnasium.com/paddor/cztop.svg)](https://gemnasium.com/paddor/cztop)
-[![Coverage Status](https://coveralls.io/repos/paddor/cztop/badge.svg?branch=master&service=github)](https://coveralls.io/github/paddor/cztop?branch=master)
+[![pipeline status](https://gitlab.com/paddor/cztop/badges/master/pipeline.svg)](https://gitlab.com/paddor/cztop/commits/master)
+[![Coverage Status](https://coveralls.io/repos/gitlab/paddor/cztop/badge.svg?branch=master)](https://coveralls.io/gitlab/paddor/cztop?branch=master)
 [![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
 ## Goals
 
-Here are some some of the goals I have/had in mind for this library:
+Here are some some of the goals I had in mind for this library:
 
 - [x] as easy as possible, Ruby-esque API
 - [x] first class support for security (CURVE mechanism)
@@ -100,11 +93,10 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
     * but you can: `CZTop::Socket.new_by_type(:REP)`
   * e.g. `#subscribe` only exists on CZTop::Socket::SUB
 * DRAFT API ready
-  * CLIENT/SERVER/RADIO/DISH/SCATTER/GATHER and other DRAFT methods are supported if the libraries (ZMQ/CZMQ) have been compiled with DRAFT APIs enabled (`--enable-drafts`)
-  * there is `#routing_id` and `#routing_id=` on the following classes:
-    * CZTop::Message
-    * CZTop::Frame
-  * there is `#group` and `#group=` on CZTop::Frame
+  * certain DRAFT methods are supported if the libraries (ZMQ/CZMQ) have been compiled with DRAFT APIs enabled (`--enable-drafts`)
+  * use `CZMQ::FFI.has_draft?` to check if the CZMQ DRAFT API is available
+  * use `CZMQ::FFI::LibZMQ.has_draft?` to check if the ZMQ DRAFT API is available
+  * extend CZTop to your needs
 * ZMTP 3.1 heartbeat ready
   * `socket.options.heartbeat_ivl = 2000`
   * `socket.options.heartbeat_timeout = 8000`
@@ -113,8 +105,8 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 You'll need:
 
-* CZMQ >= 4.0.0
-* ZMQ >= 4.2.0
+* CZMQ >= 4.1
+* ZMQ >= 4.2
 
 For security mechanisms like CURVE, it's recommended to use Libsodium. However,
 ZMQ can be compiled with tweetnacl enabled.
@@ -165,222 +157,22 @@ Or install it yourself as:
 The API should be fairly straight-forward to anyone who is familiar with CZMQ
 and Ruby.  The following API documentation is currently available:
 
-* [YARD API documentation](http://www.rubydoc.info/github/paddor/cztop) (HEAD)
 * [YARD API documentation](http://www.rubydoc.info/gems/cztop) (release)
 
-Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
+Feel free to start a [wiki](https://gitlab.com/paddor/cztop/wiki) page.
 
 ## Performance
 
 Performance should be pretty okay since this is based on czmq-ffi-gen, which is
-reasonably thin.  CZTop is basically only a convenience layer on top, with some
-nice error checking. But hey, it's Ruby. Don't expect 5M messages per second
-with a latency of 3us.
+reasonably thin.  CZTop is just a convenience layer.
 
-The measured latency on my laptop ranges from ~20us to ~60us per message for
-1kb messages, depending on whether transport is inproc, IPC, or TCP/IP.
-
-Make sure you check out the
-[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
+Make sure to check out the
+[perf](https://gitlab.com/paddor/cztop/blob/master/perf) directory for latency
 and throughput measurement scripts.
 
 ## Usage
 
-See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples. Here's a very simple one:
-
-### rep.rb:
-
-```ruby
-#!/usr/bin/env ruby
-require 'cztop'
-
-# create and bind socket
-socket = CZTop::Socket::REP.new("ipc:///tmp/req_rep_example")
-puts "<<< Socket bound to #{socket.last_endpoint.inspect}"
-
-# Simply echo every message, with every frame String#upcase'd.
-while msg = socket.receive
-  puts "<<< #{msg.to_a.inspect}"
-  socket << msg.to_a.map(&:upcase)
-end
-```
-
-### req.rb:
-
-```ruby
-#!/usr/bin/env ruby
-require 'cztop'
-
-# connect
-socket = CZTop::Socket::REQ.new("ipc:///tmp/req_rep_example")
-puts ">>> Socket connected."
-
-# simple string
-socket << "foobar"
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
-
-# multi frame message as array
-socket << %w[foo bar baz]
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
-
-# manually instantiating a Message
-msg = CZTop::Message.new("bla")
-msg << "another frame" # append a frame
-socket << msg
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
-
-##
-# This will send 20 additional messages:
-#
-#   $ ./req.rb 20
-#
-if ARGV.first
-  ARGV.first.to_i.times do
-    socket << ["fooooooooo", "baaaaaar"]
-    puts ">>> " + socket.receive.to_a.inspect
-  end
-end
-```
-
-### Running it
-
-```
-$ ./rep.rb & ./req.rb 3
-[3] 35321
->>> Socket connected.
-<<< Socket bound to "ipc:///tmp/req_rep_example"
-<<< ["foobar"]
->>> ["FOOBAR"]
-<<< ["foo", "bar", "baz"]
->>> ["FOO", "BAR", "BAZ"]
-<<< ["bla", "another frame"]
->>> ["BLA", "ANOTHER FRAME"]
-<<< ["fooooooooo", "baaaaaar"]
->>> ["FOOOOOOOOO", "BAAAAAAR"]
-<<< ["fooooooooo", "baaaaaar"]
->>> ["FOOOOOOOOO", "BAAAAAAR"]
-<<< ["fooooooooo", "baaaaaar"]
->>> ["FOOOOOOOOO", "BAAAAAAR"]
-$
-```
-
-## TODO
-
-* [x] pack generated code into its own gem ([czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen))
-* think of a neat Ruby API, including:
-  - [x] Actor
-  - [x] Beacon
-  - [x] Certificate
-  - [x] Socket
-    - [50%] access to all socket options
-    - [x] Security mechanisms
-  - [x] Message
-  - [x] Frame
-    - [x] enumerable Frames
-  - [x] Authenticator
-  - [x] Loop
-  - [x] Monitor
-  - [x] Poller
-  - [x] Proxy
-  - [x] Config
-  - [x] Z85
-* write the missing XML API files in CZMQ
-  - [x] zarmour.xml
-  - [x] zconfig.xml
-  - [x] zsock_option.xml
-  - [x] zcert.xml
-  - [x] zcertstore.xml
-* [x] check availability of libsodium within CZTop
-* [x] read error strings for exceptions where appropriate (zmq_strerror)
-* [x] add support for ZMTP 3.1 heartbeats in CZMQ
-* [x] add padded variant of Z85
-* add more examples
-  * [x] [simple REQ/REP](https://github.com/paddor/cztop/tree/master/examples/simple_req_rep)
-  * [x] [Taxy System](https://github.com/paddor/cztop/tree/master/examples/taxi_system) with CURVE security and heartbeating
-    * [x] change from ROUTER/DEALER to SERVER/CLIENT
-  * [x] [Actor](https://github.com/paddor/cztop/tree/master/examples/ruby_actor) with Ruby block
-  * [ ] PUSH/PULL
-  * [ ] PUB/SUB
-* [ ] add performance benchmarks
-  * [x] inproc latency
-  * [x] inproc throughput
-  * [x] local/remote latency
-  * [ ] local/remote throughput
-  * see [perf](https://github.com/paddor/cztop/blob/master/perf) directory
-* [x] support older versions of ZMQ
-  * [x] ZMQ HEAD
-    * [x] tested on CI
-  * [x] ZMQ 4.1
-    * [x] tested on CI
-    * as of April 2016, this isn't the case anymore
-  * [x] ZMQ 4.0
-    * [x] tested on CI
-    * as of March 2016, this isn't the case anymore
-  * [ ] ZMQ 3.2
-    * too big a pain ([d5172ab](https://github.com/paddor/czmq-ffi-gen/commit/d5172ab6db64999c50ba24f71569acf1dd45af51))
-* [x] support multiple versions of CZMQ
-  * [x] CZMQ HEAD
-    * [x] test on CI
-  * [x] CZMQ 3.0.2 (current stable)
-    * no `zcert_meta_unset()` ([zeromq/czmq#1246](https://github.com/zeromq/czmq/issues/1246))
-      * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`
-    * no `zproc`(especially no `zproc_has_curve()`)
-      * [x] adapt czmq-ffi-gen so it doesn't raise while `attach_function`, attach `zsys_has_curve()` instead (under same name)
-    * [x] adapt test suite to skip affected test examples
-    * [x] test on CI
-    * as of March, 2016, this isn't the case anymore
-* [x] port [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) to `zmq_poll()`
-  * backwards compatible (`#add_reader`, `#add_writer`, `#wait` behave the same)
-  * but in addition, it has `#readables` and `#writables` which return arrays of sockets
-  * could then be used in Celluloid::ZMQ
-* [ ] add `Message#to_s`
-  * return frame as string, if there's only one frame
-  * raise if there are multiple frames
-  * only safe to use on messages from SERVER/CLIENT sockets
-  * single-part messages are the future
-  * not sure yet
-* [x] get rid of Loop
-  * cannot handle CLIENT/SERVER sockets
-  * there good timer gems for Ruby
-  * Poller can be used to embed in an existing event loop (Celluloid), or make your own trivial one
-* [x] provide `z85encode` and `z85decode` utilities
-  * can be used in a pipeline (limited memory usage)
-  * reusable interface: `Z85::Pipe`
-
-## Reasons
-
-Why another CZMQ Ruby binding? Here is a list of existing projects I found and
-the issues with them, from my point of view:
-
-* [Asmod4n/ruby-ffi-czmq](https://github.com/Asmod4n/ruby-ffi-czmq)
-  * outdated
-  * according to its author, it's an "abomination"
-* [methodmissing/rbczmq](https://github.com/methodmissing/rbczmq)
-  * no support for security features (see [methodmissing/rbczmq#28](https://github.com/methodmissing/rbczmq/issues/28))
-  * no JRuby support (see [methodmissing/rbczmq#48](https://github.com/methodmissing/rbczmq/issues/48))
-  * doesn't feel like Ruby
-* [mtortonesi/ruby-czmq](https://github.com/mtortonesi/ruby-czmq)
-  * no tests
-  * no documentation
-  * outdated
-  * doesn't feel like Ruby
-* [chuckremes/ffi-rzmq](https://github.com/chuckremes/ffi-rzmq)
-  * support discontinued
-  * low level ZMQ gem, not CZMQ
-
-Furthermore, I knew about the generated low-level Ruby FFI binding in the
-[zeromq/czmq](https://github.com/zeromq/czmq) repository. I wanted to make use
-of it because I love that it's generated (and thus, most likely correct
-and up-to-date). Unfortunately, it was in pretty bad shape and missing a few
-CZMQ classes.
-
-So I decided to improve the quality and usability of the binding and add the
-missing classes. The result is
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen) which provides a solid
-foundation for CZTop.
+See the [examples](https://gitlab.com/paddor/cztop/blob/master/examples) directory for some examples.
 
 
 ## Contributing

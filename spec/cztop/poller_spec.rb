@@ -1,7 +1,7 @@
 require_relative 'spec_helper'
 require 'benchmark'
 
-describe CZTop::Poller do
+describe CZTop::Poller, if: has_zmq_drafts? do
   let(:poller) { CZTop::Poller.new }
   let(:poller_ptr) { poller.instance_variable_get(:@poller_ptr) }
 

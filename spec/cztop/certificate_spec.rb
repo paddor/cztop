@@ -143,7 +143,7 @@ describe CZTop::Certificate do
       describe ".check_curve_availability" do
         context "with CURVE available" do
           before do
-            expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(true)
+            expect(::CZMQ::FFI::Zsys).to receive(:has_curve).and_return(true)
           end
           it "doesn't warn" do
             assert_output("", "") do
@@ -153,7 +153,7 @@ describe CZTop::Certificate do
         end
         context "with CURVE not available" do
           before do
-            expect(::CZMQ::FFI::Zproc).to receive(:has_curve).and_return(false)
+            expect(::CZMQ::FFI::Zsys).to receive(:has_curve).and_return(false)
           end
           it "warns" do
             assert_output("", /curve.*libsodium/i) do

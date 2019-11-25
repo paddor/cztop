@@ -1,3 +1,9 @@
+0.14.1 (11/25/2019)
+-----
+* relax dependencies (ffi)
+* respect env var ZMQ_PATH when loading ZMQ for CZTop::Poller
+
+
 0.13.1 (03/04/2018)
 -----
 * fix specs

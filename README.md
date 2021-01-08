@@ -1,5 +1,4 @@
 ![Specs status](https://github.com/paddor/cztop/workflows/Specs/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/paddor/cztop/badge.svg?branch=master)](https://coveralls.io/github/paddor/cztop?branch=master)
 [![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
 # CZTop

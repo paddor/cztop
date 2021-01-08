@@ -1,30 +1,14 @@
+![Specs status](https://github.com/paddor/cztop/workflows/Specs/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/paddor/cztop/badge.svg?branch=master)](https://coveralls.io/github/paddor/cztop?branch=master)
+[![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
+
 # CZTop
 
 CZTop is a CZMQ binding for Ruby. It is based on
-[czmq-ffi-gen](https://gitlab.com/paddor/czmq-ffi-gen), the generated low-level
+[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
 FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security
 mechanisms (like CURVE).
-
-[![pipeline status](https://gitlab.com/paddor/cztop/badges/master/pipeline.svg)](https://gitlab.com/paddor/cztop/commits/master)
-[![Coverage Status](https://coveralls.io/repos/gitlab/paddor/cztop/badge.svg?branch=master)](https://coveralls.io/gitlab/paddor/cztop?branch=master)
-[![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
-
-## Goals
-
-Here are some some of the goals I had in mind for this library:
-
-- [x] as easy as possible, Ruby-esque API
-- [x] first class support for security (CURVE mechanism)
-  - [x] including handling of certificates
-- [x] support MRI, Rubinius, and JRuby
-- [x] high-quality API documentation
-- [x] 100% test coverage
-- [x] provide a portable Z85 implementation
-  * unlike [fpesce/z85](https://github.com/fpesce/z85), which is a C extension
-- [x] use it to replace the [Celluloid::ZMQ](https://github.com/celluloid/celluloid-zmq) part of [Celluloid](https://github.com/celluloid/celluloid)
-  * [celluloid/celluloid-zmq#56](https://github.com/celluloid/celluloid-zmq/issues/56)
-- [ ] implement some of the missing (CZMQ based) Ruby examples in the [ZMQ Guide](http://zguide.zeromq.org/page:all)
 
 ## Overview
 
@@ -89,50 +73,28 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
   * use `Socket#CURVE_server!(cert)` on the server
   * and `Socket#CURVE_client!(client_cert, server_cert)` on the client
 * socket types as Ruby classes
-  * no need to manually pass some constant
+  * no need to manually pass type constants
     * but you can: `CZTop::Socket.new_by_type(:REP)`
-  * e.g. `#subscribe` only exists on CZTop::Socket::SUB
-* DRAFT API ready
-  * certain DRAFT methods are supported if the libraries (ZMQ/CZMQ) have been compiled with DRAFT APIs enabled (`--enable-drafts`)
-  * use `CZMQ::FFI.has_draft?` to check if the CZMQ DRAFT API is available
-  * use `CZMQ::FFI::LibZMQ.has_draft?` to check if the ZMQ DRAFT API is available
-  * extend CZTop to your needs
-* ZMTP 3.1 heartbeat ready
-  * `socket.options.heartbeat_ivl = 2000`
-  * `socket.options.heartbeat_timeout = 8000`
+  * e.g. `#subscribe` only exists on `CZTop::Socket::SUB`
 
 ## Requirements
 
-You'll need:
 
-* CZMQ >= 4.1
-* ZMQ >= 4.2
+* CZMQ >= 4.2
+* ZMQ >= 4.3
 
-For security mechanisms like CURVE, it's recommended to use Libsodium. However,
-ZMQ can be compiled with tweetnacl enabled.
 
-To install on OSX using homebrew, run:
+On Ubuntu 20.04+:
 
-    $ brew install libsodium
-    $ brew install zmq  --HEAD --with-libsodium
-    $ brew install czmq --HEAD
+    $ sudo apt install libczmq-dev
 
-If you're running Linux, go check [this page](http://zeromq.org/distro:_start)
-to get more help. Make sure to install CZMQ, not only ZMQ.
+On macOS using Homebrew, run:
 
-**Note:** Currently (as of May 2016), when compiling ZMQ from master, it may
-be required to pass `--enable-drafts` to `./configure` to make sure all the
-`zmq_poller_*()` functions are available. However, this doesn't seem to be the
-case on all systems.
+    $ brew install czmq
 
-### Supported Ruby versions
+### Supported Rubies
 
-See [.travis.yml](https://github.com/paddor/cztop/blob/master/.travis.yml) for a list of Ruby versions against which CZTop
-is tested.
-
-At the time of writing, these include:
-
-* MRI (2.3, 2.2)
+* MRI (2.6, 2.7, 3.0)
 * Rubinius (HEAD)
 * JRuby 9000 (HEAD)
 
@@ -159,20 +121,19 @@ and Ruby.  The following API documentation is currently available:
 
 * [YARD API documentation](http://www.rubydoc.info/gems/cztop) (release)
 
-Feel free to start a [wiki](https://gitlab.com/paddor/cztop/wiki) page.
+Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 
 ## Performance
 
-Performance should be pretty okay since this is based on czmq-ffi-gen, which is
-reasonably thin.  CZTop is just a convenience layer.
+CZTop is just a convenience layer on top of the thin czmq-ffi-gen library.
 
 Make sure to check out the
-[perf](https://gitlab.com/paddor/cztop/blob/master/perf) directory for latency
+[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
 and throughput measurement scripts.
 
 ## Usage
 
-See the [examples](https://gitlab.com/paddor/cztop/blob/master/examples) directory for some examples.
+See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples.
 
 
 ## Contributing

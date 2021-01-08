@@ -1,0 +1,26 @@
+name: Specs
+
+on: [push,pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ruby:
+          - "2.6"
+          - "2.7"
+          - "3.0"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install CZMQ
+      run: sudo apt install libczmq-dev
+    - name: Run the default task
+      run: |
+        gem install bundler -v 2.2.3
+        bundle install
+        bundle exec rake

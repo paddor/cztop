@@ -1,9 +1,15 @@
 require 'bundler/setup'
+
+# Avoid additional coverage reports on other Rubies.
 if RUBY_ENGINE == "ruby"
-  # no need for additional coverage reports on other Rubies. Doesn't seem to
-  # work on JRuby anyway.
-  require 'coveralls'
-  Coveralls.wear!
+
+  # avoid additional coverage reports on other MRI versions
+  main_version = File.read(File.expand_path('../../.ruby-version', __FILE__)).chomp
+
+  if RUBY_VERSION.start_with? main_version
+    require 'coveralls'
+    Coveralls.wear!
+  end
 end
 require 'rspec'
 require 'rspec/given'

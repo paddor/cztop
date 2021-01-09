@@ -18,7 +18,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
     - name: Install CZMQ
-      run: sudo apt install libczmq-dev
+      run: sudo apt-get install libczmq-dev
     - name: Run the default task
       run: |
         gem install bundler -v 2.2.3

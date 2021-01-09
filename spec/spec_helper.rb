@@ -5,6 +5,22 @@ require 'rspec/given'
 require_relative 'zmq_helper'
 require_relative '../lib/cztop'
 
+require 'simplecov'
+SimpleCov.start
+
+# Avoid additional coverage reports on other Rubies.
+if ENV['CI'] && RUBY_ENGINE == "ruby"
+
+  # avoid additional coverage reports on other MRI versions
+  main_version = File.read(File.expand_path('../../.ruby-version', __FILE__)).chomp
+
+  if RUBY_VERSION.start_with? main_version
+    require 'codecov'
+    SimpleCov.formatter = SimpleCov::Formatter::Codecov
+  end
+end
+
+
 RSpec.configure do |config|
   config.expect_with :minitest
   config.filter_run_excluding if: false

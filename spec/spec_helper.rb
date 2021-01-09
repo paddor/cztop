@@ -1,12 +1,12 @@
 require 'bundler/setup'
+require 'simplecov'
 require 'rspec'
 require 'rspec/given'
+SimpleCov.start
 
 require_relative 'zmq_helper'
 require_relative '../lib/cztop'
 
-require 'simplecov'
-SimpleCov.start
 
 # Avoid additional coverage reports on other Rubies.
 if ENV['CI'] && RUBY_ENGINE == "ruby"

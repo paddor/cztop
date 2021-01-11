@@ -6,18 +6,12 @@ cd ~/src
 
 case "$ZMQ_VERSION" in
 HEAD)
-	echo "Using latest commit (HEAD) and compiling with --enable-drafts ..."
+	echo "Using HEAD and compiling with --enable-drafts ..."
 	git clone https://github.com/zeromq/libzmq libzmq
 	CONFIGURE_OPTS="--enable-drafts=yes"
 	;;
-stable)
-	echo "Using latest stable release on $ZMQ_VERSION fork ..."
-	git clone https://github.com/zeromq/libzmq libzmq
-	tag=`GIT_DIR=libzmq/.git git tag | grep ^v | grep -v -- -rc | sort --field-separator=. --key=1,3 --numeric-sort | tail -1`
-	CONFIGURE_OPTS="--enable-drafts=no"
-	;;
 *)
-	echo '$CZMQ_VERSION not set.'
+	echo '$ZMQ_VERSION not set.'
 	exit 1
 esac
 

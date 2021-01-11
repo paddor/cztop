@@ -6,23 +6,16 @@ cd ~/src
 
 case "$CZMQ_VERSION" in
 HEAD)
-	echo "Using latest commit (HEAD) and compiling with --enable-drafts ..."
-	git pull origin master
+	echo "Using HEAD and compiling with --enable-drafts ..."
+	git clone https://github.com/zeromq/czmq czmq
 	CONFIGURE_OPTS="--enable-drafts=yes"
-	;;
-stable)
-	echo "Using latest stable release ..."
-	tag=`git tag | grep ^v | grep -v -- -rc | sort --field-separator=. --key=1,3 --numeric-sort | tail -1`
-	echo "Using tag: $tag"
-	git pull origin master
-	git checkout $tag
-	CONFIGURE_OPTS="--enable-drafts=no"
 	;;
 *)
 	echo '$CZMQ_VERSION not set.'
 	exit 1
 esac
 
+cd czmq
 ./autogen.sh
 ./configure $CONFIGURE_OPTS
 make

@@ -11,12 +11,16 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 3.0
-    - name: Install ZMQ
-      run: env ZMQ_VERSION=HEAD ci/install-libzmq
-    - name: Install CZMQ
-      run: env CZMQ_VERSION=HEAD ci/install-libczmq
+    - name: Install ZMQ and CZMQ
+      run: |
+        export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
+        env
+        env ZMQ_VERSION=HEAD ci/install-libzmq
+        env CZMQ_VERSION=HEAD ci/install-libczmq
     - name: Run the default task
       run: |
+        export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
+        env
         gem install bundler -v 2.2.3
         bundle install
         bundle exec rake

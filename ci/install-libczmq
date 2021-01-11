@@ -17,6 +17,6 @@ esac
 
 cd czmq
 ./autogen.sh
-./configure $CONFIGURE_OPTS
+./configure --prefix=$HOME $CONFIGURE_OPTS
 make
-sudo make install
+make install

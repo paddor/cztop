@@ -1,0 +1,20 @@
+name: Coverage
+
+on: [push,pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.0
+    - name: Install CZMQ
+      run: sudo apt-get install libczmq-dev
+    - name: Run the default task
+      run: |
+        gem install bundler -v 2.2.3
+        bundle install
+        env REPORT_COVERAGE=true bundle exec rake

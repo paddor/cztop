@@ -2,22 +2,20 @@ require 'bundler/setup'
 require 'simplecov'
 require 'rspec'
 require 'rspec/given'
-SimpleCov.start
+SimpleCov.start do
+  # skip DRAFT API
+  add_filter '/lib/cztop/poller.rb'
+  add_filter '/lib/cztop/poller/aggregated.rb'
+  add_filter '/spec/poller_spec.rb'
+end
 
 require_relative 'zmq_helper'
 require_relative '../lib/cztop'
 
 
-# Avoid additional coverage reports on other Rubies.
-if ENV['CI'] && RUBY_ENGINE == "ruby"
-
-  # avoid additional coverage reports on other MRI versions
-  main_version = File.read(File.expand_path('../../.ruby-version', __FILE__)).chomp
-
-  if RUBY_VERSION.start_with? main_version
-    require 'codecov'
-    SimpleCov.formatter = SimpleCov::Formatter::Codecov
-  end
+if ENV['REPORT_COVERAGE'] == 'true'
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 

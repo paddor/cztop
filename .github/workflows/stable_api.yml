@@ -1,4 +1,4 @@
-name: Specs
+name: STABLE API
 
 on: [push,pull_request]
 

@@ -1,0 +1,22 @@
+name: DRAFT API
+
+on: [push,pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.0
+    - name: Install ZMQ
+      run: env ZMQ_VERSION=HEAD sudo ci/install-libzmq
+    - name: Install CZMQ
+      run: env CZMQ_VERSION=HEAD sudo ci/install-libczmq
+    - name: Run the default task
+      run: |
+        gem install bundler -v 2.2.3
+        bundle install
+        bundle exec rake

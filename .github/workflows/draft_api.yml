@@ -12,9 +12,9 @@ jobs:
       with:
         ruby-version: 3.0
     - name: Install ZMQ
-      run: env ZMQ_VERSION=HEAD sudo ci/install-libzmq
+      run: env ZMQ_VERSION=HEAD ci/install-libzmq
     - name: Install CZMQ
-      run: env CZMQ_VERSION=HEAD sudo ci/install-libczmq
+      run: env CZMQ_VERSION=HEAD ci/install-libczmq
     - name: Run the default task
       run: |
         gem install bundler -v 2.2.3

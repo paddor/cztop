@@ -6,7 +6,7 @@ SimpleCov.start do
   # skip DRAFT API
   add_filter '/lib/cztop/poller.rb'
   add_filter '/lib/cztop/poller/aggregated.rb'
-  add_filter '/spec/poller_spec.rb'
+  add_filter '/spec/cztop/poller_spec.rb'
 end
 
 require_relative 'zmq_helper'

@@ -221,7 +221,7 @@ describe CZTop::Socket::DISH, if: has_czmq_drafts? do
     end
 
     context "given an invalid group name" do
-      Given(:group) { "x" * 16 } # 15+1 (null byte) is maximum
+      Given(:group) { "x" * 256 }
       When(:result) { dish.join group }
       Then { result == Failure(ArgumentError) }
     end

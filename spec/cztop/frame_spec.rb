@@ -306,7 +306,7 @@ describe CZTop::Frame do
     end
 
     context "with too long group" do
-      Given(:new_group) { "x" * 16 }
+      Given(:new_group) { "x" * 256 }
       When(:result) { frame.group = new_group }
       Then { result == Failure(ArgumentError) }
     end

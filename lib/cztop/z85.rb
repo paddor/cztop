@@ -69,6 +69,7 @@ module CZTop
     #   remainder
     # @raise [SystemCallError] if this fails
     def decode(input)
+      return '' if input.size == 0
       raise ArgumentError, "wrong input length" if input.bytesize % 5 > 0
       zchunk = ffi_delegate.decode(input)
       raise_zmq_err if zchunk.null?

@@ -1,4 +1,5 @@
-![Specs status](https://github.com/paddor/cztop/workflows/Specs/badge.svg)
+![Specs status](https://github.com/paddor/cztop/workflows/STABLE%20API/badge.svg)
+![Specs status](https://github.com/paddor/cztop/workflows/DRAFT%20API/badge.svg)
 [![codecov](https://codecov.io/gh/paddor/cztop/branch/master/graph/badge.svg?token=TnjOba97R7)](https://codecov.io/gh/paddor/cztop)
 
 # CZTop

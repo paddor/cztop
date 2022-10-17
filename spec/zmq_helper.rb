@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Helper to deal with certain version or build differences of the ZMQ and CZMQ
 # libraries.
 #
@@ -12,6 +14,7 @@ module ZMQHelper
     ::CZMQ::FFI::ZMQ_VERSION >= version
   end
 
+
   # This can be used to run certain test examples only if the required minimal
   # CZMQ version is available.
   #
@@ -22,6 +25,7 @@ module ZMQHelper
     ::CZMQ::FFI::CZMQ_VERSION >= version
   end
 
+
   # This can be used to run certain test examples only if ZMQ draft API is
   # available.
   #
@@ -30,6 +34,7 @@ module ZMQHelper
   def has_zmq_drafts?
     CZMQ::FFI::LibZMQ.has_draft?
   end
+
 
   # This can be used to run certain test examples only if CZMQ draft API is
   # available.

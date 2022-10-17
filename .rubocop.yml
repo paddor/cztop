@@ -5,7 +5,6 @@ Layout/EmptyLineAfterMagicComment:
   Enabled: true
 Layout/ExtraSpacing:
   AllowForAlignment: true
-  ForceEqualSignAlignment: true
 Layout/EmptyLines:
   Enabled: false
 Layout/EmptyLineBetweenDefs:
@@ -151,4 +150,18 @@ Style/StringChars: # new in 1.12
 Style/SwapValues: # new in 1.1
   Enabled: true
 Style/ClassAndModuleChildren:
+  Enabled: false
+Style/StringConcatenation:
+  Enabled: false
+Style/RescueModifier:
+  Enabled: false
+Style/YodaCondition:
+  Enabled: false
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+Style/WordArray:
+  Enabled: false
+Style/Semicolon:
+  Enabled: false
+Lint/AmbiguousOperatorPrecedence:
   Enabled: false

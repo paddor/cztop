@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 require 'simplecov'
 require 'rspec'
@@ -30,9 +32,7 @@ end
 # raise it to a more sane 1024, like on Linux.
 begin
   soft_limit, hard_limit = Process.getrlimit(:NOFILE)
-  if soft_limit < 1024
-    Process.setrlimit(:NOFILE, 1024, hard_limit)
-  end
+  Process.setrlimit(:NOFILE, 1024, hard_limit) if soft_limit < 1024
 rescue NotImplementedError
   # JRuby
 end

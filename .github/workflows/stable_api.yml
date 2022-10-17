@@ -8,9 +8,9 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "2.6"
           - "2.7"
           - "3.0"
+          - "3.1"
     steps:
     - uses: actions/checkout@v2
     - name: Set up Ruby ${{ matrix.ruby }}
@@ -21,6 +21,6 @@ jobs:
       run: sudo apt-get install libczmq-dev
     - name: Run the default task
       run: |
-        gem install bundler -v 2.2.3
+        gem install bundler
         bundle install
         bundle exec rake

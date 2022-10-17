@@ -1,5 +1,6 @@
-module CZTop
+# frozen_string_literal: true
 
+module CZTop
   # These are methods that can be used on a {Socket} as well as an {Actor},
   # but actually just pass through to methods of {Message} (which take
   # a polymorphic reference, in Ruby as well as in C).
@@ -19,6 +20,7 @@ module CZTop
       Message.coerce(message).send_to(self)
       self
     end
+
 
     # Receives a message.
     #

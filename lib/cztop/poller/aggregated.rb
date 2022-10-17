@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # This is a poller which is able to provide a list of readable and a list
   # of writable sockets. This is useful for when you need to process socket
@@ -33,7 +35,6 @@ module CZTop
   # * {CZTop::Poller#sockets}
   #
   class Poller::Aggregated
-
     # @return [CZTop::Poller.new] the associated (regular) poller
     attr_reader :poller
 
@@ -45,22 +46,23 @@ module CZTop
 
     extend Forwardable
     def_delegators :@poller,
-      :add,
-      :add_reader,
-      :add_writer,
-      :modify,
-      :remove,
-      :remove_reader,
-      :remove_writer,
-      :sockets
+                   :add,
+                   :add_reader,
+                   :add_writer,
+                   :modify,
+                   :remove,
+                   :remove_reader,
+                   :remove_writer,
+                   :sockets
 
     # Initializes the aggregated poller.
     # @param poller [CZTop::Poller] the wrapped poller
     def initialize(poller = CZTop::Poller.new)
       @readables = []
       @writables = []
-      @poller = poller
+      @poller    = poller
     end
+
 
     # Forgets all previous event information (which sockets are
     # readable/writable) and waits for events anew. After getting the first
@@ -76,8 +78,8 @@ module CZTop
     #   or -1 to wait indefinitely
     # @return [Boolean] whether there have been any events
     def wait(timeout = -1)
-      @readables = []
-      @writables = []
+      @readables   = []
+      @writables   = []
       @event_masks = {}
 
       if event = @poller.wait(timeout)
@@ -91,7 +93,7 @@ module CZTop
         restore_event_masks
         return true
       end
-      return false
+      false
     end
 
     private
@@ -103,7 +105,7 @@ module CZTop
     # @param event [CZTop::Poller::Event]
     # @return [void]
     def extract(event)
-      event_mask = poller.event_mask_for_socket(event.socket)
+      event_mask                 = poller.event_mask_for_socket(event.socket)
       @event_masks[event.socket] = event_mask
       if event.readable?
         @readables << event.socket
@@ -115,6 +117,7 @@ module CZTop
       end
       poller.modify(event.socket, event_mask)
     end
+
 
     # Restores the event mask for all registered sockets to the state they
     # were before the call to {#wait}.

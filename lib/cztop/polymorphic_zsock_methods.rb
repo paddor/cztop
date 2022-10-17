@@ -1,5 +1,6 @@
-module CZTop
+# frozen_string_literal: true
 
+module CZTop
   # These are methods that can be used on a {Socket} as well as an {Actor}.
   # @see http://api.zeromq.org/czmq3-0:zsock
   module PolymorphicZsockMethods
@@ -9,11 +10,13 @@ module CZTop
       ::CZMQ::FFI::Zsock.signal(ffi_delegate, status)
     end
 
+
     # Waits for a signal.
     # @return [Integer] the received signal
     def wait
       ::CZMQ::FFI::Zsock.wait(ffi_delegate)
     end
+
 
     # Set socket to use unbounded pipes (HWM=0); use this in cases when you are
     # totally certain the message volume can fit in memory.

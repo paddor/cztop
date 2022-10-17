@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'set'
 
 module CZTop
-
   # A store for CURVE security certificates, either backed by files on disk or
   # in-memory.
   #
@@ -21,6 +22,7 @@ module CZTop
       attach_ffi_delegate(Zcertstore.new(location))
     end
 
+
     # Looks up a certificate in the store by its public key.
     #
     # @param pubkey [String] the public key in question, in Z85 format
@@ -29,8 +31,10 @@ module CZTop
     def lookup(pubkey)
       ptr = ffi_delegate.lookup(pubkey)
       return nil if ptr.null?
+
       Certificate.from_ffi_delegate(ptr)
     end
+
 
     # Inserts a new certificate into the store.
     #
@@ -43,7 +47,7 @@ module CZTop
       raise ArgumentError unless cert.is_a?(Certificate)
 
       @_inserted_pubkeys ||= Set.new
-      pubkey = cert.public_key
+      pubkey               = cert.public_key
       raise ArgumentError if @_inserted_pubkeys.include? pubkey
 
       ffi_delegate.insert(cert.ffi_delegate)

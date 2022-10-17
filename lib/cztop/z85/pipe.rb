@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Can be used if you want to encode or decode data from one IO to another.
 # It'll do so until it hits EOF in the source IO.
 class CZTop::Z85::Pipe
@@ -6,13 +8,14 @@ class CZTop::Z85::Pipe
   # @param strategy [Strategy] algorithm to use (pass the class itself,
   #   not an instance)
   def initialize(source, sink, strategy: Strategy::Parallel)
-    @source, @sink = source, sink
-    @strategy = strategy
+    @source    = source
+    @sink      = sink
+    @strategy  = strategy
     @bin_bytes = 0 # processed binary data (non-Z85)
   end
 
   # @return [Integer] size of chunks read when encoding
-  ENCODE_READ_SZ = (32 * 2**10) # 32 KiB (for full chunks read)
+  ENCODE_READ_SZ = (32 * (2**10)) # 32 KiB (for full chunks read)
 
   # @return [Integer] size of chunks read when decoding
   DECODE_READ_SZ = ENCODE_READ_SZ / 4 * 5
@@ -29,13 +32,14 @@ class CZTop::Z85::Pipe
       elsif prev_chunk && chunk.nil? # last chunk
         CZTop::Z85::Padded.encode(prev_chunk)
       elsif prev_chunk.nil? && chunk.nil?
-        CZTop::Z85.encode("") # empty input
+        CZTop::Z85.encode('') # empty input
       else
-        "" # very first chunk. don't encode anything yet...
+        '' # very first chunk. don't encode anything yet...
       end
     end.execute
-    return @bin_bytes
+    @bin_bytes
   end
+
 
   # Decodes Z85 data from source and writes decoded data to sink. This is
   # done until EOF is hit on the source.
@@ -48,13 +52,14 @@ class CZTop::Z85::Pipe
       elsif prev_chunk && chunk.nil?
         CZTop::Z85::Padded.decode(prev_chunk)
       elsif prev_chunk.nil? && chunk.nil?
-        CZTop::Z85.decode("") # empty input
+        CZTop::Z85.decode('') # empty input
       else
-        "" # very first chunk. don't decode anything yet...
+        '' # very first chunk. don't decode anything yet...
       end
     end.execute
-    return @bin_bytes
+    @bin_bytes
   end
+
 
   # @abstract
   # Different encoding/decoding strategies (algorithms).
@@ -71,16 +76,20 @@ class CZTop::Z85::Pipe
     #   the first time)
     # @yieldreturn [String] encoded/decoded chunk to write to sink
     def initialize(source, sink, read_sz, &xcode)
-      @source = source
-      @sink = sink
+      @source  = source
+      @sink    = sink
       @read_sz = read_sz
-      @xcode = xcode
+      @xcode   = xcode
     end
+
 
     # @abstract
     # Runs the algorithm.
     # @raise [void]
-    def execute() raise NotImplementedError end
+    def execute
+      raise NotImplementedError
+    end
+
 
     # A single thread that is either reading input, encoding/decoding, or
     # writing output.
@@ -90,13 +99,15 @@ class CZTop::Z85::Pipe
       def execute
         previous_chunk = nil
         while true
-          chunk = @source.read(@read_sz)
-          @sink << @xcode.(chunk, previous_chunk)
+          chunk          = @source.read(@read_sz)
+          @sink << @xcode.call(chunk, previous_chunk)
           break if chunk.nil?
+
           previous_chunk = chunk
         end
       end
     end
+
 
     # Uses three threads:
     #
@@ -126,6 +137,7 @@ class CZTop::Z85::Pipe
         # @sink
       end
 
+
       # Runs the algorithm.
       # @raise [void]
       def execute
@@ -146,6 +158,7 @@ class CZTop::Z85::Pipe
         @source_queue << nil
       end
 
+
       # Pops all chunks from the source queue, encodes or decodes them,
       # and pushes the result into the sink queue. Then pushes a +nil+
       # into the queue.
@@ -157,13 +170,15 @@ class CZTop::Z85::Pipe
           chunk = @source_queue.pop
 
           # call @xcode for the trailing nil-chunk as well
-          @sink_queue << @xcode.(chunk, previous_chunk)
+          @sink_queue << @xcode.call(chunk, previous_chunk)
 
           break if chunk.nil?
+
           previous_chunk = chunk
         end
         @sink_queue << nil
       end
+
 
       # Pops all chunks from the sink queue and writes them to the sink.
       # @return [void]

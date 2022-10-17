@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Represents a CZMQ::FFI::Zactor.
   #
@@ -60,14 +62,15 @@ module CZTop
     # @yieldparam pipe [Socket::PAIR]
     # @see #process_messages
     def initialize(callback = nil, c_args = nil, &handler)
-      @running = true
-      @mtx = Mutex.new
-      @callback = callback || handler
-      @callback = shim(@callback) unless @callback.is_a? ::FFI::Pointer
-      ffi_delegate = Zactor.new(@callback, c_args)
+      @running         = true
+      @mtx             = Mutex.new
+      @callback        = callback || handler
+      @callback        = shim(@callback) unless @callback.is_a? ::FFI::Pointer
+      ffi_delegate     = Zactor.new(@callback, c_args)
       attach_ffi_delegate(ffi_delegate)
-      options.sndtimeo = 20#ms # see #<<
+      options.sndtimeo = 20 # ms # see #<<
     end
+
 
     # Send a message to the actor.
     # @param message [Object] message to send to the actor, see {Message.coerce}
@@ -88,7 +91,8 @@ module CZTop
       else
         begin
           @mtx.synchronize do
-            raise DeadActorError if not @running
+            raise DeadActorError unless @running
+
             message.send_to(self)
           end
         rescue IO::EAGAINWaitWritable
@@ -112,15 +116,18 @@ module CZTop
       self
     end
 
+
     # Receive a message from the actor.
     # @return [Message]
     # @raise [DeadActorError] if actor is terminated
     def receive
       @mtx.synchronize do
-        raise DeadActorError if not @running
+        raise DeadActorError unless @running
+
         super
       end
     end
+
 
     # Same as {#<<}, but also waits for a response from the actor and returns
     # it.
@@ -129,9 +136,11 @@ module CZTop
     # @raise [ArgumentError] if the message is "$TERM" (use {#terminate})
     def request(message)
       @mtx.synchronize do
-        raise DeadActorError if not @running
+        raise DeadActorError unless @running
+
         message = Message.coerce(message)
-        raise ArgumentError, "use #terminate" if TERM == message[0]
+        raise ArgumentError, 'use #terminate' if TERM == message[0]
+
         message.send_to(self)
         Message.receive_from(self)
       end
@@ -139,6 +148,7 @@ module CZTop
       # same as in #<<
       retry
     end
+
 
     # Sends a message according to a "picture".
     # @see zsock_send() on http://api.zeromq.org/czmq3-0:zsock
@@ -151,10 +161,12 @@ module CZTop
     # @return [void]
     def send_picture(picture, *args)
       @mtx.synchronize do
-        raise DeadActorError if not @running
+        raise DeadActorError unless @running
+
         Zsock.send(ffi_delegate, picture, *args)
       end
     end
+
 
     # Thread-safe {PolymorphicZsockMethods#wait}.
     # @return [Integer]
@@ -164,12 +176,14 @@ module CZTop
       end
     end
 
+
     # Tells the actor to terminate and waits for it. Idempotent.
     # @return [Boolean] whether it died just now (+false+ if it was dead
     #   already)
     def terminate
       @mtx.synchronize do
-        return false if not @running
+        return false unless @running
+
         Message.new(TERM).send_to(self)
         await_handler_death
         true
@@ -179,10 +193,12 @@ module CZTop
       retry
     end
 
+
     # @return [Boolean] whether this actor is dead (terminated or crashed)
     def dead?
       !@running
     end
+
 
     # @return [Boolean] whether this actor has crashed
     # @see #exception
@@ -200,26 +216,25 @@ module CZTop
     # @return [FFI::Function] the callback function to be passed to the zactor
     # @raise [ArgumentError] if invalid handler given
     def shim(handler)
-      raise ArgumentError, "invalid handler" if !handler.respond_to?(:call)
+      raise ArgumentError, 'invalid handler' unless handler.respond_to?(:call)
 
-      @handler_thread = nil
+      @handler_thread      = nil
       @handler_dead_signal = Queue.new # used for signaling
 
       Zactor.fn do |pipe_delegate, _args|
-        begin
-          @mtx.synchronize do
-            @handler_thread = Thread.current
-            @pipe = Socket::PAIR.from_ffi_delegate(pipe_delegate)
-            @pipe.signal # handshake, so zactor_new() returns
-          end
-          process_messages(handler)
-        rescue Exception
-          @exception = $!
-        ensure
-          signal_shimmed_handler_death
+        @mtx.synchronize do
+          @handler_thread = Thread.current
+          @pipe           = Socket::PAIR.from_ffi_delegate(pipe_delegate)
+          @pipe.signal # handshake, so zactor_new() returns
         end
+        process_messages(handler)
+      rescue Exception
+        @exception = $ERROR_INFO
+      ensure
+        signal_shimmed_handler_death
       end
     end
+
 
     # @return [Boolean] whether the handler is a Ruby object, like a simple
     #   block (as opposed to a FFI::Pointer to a C function)
@@ -228,7 +243,7 @@ module CZTop
     end
 
     # the command which causes an actor handler to terminate
-    TERM = "$TERM"
+    TERM = '$TERM'
 
     # Successively receive messages that were sent to the actor and
     # yield them to the given handler to process them. The a pipe (a
@@ -256,11 +271,13 @@ module CZTop
       end
     end
 
+
     # Receives the next message even across any interrupts.
     # @return [Message] the next message
     def next_message
       @pipe.receive
     end
+
 
     # Creates a new thread that will signal the definitive termination of the
     # Ruby handler.
@@ -285,6 +302,7 @@ module CZTop
         @handler_dead_signal.push(nil)
       end
     end
+
 
     # Waits for the C or Ruby handler to die.
     # @return [void]

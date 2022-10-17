@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Z85 with simple padding. This allows you to {#encode} input of any
 # length.
 #
@@ -41,6 +43,7 @@ class CZTop::Z85::Padded < CZTop::Z85
       default.encode(input)
     end
 
+
     # Same as {Z85::Padded#decode}, but without the need to create an
     # instance first.
     #
@@ -72,13 +75,14 @@ class CZTop::Z85::Padded < CZTop::Z85
     padding_bytes = 4 - (input.bytesize % 4)
 
     # if 0, make it 4. we MUST append padding.
-    padding_bytes = 4 if padding_bytes == 0
+    padding_bytes = 4 if padding_bytes.zero?
 
     # generate and append padding
-    padding = [padding_bytes].pack("C") * padding_bytes
+    padding = [padding_bytes].pack('C') * padding_bytes
 
     super("#{input}#{padding}")
   end
+
 
   # Decodes from Z85 with padding.
   #
@@ -88,11 +92,12 @@ class CZTop::Z85::Padded < CZTop::Z85
   # @raise [SystemCallError] if this fails
   def decode(input)
     return super if input.empty?
+
     decoded = super
 
     # last byte contains number of padding bytes
     padding_bytes = decoded.byteslice(-1).ord
 
-    decoded.byteslice( 0 ... -padding_bytes )
+    decoded.byteslice(0...-padding_bytes)
   end
 end

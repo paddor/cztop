@@ -1,17 +1,20 @@
+# frozen_string_literal: true
+
 module CZTop
   class Message
-
     # @return [Integer] number of frames
     # @see content_size
     def size
       frames.count
     end
 
+
     # Access to this {Message}'s {Frame}s.
     # @return [FramesAccessor]
     def frames
       FramesAccessor.new(self)
     end
+
 
     # Used to access a {Message}'s {Frame}s.
     class FramesAccessor
@@ -22,14 +25,17 @@ module CZTop
         @message = message
       end
 
+
       # Returns the last frame of this message.
       # @return [Frame] first frame of Message
       # @return [nil] if there are no frames
       def first
         first = @message.ffi_delegate.first
         return nil if first.null?
+
         Frame.from_ffi_delegate(first)
       end
+
 
       # Returns the last frame of this message.
       # @return [Frame] last {Frame} of {Message}
@@ -37,8 +43,10 @@ module CZTop
       def last
         last = @message.ffi_delegate.last
         return nil if last.null?
+
         Frame.from_ffi_delegate(last)
       end
+
 
       # Index access to a frame/frames of this message, just like with an
       # array.
@@ -56,6 +64,7 @@ module CZTop
         end
       end
 
+
       # Yields all frames for this message to the given block.
       # @note Not thread safe.
       # @yieldparam frame [Frame]
@@ -63,11 +72,12 @@ module CZTop
       def each
         first = first()
         return unless first
+
         yield first
-        while frame = @message.ffi_delegate.next and not frame.null?
+        while (frame = @message.ffi_delegate.next) && !frame.null?
           yield Frame.from_ffi_delegate(frame)
         end
-        return self
+        self
       end
     end
   end

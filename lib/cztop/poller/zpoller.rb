@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # This is the trivial poller based on zpoller. It only supports polling
   # for readability, but it also supports doing that on CLIENT/SERVER sockets,
@@ -14,13 +16,14 @@ module CZTop
     # @param readers [Socket, Actor] any additional sockets to poll for input
     def initialize(reader, *readers)
       @sockets = {} # to keep references and return same instances
-      ptr = Zpoller.new(reader,
-                        *readers.flat_map {|r| [ :pointer, r ] },
-                        :pointer, nil)
+      ptr      = Zpoller.new(reader,
+                             *readers.flat_map { |r| [:pointer, r] },
+                             :pointer, nil)
       attach_ffi_delegate(ptr)
       remember_socket(reader)
       readers.each { |r| remember_socket(r) }
     end
+
 
     # Adds another reader socket to the poller.
     # @param reader [Socket, Actor] socket to poll for input
@@ -28,9 +31,10 @@ module CZTop
     # @raise [SystemCallError] if this fails
     def add(reader)
       rc = ffi_delegate.add(reader)
-      raise_zmq_err("unable to add socket %p" % reader) if rc == -1
+      raise_zmq_err(format('unable to add socket %p', reader)) if rc == -1
       remember_socket(reader)
     end
+
 
     # Removes a reader socket from the poller.
     # @param reader [Socket, Actor] socket to remove
@@ -40,9 +44,10 @@ module CZTop
     # @raise [SystemCallError] if this fails for another reason
     def remove(reader)
       rc = ffi_delegate.remove(reader)
-      raise_zmq_err("unable to remove socket %p" % reader) if rc == -1
+      raise_zmq_err(format('unable to remove socket %p', reader)) if rc == -1
       forget_socket(reader)
     end
+
 
     # Waits and returns the first socket that becomes readable.
     # @param timeout [Integer] how long to wait in ms, or 0 to avoid
@@ -54,10 +59,12 @@ module CZTop
       ptr = ffi_delegate.wait(timeout)
       if ptr.null?
         raise Interrupt if ffi_delegate.terminated
+
         return nil
       end
-      return socket_by_ptr(ptr)
+      socket_by_ptr(ptr)
     end
+
 
     # Tells the zpoller to ignore interrupts. By default, {#wait} will return
     # immediately if it detects an interrupt (when +zsys_interrupted+ is set
@@ -67,6 +74,7 @@ module CZTop
     def ignore_interrupts
       ffi_delegate.ignore_interrupts
     end
+
 
     # By default the poller stops if the process receives a SIGINT or SIGTERM
     # signal. This makes it impossible to shut-down message based architectures
@@ -91,12 +99,14 @@ module CZTop
       @sockets[socket.to_ptr.to_i] = socket
     end
 
+
     # Forgets the socket because it has been removed from the poller.
     # @param socket [Socket, Actor] the socket instance to forget
     # @return [void]
     def forget_socket(socket)
       @sockets.delete(socket.to_ptr.to_i)
     end
+
 
     # Gets the previously remembered socket associated to the given pointer.
     # @param ptr [FFI::Pointer] the pointer to a socket

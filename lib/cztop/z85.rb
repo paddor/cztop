@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Represents a CZMQ::FFI::Zarmour in Z85 mode.
   #
@@ -19,6 +21,7 @@ module CZTop
       def encode(input)
         default.encode(input)
       end
+
 
       # Same as {Z85#decode}, but without the need to create an instance
       # first.
@@ -46,6 +49,7 @@ module CZTop
       ffi_delegate.set_mode(CZMQ::FFI::Zarmour::MODE_Z85)
     end
 
+
     # Encodes to Z85.
     # @param input [String] possibly binary input data
     # @return [String] Z85 encoded data as ASCII string
@@ -53,14 +57,16 @@ module CZTop
     #   remainder
     # @raise [SystemCallError] if this fails
     def encode(input)
-      raise ArgumentError, "wrong input length" if input.bytesize % 4 > 0
+      raise ArgumentError, 'wrong input length' if (input.bytesize % 4).positive?
+
       input = input.dup.force_encoding(Encoding::BINARY)
-      ptr = ffi_delegate.encode(input, input.bytesize)
+      ptr   = ffi_delegate.encode(input, input.bytesize)
       raise_zmq_err if ptr.null?
-      z85 = ptr.read_string
+      z85   = ptr.read_string
       z85.encode!(Encoding::ASCII)
-      return z85
+      z85
     end
+
 
     # Decodes from Z85.
     # @param input [String] Z85 encoded data
@@ -69,12 +75,12 @@ module CZTop
     #   remainder
     # @raise [SystemCallError] if this fails
     def decode(input)
-      return '' if input.size == 0
-      raise ArgumentError, "wrong input length" if input.bytesize % 5 > 0
+      return '' if input.empty?
+      raise ArgumentError, 'wrong input length' if (input.bytesize % 5).positive?
+
       zchunk = ffi_delegate.decode(input)
       raise_zmq_err if zchunk.null?
-      decoded_string = zchunk.data.read_string(zchunk.size - 1)
-      return decoded_string
+      zchunk.data.read_string(zchunk.size - 1)
     end
   end
 end

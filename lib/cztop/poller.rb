@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # A non-trivial socket poller.
   #
@@ -13,18 +15,19 @@ module CZTop
 
     # @param readers [Socket, Actor] sockets to poll for input
     def initialize(*readers)
-      @sockets = {} # needed to return the same socket objects
-      @events = {} # event masks for each socket
+      @sockets    = {} # needed to return the same socket objects
+      @events     = {} # event masks for each socket
       @poller_ptr = ZMQ.poller_new
       ObjectSpace.define_finalizer(@poller_ptr,
-        Proc.new do
-          ptr_ptr = ::FFI::MemoryPointer.new :pointer
-          ptr_ptr.write_pointer(@poller_ptr)
-          ZMQ.poller_destroy(ptr_ptr)
-        end)
-      @event_ptr = FFI::MemoryPointer.new(ZMQ::PollerEvent)
+                                   proc do
+                                     ptr_ptr = ::FFI::MemoryPointer.new :pointer
+                                     ptr_ptr.write_pointer(@poller_ptr)
+                                     ZMQ.poller_destroy(ptr_ptr)
+                                   end)
+      @event_ptr  = FFI::MemoryPointer.new(ZMQ::PollerEvent)
       readers.each { |r| add_reader(r) }
     end
+
 
     # Adds a socket to be polled for readability.
     # @param socket [Socket, Actor] the socket
@@ -34,10 +37,11 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def add(socket, events)
       ptr = ptr_for_socket(socket)
-      rc = ZMQ.poller_add(@poller_ptr, ptr, nil, events)
+      rc  = ZMQ.poller_add(@poller_ptr, ptr, nil, events)
       HasFFIDelegate.raise_zmq_err if rc == -1
       remember_socket(socket, events)
     end
+
 
     # Convenience method to register a socket for readability. See {#add}.
     # @param socket [Socket, Actor] the socket
@@ -46,12 +50,14 @@ module CZTop
       add(socket, ZMQ::POLLIN)
     end
 
+
     # Convenience method to register a socket for writability. See {#add}.
     # @param socket [Socket, Actor] the socket
     # @return [void]
     def add_writer(socket)
       add(socket, ZMQ::POLLOUT)
     end
+
 
     # Modifies the events of interest for the given socket.
     # @param socket [Socket, Actor] the socket
@@ -61,10 +67,11 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def modify(socket, events)
       ptr = ptr_for_socket(socket)
-      rc = ZMQ.poller_modify(@poller_ptr, ptr, events)
+      rc  = ZMQ.poller_modify(@poller_ptr, ptr, events)
       HasFFIDelegate.raise_zmq_err if rc == -1
       remember_socket(socket, events)
     end
+
 
     # Removes a previously registered socket. Won't raise if you're
     # trying to remove a socket that's not registered.
@@ -73,10 +80,11 @@ module CZTop
     # @raise [ArgumentError] if it's not a socket
     def remove(socket)
       ptr = ptr_for_socket(socket)
-      rc = ZMQ.poller_remove(@poller_ptr, ptr)
+      rc  = ZMQ.poller_remove(@poller_ptr, ptr)
       HasFFIDelegate.raise_zmq_err if rc == -1
       forget_socket(socket)
     end
+
 
     # Removes a reader socket that was registered for readability only.
     #
@@ -88,8 +96,9 @@ module CZTop
         remove(socket)
         return
       end
-      raise ArgumentError, "not registered for readability only: %p" % socket
+      raise ArgumentError, format('not registered for readability only: %p', socket)
     end
+
 
     # Removes a reader socket that was registered for writability only.
     #
@@ -101,8 +110,9 @@ module CZTop
         remove(socket)
         return
       end
-      raise ArgumentError, "not registered for writability only: %p" % socket
+      raise ArgumentError, format('not registered for writability only: %p', socket)
     end
+
 
     # Waits for registered sockets to become readable or writable, depending
     # on what you're interested in.
@@ -116,7 +126,7 @@ module CZTop
       rc = ZMQ.poller_wait(@poller_ptr, @event_ptr, timeout)
       if rc == -1
         case CZMQ::FFI::Errors.errno
-        # NOTE: ETIMEDOUT for backwards compatibility, although this API is
+          # NOTE: ETIMEDOUT for backwards compatibility, although this API is
           # still DRAFT.
         when Errno::EAGAIN::Errno, Errno::ETIMEDOUT::Errno
           return nil
@@ -124,8 +134,9 @@ module CZTop
           HasFFIDelegate.raise_zmq_err
         end
       end
-      return Event.new(self, @event_ptr)
+      Event.new(self, @event_ptr)
     end
+
 
     # Simpler version of {#wait}, which just returns the first socket of
     # interest, if any. This is useful if you either have only reader sockets,
@@ -140,13 +151,15 @@ module CZTop
       return event.socket if event
     end
 
+
     # @param ptr [FFI::Pointer] pointer to the socket
     # @return [Socket, Actor] socket corresponding to given pointer
     # @raise [ArgumentError] if pointer is not known
     def socket_for_ptr(ptr)
       @sockets[ptr.to_i] or
-        raise ArgumentError, "no socket known for pointer %p" % ptr
+        raise ArgumentError, format('no socket known for pointer %p', ptr)
     end
+
 
     # @return [Array<CZTop::Socket>] all sockets registered with this poller
     # @note The actual events registered for each sockets don't matter.
@@ -154,13 +167,14 @@ module CZTop
       @sockets.values
     end
 
+
     # Returns the event mask for the given, registered socket.
     # @param socket [Socket, Actor] which socket's events to return
     # @return [Integer] event mask for the given socket
     # @raise [ArgumentError] if socket is not registered
     def event_mask_for_socket(socket)
       @events[socket] or
-        raise ArgumentError, "no event mask known for socket %p" % socket
+        raise ArgumentError, format('no event mask known for socket %p', socket)
     end
 
     private
@@ -170,16 +184,19 @@ module CZTop
     # @raise [ArgumentError] if argument is not a socket
     def ptr_for_socket(socket)
       raise ArgumentError unless socket.is_a?(Socket) || socket.is_a?(Actor)
+
       Zsock.resolve(socket)
     end
+
 
     # Keeps a reference to the given socket, and remembers its event mask.
     # @param socket [Socket, Actor] the socket
     # @param events [Integer] the event mask
     def remember_socket(socket, events)
       @sockets[ptr_for_socket(socket).to_i] = socket
-      @events[socket] = events
+      @events[socket]                       = events
     end
+
 
     # Discards the referencel to the given socket, and forgets its event mask.
     # @param socket [Socket, Actor] the socket
@@ -187,6 +204,7 @@ module CZTop
       @sockets.delete(ptr_for_socket(socket).to_i)
       @events.delete(socket)
     end
+
 
     # Represents an event returned by {CZTop::Poller#wait}. This is useful to
     # find out whether the associated socket is now readable or writable, in
@@ -197,19 +215,22 @@ module CZTop
       # @param event_ptr [FFI::Pointer] pointer to the memory allocated for
       #   the event's data (a +zmq_poller_event_t+)
       def initialize(poller, event_ptr)
-        @poller = poller
+        @poller       = poller
         @poller_event = ZMQ::PollerEvent.new(event_ptr)
       end
+
 
       # @return [Socket, Actor] the associated socket
       def socket
         @socket ||= @poller.socket_for_ptr(@poller_event[:socket])
       end
 
+
       # @return [Boolean] whether it's readable
       def readable?
         @poller_event.readable?
       end
+
 
       # @return [Boolean] whether it's writable
       def writable?

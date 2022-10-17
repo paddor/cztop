@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # CZMQ monitor. Listen for socket events.
   #
@@ -12,7 +14,7 @@ module CZTop
 
     # function pointer to the +zmonitor()+ function
     ZMONITOR_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
-      fptr = dl.find_function("zmonitor")
+      fptr = dl.find_function('zmonitor')
       break fptr if fptr
     end
     raise LoadError, "couldn't find zmonitor()" if ZMONITOR_FPTR.nil?
@@ -31,10 +33,11 @@ module CZTop
       @actor.terminate
     end
 
+
     # Enable verbose logging of commands and activity.
     # @return [void]
     def verbose!
-      @actor << "VERBOSE"
+      @actor << 'VERBOSE'
     end
 
     # @return [Array<String>] types of valid events
@@ -55,7 +58,7 @@ module CZTop
       HANDSHAKE_FAILED_NO_DETAIL
       HANDSHAKE_FAILED_PROTOCOL
       HANDSHAKE_FAILED_AUTH
-    ]
+    ].freeze
 
     # Configure monitor to listen for specific events.
     # @param events [String] one or more events from {EVENTS}
@@ -65,15 +68,17 @@ module CZTop
         EVENTS.include?(event) or
           raise ArgumentError, "invalid event: #{event.inspect}"
       end
-      @actor << [ "LISTEN", *events ]
+      @actor << ['LISTEN', *events]
     end
+
 
     # Start the monitor. After this, you can read events using {#next}.
     # @return [void]
     def start
-      @actor << "START"
+      @actor << 'START'
       @actor.wait
     end
+
 
     # Useful for registration in an event-loop.
     # @return [Integer] the FD
@@ -82,10 +87,12 @@ module CZTop
       @actor.fd
     end
 
+
     # @return [Boolean] whether there's at least one event available
     def readable?
       @actor.readable?
     end
+
 
     # Get next event. This blocks until the next event is available.
     # @example

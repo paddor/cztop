@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Represents a CZMQ::FFI::Zsock.
   class Socket
@@ -21,6 +23,7 @@ module CZTop
       cert.apply(self) # NOTE: desired: raises if no secret key in cert
     end
 
+
     # Enables CURVE security and makes this socket a CURVE client.
     # @param client_cert [Certificate] client's certificate, to secure
     #   communication (and be authenticated by the server)
@@ -31,9 +34,7 @@ module CZTop
     #   which means it's not secret anymore
     # @raise [SystemCallError] if there's no secret key in client_cert
     def CURVE_client!(client_cert, server_cert)
-      if server_cert.secret_key
-        raise SecurityError, "server's secret key not secret"
-      end
+      raise SecurityError, "server's secret key not secret" if server_cert.secret_key
 
       client_cert.apply(self) # NOTE: desired: raises if no secret key in cert
       options.CURVE_serverkey = server_cert.public_key
@@ -47,23 +48,26 @@ module CZTop
       ffi_delegate.endpoint
     end
 
+
     # Connects to an endpoint.
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def connect(endpoint)
-      rc = ffi_delegate.connect("%s", :string, endpoint)
-      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
+      rc = ffi_delegate.connect('%s', :string, endpoint)
+      raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
     end
+
 
     # Disconnects from an endpoint.
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def disconnect(endpoint)
-      rc = ffi_delegate.disconnect("%s", :string, endpoint)
-      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
+      rc = ffi_delegate.disconnect('%s', :string, endpoint)
+      raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
     end
+
 
     # Closes and destroys the native socket.
     # @return [void]
@@ -83,30 +87,28 @@ module CZTop
     # @return [void]
     # @raise [SystemCallError] in case of failure
     def bind(endpoint)
-      rc = ffi_delegate.bind("%s", :string, endpoint)
-      raise_zmq_err("unable to bind to %p" % endpoint) if rc == -1
-      @last_tcp_port = rc if rc > 0
+      rc             = ffi_delegate.bind('%s', :string, endpoint)
+      raise_zmq_err(format('unable to bind to %p', endpoint)) if rc == -1
+      @last_tcp_port = rc if rc.positive?
     end
+
 
     # Unbinds from an endpoint.
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
     def unbind(endpoint)
-      rc = ffi_delegate.unbind("%s", :string, endpoint)
-      raise ArgumentError, "incorrect endpoint: %p" % endpoint if rc == -1
+      rc = ffi_delegate.unbind('%s', :string, endpoint)
+      raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
     end
+
 
     # Inspects this {Socket}.
     # @return [String] shows class, native address, and {#last_endpoint}
     def inspect
-      "#<%s:0x%x last_endpoint=%p>" % [
-        self.class,
-        to_ptr.address,
-        last_endpoint
-      ]
+      format('#<%s:0x%x last_endpoint=%p>', self.class, to_ptr.address, last_endpoint)
     rescue Zsock::DestroyedError
-      "#<%s: invalid>" % self.class
+      format('#<%s: invalid>', self.class)
     end
   end
 end

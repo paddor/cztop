@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Represents a CZMQ::FFI::Zframe, a part of a message.
   #
@@ -18,8 +20,8 @@ module CZTop
       self.content = content if content
     end
 
-    FLAG_MORE = 1
-    FLAG_REUSE = 2
+    FLAG_MORE     = 1
+    FLAG_REUSE    = 2
     FLAG_DONTWAIT = 4
 
     # Send {Message} to a {Socket}/{Actor}.
@@ -39,14 +41,14 @@ module CZTop
     # @raise [SystemCallError] if there was some error. In that case, the
     #   native counterpart still exists and this {Frame} can be reused.
     def send_to(destination, more: false, reuse: false, dontwait: false)
-      flags = 0
+      flags  = 0
       flags |= FLAG_MORE if more
       flags |= FLAG_REUSE if reuse
       flags |= FLAG_DONTWAIT if dontwait
 
       # remember pointer, in case the zframe_t won't be destroyed
       zframe_ptr = ffi_delegate.to_ptr
-      ret = CZMQ::FFI::Zframe.send(ffi_delegate, destination, flags)
+      ret        = CZMQ::FFI::Zframe.send(ffi_delegate, destination, flags)
 
       if reuse || ret == -1
         # zframe_t hasn't been destroyed yet: avoid memory leak.
@@ -55,13 +57,12 @@ module CZTop
       end
 
       if ret == -1
-        if dontwait && FFI.errno == Errno::EAGAIN::Errno
-          raise IO::EAGAINWaitWritable
-        end
+        raise IO::EAGAINWaitWritable if dontwait && FFI.errno == Errno::EAGAIN::Errno
 
         raise_zmq_err
       end
     end
+
 
     # Receive {Frame} from a {Socket}/{Actor}.
     # @note This is low-level. Consider just receiving a {Message}.
@@ -70,17 +71,19 @@ module CZTop
       from_ffi_delegate(CZMQ::FFI::Zframe.recv(source))
     end
 
+
     # @note This string is always binary. Use String#force_encoding if needed.
     # @return [String] content as string (encoding = Encoding::BINARY)
     def content
       ffi_delegate.data.read_string(size)
     end
-    alias_method :to_s, :content
+    alias to_s content
 
     # @return [Boolean] if this {Frame} has zero-sized content
     def empty?
       size.zero?
     end
+
 
     # Sets new content of this {Frame}.
     # @param new_content [String]
@@ -92,11 +95,13 @@ module CZTop
       # NOTE: FFI::MemoryPointer will autorelease
     end
 
+
     # Duplicates a frame.
     # @return [Frame] new frame with same content
     def dup
       from_ffi_delegate(ffi_delegate.dup)
     end
+
 
     # @return [Boolean] if the MORE indicator is set
     # @note This happens when reading a frame from a {Socket} or using
@@ -104,6 +109,7 @@ module CZTop
     def more?
       ffi_delegate.more == 1
     end
+
 
     # Sets the MORE indicator.
     # @param indicator [Boolean]
@@ -113,6 +119,7 @@ module CZTop
     def more=(indicator)
       ffi_delegate.set_more(indicator ? 1 : 0)
     end
+
 
     # Compare to another frame.
     # @param other [Frame]
@@ -151,9 +158,11 @@ module CZTop
     def routing_id=(new_routing_id)
       # need to raise manually, as FFI lacks this feature.
       # @see https://github.com/ffi/ffi/issues/473
-      raise RangeError if new_routing_id < 0
+      raise RangeError if new_routing_id.negative?
+
       ffi_delegate.set_routing_id(new_routing_id)
     end
+
 
     # Gets the group (radio/dish pattern).
     # @note This is only set when the frame has been read from
@@ -163,8 +172,10 @@ module CZTop
     def group
       group = ffi_delegate.group
       return nil if group.nil? || group.empty?
+
       group
     end
+
 
     # Sets a new group (radio/dish pattern).
     # @note This is used when the frame is sent via a {CZTop::Socket::RADIO}
@@ -174,7 +185,7 @@ module CZTop
     # @return [new_group]
     def group=(new_group)
       rc = ffi_delegate.set_group(new_group)
-      raise_zmq_err("unable to set group to %p" % new_group) if rc == -1
+      raise_zmq_err(format('unable to set group to %p', new_group)) if rc == -1
     end
   end
 end

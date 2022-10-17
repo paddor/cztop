@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'czmq-ffi-gen'
 require_relative 'cztop/version'
 
@@ -39,7 +41,6 @@ require_relative 'cztop/socket/types'
 require_relative 'cztop/z85/padded'
 require_relative 'cztop/z85/pipe'
 require_relative 'cztop/zap'
-
 
 # make Ctrl-C work in case a low-level call hangs
 CZMQ::FFI::Signals.disable_default_handling

@@ -1,5 +1,6 @@
 1.1.0.pre1 (10/17/2022)
 -----
+* modernize syntax using Rubocop
 * use czmq-ffi-gen 1.1.0.pre1
 * require Ruby >= 2.7.x
 

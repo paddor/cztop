@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'forwardable'
 require 'socket' # for SocketError
 
@@ -11,6 +13,7 @@ module CZTop::HasFFIDelegate
   def to_ptr
     @ffi_delegate.to_ptr
   end
+
 
   # Attaches an FFI delegate to the current (probably new) {CZTop} object.
   # @param ffi_delegate an instance of the corresponding class in the
@@ -26,6 +29,7 @@ module CZTop::HasFFIDelegate
     raise_zmq_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
     @ffi_delegate = ffi_delegate
   end
+
 
   # Same as the counterpart in {ClassMethods}, but usable from within an
   # instance.
@@ -60,6 +64,7 @@ module CZTop::HasFFIDelegate
     end
   end
 
+
   # Some class methods related to FFI delegates.
   module ClassMethods
     include Forwardable
@@ -73,6 +78,7 @@ module CZTop::HasFFIDelegate
       def_delegator(:@ffi_delegate, method)
     end
 
+
     # Allocates a new instance and attaches the FFI delegate to it. This is
     # useful if you already have an FFI delegate and need to attach it to a
     # fresh high-level object.
@@ -84,7 +90,7 @@ module CZTop::HasFFIDelegate
     def from_ffi_delegate(ffi_delegate)
       obj = allocate
       obj.attach_ffi_delegate(ffi_delegate)
-      return obj
+      obj
     end
   end
 end

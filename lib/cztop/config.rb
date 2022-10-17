@@ -1,5 +1,6 @@
-module CZTop
+# frozen_string_literal: true
 
+module CZTop
   # Represents a CZMQ::FFI::Zconfig item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
@@ -17,7 +18,7 @@ module CZTop
     #   {Config} object is garbage collected).
     def initialize(name = nil, value = nil, parent: nil)
       if parent
-        parent = parent.ffi_delegate if parent.is_a?(Config)
+        parent   = parent.ffi_delegate if parent.is_a?(Config)
         delegate = ::CZMQ::FFI::Zconfig.new(name, parent)
         attach_ffi_delegate(delegate)
 
@@ -42,8 +43,10 @@ module CZTop
     def name
       ptr = ffi_delegate.name
       return nil if ptr.null? # NOTE: for unnamed elements
+
       ptr.read_string
     end
+
 
     # Sets a new name.
     # @param new_name [String, #to_s]
@@ -52,27 +55,32 @@ module CZTop
       ffi_delegate.set_name(new_name.to_s)
     end
 
+
     # Get the value of the config item.
     # @return [String]
     # @note This returns an empty string if the value is unset.
     def value
       ptr = ffi_delegate.value
-      return "" if ptr.null? # NOTE: for root elements
+      return '' if ptr.null? # NOTE: for root elements
+
       ptr.read_string
     end
+
 
     # Set or update the value of the config item.
     # @param new_value [String, #to_s]
     # @return [new_value]
     def value=(new_value)
-      ffi_delegate.set_value("%s", :string, new_value.to_s)
+      ffi_delegate.set_value('%s', :string, new_value.to_s)
     end
+
 
     # Inspects this {Config} item.
     # @return [String] shows class, name, and value
     def inspect
       "#<#{self.class.name}: name=#{name.inspect} value=#{value.inspect}>"
     end
+
 
     # Update the value of a config item by path.
     # @param path [String, #to_s] path to config item
@@ -81,7 +89,7 @@ module CZTop
     def []=(path, value)
       ffi_delegate.put(path.to_s, value.to_s)
     end
-    alias_method :put, :[]=
+    alias put []=
 
     # Get the value of the current config item.
     # @param path [String, #to_s] path to config item
@@ -92,12 +100,13 @@ module CZTop
     # @note The default value is not returned when the config item exists but
     #   just doesn't have a value. In that case, it'll return the empty
     #   string.
-    def [](path, default = "")
+    def [](path, default = '')
       ptr = ffi_delegate.get(path, default)
       return nil if ptr.null?
+
       ptr.read_string
     end
-    alias_method :get, :[]
+    alias get []
 
     # @!endgroup
 
@@ -107,15 +116,16 @@ module CZTop
     # @return [Boolean] whether they're equal
     def ==(other)
       name == other.name &&
-      value == other.value
+        value == other.value
     end
+
 
     # Compares this config tree to another tree or subtree. Names, values, and
     # children are considered.
     # @param other [Config] the other config tree
     # @return [Boolean] whether they're equal
     def tree_equal?(other)
-      self == other && self.children == other.children
+      self == other && children == other.children
     end
   end
 end

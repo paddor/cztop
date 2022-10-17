@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Represents a CZMQ::FFI::Zmsg.
   class Message
@@ -12,13 +14,14 @@ module CZTop
     def self.coerce(msg)
       case msg
       when Message
-        return msg
+        msg
       when String, Frame, Array
-        return new(msg)
+        new(msg)
       else
-        raise ArgumentError, "cannot coerce message: %p" % msg
+        raise ArgumentError, format('cannot coerce message: %p', msg)
       end
     end
+
 
     # @param parts [String, Frame, Array<String>, Array<Frame>] initial parts
     #   of the message
@@ -27,10 +30,12 @@ module CZTop
       Array(parts).each { |part| self << part } if parts
     end
 
+
     # @return [Boolean] if this message is empty or not
     def empty?
       content_size.zero?
     end
+
 
     # Send {Message} to a {Socket} or {Actor}.
     #
@@ -56,11 +61,13 @@ module CZTop
     #
     def send_to(destination)
       rc = Zmsg.send(ffi_delegate, destination)
-      return if rc == 0
+      return if rc.zero?
+
       raise_zmq_err
     rescue Errno::EAGAIN
       raise IO::EAGAINWaitWritable
     end
+
 
     # Receive a {Message} from a {Socket} or {Actor}.
     # @param source [Socket, Actor]
@@ -73,10 +80,12 @@ module CZTop
     def self.receive_from(source)
       delegate = Zmsg.recv(source)
       return from_ffi_delegate(delegate) unless delegate.null?
+
       HasFFIDelegate.raise_zmq_err
     rescue Errno::EAGAIN
       raise IO::EAGAINWaitReadable
     end
+
 
     # Append a frame to this message.
     # @param frame [String, Frame] what to append
@@ -90,15 +99,16 @@ module CZTop
       when String
         # NOTE: can't use addstr because the data might be binary
         mem = FFI::MemoryPointer.from_string(frame)
-        rc = ffi_delegate.addmem(mem, mem.size - 1) # without NULL byte
+        rc  = ffi_delegate.addmem(mem, mem.size - 1) # without NULL byte
       when Frame
         rc = ffi_delegate.append(frame.ffi_delegate)
       else
-        raise ArgumentError, "invalid frame: %p" % frame
+        raise ArgumentError, format('invalid frame: %p', frame)
       end
-      raise_zmq_err unless rc == 0
+      raise_zmq_err unless rc.zero?
       self
     end
+
 
     # Prepend a frame to this message.
     # @param frame [String, Frame] what to prepend
@@ -112,14 +122,15 @@ module CZTop
       when String
         # NOTE: can't use pushstr because the data might be binary
         mem = FFI::MemoryPointer.from_string(frame)
-        rc = ffi_delegate.pushmem(mem, mem.size - 1) # without NULL byte
+        rc  = ffi_delegate.pushmem(mem, mem.size - 1) # without NULL byte
       when Frame
         rc = ffi_delegate.prepend(frame.ffi_delegate)
       else
-        raise ArgumentError, "invalid frame: %p" % frame
+        raise ArgumentError, format('invalid frame: %p', frame)
       end
-      raise_zmq_err unless rc == 0
+      raise_zmq_err unless rc.zero?
     end
+
 
     # Removes first part from message and returns it as a string.
     # @return [String, nil] first part, if any, or nil
@@ -127,14 +138,17 @@ module CZTop
       # NOTE: can't use popstr because the data might be binary
       ptr = ffi_delegate.pop
       return nil if ptr.null?
+
       Frame.from_ffi_delegate(ptr).to_s
     end
+
 
     # @return [Integer] size of this message in bytes
     # @see size
     def content_size
       ffi_delegate.content_size
     end
+
 
     # Returns all frames as strings in an array. This is useful if for quick
     # inspection of the message.
@@ -143,29 +157,26 @@ module CZTop
     # @return [Array<String>] all frames
     def to_a
       ffi_delegate = ffi_delegate()
-      frame = ffi_delegate.first
+      frame        = ffi_delegate.first
       return [] if frame.null?
 
-      arr = [ frame.data.read_bytes(frame.size) ]
-      while frame = ffi_delegate.next and not frame.null?
+      arr          = [frame.data.read_bytes(frame.size)]
+      while (frame = ffi_delegate.next) && !frame.null?
         arr << frame.data.read_bytes(frame.size)
       end
 
-      return arr
+      arr
     end
+
 
     # Inspects this {Message}.
     # @return [String] shows class, number of frames, content size, and
     #   content (only if it's up to 200 bytes)
     def inspect
-      "#<%s:0x%x frames=%i content_size=%i content=%s>" % [
-        self.class,
-        to_ptr.address,
-        size,
-        content_size,
-        content_size <= 500 ? to_a.inspect : "[...]"
-      ]
+      format('#<%s:0x%x frames=%i content_size=%i content=%s>', self.class, to_ptr.address, size, content_size,
+             content_size <= 500 ? to_a.inspect : '[...]')
     end
+
 
     # Return a frame's content.
     # @return [String] the frame's content, if it exists
@@ -193,7 +204,8 @@ module CZTop
 
       # need to raise manually, as FFI lacks this feature.
       # @see https://github.com/ffi/ffi/issues/473
-      raise RangeError if new_routing_id < 0
+      raise RangeError if new_routing_id.negative?
+
       ffi_delegate.set_routing_id(new_routing_id)
     end
   end

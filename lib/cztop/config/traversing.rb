@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 # Methods used to traverse a {CZTop::Config} tree.
 module CZTop::Config::Traversing
-
   # Calls the given block once for each {Config} item in the tree, starting
   # with self.
   #
@@ -12,24 +13,25 @@ module CZTop::Config::Traversing
   # @raise [Exception] the block's exception, in case it raises (it won't
   #   call the block any more after that)
   def execute
-    raise ArgumentError, "no block given" unless block_given?
-    exception = nil
-    block_value = nil
-    ret = nil
-    callback = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
+    raise ArgumentError, 'no block given' unless block_given?
+
+    exception                           = nil
+    block_value                         = nil
+    ret                                 = nil
+    callback                            = CZMQ::FFI::Zconfig.fct do |zconfig, _arg, level|
       begin
         # NOTE: work around JRuby and Rubinius bug, where it'd keep calling
         # this FFI::Function, even when the block `break`ed
         if ret != -1
-          config = from_ffi_delegate(zconfig)
+          config      = from_ffi_delegate(zconfig)
           block_value = yield config, level
-          ret = 0 # report success to keep zconfig_execute() going
+          ret         = 0 # report success to keep zconfig_execute() going
         end
-      rescue
+      rescue StandardError
         # remember exception, so we can raise it later to the ruby code
         # (it can't be raised now, as we have to report failure to
         # zconfig_execute())
-        exception = $!
+        exception = $ERROR_INFO
 
         ret = -1 # report failure to stop zconfig_execute() immediately
       ensure
@@ -39,14 +41,17 @@ module CZTop::Config::Traversing
     end
     ffi_delegate.execute(callback, _arg = nil)
     raise exception if exception
-    return block_value
+
+    block_value
   end
+
 
   # Access to this config item's direct children.
   # @return [ChildrenAccessor]
   def children
     ChildrenAccessor.new(self)
   end
+
 
   # Access to this config item's siblings.
   # @note Only the "younger" (later in the ZPL file) config items are
@@ -55,6 +60,7 @@ module CZTop::Config::Traversing
   def siblings
     SiblingsAccessor.new(self)
   end
+
 
   # Used to give access to a {Config} item's children or siblings.
   # @abstract
@@ -67,24 +73,29 @@ module CZTop::Config::Traversing
       @config = config
     end
 
+
     # This is supposed to return the first relevant config item.
     # @abstract
     # @return [Config, nil]
     def first; end
 
+
     # Yields all direct children/younger siblings. Starts with {#first}, if
     # set.
     # @yieldparam config [Config]
     def each
-      current = first()
+      current = first
       return if current.nil?
+
       yield current
-      current_delegate = current.ffi_delegate
+      current_delegate       = current.ffi_delegate
       while current_delegate = current_delegate.next
         break if current_delegate.null?
+
         yield CZTop::Config.from_ffi_delegate(current_delegate)
       end
     end
+
 
     # Recursively compares these config items with the ones of the other.
     # @param other [FamilyAccessor]
@@ -94,9 +105,10 @@ module CZTop::Config::Traversing
       these.size == those.size && these.zip(those) do |this, that|
         this.tree_equal?(that) or return false
       end
-      return true
+      true
     end
   end
+
 
   # Accesses the younger siblings of a given {Config} item.
   class SiblingsAccessor < FamilyAccessor
@@ -106,17 +118,21 @@ module CZTop::Config::Traversing
     def first
       ptr = @config.ffi_delegate.next
       return nil if ptr.null?
+
       CZTop::Config.from_ffi_delegate(ptr)
     end
   end
+
 
   # Accesses the direct children of a given {Config} item.
   class ChildrenAccessor < FamilyAccessor
     def first
       ptr = @config.ffi_delegate.child
       return nil if ptr.null?
+
       CZTop::Config.from_ffi_delegate(ptr)
     end
+
 
     # Adds a new Config item and yields it, so it can be configured in
     # a block.
@@ -131,6 +147,7 @@ module CZTop::Config::Traversing
     end
   end
 
+
   # Finds a config item along a path, relative to the current item.
   # @param path [String] path (leading slash is optional and will be
   #   ignored)
@@ -139,8 +156,10 @@ module CZTop::Config::Traversing
   def locate(path)
     ptr = ffi_delegate.locate(path)
     return nil if ptr.null?
+
     from_ffi_delegate(ptr)
   end
+
 
   # Finds last item at given level (0 = root).
   # @return [Config] the last config item at given level
@@ -148,9 +167,11 @@ module CZTop::Config::Traversing
   def last_at_depth(level)
     ptr = ffi_delegate.at_depth(level)
     return nil if ptr.null?
+
     from_ffi_delegate(ptr)
   end
 end
+
 
 class CZTop::Config
   include Traversing

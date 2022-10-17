@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CZTop
   # Steerable proxy which switches messages between a frontend and a backend
   # socket.
@@ -10,7 +12,7 @@ module CZTop
 
     # function pointer to the +zmonitor()+ function
     ZPROXY_FPTR = ::CZMQ::FFI.ffi_libraries.each do |dl|
-      fptr = dl.find_function("zproxy")
+      fptr = dl.find_function('zproxy')
       break fptr if fptr
     end
     raise LoadError, "couldn't find zproxy()" if ZPROXY_FPTR.nil?
@@ -28,12 +30,14 @@ module CZTop
       @actor.terminate
     end
 
+
     # Enable verbose logging of commands and activity.
     # @return [void]
     def verbose!
-      @actor << "VERBOSE"
+      @actor << 'VERBOSE'
       @actor.wait
     end
+
 
     # Returns a configurator object which you can use to configure the
     # frontend socket.
@@ -42,6 +46,7 @@ module CZTop
       @frontend ||= Configurator.new(self, :frontend)
     end
 
+
     # Returns a configurator object which you can use to configure the backend
     # socket.
     # @return [Configurator] (memoized) backend configurator
@@ -49,15 +54,17 @@ module CZTop
       @backend ||= Configurator.new(self, :backend)
     end
 
+
     # Captures all proxied messages and delivers them to a PULL socket bound
     # to the specified endpoint.
     # @note The PULL socket has to be bound before calling this method.
     # @param endpoint [String] the endpoint to which the PULL socket is bound to
     # @return [void]
     def capture(endpoint)
-      @actor << ["CAPTURE", endpoint]
+      @actor << ['CAPTURE', endpoint]
       @actor.wait
     end
+
 
     # Pauses proxying of any messages.
     # @note This causes any messages to be queued up and potentialy hit the
@@ -65,9 +72,10 @@ module CZTop
     #   be dropped or writing applications to block.
     # @return [void]
     def pause
-      @actor << "PAUSE"
+      @actor << 'PAUSE'
       @actor.wait
     end
+
 
     # Resume proxying of messages.
     # @note This is only needed after a call to {#pause}, not to start the
@@ -75,9 +83,10 @@ module CZTop
     #   properly attached.
     # @return [void]
     def resume
-      @actor << "RESUME"
+      @actor << 'RESUME'
       @actor.wait
     end
+
 
     # Used to configure the socket on one side of a {Proxy}.
     class Configurator
@@ -86,17 +95,17 @@ module CZTop
         PAIR PUB SUB REQ REP
         DEALER ROUTER PULL PUSH
         XPUB XSUB
-      ]
+      ].freeze
 
       # @param proxy [Proxy] the proxy instance
       # @param side [Symbol] :frontend or :backend
       def initialize(proxy, side)
         @proxy = proxy
-        @side = case side
-                when :frontend then "FRONTEND"
-                when :backend then "BACKEND"
-                else raise ArgumentError, "invalid side: #{side.inspect}"
-                end
+        @side  = case side
+                 when :frontend then 'FRONTEND'
+                 when :backend then 'BACKEND'
+                 else raise ArgumentError, "invalid side: #{side.inspect}"
+                 end
       end
 
       # @return [Proxy] the proxy this {Configurator} works on
@@ -111,26 +120,28 @@ module CZTop
       # @raise [ArgumentError] if the given socket type is invalid
       # @return [void]
       def bind(socket_type, endpoint)
-        unless SOCKET_TYPES.include?(socket_type)
-          raise ArgumentError, "invalid socket type: #{socket_type}"
-        end
-        @proxy.actor << [ @side, socket_type.to_s, endpoint ]
+        raise ArgumentError, "invalid socket type: #{socket_type}" unless SOCKET_TYPES.include?(socket_type)
+
+        @proxy.actor << [@side, socket_type.to_s, endpoint]
         @proxy.actor.wait
       end
+
 
       # Set ZAP domain for authentication.
       # @param domain [String] the ZAP domain
       def domain=(domain)
-        @proxy.actor << [ "DOMAIN", @side, domain ]
+        @proxy.actor << ['DOMAIN', @side, domain]
         @proxy.actor.wait
       end
+
 
       # Configure PLAIN authentication on this socket.
       # @note You'll have to use a {CZTop::Authenticator}.
       def PLAIN_server!
-        @proxy.actor << [ "PLAIN", @side ]
+        @proxy.actor << ['PLAIN', @side]
         @proxy.actor.wait
       end
+
 
       # Configure CURVE authentication on this socket.
       # @note You'll have to use a {CZTop::Authenticator}.
@@ -139,9 +150,9 @@ module CZTop
       def CURVE_server!(cert)
         public_key = cert.public_key
         secret_key = cert.secret_key or
-          raise ArgumentError, "no secret key in certificate"
+          raise ArgumentError, 'no secret key in certificate'
 
-        @proxy.actor << [ "CURVE", @side, public_key, secret_key ]
+        @proxy.actor << ['CURVE', @side, public_key, secret_key]
         @proxy.actor.wait
       end
     end

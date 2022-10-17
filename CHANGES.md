@@ -1,3 +1,8 @@
+1.1.0.pre1 (10/17/2022)
+-----
+* use czmq-ffi-gen 1.1.0.pre1
+* require Ruby >= 2.7.x
+
 1.0.0 (01/08/2021)
 -----
 * use czmq-ffi-gen 1.0.x

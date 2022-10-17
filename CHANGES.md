@@ -1,5 +1,6 @@
 1.0.0 (01/08/2021)
 -----
+* use czmq-ffi-gen 1.0.x
 * modernized project
 
 0.13.1 (03/04/2018)

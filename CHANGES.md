@@ -132,7 +132,7 @@
 
 0.3.0 (04/13/2016)
 -----
-* port CZTop::Poller to zmq_poller_*() functions so it supports thread-safe
+* port CZTop::Poller to `zmq_poller_*()` functions so it supports thread-safe
   sockets as well
 * extract niche features to CZTop::Poller::Aggregated
 * fix taxi system example

@@ -3,6 +3,7 @@
 module CZTop
   # CZTop's interface to the low-level +zmq_poller_*()+ functions.
   module Poller::ZMQ
+
     POLLIN  = 1
     POLLOUT = 2
     POLLERR = 4
@@ -24,6 +25,7 @@ module CZTop
     #       short events;
     #   } zmq_poller_event_t;
     class PollerEvent < FFI::Struct
+
       layout :socket, :pointer,
              :fd, :int,
              :user_data, :pointer,
@@ -39,6 +41,7 @@ module CZTop
       def writable?
         (self[:events] & POLLOUT).positive?
       end
+
     end
 
     # ZMQ_EXPORT void *zmq_poller_new (void);
@@ -74,5 +77,6 @@ module CZTop
                     %i[pointer pointer], :int, **opts
     attach_function :poller_wait, :zmq_poller_wait,
                     %i[pointer pointer long], :int, **opts
+
   end
 end

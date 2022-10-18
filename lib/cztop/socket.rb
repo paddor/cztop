@@ -3,6 +3,7 @@
 module CZTop
   # Represents a CZMQ::FFI::Zsock.
   class Socket
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
     include ZsockOptions
@@ -41,6 +42,7 @@ module CZTop
     end
 
     # @!endgroup
+
 
     # @return [String] last bound endpoint, if any
     # @return [nil] if not bound
@@ -87,7 +89,7 @@ module CZTop
     # @return [void]
     # @raise [SystemCallError] in case of failure
     def bind(endpoint)
-      rc             = ffi_delegate.bind('%s', :string, endpoint)
+      rc = ffi_delegate.bind('%s', :string, endpoint)
       raise_zmq_err(format('unable to bind to %p', endpoint)) if rc == -1
       @last_tcp_port = rc if rc.positive?
     end
@@ -110,5 +112,6 @@ module CZTop
     rescue Zsock::DestroyedError
       format('#<%s: invalid>', self.class)
     end
+
   end
 end

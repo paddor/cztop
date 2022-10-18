@@ -8,6 +8,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zcertstore
   class CertStore
+
     include ::CZMQ::FFI
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
@@ -53,5 +54,6 @@ module CZTop
       ffi_delegate.insert(cert.ffi_delegate)
       @_inserted_pubkeys << pubkey
     end
+
   end
 end

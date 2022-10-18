@@ -35,6 +35,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zactor
   class Actor
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
     include ZsockOptions
@@ -42,11 +43,14 @@ module CZTop
     include PolymorphicZsockMethods
     include ::CZMQ::FFI
 
+
     # Raised when trying to interact with a terminated actor.
     class DeadActorError < RuntimeError; end
 
+
     # @return [Exception] the exception that crashed this actor, if any
     attr_reader :exception
+
 
     # Creates a new actor. Either pass a callback directly or a block. The
     # block will be called for every received message.
@@ -113,6 +117,7 @@ module CZTop
           retry
         end
       end
+
       self
     end
 
@@ -206,7 +211,9 @@ module CZTop
       !!@exception # if set, it has crashed
     end
 
+
     private
+
 
     # Shims the given handler. The shim is used to do the handshake, to
     # {#process_messages}, and ensure we're notified when the handler has
@@ -227,6 +234,7 @@ module CZTop
           @pipe           = Socket::PAIR.from_ffi_delegate(pipe_delegate)
           @pipe.signal # handshake, so zactor_new() returns
         end
+
         process_messages(handler)
       rescue Exception
         @exception = $ERROR_INFO
@@ -242,8 +250,10 @@ module CZTop
       !!@handler_thread # if it exists, it's shimmed
     end
 
+
     # the command which causes an actor handler to terminate
     TERM = '$TERM'
+
 
     # Successively receive messages that were sent to the actor and
     # yield them to the given handler to process them. The a pipe (a
@@ -321,5 +331,6 @@ module CZTop
         @running = false
       end
     end
+
   end
 end

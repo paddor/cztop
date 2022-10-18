@@ -6,6 +6,7 @@ module CZTop
   # a polymorphic reference, in Ruby as well as in C).
   # @see http://api.zeromq.org/czmq3-0:zmsg
   module SendReceiveMethods
+
     # Sends a message.
     #
     # @param message [Message, String, Array<parts>] the message to send
@@ -33,5 +34,6 @@ module CZTop
     def receive
       Message.receive_from(self)
     end
+
   end
 end

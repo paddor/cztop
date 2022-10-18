@@ -2,6 +2,7 @@
 
 # Methods used around serialization of {CZTop::Config} items.
 module CZTop::Config::Serialization
+
   # Serialize to a string in the ZPL format.
   # @return [String]
   def to_s
@@ -18,6 +19,7 @@ module CZTop::Config::Serialization
 
   # Some class methods for {Config} related to serialization.
   module ClassMethods
+
     # Loads a {Config} tree from a string.
     # @param string [String] the tree
     # @return [Config]
@@ -47,6 +49,7 @@ module CZTop::Config::Serialization
     def _load(string)
       from_string(string)
     end
+
   end
 
 
@@ -87,10 +90,13 @@ module CZTop::Config::Serialization
   def _dump(_level)
     to_s
   end
+
 end
 
 
 class CZTop::Config
+
   include Serialization
   extend Serialization::ClassMethods
+
 end

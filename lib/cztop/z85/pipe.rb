@@ -3,6 +3,7 @@
 # Can be used if you want to encode or decode data from one IO to another.
 # It'll do so until it hits EOF in the source IO.
 class CZTop::Z85::Pipe
+
   # @param source [IO] where to read data
   # @param sink [IO] where to write data
   # @param strategy [Strategy] algorithm to use (pass the class itself,
@@ -66,6 +67,7 @@ class CZTop::Z85::Pipe
   #
   # This is mainly just for me to practice the GoF Strategy Pattern.
   class Strategy
+
     # @param source [IO] the source
     # @param sink [IO] the sink
     # @param read_sz [Integer] chunk size when reading from source
@@ -94,18 +96,20 @@ class CZTop::Z85::Pipe
     # A single thread that is either reading input, encoding/decoding, or
     # writing output.
     class Sequential < Strategy
+
       # Runs the algorithm.
       # @raise [void]
       def execute
         previous_chunk = nil
         while true
-          chunk          = @source.read(@read_sz)
+          chunk = @source.read(@read_sz)
           @sink << @xcode.call(chunk, previous_chunk)
           break if chunk.nil?
 
           previous_chunk = chunk
         end
       end
+
     end
 
 
@@ -119,6 +123,7 @@ class CZTop::Z85::Pipe
     # platforms such as Rubinius and JRuby (and multiple CPU cores).
     #
     class Parallel < Strategy
+
       # Initializes the 2 sized queues used.
       def initialize(*)
         super
@@ -152,7 +157,7 @@ class CZTop::Z85::Pipe
       # pushes a +nil+ into the queue.
       # @return [void]
       def read
-        while chunk = @source.read(@read_sz)
+        while (chunk = @source.read(@read_sz))
           @source_queue << chunk
         end
         @source_queue << nil
@@ -183,10 +188,13 @@ class CZTop::Z85::Pipe
       # Pops all chunks from the sink queue and writes them to the sink.
       # @return [void]
       def write
-        while chunk = @sink_queue.pop
+        while (chunk = @sink_queue.pop)
           @sink << chunk
         end
       end
+
     end
+
   end
+
 end

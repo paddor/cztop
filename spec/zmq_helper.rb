@@ -4,6 +4,7 @@
 # libraries.
 #
 module ZMQHelper
+
   # This can be used to run certain test examples only if the required minimal
   # ZMQ version is available.
   #
@@ -44,4 +45,5 @@ module ZMQHelper
   def has_czmq_drafts?
     ::CZMQ::FFI.has_draft?
   end
+
 end

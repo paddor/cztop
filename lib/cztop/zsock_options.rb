@@ -11,6 +11,7 @@ module CZTop
   # @see http://api.zeromq.org/czmq3-0:zsock-option
   #
   module ZsockOptions
+
     # Access to the options of this socket.
     # @return [OptionsAccessor] the memoized options accessor
     def options
@@ -44,6 +45,7 @@ module CZTop
 
     # Used to access the options of a {Socket} or {Actor}.
     class OptionsAccessor
+
       # @return [Socket, Actor] whose options this {OptionsAccessor} instance
       #   is accessing
       attr_reader :zocket
@@ -158,7 +160,7 @@ module CZTop
           ptr = ::FFI::MemoryPointer.from_string(key)
           Zsock.set_curve_serverkey_bin(@zocket, ptr)
         else
-          raise ArgumentError, 'invalid server key: %p' % key
+          raise ArgumentError, format('invalid server key: %p', key)
         end
       end
 
@@ -177,7 +179,7 @@ module CZTop
         # int zsock_mechanism (void *self);
         code = Zsock.mechanism(@zocket)
         MECHANISMS[code] or
-          raise 'unknown ZMQ security mechanism code: %i' % code
+          raise format('unknown ZMQ security mechanism code: %i', code)
       end
 
 
@@ -442,6 +444,8 @@ module CZTop
       def reconnect_ivl=(new_value)
         Zsock.set_reconnect_ivl(@zocket, new_value)
       end
+
     end
+
   end
 end

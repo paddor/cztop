@@ -11,6 +11,7 @@ module CZTop
   # * +zpoller+ can only poll for readability
   #
   class Poller
+
     include ::CZMQ::FFI
 
     # @param readers [Socket, Actor] sockets to poll for input
@@ -24,7 +25,7 @@ module CZTop
                                      ptr_ptr.write_pointer(@poller_ptr)
                                      ZMQ.poller_destroy(ptr_ptr)
                                    end)
-      @event_ptr  = FFI::MemoryPointer.new(ZMQ::PollerEvent)
+      @event_ptr = FFI::MemoryPointer.new(ZMQ::PollerEvent)
       readers.each { |r| add_reader(r) }
     end
 
@@ -211,6 +212,7 @@ module CZTop
     # case you're interested in both. For a simpler variant, check out
     # {CZTop::Poller#simple_wait}.
     class Event
+
       # @param poller [CZTop::Poller] the poller instance
       # @param event_ptr [FFI::Pointer] pointer to the memory allocated for
       #   the event's data (a +zmq_poller_event_t+)
@@ -236,6 +238,8 @@ module CZTop
       def writable?
         @poller_event.writable?
       end
+
     end
+
   end
 end

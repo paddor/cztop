@@ -15,14 +15,18 @@ module CZTop
   #
   # @see https://rfc.zeromq.org/spec:23/ZMTP
   class Metadata
+
     VALUE_MAXLEN = (2**31) - 1
+
 
     # Raised when decoding malformed metadata.
     class InvalidData < StandardError
     end
 
+
     # regular expression used to validate property names
     NAME_REGEX = /\A[[:alnum:]_.+-]{1,255}\Z/.freeze
+
 
     # @param metadata [Hash<Symbol, #to_s>]
     # @raise [ArgumentError] when properties have an invalid, too long, or
@@ -30,13 +34,12 @@ module CZTop
     # @return [String]
     def self.dump(metadata)
       ic_names = Set.new
+
       metadata.map do |k, v|
         ic_name = k.to_sym.downcase
-        if ic_names.include?(ic_name)
-          raise ArgumentError, "property #{k.inspect}: duplicate name"
-        else
-          ic_names << ic_name
-        end
+        raise ArgumentError, "property #{k.inspect}: duplicate name" if ic_names.include? ic_name
+
+        ic_names << ic_name
 
         name = k.to_s
         raise ArgumentError, "property #{k.inspect}: invalid name" if NAME_REGEX !~ name
@@ -54,6 +57,7 @@ module CZTop
     def self.load(data)
       properties = {}
       consumed   = 0
+
       while consumed < data.bytesize # while there are bytes to read
         # read property name
         name_length = data.byteslice(consumed).unpack1('C') # never nil
@@ -102,5 +106,6 @@ module CZTop
     def to_h
       @properties
     end
+
   end
 end

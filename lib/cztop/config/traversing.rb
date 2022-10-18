@@ -2,6 +2,7 @@
 
 # Methods used to traverse a {CZTop::Config} tree.
 module CZTop::Config::Traversing
+
   # Calls the given block once for each {Config} item in the tree, starting
   # with self.
   #
@@ -65,6 +66,7 @@ module CZTop::Config::Traversing
   # Used to give access to a {Config} item's children or siblings.
   # @abstract
   class FamilyAccessor
+
     include Enumerable
 
     # @param config [Config] the relative starting point (either parent or
@@ -107,11 +109,13 @@ module CZTop::Config::Traversing
       end
       true
     end
+
   end
 
 
   # Accesses the younger siblings of a given {Config} item.
   class SiblingsAccessor < FamilyAccessor
+
     # Returns the first sibling.
     # @return [Config]
     # @return [nil] if no younger siblings
@@ -121,11 +125,13 @@ module CZTop::Config::Traversing
 
       CZTop::Config.from_ffi_delegate(ptr)
     end
+
   end
 
 
   # Accesses the direct children of a given {Config} item.
   class ChildrenAccessor < FamilyAccessor
+
     def first
       ptr = @config.ffi_delegate.child
       return nil if ptr.null?
@@ -145,6 +151,7 @@ module CZTop::Config::Traversing
       yield config if block_given?
       config
     end
+
   end
 
 
@@ -170,9 +177,12 @@ module CZTop::Config::Traversing
 
     from_ffi_delegate(ptr)
   end
+
 end
 
 
 class CZTop::Config
+
   include Traversing
+
 end

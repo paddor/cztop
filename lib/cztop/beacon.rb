@@ -7,6 +7,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zbeacon
   class Beacon
+
     include ::CZMQ::FFI
 
     # function pointer to the +zbeacon()+ function
@@ -111,5 +112,6 @@ module CZTop
     def receive
       @actor.receive
     end
+
   end
 end

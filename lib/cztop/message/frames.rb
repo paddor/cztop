@@ -2,6 +2,7 @@
 
 module CZTop
   class Message
+
     # @return [Integer] number of frames
     # @see content_size
     def size
@@ -18,6 +19,7 @@ module CZTop
 
     # Used to access a {Message}'s {Frame}s.
     class FramesAccessor
+
       include Enumerable
 
       # @param message [Message]
@@ -79,6 +81,8 @@ module CZTop
         end
         self
       end
+
     end
+
   end
 end

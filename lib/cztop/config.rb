@@ -4,8 +4,10 @@ module CZTop
   # Represents a CZMQ::FFI::Zconfig item.
   # @see http://rfc.zeromq.org/spec:4/ZPL
   class Config
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
+
 
     # Initializes a new {Config} item. Takes an optional block to initialize
     # the item further.
@@ -110,6 +112,7 @@ module CZTop
 
     # @!endgroup
 
+
     # Compares this config item to another. Only the name and value are
     # considered. If you need to compare a config tree, use {#tree_equal?}.
     # @param other [Config] the other config item
@@ -127,5 +130,6 @@ module CZTop
     def tree_equal?(other)
       self == other && children == other.children
     end
+
   end
 end

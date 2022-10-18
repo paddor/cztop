@@ -10,6 +10,7 @@ module CZTop
   # @see http://api.zeromq.org/czmq3-0:zmonitor
   # @see http://api.zeromq.org/4-1:zmq-socket-monitor
   class Monitor
+
     include ::CZMQ::FFI
 
     # function pointer to the +zmonitor()+ function
@@ -119,5 +120,6 @@ module CZTop
     def next
       @actor.receive
     end
+
   end
 end

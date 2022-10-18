@@ -3,6 +3,7 @@
 module CZTop
   # Represents a CZMQ::FFI::Zcert.
   class Certificate
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
@@ -122,8 +123,8 @@ module CZTop
       first_key = zlist.first
       return [] if first_key.null?
 
-      keys      = [first_key.read_string]
-      while key = zlist.next
+      keys = [first_key.read_string]
+      while (key = zlist.next)
         break if key.null?
 
         keys << key.read_string
@@ -203,5 +204,6 @@ module CZTop
     def ==(other)
       ffi_delegate.eq(other.ffi_delegate)
     end
+
   end
 end

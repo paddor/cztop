@@ -7,6 +7,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zpoller
   class Poller::ZPoller
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
@@ -119,5 +120,6 @@ module CZTop
         # it ever returns a wrong pointer.
         raise_zmq_err("no socket known for pointer #{ptr.inspect}")
     end
+
   end
 end

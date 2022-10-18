@@ -31,7 +31,9 @@
 #
 # @see https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7
 class CZTop::Z85::Padded < CZTop::Z85
+
   class << self
+
     # Same as {Z85::Padded#encode}, but without the need to create an
     # instance first.
     #
@@ -62,6 +64,7 @@ class CZTop::Z85::Padded < CZTop::Z85
     def default
       @default ||= CZTop::Z85::Padded.new
     end
+
   end
 
   # Encododes to Z85, with padding if needed.
@@ -100,4 +103,5 @@ class CZTop::Z85::Padded < CZTop::Z85
 
     decoded.byteslice(0...-padding_bytes)
   end
+
 end

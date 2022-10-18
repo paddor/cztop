@@ -7,6 +7,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zauth
   class Authenticator
+
     include ::CZMQ::FFI
 
     # function pointer to the +zauth()+ function
@@ -107,5 +108,6 @@ module CZTop
       @actor << 'GSSAPI'
       @actor.wait
     end
+
   end
 end

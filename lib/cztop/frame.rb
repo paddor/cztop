@@ -10,6 +10,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zframe
   class Frame
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
@@ -187,5 +188,6 @@ module CZTop
       rc = ffi_delegate.set_group(new_group)
       raise_zmq_err(format('unable to set group to %p', new_group)) if rc == -1
     end
+
   end
 end

@@ -8,6 +8,7 @@ module CZTop
   #
   # @see http://api.zeromq.org/czmq3-0:zproxy
   class Proxy
+
     include ::CZMQ::FFI
 
     # function pointer to the +zmonitor()+ function
@@ -90,6 +91,7 @@ module CZTop
 
     # Used to configure the socket on one side of a {Proxy}.
     class Configurator
+
       # @return [Array<Symbol>] supported socket types
       SOCKET_TYPES = %i[
         PAIR PUB SUB REQ REP
@@ -155,6 +157,8 @@ module CZTop
         @proxy.actor << ['CURVE', @side, public_key, secret_key]
         @proxy.actor.wait
       end
+
     end
+
   end
 end

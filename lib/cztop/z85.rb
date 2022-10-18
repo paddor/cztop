@@ -6,10 +6,12 @@ module CZTop
   # Use this class to encode to and from the Z85 encoding scheme.
   # @see http://rfc.zeromq.org/spec:32
   class Z85
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
     class << self
+
       # Same as {Z85#encode}, but without the need to create an instance
       # first.
       #
@@ -42,6 +44,7 @@ module CZTop
       def default
         @default ||= Z85.new
       end
+
     end
 
     def initialize
@@ -62,7 +65,7 @@ module CZTop
       input = input.dup.force_encoding(Encoding::BINARY)
       ptr   = ffi_delegate.encode(input, input.bytesize)
       raise_zmq_err if ptr.null?
-      z85   = ptr.read_string
+      z85 = ptr.read_string
       z85.encode!(Encoding::ASCII)
       z85
     end
@@ -82,5 +85,6 @@ module CZTop
       raise_zmq_err if zchunk.null?
       zchunk.data.read_string(zchunk.size - 1)
     end
+
   end
 end

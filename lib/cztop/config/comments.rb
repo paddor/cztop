@@ -2,6 +2,7 @@
 
 module CZTop
   class Config
+
     # Access this config item's comments.
     # @note Note that comments are discarded when loading a config (either from
     #   a string or file) and thus, only the comments you add during runtime
@@ -14,6 +15,7 @@ module CZTop
 
     # Used to access a {Config}'s comments.
     class CommentsAccessor
+
       include Enumerable
 
       # @param config [Config]
@@ -68,6 +70,8 @@ module CZTop
       def _zlist
         @config.ffi_delegate.comments
       end
+
     end
+
   end
 end

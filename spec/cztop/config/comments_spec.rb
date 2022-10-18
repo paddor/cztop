@@ -5,19 +5,21 @@ require_relative '../../spec_helper'
 describe CZTop::Config do
   describe 'comments' do
     let(:config_contents) do
-      <<~EOF
+      <<~CONFIG
         test
             has_no_comments
             has_one_comment
             has_two_comments
-      EOF
+      CONFIG
     end
+
     let(:config) do
       c = CZTop::Config.from_string(config_contents)
       c.locate('test/has_one_comment').comments << 'foo'
       c.locate('test/has_two_comments').comments << 'foo' << 'bar'
       c
     end
+
     let(:comments) { item.comments }
 
     describe '#comments' do

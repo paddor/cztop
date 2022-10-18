@@ -6,6 +6,7 @@ require 'socket' # for SocketError
 # This module is used to attach the low-level objects of classes within the
 # CZMQ::FFI namespace (coming from the _czmq-ffi-gen_ gem) as delegates.
 module CZTop::HasFFIDelegate
+
   # @return [CZMQ::FFI::*] the attached delegate
   attr_reader :ffi_delegate
 
@@ -67,6 +68,7 @@ module CZTop::HasFFIDelegate
 
   # Some class methods related to FFI delegates.
   module ClassMethods
+
     include Forwardable
 
     # Delegate specified instance method to the registered FFI delegate.
@@ -92,5 +94,7 @@ module CZTop::HasFFIDelegate
       obj.attach_ffi_delegate(ffi_delegate)
       obj
     end
+
   end
+
 end

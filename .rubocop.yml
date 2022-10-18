@@ -26,7 +26,7 @@ Layout/SpaceBeforeBrackets: # new in 1.7
 Lint/AmbiguousAssignment: # new in 1.7
   Enabled: true
 Lint/AmbiguousOperatorPrecedence: # new in 1.21
-  Enabled: true
+  Enabled: false
 Lint/AmbiguousRange: # new in 1.19
   Enabled: true
 Lint/ConstantOverwrittenInRescue: # new in 1.31
@@ -163,5 +163,13 @@ Style/WordArray:
   Enabled: false
 Style/Semicolon:
   Enabled: false
-Lint/AmbiguousOperatorPrecedence:
+Naming/MethodName:
   Enabled: false
+Style/EmptyMethod:
+  Enabled: false
+Layout/EmptyLinesAroundClassBody:
+  Enabled: true
+  EnforcedStyle: empty_lines_except_namespace
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: true
+  EnforcedStyle: empty_lines_except_namespace

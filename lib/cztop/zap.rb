@@ -14,6 +14,7 @@ module CZTop
   # @note This is not needed to be able to use {CZTop::Authenticator}!
   # @see https://rfc.zeromq.org/spec:27/ZAP
   module ZAP
+
     # the endpoint a ZAP authenticator has bound to
     ENDPOINT = 'inproc://zeromq.zap.01'
 
@@ -32,14 +33,17 @@ module CZTop
 
     # security mechanisms mentioned in ZeroMQ RFC 27.
     module Mechanisms
+
       NULL  = 'NULL'
       PLAIN = 'PLAIN'
       CURVE = 'CURVE'
+
     end
 
 
     # Represents a ZAP request.
     class Request
+
       # Crafts a new {Request} from a message.
       #
       # @param msg [CZTop::message] the message
@@ -109,11 +113,13 @@ module CZTop
 
         CZTop::Message.new(fields)
       end
+
     end
 
 
     # Represents a ZAP response.
     class Response
+
       # used to indicate a temporary error
       class TemporaryError < Error
       end
@@ -126,6 +132,7 @@ module CZTop
 
       # Status codes of ZAP responses.
       module StatusCodes
+
         SUCCESS                = '200'
         TEMPORARY_ERROR        = '300'
         AUTHENTICATION_FAILURE = '400'
@@ -137,6 +144,7 @@ module CZTop
           AUTHENTICATION_FAILURE,
           INTERNAL_ERROR
         ].freeze
+
       end
 
       include StatusCodes
@@ -244,6 +252,8 @@ module CZTop
                   @status_text, @user_id, @meta_data].map(&:to_s)
         CZTop::Message.new(fields)
       end
+
     end
+
   end
 end

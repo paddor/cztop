@@ -35,16 +35,21 @@ module CZTop
   # * {CZTop::Poller#sockets}
   #
   class Poller::Aggregated
+
     # @return [CZTop::Poller.new] the associated (regular) poller
     attr_reader :poller
+
 
     # @return [Array<CZTop::Socket>] readable sockets
     attr_reader :readables
 
+
     # @return [Array<CZTop::Socket>] writable sockets
     attr_reader :writables
 
+
     extend Forwardable
+
     def_delegators :@poller,
                    :add,
                    :add_reader,
@@ -54,6 +59,7 @@ module CZTop
                    :remove_reader,
                    :remove_writer,
                    :sockets
+
 
     # Initializes the aggregated poller.
     # @param poller [CZTop::Poller] the wrapped poller
@@ -82,21 +88,24 @@ module CZTop
       @writables   = []
       @event_masks = {}
 
-      if event = @poller.wait(timeout)
+      if (event = @poller.wait(timeout))
         extract(event)
 
         # get all other pending events, if any, but no more blocking
-        while event = @poller.wait(0)
+        while (event = @poller.wait 0)
           extract(event)
         end
 
         restore_event_masks
         return true
       end
+
       false
     end
 
+
     private
+
 
     # Extracts the event information, adds the socket to the correct list(s)
     # and modifies the socket's event mask for the socket to not turn up
@@ -107,14 +116,17 @@ module CZTop
     def extract(event)
       event_mask                 = poller.event_mask_for_socket(event.socket)
       @event_masks[event.socket] = event_mask
+
       if event.readable?
         @readables << event.socket
         event_mask &= 0xFFFF ^ CZTop::Poller::ZMQ::POLLIN
       end
+
       if event.writable?
         @writables << event.socket
         event_mask &= 0xFFFF ^ CZTop::Poller::ZMQ::POLLOUT
       end
+
       poller.modify(event.socket, event_mask)
     end
 
@@ -125,5 +137,6 @@ module CZTop
     def restore_event_masks
       @event_masks.each { |socket, mask| poller.modify(socket, mask) }
     end
+
   end
 end

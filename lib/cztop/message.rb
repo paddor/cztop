@@ -3,6 +3,7 @@
 module CZTop
   # Represents a CZMQ::FFI::Zmsg.
   class Message
+
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
@@ -208,5 +209,6 @@ module CZTop
 
       ffi_delegate.set_routing_id(new_routing_id)
     end
+
   end
 end

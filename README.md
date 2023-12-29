@@ -18,7 +18,7 @@ Here's an overview of the core classes:
 
 * [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
   * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Authentiator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
+  * [Authenticator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
   * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
   * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
   * [CertStore](http://www.rubydoc.info/gems/cztop/CZTop/CertStore)

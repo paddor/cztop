@@ -4,7 +4,24 @@ require_relative '../../spec_helper'
 
 describe CZTop::Socket::Types do
   it 'has constants' do
-    assert_equal 14, described_class.constants.size
+    CZTop::Socket::Types::PAIR
+    CZTop::Socket::Types::PUB
+    CZTop::Socket::Types::SUB
+    CZTop::Socket::Types::REQ
+    CZTop::Socket::Types::REP
+    CZTop::Socket::Types::DEALER
+    CZTop::Socket::Types::ROUTER
+    CZTop::Socket::Types::PULL
+    CZTop::Socket::Types::PUSH
+    CZTop::Socket::Types::XPUB
+    CZTop::Socket::Types::XSUB
+    CZTop::Socket::Types::STREAM
+    CZTop::Socket::Types::SERVER
+    CZTop::Socket::Types::CLIENT
+    CZTop::Socket::Types::RADIO
+    CZTop::Socket::Types::DISH
+    CZTop::Socket::Types::GATHER
+    CZTop::Socket::Types::SCATTER
   end
 
   it 'has names for each type' do

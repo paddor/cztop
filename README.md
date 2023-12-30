@@ -59,6 +59,7 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 ### Features
 
+* compatible with [Async](https://github.com/socketry/async) / [Async::IO](https://github.com/socketry/async-io)
 * Ruby-like API
   * method names
     * sending a message via a socket is done with `Socket#<<`

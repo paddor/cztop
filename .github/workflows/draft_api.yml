@@ -4,14 +4,14 @@ on: [push,pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v2
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1
+        ruby-version: 3.3
     - name: Install ZMQ and CZMQ
       run: |
         export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)

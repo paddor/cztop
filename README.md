@@ -94,7 +94,7 @@ On macOS using Homebrew, run:
 
 ### Supported Rubies
 
-* MRI (2.6, 2.7, 3.0)
+* MRI (3.0, 3.2, 3.3)
 * Rubinius (HEAD)
 * JRuby 9000 (HEAD)
 

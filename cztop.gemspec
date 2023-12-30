@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{CZMQ Ruby binding based on the generated low-level FFI bindings of CZMQ}
   spec.homepage      = "https://rubygems.org/gems/cztop"
   spec.license       = "ISC"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/paddor/cztop"

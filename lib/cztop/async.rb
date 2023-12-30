@@ -4,11 +4,19 @@ require 'cztop'
 require 'async/io'
 
 module Async
-	module IO
-		class CZTopSocket < Generic
-      CZTop::Socket::Types.constants.each do |name|
-        wraps ::CZTop::Socket.const_get(name)
-      end
+  module IO
+    class CZTopSocket < Generic
+      wraps ::CZTop::Socket::REQ
+      wraps ::CZTop::Socket::REP
+      wraps ::CZTop::Socket::PAIR
+      wraps ::CZTop::Socket::ROUTER
+      wraps ::CZTop::Socket::DEALER
+      wraps ::CZTop::Socket::PUSH
+      wraps ::CZTop::Socket::PULL
+      wraps ::CZTop::Socket::PUB
+      wraps ::CZTop::Socket::SUB
+      wraps ::CZTop::Socket::XPUB
+      wraps ::CZTop::Socket::XSUB
 
 
       def receive
@@ -79,6 +87,6 @@ module Async
       def now
         Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
-		end
+    end
   end
 end

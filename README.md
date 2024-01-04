@@ -13,6 +13,8 @@ mechanisms (like CURVE).
 
 ## Example with Async
 
+See [this example](https://github.com/paddor/cztop/blob/master/examples/async/):
+
 ```ruby
 #! /usr/bin/env ruby
 
@@ -54,6 +56,9 @@ end
 
 Output:
 ```
+$ cd examples/async
+$ bundle
+$ /bin/time bundle exec ./async.rb
 <<< ["foobar #0"]
 >>> ["FOOBAR #0"]
 <<< ["foobar #1"]

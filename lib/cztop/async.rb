@@ -49,6 +49,8 @@ module Async
       def wait_readable(timeout = read_timeout)
         @io_fd ||= ::IO.for_fd @io.fd, autoclose: false
 
+        return true if @io.readable?
+
         if timeout
           timeout_at = now + timeout
 
@@ -66,6 +68,8 @@ module Async
       # Waits for socket to become writable.
       def wait_writable(timeout = write_timeout)
         @io_fd ||= ::IO.for_fd @io.fd, autoclose: false
+
+        return true if @io.writable?
 
         if timeout
           timeout_at = now + timeout

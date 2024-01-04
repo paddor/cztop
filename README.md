@@ -10,6 +10,76 @@ FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
 easy to use for Rubyists (POLS) and providing first class support for security
 mechanisms (like CURVE).
 
+
+## Example with Async
+
+```ruby
+#! /usr/bin/env ruby
+
+require 'cztop/async'
+
+Async do |task|
+  task.async do |t|
+    socket = CZTop::Socket::REP.new("inproc://req_rep_example")
+    io     = Async::IO.try_convert socket
+
+    socket.options.rcvtimeo = 50 # ms
+
+    loop do
+      msg = io.receive
+      puts "<<< #{msg.to_a.inspect}"
+      io << msg.to_a.map(&:upcase)
+    rescue IO::TimeoutError
+      break
+    end
+
+    puts "REP done."
+  end
+
+  task.async do
+    socket = CZTop::Socket::REQ.new("inproc://req_rep_example")
+    io     = Async::IO.try_convert socket
+
+    10.times do |i|
+      io << "foobar ##{i}"
+      msg = io.receive
+      puts ">>> #{msg.to_a.inspect}"
+    end
+
+    puts "REQ done."
+  end
+end
+```
+
+
+Output:
+```
+<<< ["foobar #0"]
+>>> ["FOOBAR #0"]
+<<< ["foobar #1"]
+>>> ["FOOBAR #1"]
+<<< ["foobar #2"]
+>>> ["FOOBAR #2"]
+<<< ["foobar #3"]
+>>> ["FOOBAR #3"]
+<<< ["foobar #4"]
+>>> ["FOOBAR #4"]
+<<< ["foobar #5"]
+>>> ["FOOBAR #5"]
+<<< ["foobar #6"]
+>>> ["FOOBAR #6"]
+<<< ["foobar #7"]
+>>> ["FOOBAR #7"]
+<<< ["foobar #8"]
+>>> ["FOOBAR #8"]
+<<< ["foobar #9"]
+>>> ["FOOBAR #9"]
+REQ done.
+REP done.
+0.46user 0.09system 0:00.60elapsed 90%CPU (0avgtext+0avgdata 47296maxresident)k
+0inputs+0outputs (0major+13669minor)pagefaults 0swaps
+```
+
 ## Overview
 
 ### Class Hierarchy
@@ -59,24 +129,12 @@ More information in the [API documentation](http://www.rubydoc.info/github/paddo
 
 ### Features
 
+* Ruby idiomatic API
 * compatible with [Async](https://github.com/socketry/async) / [Async::IO](https://github.com/socketry/async-io)
-* Ruby-like API
-  * method names
-    * sending a message via a socket is done with `Socket#<<`
-      * `socket << "simple message"`
-      * `socket << ["multi", "frame", "message"]`
-    * `#x=` methods instead of `#set_x` (e.g. socket options)
-    * `#[]` where it makes sense (e.g. on a Message, Config, or Certificate)
-  * no manual error checking needed
-    * if there's an error, an appropriate exception is raised
-  * of course, no manual dealing with the ZMQ context
-* easy security
-  * use `Socket#CURVE_server!(cert)` on the server
-  * and `Socket#CURVE_client!(client_cert, server_cert)` on the client
-* socket types as Ruby classes
-  * no need to manually pass type constants
-    * but you can: `CZTop::Socket.new_by_type(:REP)`
-  * e.g. `#subscribe` only exists on `CZTop::Socket::SUB`
+* errors as exceptions
+* CURVE security
+* supports CZMQ DRAFT API
+* extensive spec coverage
 
 ## Requirements
 
@@ -96,8 +154,8 @@ On macOS using Homebrew, run:
 ### Supported Rubies
 
 * MRI (3.0, 3.2, 3.3)
-* Rubinius (HEAD)
-* JRuby 9000 (HEAD)
+* JRuby
+* TruffleRuby
 
 ## Installation
 

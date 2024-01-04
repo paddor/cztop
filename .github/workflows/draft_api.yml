@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.3
+        ruby-version: '3.3'
     - name: Install ZMQ and CZMQ
       run: |
         export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)

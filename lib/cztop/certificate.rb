@@ -8,6 +8,13 @@ module CZTop
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
 
+    unless ::CZMQ::FFI::Zsys.has_curve
+      def self.new(...)
+        fail NotImplementedError
+      end
+    end
+
+
     # Warns if CURVE security isn't available.
     # @return [void]
     def self.check_curve_availability
@@ -54,6 +61,16 @@ module CZTop
     # Initialize a new in-memory certificate with random keys.
     def initialize
       attach_ffi_delegate(Zcert.new)
+    end
+
+
+    KEY_ALL_ZERO = '0000000000000000000000000000000000000000'
+
+    # @return [Boolean] whether one of the keys is all zeros (happens when CURVE is not available, i.e. libzmq was
+    #   compiled without libsodium)
+    # @see .check_curve_availability
+    def zero?
+      public_key(format: :z85) == KEY_ALL_ZERO || secret_key(format: :z85) == KEY_ALL_ZERO
     end
 
 

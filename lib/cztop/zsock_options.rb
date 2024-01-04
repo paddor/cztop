@@ -111,58 +111,8 @@ module CZTop
 
       # @!endgroup
 
+
       # @!group Security Mechanisms
-
-      # @return [Boolean] whether this zocket is a CURVE server
-      def CURVE_server?
-        Zsock.curve_server(@zocket).positive?
-      end
-
-
-      # Make this zocket a CURVE server.
-      # @param bool [Boolean]
-      # @note You'll have to use a {CZTop::Authenticator}.
-      def CURVE_server=(bool)
-        Zsock.set_curve_server(@zocket, bool ? 1 : 0)
-      end
-
-
-      # @return [String] Z85 encoded server key set
-      # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
-      #   supported
-      def CURVE_serverkey
-        CURVE_key(:curve_serverkey)
-      end
-
-
-      # Get one of the CURVE keys.
-      # @param key_name [Symbol] something like +:curve_serverkey+
-      # @return [String, nil] key, if CURVE is supported and active, or nil
-      def CURVE_key(key_name)
-        return nil if mechanism != :CURVE
-
-        ptr = Zsock.__send__(key_name, @zocket)
-        return nil if ptr.null?
-
-        ptr.read_string
-      end
-      private :CURVE_key
-
-      # Sets the server's public key, so the zocket can authenticate the
-      # remote server.
-      # @param key [String] Z85 (40 bytes) or binary (32 bytes) server key
-      # @raise [ArgumentError] if key has wrong size
-      def CURVE_serverkey=(key)
-        case key.bytesize
-        when 40
-          Zsock.set_curve_serverkey(@zocket, key)
-        when 32
-          ptr = ::FFI::MemoryPointer.from_string(key)
-          Zsock.set_curve_serverkey_bin(@zocket, ptr)
-        else
-          raise ArgumentError, format('invalid server key: %p', key)
-        end
-      end
 
       # supported security mechanisms and their macro value equivalent
       MECHANISMS = {
@@ -182,20 +132,92 @@ module CZTop
           raise format('unknown ZMQ security mechanism code: %i', code)
       end
 
-
-      # @return [String] Z85 encoded secret key set
-      # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
-      #   supported
-      def CURVE_secretkey
-        CURVE_key(:curve_secretkey)
-      end
+      if ::CZMQ::FFI::Zsys.has_curve
+        # @return [Boolean] whether this zocket is a CURVE server
+        def CURVE_server?
+          Zsock.curve_server(@zocket).positive?
+        end
 
 
-      # @return [String] Z85 encoded public key set
-      # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
-      #   supported
-      def CURVE_publickey
-        CURVE_key(:curve_publickey)
+        # Make this zocket a CURVE server.
+        # @param bool [Boolean]
+        # @note You'll have to use a {CZTop::Authenticator}.
+        def CURVE_server=(bool)
+          Zsock.set_curve_server(@zocket, bool ? 1 : 0)
+        end
+
+
+        # @return [String] Z85 encoded server key set
+        # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
+        #   supported
+        def CURVE_serverkey
+          CURVE_key(:curve_serverkey)
+        end
+
+
+        # Get one of the CURVE keys.
+        # @param key_name [Symbol] something like +:curve_serverkey+
+        # @return [String, nil] key, if CURVE is supported and active, or nil
+        def CURVE_key(key_name)
+          return nil if mechanism != :CURVE
+
+          ptr = Zsock.__send__(key_name, @zocket)
+          return nil if ptr.null?
+
+          ptr.read_string
+        end
+        private :CURVE_key
+
+        # Sets the server's public key, so the zocket can authenticate the
+        # remote server.
+        # @param key [String] Z85 (40 bytes) or binary (32 bytes) server key
+        # @raise [ArgumentError] if key has wrong size
+        def CURVE_serverkey=(key)
+          case key.bytesize
+          when 40
+            Zsock.set_curve_serverkey(@zocket, key)
+          when 32
+            ptr = ::FFI::MemoryPointer.from_string(key)
+            Zsock.set_curve_serverkey_bin(@zocket, ptr)
+          else
+            raise ArgumentError, format('invalid server key: %p', key)
+          end
+        end
+
+
+        # @return [String] Z85 encoded secret key set
+        # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
+        #   supported
+        def CURVE_secretkey
+          CURVE_key(:curve_secretkey)
+        end
+
+
+        # @return [String] Z85 encoded public key set
+        # @return [nil] if the current mechanism isn't CURVE or CURVE isn't
+        #   supported
+        def CURVE_publickey
+          CURVE_key(:curve_publickey)
+        end
+      else
+        def CURVE_server?
+          fail NotImplementedError
+        end
+        def CURVE_server=(...)
+          fail NotImplementedError
+        end
+        def CURVE_serverkey(...)
+          fail NotImplementedError
+        end
+        def CURVE_serverkey=(...)
+          fail NotImplementedError
+        end
+        def CURVE_secretkey(...)
+          fail NotImplementedError
+        end
+        def CURVE_publickey(...)
+          fail NotImplementedError
+        end
       end
 
 

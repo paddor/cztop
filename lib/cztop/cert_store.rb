@@ -13,6 +13,12 @@ module CZTop
     include HasFFIDelegate
     extend CZTop::HasFFIDelegate::ClassMethods
 
+    unless ::CZMQ::FFI::Zsys.has_curve
+      def self.new(...)
+        fail NotImplementedError
+      end
+    end
+
     # Initializes a new certificate store.
     #
     # @param location [String, #to_s, nil] location the path to the

@@ -27,7 +27,7 @@ RSpec.configure do |config|
   include ZMQHelper
 end
 
-# NOTE: as of January 28, 2016, the test suite needs opens about ~650 file
+# NOTE: as of January 28, 2016, the test suite opens about ~650 file
 # descriptors. Some OS (like OSX) has a very low default limit of 256. Let's
 # raise it to a more sane 1024, like on Linux.
 begin

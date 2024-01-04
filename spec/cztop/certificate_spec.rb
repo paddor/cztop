@@ -4,14 +4,32 @@ require_relative 'spec_helper'
 require 'tmpdir'
 require 'pathname'
 
-describe CZTop::Certificate do
+unless ::CZMQ::FFI::Zsys.has_curve
+  warn "Skipping most CZTop::Certificate specs because CURVE is not available."
+end
+
+
+describe CZTop::Certificate, if: !::CZMQ::FFI::Zsys.has_curve do
+  describe '#initialize' do
+    it 'raises' do
+      assert_raises(NotImplementedError) do
+        CZTop::Certificate.new
+      end
+    end
+  end
+end
+
+
+describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
   include_examples 'has FFI delegate'
 
   context 'with certificate' do
     let(:cert) { CZTop::Certificate.new }
     let(:ffi_delegate) { cert.ffi_delegate }
+
     describe '#initialize' do
       Then { cert }
+      Then { !cert.zero? }
     end
 
     describe '#public_key' do
@@ -102,7 +120,7 @@ describe CZTop::Certificate do
             cert[key] = value
           end
         end
-        context 'when unsetting', if: has_czmq_drafts? do
+        context 'when unsetting', if: has_czmq_drafts? && ::CZMQ::FFI::Zsys.has_curve do
           Given { cert[key] = value }
           When { cert[key] = nil }
           Then { cert[key].nil? }

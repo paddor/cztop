@@ -4,7 +4,11 @@ require_relative 'spec_helper'
 require 'tmpdir'
 require 'pathname'
 
-describe CZTop::CertStore do
+unless ::CZMQ::FFI::Zsys.has_curve
+  warn "Skipping CZTop::Certificate specs because CURVE is not available."
+end
+
+describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
   include_examples 'has FFI delegate'
 
   context 'with disk location' do
@@ -17,6 +21,7 @@ describe CZTop::CertStore do
     let(:cert1) { CZTop::Certificate.new }
 
     before do
+      CZTop::Certificate.check_curve_availability
       cert1.save(location + 'cert1')
     end
 
@@ -29,8 +34,10 @@ describe CZTop::CertStore do
         let(:key) { cert1.public_key(format: :z85) }
         it 'finds certificate' do
           assert_kind_of CZTop::Certificate, subject.lookup(key)
+          assert_equal key, subject.lookup(key).public_key(format: :z85)
         end
       end
+
       context 'with unknown public key' do
         let(:key) { CZTop::Certificate.new.public_key(format: :z85) }
         it 'returns nil' do

@@ -2,6 +2,10 @@
 
 require_relative '../spec_helper'
 
+unless ::CZMQ::FFI::Zsys.has_curve
+  warn "Skipping some CZTop::Proxy specs because CURVE is not available."
+end
+
 describe 'CZTop::Proxy::ZPROXY_FPTR' do
   it 'points to a dynamic library symbol' do
     assert_kind_of FFI::DynamicLibrary::Symbol, CZTop::Proxy::ZPROXY_FPTR
@@ -207,7 +211,8 @@ describe CZTop::Proxy do
         end
       end
     end
-    describe '#CURVE!' do
+
+    describe '#CURVE!', if: ::CZMQ::FFI::Zsys.has_curve do
       let(:cert) { CZTop::Certificate.new }
       let(:public_key) { cert.public_key }
       let(:secret_key) { cert.secret_key }

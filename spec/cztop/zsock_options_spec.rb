@@ -92,7 +92,7 @@ describe CZTop::ZsockOptions do
         end
       end
     end
-    describe '#CURVE_server' do
+    describe '#CURVE_server?', if: ::CZMQ::FFI::Zsys.has_curve do
       it 'sets and gets CURVE server flag' do
         refute options.CURVE_server?
         options.CURVE_server = true
@@ -108,7 +108,7 @@ describe CZTop::ZsockOptions do
       end
     end
 
-    describe '#CURVE_serverkey' do
+    describe '#CURVE_serverkey', if: ::CZMQ::FFI::Zsys.has_curve do
       context 'with key not set' do
         it 'returns nil' do
           assert_nil options.CURVE_serverkey
@@ -135,7 +135,7 @@ describe CZTop::ZsockOptions do
       end
     end
 
-    describe '#CURVE_secretkey' do
+    describe '#CURVE_secretkey', if: ::CZMQ::FFI::Zsys.has_curve do
       context 'with key not set' do
         Then { options.CURVE_secretkey.nil? }
       end
@@ -163,7 +163,7 @@ describe CZTop::ZsockOptions do
         When { options.PLAIN_server = true }
         Then { :PLAIN == options.mechanism }
       end
-      context 'with CURVE security' do
+      context 'with CURVE security', if: ::CZMQ::FFI::Zsys.has_curve do
         When { options.CURVE_server = true }
         Then { :CURVE == options.mechanism }
       end
@@ -206,7 +206,7 @@ describe CZTop::ZsockOptions do
         refute options.PLAIN_server?
       end
 
-      it 'is mutually exclusive with CURVE' do
+      it 'is mutually exclusive with CURVE', if: ::CZMQ::FFI::Zsys.has_curve do
         options.PLAIN_server = true
         options.CURVE_server = true
         refute_operator options, :PLAIN_server?
@@ -557,7 +557,6 @@ describe CZTop::ZsockOptions do
         end
 
         it 'gets option' do
-          assert_equal options.CURVE_server?, options[:curve_server]
           assert_equal identity, options[:IDENTITY]
           assert_equal identity, options['IDENTITY']
           assert_equal options.tos, options[:ToS]
@@ -575,13 +574,11 @@ describe CZTop::ZsockOptions do
       let(:identity) { 'foobar' }
       let(:tos) { 5 }
       before do
-        options[:curve_server] = true
         options[:IDENTITY] = identity
         options[:ToS] = tos
       end
       context 'with vague option name' do
         it 'sets option' do
-          assert_operator options, :CURVE_server?
           assert_equal identity, options.identity
           assert_equal tos, options.tos
         end

@@ -4,6 +4,10 @@ require_relative 'spec_helper'
 require 'tmpdir'
 require 'pathname'
 
+unless ::CZMQ::FFI::Zsys.has_curve
+  warn "Skipping some CZTop::Socket specs because CURVE is not available."
+end
+
 describe CZTop::Socket do
   include_examples 'has FFI delegate'
 
@@ -60,7 +64,7 @@ describe CZTop::Socket do
     end
   end
 
-  describe '#CURVE_server!' do
+  describe '#CURVE_server!', if: ::CZMQ::FFI::Zsys.has_curve do
     let(:certificate) { CZTop::Certificate.new }
     let(:options) { rep_socket.options }
 
@@ -89,7 +93,7 @@ describe CZTop::Socket do
     end
   end
 
-  describe '#CURVE_client!' do
+  describe '#CURVE_client!', if: ::CZMQ::FFI::Zsys.has_curve do
     let(:tmpdir) do
       Pathname.new(Dir.mktmpdir('zsock_test'))
     end

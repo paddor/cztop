@@ -5,6 +5,18 @@ require 'async/io'
 
 module Async
   module IO
+
+    # Wrapper for CZTop sockets.
+    #
+    # @example
+    #   Async do |task|
+    #     socket = CZTop::Socket::REP.new("ipc:///tmp/req_rep_example")
+    #     socket.options.rcvtimeo = 3
+    #     io = Async::IO.try_convert socket
+    #     msg = io.receive
+    #     io << msg.to_a.map(&:upcase)
+    #   end
+
     class CZTopSocket < Generic
       wraps ::CZTop::Socket::REQ
       wraps ::CZTop::Socket::REP
@@ -19,20 +31,22 @@ module Async
       wraps ::CZTop::Socket::XSUB
 
 
+      # @see {CZTop::SendReceiveMethods#receive}
       def receive
         wait_readable
         @io.receive
       end
 
 
+      # @see {CZTop::SendReceiveMethods#<<}
       def <<(...)
         wait_writable
         @io.<<(...)
       end
 
 
+      # Waits for socket to become readable.
       def wait_readable(timeout = read_timeout)
-        puts "Async::IO::CZTopSocket#wait_readable: waiting with timeout=#{timeout}"
         @io_fd ||= ::IO.for_fd @io.fd, autoclose: false
 
         if timeout
@@ -41,7 +55,7 @@ module Async
           while true
             @io_fd.wait_readable(timeout)
             break if @io.readable?
-            raise TimeoutError if now >= timeout_at
+            raise ::IO::TimeoutError if now >= timeout_at
           end
         else
           @io_fd.wait_readable until @io.readable?
@@ -49,8 +63,8 @@ module Async
       end
 
 
+      # Waits for socket to become writable.
       def wait_writable(timeout = write_timeout)
-        puts "Async::IO::CZTopSocket#wait_writable: waiting with timeout=#{timeout}"
         @io_fd ||= ::IO.for_fd @io.fd, autoclose: false
 
         if timeout
@@ -59,7 +73,7 @@ module Async
           while true
             @io_fd.wait_writable(timeout)
             break if @io.writable?
-            raise TimeoutError if now >= timeout_at
+            raise ::IO::TimeoutError if now >= timeout_at
           end
         else
           @io_fd.wait_writable until @io.writable?
@@ -67,16 +81,30 @@ module Async
       end
 
 
+      # @return [Float, nil] the timeout in seconds used by {IO#wait_readable}
       def read_timeout
         timeout = @io.options.rcvtimeo
-        timeout = nil if timeout <= 0
+
+        if timeout <= 0
+          timeout = nil
+        else
+          timeout = timeout.to_f / 1000
+        end
+
         timeout
       end
 
 
+      # @return [Float, nil] the timeout in seconds used by {IO#wait_writable}
       def write_timeout
         timeout = @io.options.sndtimeo
-        timeout = nil if timeout <= 0
+
+        if timeout <= 0
+          timeout = nil
+        else
+          timeout = timeout.to_f / 1000
+        end
+
         timeout
       end
 

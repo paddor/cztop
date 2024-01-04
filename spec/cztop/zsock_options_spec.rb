@@ -245,8 +245,12 @@ describe CZTop::ZsockOptions do
     describe '#sndtimeo' do
       it 'sets and gets send timeout' do
         assert_equal(-1, options.sndtimeo)
+
         options.sndtimeo = 7
         assert_equal 7, options.sndtimeo
+
+        options.sndtimeo = 0
+        assert_equal 0, options.sndtimeo
       end
     end
 

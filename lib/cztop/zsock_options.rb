@@ -264,29 +264,33 @@ module CZTop
 
       # @!group Send and Receive Timeouts
 
-      # @return [Integer] the timeout when receiving a message
+      # @return [Integer] the timeout in milliseconds when receiving a message
       # @see Message.receive_from
+      # @note -1 means infinite, 0 means nonblocking
       def rcvtimeo
         Zsock.rcvtimeo(@zocket)
       end
 
 
-      # @param timeout [Integer] new timeout
+      # @param timeout [Integer] new timeout in milliseconds
       # @see Message.receive_from
+      # @note -1 means infinite, 0 means nonblocking
       def rcvtimeo=(timeout)
         Zsock.set_rcvtimeo(@zocket, timeout)
       end
 
 
-      # @return [Integer] the timeout when sending a message
+      # @return [Integer] the timeout in milliseconds when sending a message
       # @see Message#send_to
+      # @note -1 means infinite, 0 means nonblocking
       def sndtimeo
         Zsock.sndtimeo(@zocket)
       end
 
 
-      # @param timeout [Integer] new timeout
+      # @param timeout [Integer] new timeout in milliseconds
       # @see Message#send_to
+      # @note -1 means infinite, 0 means nonblocking
       def sndtimeo=(timeout)
         Zsock.set_sndtimeo(@zocket, timeout)
       end

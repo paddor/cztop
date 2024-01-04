@@ -32,4 +32,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
   spec.add_development_dependency "yard"
   spec.add_development_dependency "rubocop", "~> 1.36.0"
+  spec.add_development_dependency "async", ">= 2.0.1"
+  spec.add_development_dependency "async-io"
 end

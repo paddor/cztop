@@ -4,37 +4,32 @@ require 'cztop/async'
 
 Async do |task|
   task.async do |t|
-    socket = CZTop::Socket::REP.new("ipc:///tmp/req_rep_example")
+    socket = CZTop::Socket::REP.new("inproc://req_rep_example")
+    io     = Async::IO.try_convert socket
 
-    # Simply echo every message, with every frame String#upcase'd.
-    socket.options.rcvtimeo = 3
-    io = Async::IO.try_convert socket
+    socket.options.rcvtimeo = 50 # ms
 
-    msg = io.receive
-    puts "<<< #{msg.to_a.inspect}"
-    io << msg.to_a.map(&:upcase)
+    loop do
+      msg = io.receive
+      puts "<<< #{msg.to_a.inspect}"
+      io << msg.to_a.map(&:upcase)
+    rescue IO::TimeoutError
+      break
+    end
 
     puts "REP done."
   end
 
   task.async do
-    socket = CZTop::Socket::REQ.new("ipc:///tmp/req_rep_example")
-    puts ">>> Socket connected."
+    socket = CZTop::Socket::REQ.new("inproc://req_rep_example")
+    io     = Async::IO.try_convert socket
 
-    io = Async::IO.try_convert socket
-    # sleep 5
-    io << "foobar"
-
-    socket.options.rcvtimeo = 3
-    msg = io.receive
-    puts ">>> #{msg.to_a.inspect}"
-    puts "REQ done."
-  end
-
-  task.async do
-    6.times do
-      sleep 0.5
-      puts "tick"
+    10.times do |i|
+      io << "foobar ##{i}"
+      msg = io.receive
+      puts ">>> #{msg.to_a.inspect}"
     end
+
+    puts "REQ done."
   end
 end

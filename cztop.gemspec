@@ -8,7 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Patrik Wenger"]
   spec.email         = ["paddor@gmail.com"]
 
-  spec.summary       = %q{CZMQ Ruby binding based on the generated low-level FFI bindings of CZMQ}
+  spec.summary       = 'CZMQ FFI binding to bring ZMQ sockets to Ruby'
+  spec.description   = 'CZMQ binding based on the generated low-level FFI bindings of CZMQ'
   spec.homepage      = "https://rubygems.org/gems/cztop"
   spec.license       = "ISC"
   spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")

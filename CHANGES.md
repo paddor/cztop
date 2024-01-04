@@ -1,3 +1,12 @@
+1.1.1 (1/4/2024)
+-----
+* speed up Async::IO#wait_readable and #wait_writable
+* update CI and specs
+
+1.1.0 (1/4/2024)
+-----
+* support Async
+
 1.1.0.pre1 (10/17/2022)
 -----
 * modernize syntax using Rubocop

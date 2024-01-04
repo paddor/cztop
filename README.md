@@ -87,51 +87,6 @@ REP done.
 
 ## Overview
 
-### Class Hierarchy
-
-Here's an overview of the core classes:
-
-* [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Authenticator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
-  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
-  * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
-  * [CertStore](http://www.rubydoc.info/gems/cztop/CZTop/CertStore)
-  * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
-  * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
-  * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
-  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
-  * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
-  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy)
-  * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) (based on `zmq_poller_*()` functions)
-    * [Aggregated](http://www.rubydoc.info/gems/cztop/CZTop/Poller/Aggregated)
-    * [ZPoller](http://www.rubydoc.info/gems/cztop/CZTop/Poller/ZPoller)
-  * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
-    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
-    * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket
-    * [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER) < Socket
-    * [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER) < Socket
-    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH) < Socket
-    * [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL) < Socket
-    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB) < Socket
-    * [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB) < Socket
-    * [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB) < Socket
-    * [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB) < Socket
-    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR) < Socket
-    * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
-    * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
-    * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
-    * [RADIO](http://www.rubydoc.info/gems/cztop/CZTop/Socket/RADIO) < Socket
-    * [DISH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DISH) < Socket
-    * [SCATTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SCATTER) < Socket
-    * [GATHER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/GATHER) < Socket
-  * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
-    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
-    * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)
-  * [ZAP](http://www.rubydoc.info/gems/cztop/CZTop/ZAP)
-
-More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
-
 ### Features
 
 * Ruby idiomatic API
@@ -179,6 +134,51 @@ And then execute:
 Or install it yourself as:
 
     $ gem install cztop
+
+### Class Hierarchy
+
+Here's an overview of the core classes:
+
+* [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
+  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
+  * [Authenticator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
+  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
+  * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
+  * [CertStore](http://www.rubydoc.info/gems/cztop/CZTop/CertStore)
+  * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
+  * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
+  * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
+  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
+  * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
+  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy)
+  * [Poller](http://www.rubydoc.info/gems/cztop/CZTop/Poller) (based on `zmq_poller_*()` functions)
+    * [Aggregated](http://www.rubydoc.info/gems/cztop/CZTop/Poller/Aggregated)
+    * [ZPoller](http://www.rubydoc.info/gems/cztop/CZTop/Poller/ZPoller)
+  * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
+    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
+    * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket
+    * [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER) < Socket
+    * [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER) < Socket
+    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH) < Socket
+    * [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL) < Socket
+    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB) < Socket
+    * [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB) < Socket
+    * [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB) < Socket
+    * [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB) < Socket
+    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR) < Socket
+    * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
+    * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
+    * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
+    * [RADIO](http://www.rubydoc.info/gems/cztop/CZTop/Socket/RADIO) < Socket
+    * [DISH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DISH) < Socket
+    * [SCATTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SCATTER) < Socket
+    * [GATHER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/GATHER) < Socket
+  * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
+    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
+    * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)
+  * [ZAP](http://www.rubydoc.info/gems/cztop/CZTop/ZAP)
+
+More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
 
 ## Documentation
 

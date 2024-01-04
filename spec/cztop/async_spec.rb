@@ -4,7 +4,7 @@ require_relative 'spec_helper'
 
 # NOTE: Async 2 requires Ruby 3.1
 # NOTE: IO::TimeoutError was introduced in 3.2, so lets focus on 3.2+
-describe 'Async::IO::CZTopSocket', if: RUBY_VERSION >= '3.2' do
+describe 'Async::IO::CZTopSocket', if: (RUBY_VERSION >= '3.2') do
   require_relative '../../lib/cztop/async'
 
   i = 0

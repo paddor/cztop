@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 require_relative 'spec_helper'
-require_relative '../../lib/cztop/async'
 
-describe Async::IO::CZTopSocket do
+# NOTE: Async 2 requires Ruby 3.1
+describe 'Async::IO::CZTopSocket', if: RUBY_VERSION >= '3.1' do
+  require_relative '../../lib/cztop/async'
+
   i = 0
   let(:endpoint)   { "inproc://async_endpoint_socket_spec_reqrep_#{i += 1}" }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }

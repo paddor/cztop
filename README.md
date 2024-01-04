@@ -153,7 +153,7 @@ On macOS using Homebrew, run:
 
 ### Supported Rubies
 
-* MRI (3.0, 3.2, 3.3)
+* MRI (3.1, 3.2, 3.3)
 * JRuby
 * TruffleRuby
 

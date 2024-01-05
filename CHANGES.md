@@ -1,3 +1,8 @@
+next
+-----
+* refactor to make code Fiber Scheduler agnostic
+* remove Async::IO::CZTopSocket
+
 1.1.1 (1/4/2024)
 -----
 * speed up Async::IO#wait_readable and #wait_writable

@@ -36,6 +36,5 @@ Gem::Specification.new do |spec|
 
   if RUBY_VERSION >= '3.1'
     spec.add_development_dependency "async", ">= 2.0.1"
-    spec.add_development_dependency "async-io"
   end
 end

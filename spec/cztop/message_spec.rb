@@ -191,6 +191,22 @@ describe CZTop::Message do
 
   describe '#send_to' do
     let(:destination) { double 'destination socket' }
+
+    context 'with Fiber scheduler set', if: (RUBY_VERSION >= '3.2') do
+      before do
+        allow(Fiber).to receive(:scheduler) { double 'fiber scheduler' }
+      end
+
+      it 'waits for writability' do
+        # NOTE: we raise because we don't want it to actually send
+        expect(destination).to receive(:wait_writable).and_raise(IO::TimeoutError)
+
+        assert_raises IO::TimeoutError do
+          msg.send_to(destination)
+        end
+      end
+    end
+
     context 'when successful' do
       after { msg.send_to(destination) }
       it 'sends its delegate to the destination' do
@@ -198,6 +214,7 @@ describe CZTop::Message do
                                                  .and_return(0)
       end
     end
+
     context 'when NOT successful' do
       before do
         expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
@@ -231,6 +248,22 @@ describe CZTop::Message do
   describe '.receive_from' do
     let(:received_message) { CZTop::Message.receive_from(src) }
     let(:src) { double 'source' }
+
+    context 'with Fiber scheduler set', if: (RUBY_VERSION >= '3.2') do
+      before do
+        allow(Fiber).to receive(:scheduler) { double 'fiber scheduler' }
+      end
+
+      it 'waits for readability' do
+        # NOTE: we raise because we don't want it to actually receive
+        expect(src).to receive(:wait_readable).and_raise(IO::TimeoutError)
+
+        assert_raises IO::TimeoutError do
+          received_message
+        end
+      end
+    end
+
     context 'when successful' do
       it 'receives message from source' do
         expect(CZMQ::FFI::Zmsg).to receive(:recv).with(src)

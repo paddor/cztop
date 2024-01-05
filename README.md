@@ -13,24 +13,22 @@ mechanisms (like CURVE).
 
 ## Example with Async
 
-See [this example](https://github.com/paddor/cztop/blob/master/examples/async/):
+See [this example](https://github.com/paddor/cztop/blob/master/examples/async.rb):
 
 ```ruby
 #! /usr/bin/env ruby
 
-require 'cztop/async'
+require 'cztop'
 
 Async do |task|
   task.async do |t|
     socket = CZTop::Socket::REP.new("inproc://req_rep_example")
-    io     = Async::IO.try_convert socket
-
     socket.options.rcvtimeo = 50 # ms
 
     loop do
-      msg = io.receive
+      msg = socket.receive
       puts "<<< #{msg.to_a.inspect}"
-      io << msg.to_a.map(&:upcase)
+      socket << msg.to_a.map(&:upcase)
     rescue IO::TimeoutError
       break
     end
@@ -40,11 +38,10 @@ Async do |task|
 
   task.async do
     socket = CZTop::Socket::REQ.new("inproc://req_rep_example")
-    io     = Async::IO.try_convert socket
 
     10.times do |i|
-      io << "foobar ##{i}"
-      msg = io.receive
+      socket << "foobar ##{i}"
+      msg = socket.receive
       puts ">>> #{msg.to_a.inspect}"
     end
 
@@ -56,9 +53,8 @@ end
 
 Output:
 ```
-$ cd examples/async
-$ bundle
-$ /bin/time bundle exec ./async.rb
+$ cd examples
+$ time ./async.rb
 <<< ["foobar #0"]
 >>> ["FOOBAR #0"]
 <<< ["foobar #1"]
@@ -81,8 +77,12 @@ $ /bin/time bundle exec ./async.rb
 >>> ["FOOBAR #9"]
 REQ done.
 REP done.
-0.46user 0.09system 0:00.60elapsed 90%CPU (0avgtext+0avgdata 47296maxresident)k
-0inputs+0outputs (0major+13669minor)pagefaults 0swaps
+
+________________________________________________________
+Executed in  401.51 millis    fish           external
+   usr time  308.44 millis  605.00 micros  307.83 millis
+   sys time   40.08 millis  278.00 micros   39.81 millis
+
 ```
 
 ## Overview
@@ -90,7 +90,7 @@ REP done.
 ### Features
 
 * Ruby idiomatic API
-* compatible with [Async](https://github.com/socketry/async) / [Async::IO](https://github.com/socketry/async-io)
+* Fiber Scheduler aware
 * errors as exceptions
 * CURVE security
 * supports CZMQ DRAFT API

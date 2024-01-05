@@ -61,6 +61,8 @@ module CZTop
     #   returns with failure. Please report as bug.
     #
     def send_to(destination)
+      destination.wait_writable if Fiber.scheduler
+
       rc = Zmsg.send(ffi_delegate, destination)
       return if rc.zero?
 
@@ -79,6 +81,8 @@ module CZTop
     # @raise [SystemCallError] for any other error code set after +zmsg_recv+
     #   returns with failure. Please report as bug.
     def self.receive_from(source)
+      source.wait_readable if Fiber.scheduler
+
       delegate = Zmsg.recv(source)
       return from_ffi_delegate(delegate) unless delegate.null?
 

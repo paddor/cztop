@@ -35,5 +35,80 @@ module CZTop
       Message.receive_from(self)
     end
 
+
+    # Waits for socket to become readable.
+    def wait_readable(timeout = read_timeout)
+      return true if readable?
+
+      @fd_io ||= to_io
+
+      if timeout
+        timeout_at = now + timeout
+
+        while true
+          @fd_io.wait_readable(timeout)
+          break if readable? # NOTE: ZMQ FD can't be trusted 100%
+          raise ::IO::TimeoutError if now >= timeout_at
+        end
+      else
+        @fd_io.wait_readable until readable?
+      end
+    end
+
+
+    # Waits for socket to become writable.
+    def wait_writable(timeout = write_timeout)
+      return true if writable?
+
+      @fd_io ||= to_io
+
+      if timeout
+        timeout_at = now + timeout
+
+        while true
+          @fd_io.wait_writable(timeout)
+          break if writable? # NOTE: ZMQ FD can't be trusted 100%
+          raise ::IO::TimeoutError if now >= timeout_at
+        end
+      else
+        @fd_io.wait_writable until writable?
+      end
+    end
+
+
+    # @return [Float, nil] the timeout in seconds used by {IO#wait_readable}
+    def read_timeout
+      timeout = options.rcvtimeo
+
+      if timeout <= 0
+        timeout = nil
+      else
+        timeout = timeout.to_f / 1000
+      end
+
+      timeout
+    end
+
+
+    # @return [Float, nil] the timeout in seconds used by {IO#wait_writable}
+    def write_timeout
+      timeout = options.sndtimeo
+
+      if timeout <= 0
+        timeout = nil
+      else
+        timeout = timeout.to_f / 1000
+      end
+
+      timeout
+    end
+
+
+    private
+
+
+    def now
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
   end
 end

@@ -43,6 +43,12 @@ module CZTop
     end
 
 
+    # @return [IO] IO for FD
+    def to_io
+      IO.for_fd fd, autoclose: false
+    end
+
+
     # Used to access the options of a {Socket} or {Actor}.
     class OptionsAccessor
 

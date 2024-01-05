@@ -63,6 +63,17 @@ describe CZTop::ZsockOptions do
     end
   end
 
+  describe '#to_io' do
+    it 'returns IO' do
+      assert_kind_of IO, socket.to_io
+      assert_equal socket.options.fd, socket.to_io.fileno
+    end
+
+    it 'will not autoclose' do
+      refute_operator socket.to_io, :autoclose?
+    end
+  end
+
   describe CZTop::ZsockOptions::OptionsAccessor do
     describe '#sndhwm' do
       context 'when getting current value' do

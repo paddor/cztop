@@ -1,4 +1,4 @@
-next
+1.1.2 (1/5/2024)
 -----
 * refactor to make code Fiber Scheduler agnostic
 * remove Async::IO::CZTopSocket

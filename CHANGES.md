@@ -1,6 +1,6 @@
-next
+1.2.2 (1/7/2024)
 -----
-* add compatibility for Ruby 3.0 and Ruby 3.1 (it'll define `IO::TimeoutError < IOError` if not defined)
+* restore compatibility with Ruby 3.0+
 * fix latency issue
 
 1.2.1 (1/7/2024)

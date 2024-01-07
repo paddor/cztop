@@ -8,26 +8,25 @@ gemfile do
   gem 'async'
 end
 
-require 'cztop'
+ENDPOINT = 'inproc://req_rep_example'
+# ENDPOINT = 'ipc://req_rep_example0'
+# ENDPOINT = 'tcp://localhost:5556'
 
 Async do |task|
-  task.async do |t|
-    socket = CZTop::Socket::REP.new("inproc://req_rep_example")
-    socket.options.rcvtimeo = 50 # ms
+  rep_task = task.async do |t|
+    socket = CZTop::Socket::REP.new ENDPOINT
 
     loop do
       msg = socket.receive
       puts "<<< #{msg.to_a.inspect}"
       socket << msg.to_a.map(&:upcase)
-    rescue IO::TimeoutError
-      break
     end
-
+  ensure
     puts "REP done."
   end
 
   task.async do
-    socket = CZTop::Socket::REQ.new("inproc://req_rep_example")
+    socket = CZTop::Socket::REQ.new ENDPOINT
 
     10.times do |i|
       socket << "foobar ##{i}"
@@ -36,5 +35,6 @@ Async do |task|
     end
 
     puts "REQ done."
+    rep_task.stop
   end
 end

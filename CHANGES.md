@@ -1,3 +1,14 @@
+next
+-----
+* refactor waiting for socket readability/writability
+* fix ROUTER socket hanging in busy loop if ZMQ_ROUTER_MANDATORY flag is set and sending a message while no peers are connected
+* same for unconnected CLIENT sockets
+* slim down packaged gem
+* modernize examples
+* require Ruby 3.2
+* some exceptions changed from EAGAIN to IO::TimeoutError
+* Certificate.load and .new_from raise NotImplementedError if CURVE is not available
+
 1.1.2 (1/5/2024)
 -----
 * refactor to make code Fiber Scheduler agnostic

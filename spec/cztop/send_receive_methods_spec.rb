@@ -74,6 +74,48 @@ describe CZTop::SendReceiveMethods do
     end
 
 
+    describe '#wait_readable' do
+      context 'if readable' do
+        it 'returns true'
+      end
+
+      context 'if not readable' do
+        it 'waits'
+
+        it 'does not trust FD'
+
+        context 'when not timed out' do
+          it 'returns true'
+        end
+
+        context 'when timed out' do
+          it 'raises IO::TimeoutError'
+        end
+      end
+    end
+
+
+    describe '#wait_writable' do
+      context 'if writable' do
+        it 'returns true'
+      end
+
+      context 'if not writable' do
+        it 'waits'
+
+        it 'does not trust FD'
+
+        context 'when not timed out' do
+          it 'returns true'
+        end
+
+        context 'when timed out' do
+          it 'raises IO::TimeoutError'
+        end
+      end
+    end
+
+
     describe '#read_timeout' do
       describe 'with no rcvtimeout set' do
         before do

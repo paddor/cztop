@@ -10,7 +10,7 @@ module CZTop
     # Sends a message.
     #
     # @param message [Message, String, Array<parts>] the message to send
-    # @raise [IO::EAGAINWaitWritable] if send timeout has been reached (see
+    # @raise [IO::EAGAINWaitWritable, IO::TimeoutError] if send timeout has been reached (see
     #   {ZsockOptions::OptionsAccessor#sndtimeo=})
     # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
     #   {Message#send_to}
@@ -26,7 +26,7 @@ module CZTop
     # Receives a message.
     #
     # @return [Message]
-    # @raise [IO::EAGAINWaitReadable] if receive timeout has been reached (see
+    # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if receive timeout has been reached (see
     #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
     # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
     #   {Message.receive_from}
@@ -37,6 +37,9 @@ module CZTop
 
 
     # Waits for socket to become readable.
+    # @param timeout [Numeric, nil] timeout in seconds
+    # @return [true] if readable within timeout
+    # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if timeout has been reached
     def wait_readable(timeout = read_timeout)
       return true if readable?
 
@@ -47,16 +50,21 @@ module CZTop
 
         while true
           @fd_io.wait_readable(timeout)
-          break if readable? # NOTE: ZMQ FD can't be trusted 100%
+          break if readable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
         end
       else
         @fd_io.wait_readable until readable?
       end
+
+      true
     end
 
 
     # Waits for socket to become writable.
+    # @param timeout [Numeric, nil] timeout in seconds
+    # @return [true] if writable within timeout
+    # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if timeout has been reached
     def wait_writable(timeout = write_timeout)
       return true if writable?
 
@@ -67,12 +75,14 @@ module CZTop
 
         while true
           @fd_io.wait_writable(timeout)
-          break if writable? # NOTE: ZMQ FD can't be trusted 100%
+          break if writable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
         end
       else
         @fd_io.wait_writable until writable?
       end
+
+       true
     end
 
 

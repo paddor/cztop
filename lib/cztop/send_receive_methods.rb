@@ -36,6 +36,9 @@ module CZTop
     end
 
 
+    JIFFY = 0.015 # 15 ms
+
+
     # Waits for socket to become readable.
     # @param timeout [Numeric, nil] timeout in seconds
     # @return [true] if readable within timeout
@@ -52,9 +55,17 @@ module CZTop
           @fd_io.wait_readable(timeout)
           break if readable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
+
+          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
+          sleep JIFFY
         end
       else
-        @fd_io.wait_readable until readable?
+        until readable?
+          @fd_io.wait_readable
+
+          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
+          sleep JIFFY
+        end
       end
 
       true
@@ -77,12 +88,20 @@ module CZTop
           @fd_io.wait_writable(timeout)
           break if writable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
+
+          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
+          sleep JIFFY
         end
       else
-        @fd_io.wait_writable until writable?
+        until writable?
+          @fd_io.wait_writable
+
+          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
+          sleep JIFFY
+        end
       end
 
-       true
+      true
     end
 
 

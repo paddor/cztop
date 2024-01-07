@@ -32,8 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-given", "~> 3.8.0"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "yard"
-
-  if RUBY_VERSION >= '3.1'
-    spec.add_development_dependency "async", ">= 2.0.1"
-  end
+  spec.add_development_dependency "async"
 end

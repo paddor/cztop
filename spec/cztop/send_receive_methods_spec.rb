@@ -40,9 +40,7 @@ describe CZTop::SendReceiveMethods do
     end
   end
 
-  # NOTE: Async 2 requires Ruby 3.1
-  # NOTE: IO::TimeoutError was introduced in 3.2, so let's focus on 3.2+
-  describe 'async IO with Fiber Scheduler', if: (RUBY_VERSION >= '3.2') do
+  describe 'Async with Fiber Scheduler' do
     require 'async'
 
     i = 0

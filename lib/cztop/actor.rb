@@ -12,7 +12,7 @@ module CZTop
   #
   # = About termination
   # Actors should be terminated explicitly, either by calling {#terminate}
-  # from the current process or sending them the "$TERM" command (from
+  # from the current process or sending them the {TERMINATE} command (from
   # outside). Not terminating them explicitly might make the process block at
   # exit.
   #
@@ -48,12 +48,20 @@ module CZTop
     class DeadActorError < RuntimeError; end
 
 
+    # the command which causes an actor handler to terminate
+    TERMINATE = '$TERM'
+
+
+    # timeout to use when sending the actor a message
+    SEND_TIMEOUT = 20 # ms
+
+
     # @return [Exception] the exception that crashed this actor, if any
     attr_reader :exception
 
 
     # Creates a new actor. Either pass a callback directly or a block. The
-    # block will be called for every received message.
+    # callback/block will be called for every received message.
     #
     # In case the given callback is an FFI::Pointer (to a C function), it's
     # used as-is. It is expected to do the handshake (signal) itself.
@@ -71,8 +79,9 @@ module CZTop
       @callback        = callback || handler
       @callback        = shim(@callback) unless @callback.is_a? ::FFI::Pointer
       ffi_delegate     = Zactor.new(@callback, c_args)
+
       attach_ffi_delegate(ffi_delegate)
-      options.sndtimeo = 20 # ms # see #<<
+      options.sndtimeo = SEND_TIMEOUT # see #<<
     end
 
 
@@ -83,11 +92,11 @@ module CZTop
     # @raise [IO::EAGAINWaitWritable, RuntimeError] anything that could be
     #   raised by {Message#send_to}
     # @note Normally this method is asynchronous, but if the message is
-    #   "$TERM", it blocks until the actor is terminated.
+    #   {TERMINATE}, it blocks until the actor is terminated.
     def <<(message)
       message = Message.coerce(message)
 
-      if TERM == message[0]
+      if TERMINATE == message[0]
         # NOTE: can't just send this to the actor. The sender might call
         # #terminate immediately, which most likely causes a hang due to race
         # conditions.
@@ -99,7 +108,7 @@ module CZTop
 
             message.send_to(self)
           end
-        rescue IO::EAGAINWaitWritable
+        rescue IO::EAGAINWaitWritable, IO::TimeoutError
           # The sndtimeo has been reached.
           #
           # This should fix the race condition (mainly on JRuby) between
@@ -111,9 +120,8 @@ module CZTop
           # at least when using a Ruby handler.
           #
           # In case of a C function handler, it MUST NOT crash and only
-          # terminate when being sent the "$TERM" message using #terminate (so
-          # #await_handler_death can set
-          # @running to false).
+          # terminate when being sent the {TERMINATE} message using #terminate (so
+          # #await_handler_death can set @running to false).
           retry
         end
       end
@@ -138,13 +146,13 @@ module CZTop
     # it.
     # @param message [Message] the request to the actor
     # @return [Message] the actor's response
-    # @raise [ArgumentError] if the message is "$TERM" (use {#terminate})
+    # @raise [ArgumentError] if the message is {TERMINATE} (use {#terminate})
     def request(message)
       @mtx.synchronize do
         raise DeadActorError unless @running
 
         message = Message.coerce(message)
-        raise ArgumentError, 'use #terminate' if TERM == message[0]
+        raise ArgumentError, 'use #terminate' if TERMINATE == message[0]
 
         message.send_to(self)
         Message.receive_from(self)
@@ -189,7 +197,7 @@ module CZTop
       @mtx.synchronize do
         return false unless @running
 
-        Message.new(TERM).send_to(self)
+        Message.new(TERMINATE).send_to(self)
         await_handler_death
         true
       end
@@ -236,8 +244,8 @@ module CZTop
         end
 
         process_messages(handler)
-      rescue Exception
-        @exception = $ERROR_INFO
+      rescue Exception => e
+        @exception = e
       ensure
         signal_shimmed_handler_death
       end
@@ -251,16 +259,12 @@ module CZTop
     end
 
 
-    # the command which causes an actor handler to terminate
-    TERM = '$TERM'
-
-
     # Successively receive messages that were sent to the actor and
     # yield them to the given handler to process them. The a pipe (a
     # {Socket::PAIR} socket) is also passed to the handler so it can send back
     # the result of a command, if needed.
     #
-    # When a message is "$TERM", or when the waiting for a message is
+    # When a message is {TERMINATE}, or when the waiting for a message is
     # interrupted, execution is aborted and the actor will terminate.
     #
     # @param handler [Proc, #call] the handler used to process messages
@@ -274,7 +278,7 @@ module CZTop
         rescue Interrupt
           break
         else
-          break if TERM == message[0]
+          break if TERMINATE == message[0]
         end
 
         handler.call(message, @pipe)
@@ -294,7 +298,7 @@ module CZTop
     #
     # This is needed to avoid the race condition between zactor_destroy()
     # which will wait for a signal from the handler in case it was able to
-    # send the "$TERM" command, and the @callback which might still haven't
+    # send the {TERMINATE} command, and the @callback which might still haven't
     # returned, but doesn't receive any messages anymore.
     #
     # @return [void]

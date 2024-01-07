@@ -5,76 +5,65 @@ This directory contains simple performance measurement utilities:
 - `inproc_lat.rb` measures the latency of the inproc transport
 - `inproc_thru.rb` measures the throughput of the inproc transport
 - `local_lat.rb` and `remote_lat.rb` measure the latency of other transports
-- `local_thru.rb` and `remote_thru.rb` measure the throughput of other transports (TODO)
+- `test_latency.sh` run all latency tests
+- `test_throughput.sh` run all throuput tests
 
 ## Example Output
 
-On my laptop, it currently looks something like this:
-
 ### Latency
 
-over inproc, using 10k roundtrips of a repeatedly allocated 1kb message:
 ```
-$ bundle exec ./inproc_lat_reqrep.rb 1_000 10_000
+$ ./test_latency.sh
+ruby 3.3.0 (2023-12-25 revision 5124f9ac75) +YJIT [x86_64-linux]
+#### Over inproc, using 10k roundtrips of a repeatedly allocated 1kb message:
 message size: 1000 [B]
 roundtrip count: 10000
-elapsed time: 0.469 [s]
-average latency: 23.439 [us]
-```
+elapsed time: 0.805 [s]
+average latency: 40.254 [μs]
 
-over IPC, using 10k roundtrips of a repeatedly allocated 1kb message:
-```
-$ bundle exec ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000 & ./remote_lat.rb ipc:///tmp/cztop-perf 1000 1000
-[3] 58043
+#### Over IPC, using 10k roundtrips of a repeatedly allocated 1kb message:
 message size: 1000 [B]
 roundtrip count: 1000
-elapsed time: 0.091 [s]
-average latency: 45.482 [us]
-[3]    58043 done       ./local_lat.rb ipc:///tmp/cztop-perf 1000 1000
-```
+elapsed time: 0.190 [s]
+average latency: 95.009 [μs]
 
-over local TCP/IP stack, using 10k roundtrips of a repeatedly allocated
-1kb message:
-```
-$ bundle exec ./local_lat.rb tcp://127.0.0.1:55667 1000 1000 & ./remote_lat.rb tcp://127.0.0.1:55667 1000 1000
-[3] 58064
+#### Over local TCP/IP stack, using 10k roundtrips of a repeatedly allocated 1kb message:
 message size: 1000 [B]
 roundtrip count: 1000
-elapsed time: 0.123 [s]
-average latency: 61.434 [us]
-[3]    58064 done       ./local_lat.rb tcp://127.0.0.1:55667 1000 1000
+elapsed time: 0.233 [s]
+average latency: 116.551 [μs]
 ```
 
 ### Throughput
 
-over inproc, with message sizes from 100 bytes to 100kb, 10,000 each:
-
 ```
-$ bundle exec ./inproc_thru.rb 100 10_000
+$ ./test_throughput.sh
+ruby 3.3.0 (2023-12-25 revision 5124f9ac75) +YJIT [x86_64-linux]
+#### Over inproc, with 10,000 messages of 100 bytes:
 message size: 100 [B]
 message count: 10000
-elapsed time: 0.270 [s]
-mean throughput: 37093 [msg/s]
-mean throughput: 29.674 [Mb/s]
+elapsed time: 0.446 [s]
+mean throughput: 22438 [msg/s]
+mean throughput: 17.951 [Mb/s]
 
-$ bundle exec ./inproc_thru.rb 1_000 10_000
+#### Over inproc, with 10,000 messages of 1,000 bytes:
 message size: 1000 [B]
 message count: 10000
-elapsed time: 0.260 [s]
-mean throughput: 38498 [msg/s]
-mean throughput: 307.987 [Mb/s]
+elapsed time: 0.438 [s]
+mean throughput: 22808 [msg/s]
+mean throughput: 182.465 [Mb/s]
 
-$ bundle exec ./inproc_thru.rb 10_000 10_000
+#### Over inproc, with 10,000 messages of 10,000 bytes:
 message size: 10000 [B]
 message count: 10000
-elapsed time: 0.317 [s]
-mean throughput: 31501 [msg/s]
-mean throughput: 2520.102 [Mb/s]
+elapsed time: 0.513 [s]
+mean throughput: 19478 [msg/s]
+mean throughput: 1558.270 [Mb/s]
 
-$ bundle exec ./inproc_thru.rb 100_000 10_000
+#### Over inproc, with 10,000 messages of 100,000 bytes:
 message size: 100000 [B]
 message count: 10000
-elapsed time: 0.906 [s]
-mean throughput: 11034 [msg/s]
-mean throughput: 8827.440 [Mb/s]
+elapsed time: 0.705 [s]
+mean throughput: 14193 [msg/s]
+mean throughput: 11354.498 [Mb/s]
 ```

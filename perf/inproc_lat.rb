@@ -47,7 +47,7 @@ latency = elapsed / (ROUNDTRIP_COUNT * 2) * 1_000_000
 puts "message size: #{MSG_SIZE} [B]"
 puts "roundtrip count: #{ROUNDTRIP_COUNT}"
 puts "elapsed time: %.3f [s]" % elapsed
-puts "average latency: %.3f [us]" % latency
+puts "average latency: %.3f [μs]" % latency
 
 # print a flat profile to text
 #printer = RubyProf::FlatPrinter.new(rubyprof_result)

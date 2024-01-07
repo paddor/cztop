@@ -192,22 +192,19 @@ describe CZTop::Message do
   describe '#send_to' do
     let(:destination) { double 'destination socket' }
 
-    context 'with Fiber scheduler set', if: (RUBY_VERSION >= '3.2') do
-      before do
-        allow(Fiber).to receive(:scheduler) { double 'fiber scheduler' }
-      end
+    it 'waits for writability' do
+      # NOTE: we raise because we don't want it to actually send
+      expect(destination).to receive(:wait_writable).and_raise(IO::TimeoutError)
 
-      it 'waits for writability' do
-        # NOTE: we raise because we don't want it to actually send
-        expect(destination).to receive(:wait_writable).and_raise(IO::TimeoutError)
-
-        assert_raises IO::TimeoutError do
-          msg.send_to(destination)
-        end
+      assert_raises IO::TimeoutError do
+        msg.send_to(destination)
       end
     end
 
     context 'when successful' do
+      before do
+        allow(destination).to receive(:wait_writable) { true }
+      end
       after { msg.send_to(destination) }
       it 'sends its delegate to the destination' do
         expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
@@ -217,6 +214,7 @@ describe CZTop::Message do
 
     context 'when NOT successful' do
       before do
+        allow(destination).to receive(:wait_writable) { true }
         expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
                                                  .and_return(-1)
         expect(CZMQ::FFI::Errors).to receive(:errno)
@@ -249,22 +247,19 @@ describe CZTop::Message do
     let(:received_message) { CZTop::Message.receive_from(src) }
     let(:src) { double 'source' }
 
-    context 'with Fiber scheduler set', if: (RUBY_VERSION >= '3.2') do
-      before do
-        allow(Fiber).to receive(:scheduler) { double 'fiber scheduler' }
-      end
+    it 'waits for readability' do
+      # NOTE: we raise because we don't want it to actually receive
+      expect(src).to receive(:wait_readable).and_raise(IO::TimeoutError)
 
-      it 'waits for readability' do
-        # NOTE: we raise because we don't want it to actually receive
-        expect(src).to receive(:wait_readable).and_raise(IO::TimeoutError)
-
-        assert_raises IO::TimeoutError do
-          received_message
-        end
+      assert_raises IO::TimeoutError do
+        received_message
       end
     end
 
     context 'when successful' do
+      before do
+        allow(src).to receive(:wait_readable) { true }
+      end
       it 'receives message from source' do
         expect(CZMQ::FFI::Zmsg).to receive(:recv).with(src)
                                                  .and_return(ffi_delegate)
@@ -276,6 +271,7 @@ describe CZTop::Message do
     context 'when NOT successful' do
       let(:nullptr) { ::FFI::Pointer::NULL }
       before do
+        allow(src).to receive(:wait_readable) { true }
         expect(CZMQ::FFI).to receive(:zmsg_recv).and_return(nullptr)
         expect(CZMQ::FFI::Errors).to receive(:errno)
           .and_return(errno)

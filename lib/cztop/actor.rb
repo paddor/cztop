@@ -201,7 +201,7 @@ module CZTop
         await_handler_death
         true
       end
-    rescue IO::EAGAINWaitWritable
+    rescue IO::EAGAINWaitWritable, IO::TimeoutError
       # same as in #<<
       retry
     end

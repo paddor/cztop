@@ -8,19 +8,15 @@ module CZTop
     extend CZTop::HasFFIDelegate::ClassMethods
     include ::CZMQ::FFI
 
-    unless ::CZMQ::FFI::Zsys.has_curve
-      def self.new(...)
-        fail NotImplementedError
-      end
-    end
-
-
     # Warns if CURVE security isn't available.
-    # @return [void]
+    # @return [Boolean] whether it's available
     def self.check_curve_availability
-      return if Zsys.has_curve
-
-      warn "CZTop: CURVE isn't available. Consider installing libsodium."
+      if Zsys.has_curve
+        true
+      else
+        warn "CZTop: CURVE isn't available. Consider installing libsodium."
+        false
+      end
     end
 
 
@@ -55,6 +51,18 @@ module CZTop
 
       ptr = Zcert.new_from(public_key, secret_key)
       from_ffi_delegate(ptr)
+    end
+
+    unless ::CZMQ::FFI::Zsys.has_curve
+      def self.new(...)
+        fail NotImplementedError
+      end
+      def self.load(...)
+        fail NotImplementedError
+      end
+      def self.new_from(...)
+        fail NotImplementedError
+      end
     end
 
 

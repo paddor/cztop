@@ -1,7 +1,18 @@
 #!/usr/bin/env ruby
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+  gem 'pry'
+end
+
 require 'pry'
 require 'pathname'
 require 'cztop'
+
+CZTop::Certificate.check_curve_availability or abort
 
 endpoint = ENV["BROKER_ADDRESS"]
 broker_cert = CZTop::Certificate.load ENV["BROKER_CERT"] # secret+public

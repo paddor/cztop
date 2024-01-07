@@ -85,7 +85,7 @@ end
 #
 puts <<MSG
 You can now send messages to the drivers yourself.
-The use the method #send_command, like this:
+Use the method #send_command, like this:
 
 pry> send_command("driver1", "PICKUP\t(8.541694,47.376887)")
 

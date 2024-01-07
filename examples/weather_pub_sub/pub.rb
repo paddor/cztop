@@ -5,6 +5,14 @@
 # Publishes random weather updates
 #
 
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+  gem 'async'
+end
+
 require 'cztop'
 
 # create and bind socket
@@ -12,13 +20,12 @@ socket = CZTop::Socket::PUB.new("ipc:///tmp/weather_pubsub_example")
 puts "<<< Socket bound to #{socket.last_endpoint.inspect}"
 
 while true
-	# Generate values for zipcodes
-	zipcode = rand(100000)
-	temperature = rand(215) - 80
+  zipcode     = rand(3..9) * 1000 + rand(0..99)
+  temperature = rand(-15..38)
 	relhumidity = rand(50) + 10
-	
-	update = "%05d %d %d" % [zipcode, temperature, relhumidity]
-	puts update
-	
-	socket << update
+
+  update = [zipcode, temperature, relhumidity]
+	puts("%04d %d %d" % update)
+
+  socket << update.map(&:to_s)
 end

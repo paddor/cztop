@@ -5,6 +5,14 @@
 # Collects weather updates and finds avg temp in zipcode
 #
 
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+  gem 'async'
+end
+
 require 'cztop'
 
 COUNT = 100
@@ -13,21 +21,18 @@ COUNT = 100
 socket = CZTop::Socket::SUB.new("ipc:///tmp/weather_pubsub_example")
 puts ">>> Socket Connected"
 
-# Subscribe to zipcode.  Default: Chicago - 60606
-filter = ARGV.size > 0 ? ARGV[0] : "60606"
+# Subscribe to zipcode.  Default: Zürich - 8000
+filter = ARGV.size > 0 ? ARGV[0] : "8000"
 socket.subscribe(filter)
 
 # gather & process COUNT updates.
-print "Gathering #{COUNT} samples."
+print "Gathering #{COUNT} samples for: #{filter.inspect}"
 total_temp = 0
-1.upto(COUNT) do |update_nbr|
-	msg = socket.receive
-	
-	zipcode, temperature, relhumidity = msg[0].split.map(&:to_i)
+1.upto(COUNT) do
+  zipcode, temperature, relhumidity = socket.receive.to_a.map(&:to_i)
+  p(zipcode:, temperature:, relhumidity:)
 	total_temp += temperature
-	# just to show that we're doing something...
-	print "." if update_nbr % 5 == 0
 end
-print "\n"
 
-puts "Average temperatuer for zipcode #{filter} was #{total_temp / COUNT}F."
+puts
+puts "Average temperature for zipcode #{filter} was #{total_temp / COUNT}C."

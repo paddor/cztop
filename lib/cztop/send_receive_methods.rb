@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Support Ruby < 3.2
 unless defined? IO::TimeoutError
+  # Support Ruby < 3.2
   class IO::TimeoutError < IOError
   end
 end

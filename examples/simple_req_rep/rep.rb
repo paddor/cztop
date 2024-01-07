@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
-require 'cztop'
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+end
 
 # create and bind socket
 socket = CZTop::Socket::REP.new("ipc:///tmp/req_rep_example")

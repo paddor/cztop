@@ -7,8 +7,6 @@ gemfile do
   gem 'cztop', path: '../../'
 end
 
-require 'cztop'
-
 t1 = Thread.new do
   socket = CZTop::Socket::REP.new("inproc://req_rep_example")
   socket.options.rcvtimeo = 50 # ms

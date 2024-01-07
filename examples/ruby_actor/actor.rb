@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
-require 'cztop'
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+end
 
 ##
 # This example shows how to create a simple actor using a Ruby block.

@@ -13,8 +13,6 @@ gemfile do
   gem 'async'
 end
 
-require 'cztop'
-
 # create and bind socket
 socket = CZTop::Socket::PUB.new("ipc:///tmp/weather_pubsub_example")
 puts "<<< Socket bound to #{socket.last_endpoint.inspect}"

@@ -1,7 +1,13 @@
 #! /usr/bin/env ruby
-require "cztop"
-require "benchmark"
-#require "ruby-prof"
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+  gem 'benchmark'
+  # gem 'ruby-prof'
+end
 
 if ARGV.size != 2
   abort <<MSG
@@ -9,13 +15,14 @@ Usage: #{$0} <message-size> <roundtrip-count>
 MSG
 end
 
-MSG_SIZE = Integer(ARGV[0]) # bytes
+MSG_SIZE        = Integer(ARGV[0]) # bytes
 ROUNDTRIP_COUNT = Integer(ARGV[1]) # round trips
-MSG = "X" * MSG_SIZE
+MSG             = "X" * MSG_SIZE
 
 Thread.new do
   s = CZTop::Socket::PAIR.new("@inproc://perf")
   s.signal
+
   ROUNDTRIP_COUNT.times do
     msg = s.receive
     raise "wrong message size" if msg.content_size != MSG_SIZE
@@ -27,7 +34,7 @@ s = CZTop::Socket::PAIR.new(">inproc://perf")
 s.wait
 
 #RubyProf.start
-tms = Benchmark.measure do
+elapsed = Benchmark.realtime do
   ROUNDTRIP_COUNT.times do
     s << MSG
     msg = s.receive
@@ -36,7 +43,6 @@ tms = Benchmark.measure do
 end
 #rubyprof_result = RubyProf.stop
 
-elapsed = tms.real
 latency = elapsed / (ROUNDTRIP_COUNT * 2) * 1_000_000
 puts "message size: #{MSG_SIZE} [B]"
 puts "roundtrip count: #{ROUNDTRIP_COUNT}"

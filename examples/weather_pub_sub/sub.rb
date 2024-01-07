@@ -13,8 +13,6 @@ gemfile do
   gem 'async'
 end
 
-require 'cztop'
-
 COUNT = 100
 
 # Create socket, connect to publisher.

@@ -1,4 +1,4 @@
-next
+1.2.0 (1/7/2024)
 -----
 * refactor waiting for socket readability/writability
 * fix ROUTER socket hanging in busy loop if ZMQ_ROUTER_MANDATORY flag is set and sending a message while no peers are connected

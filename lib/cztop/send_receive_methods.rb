@@ -60,8 +60,9 @@ module CZTop
           sleep JIFFY
         end
       else
-        until readable?
+        while true
           @fd_io.wait_readable
+          break if readable? # NOTE: ZMQ FD can't be trusted
 
           # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
           sleep JIFFY
@@ -93,8 +94,9 @@ module CZTop
           sleep JIFFY
         end
       else
-        until writable?
+        while true
           @fd_io.wait_writable
+          break if writable? # NOTE: ZMQ FD can't be trusted
 
           # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
           sleep JIFFY

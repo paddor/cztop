@@ -19,7 +19,7 @@ $ bundle exec ./inproc_lat_reqrep.rb 1_000 10_000
 message size: 1000 [B]
 roundtrip count: 10000
 elapsed time: 0.469 [s]
-average latency: 23.439 [us]<Paste>
+average latency: 23.439 [us]
 ```
 
 over IPC, using 10k roundtrips of a repeatedly allocated 1kb message:

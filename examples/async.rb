@@ -9,7 +9,7 @@ gemfile do
 end
 
 ENDPOINT = 'inproc://req_rep_example'
-# ENDPOINT = 'ipc://req_rep_example0'
+# ENDPOINT = 'ipc:///tmp/req_rep_example0'
 # ENDPOINT = 'tcp://localhost:5556'
 
 Async do |task|

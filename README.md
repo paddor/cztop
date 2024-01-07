@@ -18,26 +18,33 @@ See [this example](https://github.com/paddor/cztop/blob/master/examples/async.rb
 ```ruby
 #! /usr/bin/env ruby
 
-require 'cztop'
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'cztop', path: '../../'
+  gem 'async'
+end
+
+ENDPOINT = 'inproc://req_rep_example'
+# ENDPOINT = 'ipc:///tmp/req_rep_example0'
+# ENDPOINT = 'tcp://localhost:5556'
 
 Async do |task|
-  task.async do |t|
-    socket = CZTop::Socket::REP.new("inproc://req_rep_example")
-    socket.options.rcvtimeo = 50 # ms
+  rep_task = task.async do |t|
+    socket = CZTop::Socket::REP.new ENDPOINT
 
     loop do
       msg = socket.receive
       puts "<<< #{msg.to_a.inspect}"
       socket << msg.to_a.map(&:upcase)
-    rescue IO::TimeoutError
-      break
     end
-
+  ensure
     puts "REP done."
   end
 
   task.async do
-    socket = CZTop::Socket::REQ.new("inproc://req_rep_example")
+    socket = CZTop::Socket::REQ.new ENDPOINT
 
     10.times do |i|
       socket << "foobar ##{i}"
@@ -46,6 +53,7 @@ Async do |task|
     end
 
     puts "REQ done."
+    rep_task.stop
   end
 end
 ```
@@ -84,6 +92,8 @@ Executed in  401.51 millis    fish           external
    sys time   40.08 millis  278.00 micros   39.81 millis
 
 ```
+
+A slightly more complex version (more sockets) is [here](https://github.com/paddor/cztop/blob/master/examples/massive_async.rb).
 
 ## Overview
 

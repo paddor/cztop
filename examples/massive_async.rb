@@ -15,9 +15,11 @@ ENDPOINTS = [
   'inproc://req_rep_example0',
   'inproc://req_rep_example1',
   'inproc://req_rep_example2',
+
   'ipc:///tmp/req_rep_example0',
   # 'ipc:///tmp/req_rep_example1',
-  # 'ipc://req_rep_example2',
+  # 'ipc:///tmp/req_rep_example2',
+
   'tcp://localhost:5556',
   # 'tcp://localhost:5557',
   # 'tcp://localhost:5558',

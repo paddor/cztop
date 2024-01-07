@@ -90,15 +90,54 @@ describe CZTop::Socket do
 end
 
 describe CZTop::Socket::CLIENT, if: has_czmq_drafts? do
-  Given(:socket) { described_class.new }
-  it 'instanciates' do
-    socket
+  Given(:client) do
+    described_class.new.tap do |client|
+      client.connect endpoint
+    end
   end
 
-  context 'when sending multi-part message' do
+  Given(:server) do
+    CZTop::Socket::SERVER.new.tap do |server|
+      server.bind endpoint
+    end
+  end
+  i = 54_578
+  Given(:endpoint) { "inproc://client_spec_#{i += 1}" }
+
+  it 'instanciates' do
+    client
+  end
+
+  context 'sending message while not connected' do
     it 'raises' do
-      assert_raises(ArgumentError) do
-        socket << %w[foo bar]
+      client = CZTop::Socket::CLIENT.new
+      assert_raises(SocketError) do
+        client << 'foo'
+      end
+    end
+  end
+
+  context 'while connected' do
+    before do
+      server
+      client
+      sleep 0.1
+    end
+
+    it 'can exchange message' do
+      client << 'foo'
+      request = server.receive
+      assert_equal ['foo'], request.to_a
+      response = CZTop::Message.new('bar').tap { |msg| msg.routing_id = request.routing_id }
+      server << response
+      assert_equal ['bar'], client.receive.to_a
+    end
+
+    context 'when sending multi-part message' do
+      it 'raises' do
+        assert_raises(ArgumentError) do
+          client << %w[foo bar]
+        end
       end
     end
   end

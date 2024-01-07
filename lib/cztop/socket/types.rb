@@ -76,6 +76,15 @@ module CZTop
         attach_ffi_delegate(Zsock.new_client(endpoints))
       end
 
+
+      # @raise [SocketError] if no peer is connected
+      def wait_writable(...)
+        if !writable?
+          fail SocketError, "no peer connected"
+        end
+
+        super
+      end
     end
 
 

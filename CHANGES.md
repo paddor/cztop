@@ -1,3 +1,7 @@
+1.2.3 (1/7/2024)
+-----
+* no changes, just re-release to update README on https://www.rubydoc.info/gems/cztop
+
 1.2.2 (1/7/2024)
 -----
 * restore compatibility with Ruby 3.0+

@@ -160,6 +160,15 @@ module CZTop
         self << message
       end
 
+
+      # @raise [SocketError] if ZMQ_ROUTER_MANDATORY option and message is currently not routable
+      def wait_writable(...)
+        if options.router_mandatory? && !writable?
+          fail SocketError, "no peer connected"
+        end
+
+        super
+      end
     end
 
 

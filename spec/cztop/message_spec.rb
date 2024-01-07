@@ -229,7 +229,7 @@ describe CZTop::Message do
         end
       end
       context 'with host unreachable' do
-        # NOTE: unroutable message given to ROUTER with ROUTER_MANDATORY
+        # NOTE: unroutable message given to ROUTER with ZMQ_ROUTER_MANDATORY
         # option set.
         let(:errno) { Errno::EHOSTUNREACH::Errno }
         it 'raises' do

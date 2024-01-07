@@ -340,6 +340,22 @@ describe CZTop::Socket::ROUTER do
       socket.send_to(receiver, content)
     end
   end
+
+  describe '#wait_writable' do
+    context 'when ROUTER_MANDATORY is set' do
+      before do
+        socket.options.router_mandatory = true
+      end
+
+      context 'when no peer is connected' do
+        it 'raises SocketError' do
+          assert_raises SocketError do
+            socket << ['john', '', 'foo']
+          end
+        end
+      end
+    end
+  end
 end
 
 describe CZTop::Socket::PUB do

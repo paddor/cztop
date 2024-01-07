@@ -325,11 +325,19 @@ module CZTop
 
       # @!endgroup
 
-      # Accept only routable messages on ROUTER sockets. Default is off.
-      # @param bool [Boolean] whether to error if a message isn't routable
+      # ZMQ_ROUTER_MANDATORY: Accept only routable messages on ROUTER sockets. Default is off.
+      # @param bool [Boolean] whether to raise a SocketError if a message isn't routable
       #   (either if the that peer isn't connected or its SNDHWM is reached)
+      # @see https://libzmq.readthedocs.io/en/latest/zmq_setsockopt.html#_zmq_router_mandatory_accept_only_routable_messages_on_router_sockets
       def router_mandatory=(bool)
         Zsock.set_router_mandatory(@zocket, bool ? 1 : 0)
+        @router_mandatory = bool # NOTE: no way to read this option, so we need to remember
+      end
+
+
+      # @return [Boolean] whether ZMQ_ROUTER_MANDATORY has been set
+      def router_mandatory?
+        @router_mandatory
       end
 
 

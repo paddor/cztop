@@ -294,6 +294,18 @@ describe CZTop::ZsockOptions do
       end
     end
 
+    describe '#router_mandatory?' do
+      let(:router) { CZTop::Socket::ROUTER.new(endpoint) }
+
+      it 'gets the flag' do
+        refute_operator router.options, :router_mandatory?
+        router.options.router_mandatory = true
+        assert_operator router.options, :router_mandatory?
+        router.options.router_mandatory = false
+        refute_operator router.options, :router_mandatory?
+      end
+    end
+
     describe '#identity' do
       context 'with no identity set' do
         it 'returns empty string' do

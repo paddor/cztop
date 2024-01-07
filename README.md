@@ -117,8 +117,6 @@ At least:
 
 * Ruby 3.0, 3.1, 3.2, 3.3
 
-Using CZTop with Async will require Ruby 3.2 because of the use of `IO::TimeoutError`, which was introduced in Ruby 3.2.
-
 ## Installation
 
 To use this gem, add this line to your application's Gemfile:

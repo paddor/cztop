@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Support Ruby < 3.2
+unless defined? IO::TimeoutError
+  class IO::TimeoutError < IOError
+  end
+end
+
 module CZTop
   # These are methods that can be used on a {Socket} as well as an {Actor},
   # but actually just pass through to methods of {Message} (which take

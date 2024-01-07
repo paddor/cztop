@@ -24,6 +24,9 @@ end
 RSpec.configure do |config|
   config.expect_with :minitest
   config.filter_run_excluding if: false
+  config.filter_run focus: true
+  config.run_all_when_everything_filtered = true
+
   include ZMQHelper
 end
 

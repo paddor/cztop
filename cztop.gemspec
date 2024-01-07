@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/paddor/cztop"
-  spec.metadata["changelog_uri"]   = "https://github.com/paddor/cztop/blob/master/CHANGELOG.md"
+  spec.metadata["changelog_uri"]   = "https://github.com/paddor/cztop/blob/master/CHANGES.md"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match?(%r{^(\.|Rakefile|spec/|examples/|ci/|perf/)}) }
   spec.bindir        = "exe"

@@ -274,7 +274,7 @@ describe CZTop::Socket::DISH, if: has_czmq_drafts? do
       Given(:msg) { CZTop::Frame.new('foo').tap { |f| f.group = 'group2' } }
       When { radio << msg }
       When(:result) { dish.receive }
-      Then { result == Failure(Errno::EAGAIN) }
+      Then { result == Failure(IO::TimeoutError) }
     end
 
     context 'given an invalid group name' do
@@ -345,7 +345,7 @@ describe CZTop::Socket::GATHER, if: has_czmq_drafts? do
     Given { scatter << 'foo' }
     When(:result1) { gather.receive }
     When(:result2) { gather2.receive }
-    Then { result1 == Failure(Errno::EAGAIN) || result2 == Failure(Errno::EAGAIN) }
+    Then { result1 == Failure(IO::TimeoutError) || result2 == Failure(IO::TimeoutError) }
     And { result1.is_a?(CZTop::Message) || result2.is_a?(CZTop::Message) }
   end
 end

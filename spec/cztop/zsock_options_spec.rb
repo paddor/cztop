@@ -6,11 +6,10 @@ describe CZTop::ZsockOptions do
   i = 0
   let(:endpoint) { "inproc://zsock_options_#{i += 1}" }
   let(:socket) { CZTop::Socket::REQ.new(endpoint) }
-  let(:options) { socket.options }
 
   describe '#options' do
     it 'returns options accessor' do
-      assert_kind_of CZTop::ZsockOptions::OptionsAccessor, options
+      assert_kind_of CZTop::ZsockOptions::OptionsAccessor, socket.options
     end
 
     it 'memoizes the options accessor' do
@@ -18,13 +17,13 @@ describe CZTop::ZsockOptions do
     end
 
     it "changes the correct socket's options" do
-      assert_same socket, options.zocket
+      assert_same socket, socket.options.zocket
     end
   end
 
   describe 'event-based methods' do
     before do
-      expect(options).to receive(:events).and_return(events)
+      expect(socket.options).to receive(:events).and_return(events)
     end
     describe '#readable?' do
       context 'with read event set' do
@@ -78,51 +77,51 @@ describe CZTop::ZsockOptions do
     describe '#sndhwm' do
       context 'when getting current value' do
         it 'returns value' do
-          assert_kind_of Integer, options.sndhwm
+          assert_kind_of Integer, socket.options.sndhwm
         end
       end
       context 'when setting new value' do
         let(:new_value) { 99 }
-        before { options.sndhwm = new_value }
+        before { socket.options.sndhwm = new_value }
         it 'sets new value' do
-          assert_equal new_value, options.sndhwm
+          assert_equal new_value, socket.options.sndhwm
         end
       end
     end
     describe '#rcvhwm' do
       context 'when getting current value' do
         it 'returns value' do
-          assert_kind_of Integer, options.rcvhwm
+          assert_kind_of Integer, socket.options.rcvhwm
         end
       end
       context 'when setting new value' do
         let(:new_value) { 99 }
-        before { options.rcvhwm = new_value }
+        before { socket.options.rcvhwm = new_value }
         it 'sets new value' do
-          assert_equal new_value, options.rcvhwm
+          assert_equal new_value, socket.options.rcvhwm
         end
       end
     end
     describe '#CURVE_server?', if: ::CZMQ::FFI::Zsys.has_curve do
       it 'sets and gets CURVE server flag' do
-        refute options.CURVE_server?
-        options.CURVE_server = true
-        assert options.CURVE_server?
-        options.CURVE_server = false
-        refute options.CURVE_server?
+        refute socket.options.CURVE_server?
+        socket.options.CURVE_server = true
+        assert socket.options.CURVE_server?
+        socket.options.CURVE_server = false
+        refute socket.options.CURVE_server?
       end
 
       it 'is mutually exclusive with PLAIN' do
-        options.CURVE_server = true
-        options.PLAIN_server = true
-        refute_operator options, :CURVE_server?
+        socket.options.CURVE_server = true
+        socket.options.PLAIN_server = true
+        refute_operator socket.options, :CURVE_server?
       end
     end
 
     describe '#CURVE_serverkey', if: ::CZMQ::FFI::Zsys.has_curve do
       context 'with key not set' do
         it 'returns nil' do
-          assert_nil options.CURVE_serverkey
+          assert_nil socket.options.CURVE_serverkey
         end
       end
       context 'with valid key' do
@@ -130,53 +129,53 @@ describe CZTop::ZsockOptions do
         let(:key_bin) { cert.public_key(format: :binary) }
         let(:key_z85) { cert.public_key(format: :z85) }
         context 'as binary' do
-          When { options.CURVE_serverkey = key_bin }
-          Then { key_z85 == options.CURVE_serverkey }
+          When { socket.options.CURVE_serverkey = key_bin }
+          Then { key_z85 == socket.options.CURVE_serverkey }
         end
         context 'as Z85' do
-          When { options.CURVE_serverkey = key_z85 }
-          Then { key_z85 == options.CURVE_serverkey }
+          When { socket.options.CURVE_serverkey = key_z85 }
+          Then { key_z85 == socket.options.CURVE_serverkey }
         end
       end
       context 'with invalid key' do
         it 'raises' do
-          assert_raises(ArgumentError) { options.CURVE_serverkey = 'foo' }
-          assert_raises { options.CURVE_serverkey = nil }
+          assert_raises(ArgumentError) { socket.options.CURVE_serverkey = 'foo' }
+          assert_raises { socket.options.CURVE_serverkey = nil }
         end
       end
     end
 
     describe '#CURVE_secretkey', if: ::CZMQ::FFI::Zsys.has_curve do
       context 'with key not set' do
-        Then { options.CURVE_secretkey.nil? }
+        Then { socket.options.CURVE_secretkey.nil? }
       end
       context 'with valid key' do
         let(:cert) { CZTop::Certificate.new }
         let(:key_bin) { cert.secret_key(format: :binary) }
         let(:key_z85) { cert.secret_key(format: :z85) }
         When { cert.apply(socket) }
-        Then { key_z85 == options.CURVE_secretkey }
+        Then { key_z85 == socket.options.CURVE_secretkey }
       end
       context 'with only CURVE mechanism enabled but no key set' do
-        When { options.CURVE_server = true } # just enable CURVE
-        Then { options.CURVE_secretkey.is_a? String }
-        And { !options.CURVE_secretkey.empty? }
+        When { socket.options.CURVE_server = true } # just enable CURVE
+        Then { socket.options.CURVE_secretkey.is_a? String }
+        And { !socket.options.CURVE_secretkey.empty? }
       end
     end
 
     describe '#mechanism' do
       context 'with no security' do
         it 'returns :NULL' do
-          assert_equal :NULL, options.mechanism
+          assert_equal :NULL, socket.options.mechanism
         end
       end
       context 'with PLAIN security' do
-        When { options.PLAIN_server = true }
-        Then { :PLAIN == options.mechanism }
+        When { socket.options.PLAIN_server = true }
+        Then { :PLAIN == socket.options.mechanism }
       end
       context 'with CURVE security', if: ::CZMQ::FFI::Zsys.has_curve do
-        When { options.CURVE_server = true }
-        Then { :CURVE == options.mechanism }
+        When { socket.options.CURVE_server = true }
+        Then { :CURVE == socket.options.mechanism }
       end
       #      context "with GSSAPI security" do
       #        it "returns :GSSAPI" # FIXME: see "GSSAPI" branch
@@ -187,112 +186,110 @@ describe CZTop::ZsockOptions do
             .with(socket).and_return(99)
         end
         it 'raises' do
-          assert_raises { options.mechanism }
+          assert_raises { socket.options.mechanism }
         end
       end
     end
 
     describe '#zap_domain' do
       context 'with no ZAP domain set' do
-        Then { '' == options.zap_domain }
+        Then { '' == socket.options.zap_domain }
       end
       context 'with valid ZAP domain' do
         Given(:domain) { 'foobar' }
-        When { options.zap_domain = domain }
-        Then { domain == options.zap_domain }
+        When { socket.options.zap_domain = domain }
+        Then { domain == socket.options.zap_domain }
       end
       context 'with too long ZAP domain' do
         Given(:domain) { 'o' * 255 }
-        When(:result) { options.zap_domain = domain }
+        When(:result) { socket.options.zap_domain = domain }
         Then { result == Failure(ArgumentError) }
       end
     end
 
     describe '#PLAIN_server' do
       it 'sets and gets PLAIN server flag' do
-        refute options.PLAIN_server?
-        options.PLAIN_server = true
-        assert options.PLAIN_server?
-        options.PLAIN_server = false
-        refute options.PLAIN_server?
+        refute socket.options.PLAIN_server?
+        socket.options.PLAIN_server = true
+        assert socket.options.PLAIN_server?
+        socket.options.PLAIN_server = false
+        refute socket.options.PLAIN_server?
       end
 
       it 'is mutually exclusive with CURVE', if: ::CZMQ::FFI::Zsys.has_curve do
-        options.PLAIN_server = true
-        options.CURVE_server = true
-        refute_operator options, :PLAIN_server?
+        socket.options.PLAIN_server = true
+        socket.options.CURVE_server = true
+        refute_operator socket.options, :PLAIN_server?
       end
     end
     describe '#PLAIN_username' do
       context 'with no username set' do
-        Then { options.PLAIN_username.nil? }
+        Then { socket.options.PLAIN_username.nil? }
       end
       context 'setting and getting' do
         Given(:username) { 'foo' }
-        When { options.PLAIN_username = username }
-        Then { username == options.PLAIN_username }
+        When { socket.options.PLAIN_username = username }
+        Then { username == socket.options.PLAIN_username }
       end
     end
     describe '#PLAIN_password' do
       context 'with not PLAIN mechanism' do
-        Then { options.PLAIN_password.nil? }
+        Then { socket.options.PLAIN_password.nil? }
       end
       context 'with password set' do
         Given(:password) { 'secret' }
-        When { options.PLAIN_password = password }
-        Then { options.PLAIN_password == password }
+        When { socket.options.PLAIN_password = password }
+        Then { socket.options.PLAIN_password == password }
       end
       context 'with only username set' do
-        When { options.PLAIN_username = 'foo' }
-        Then { '' == options.PLAIN_password }
+        When { socket.options.PLAIN_username = 'foo' }
+        Then { '' == socket.options.PLAIN_password }
       end
       context 'setting and getting' do
         Given(:password) { 'foo' }
-        When { options.PLAIN_password = password }
-        When { password == options.PLAIN_password }
+        When { socket.options.PLAIN_password = password }
+        When { password == socket.options.PLAIN_password }
       end
     end
 
     describe '#sndtimeo' do
       it 'sets and gets send timeout' do
-        assert_equal(-1, options.sndtimeo)
+        assert_equal(-1, socket.options.sndtimeo)
 
-        options.sndtimeo = 7
-        assert_equal 7, options.sndtimeo
+        socket.options.sndtimeo = 7
+        assert_equal 7, socket.options.sndtimeo
 
-        options.sndtimeo = 0
-        assert_equal 0, options.sndtimeo
+        socket.options.sndtimeo = 0
+        assert_equal 0, socket.options.sndtimeo
       end
     end
 
     describe '#rcvtimeo' do
       it 'sets and gets receive timeout' do
-        assert_equal(-1, options.rcvtimeo)
-        options.rcvtimeo = 7
-        assert_equal 7, options.rcvtimeo
+        assert_equal(-1, socket.options.rcvtimeo)
+        socket.options.rcvtimeo = 7
+        assert_equal 7, socket.options.rcvtimeo
       end
     end
 
     describe '#router_mandatory=' do
-      let(:socket) { CZTop::Socket::ROUTER.new }
+      let(:router) { CZTop::Socket::ROUTER.new(endpoint) }
 
       it 'can set the flag' do
-        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory)
-          .with(socket, 1)
-        options.router_mandatory = true
+        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory).with(router, 1)
+        router.options.router_mandatory = true
       end
       it 'can unset the flag' do
-        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory)
-          .with(socket, 0)
-        options.router_mandatory = false
+        expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory).with(router, 0)
+        router.options.router_mandatory = false
       end
       context 'with flag set and message unroutable' do
-        before { options.router_mandatory = true }
+        before { router.options.router_mandatory = true }
         let(:identity) { 'receiver identity' }
         let(:content) { 'foobar' }
         let(:msg) { [identity, '', content] }
         it 'raises' do
-          assert_raises(SocketError) { socket << msg }
+          assert_raises(SocketError) { router << msg }
         end
       end
     end
@@ -300,14 +297,14 @@ describe CZTop::ZsockOptions do
     describe '#identity' do
       context 'with no identity set' do
         it 'returns empty string' do
-          assert_equal '', options.identity
+          assert_equal '', socket.options.identity
         end
       end
       context 'with identity set' do
         let(:identity) { 'foobar' }
-        before { options.identity = identity }
+        before { socket.options.identity = identity }
         it 'returns identity' do
-          assert_equal identity, options.identity
+          assert_equal identity, socket.options.identity
         end
       end
     end
@@ -316,21 +313,21 @@ describe CZTop::ZsockOptions do
       context 'with zero-length identity' do
         let(:identity) { '' }
         it 'raises' do
-          assert_raises(ArgumentError) { options.identity = identity }
+          assert_raises(ArgumentError) { socket.options.identity = identity }
         end
       end
       context 'with invalid identity' do
         # NOTE: leading null byte is reserved for ZMQ
         let(:identity) { "\x00foobar" }
         it 'raises' do
-          assert_raises(ArgumentError) { options.identity = identity }
+          assert_raises(ArgumentError) { socket.options.identity = identity }
         end
       end
       context 'with too long identity' do
         # NOTE: identities are 255 bytes maximum
         let(:identity) { 'x' * 256 }
         it 'raises' do
-          assert_raises(ArgumentError) { options.identity = identity }
+          assert_raises(ArgumentError) { socket.options.identity = identity }
         end
       end
     end
@@ -338,86 +335,86 @@ describe CZTop::ZsockOptions do
     describe '#tos' do
       context 'with no TOS' do
         it 'returns zero' do
-          assert_equal 0, options.tos
+          assert_equal 0, socket.options.tos
         end
       end
       context 'with TOS set' do
         let(:tos) { 5 }
-        before { options.tos = tos }
+        before { socket.options.tos = tos }
         it 'returns TOS' do
-          assert_equal tos, options.tos
+          assert_equal tos, socket.options.tos
         end
       end
       context 'with invalid TOS' do
         it 'raises' do
-          assert_raises(ArgumentError) { options.tos = -5 }
+          assert_raises(ArgumentError) { socket.options.tos = -5 }
         end
       end
       context 'when resetting to zero' do
-        before { options.tos = 10 }
+        before { socket.options.tos = 10 }
         it "doesn't raise" do
-          options.tos = 0
+          socket.options.tos = 0
         end
       end
     end
     describe '#heartbeat_ivl', if: (has_zmq_version?('4.2') && has_czmq_drafts?) do
       context 'with no IVL' do
         it 'returns zero' do
-          assert_equal 0, options.heartbeat_ivl
+          assert_equal 0, socket.options.heartbeat_ivl
         end
       end
       context 'with IVL set' do
         let(:ivl) { 5 }
-        before { options.heartbeat_ivl = ivl }
+        before { socket.options.heartbeat_ivl = ivl }
         it 'returns IVL' do
-          assert_equal ivl, options.heartbeat_ivl
+          assert_equal ivl, socket.options.heartbeat_ivl
         end
       end
     end
     describe '#heartbeat_ttl', if: (has_zmq_version?('4.2') && has_czmq_drafts?) do
       context 'with no TTL' do
         it 'returns zero' do
-          assert_equal 0, options.heartbeat_ttl
+          assert_equal 0, socket.options.heartbeat_ttl
         end
       end
       context 'with TTL set' do
         let(:ttl) { 500 }
-        before { options.heartbeat_ttl = ttl }
+        before { socket.options.heartbeat_ttl = ttl }
         it 'returns TTL' do
-          assert_equal ttl, options.heartbeat_ttl
+          assert_equal ttl, socket.options.heartbeat_ttl
         end
       end
       context 'with invalid TTL' do
         let(:ttl) { 500.3 }
         it 'raises' do
-          assert_raises(ArgumentError) { options.heartbeat_ttl = ttl }
+          assert_raises(ArgumentError) { socket.options.heartbeat_ttl = ttl }
         end
       end
       context 'with out-of-range TTL' do
         let(:ttl) { 100_000 }
         it 'raises' do
-          assert_raises(ArgumentError) { options.heartbeat_ttl = ttl }
+          assert_raises(ArgumentError) { socket.options.heartbeat_ttl = ttl }
         end
       end
       context 'with insignificant TTL' do
         let(:ttl) { 80 } # less than 100
-        before { options.heartbeat_ttl = ttl }
+        before { socket.options.heartbeat_ttl = ttl }
         it 'has no effect' do
-          assert_equal 0, options.heartbeat_ttl
+          assert_equal 0, socket.options.heartbeat_ttl
         end
       end
     end
     describe '#heartbeat_timeout', if: (has_zmq_version?('4.2') && has_czmq_drafts?) do
       context 'with no timeout' do
         it 'returns -1' do
-          assert_equal(-1, options.heartbeat_timeout)
+          assert_equal(-1, socket.options.heartbeat_timeout)
         end
       end
       context 'with timeout set' do
         let(:timeout) { 5 }
-        before { options.heartbeat_timeout = timeout }
+        before { socket.options.heartbeat_timeout = timeout }
         it 'returns timeout' do
-          assert_equal timeout, options.heartbeat_timeout
+          assert_equal timeout, socket.options.heartbeat_timeout
         end
       end
       context 'integration test' do
@@ -516,46 +513,44 @@ describe CZTop::ZsockOptions do
     describe '#linger' do
       context 'with no LINGER' do
         it 'returns default' do
-          assert_equal 0, options.linger # ZMQ docs say 30_000, but they're wrong
+          assert_equal 0, socket.options.linger # ZMQ docs say 30_000, but they're wrong
         end
       end
       context 'with LINGER set' do
         let(:linger) { 500 }
-        before { options.linger = linger }
+        before { socket.options.linger = linger }
         it 'returns LINGER' do
-          assert_equal linger, options.linger
+          assert_equal linger, socket.options.linger
         end
       end
     end
 
     describe '#ipv6=' do
       it 'can enable IPv6' do
-        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6)
-          .with(socket, 1)
-        options.ipv6 = true
+        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6).with(socket, 1)
+        socket.options.ipv6 = true
       end
       it 'can disable IPv6' do
-        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6)
-          .with(socket, 0)
-        options.ipv6 = false
+        expect(CZMQ::FFI::Zsock).to receive(:set_ipv6).with(socket, 0)
+        socket.options.ipv6 = false
       end
     end
     describe '#ipv6?' do
       context 'with default setting' do
         it 'returns false' do
-          refute_operator options, :ipv6?
+          refute_operator socket.options, :ipv6?
         end
       end
       context 'with ipv6 enabled' do
-        before { options.ipv6 = true }
+        before { socket.options.ipv6 = true }
         it 'returns true' do
-          assert_operator options, :ipv6?
+          assert_operator socket.options, :ipv6?
         end
       end
       context 'with ipv6 disabled' do
-        before { options.ipv6 = false }
+        before { socket.options.ipv6 = false }
         it 'returns false' do
-          refute_operator options, :ipv6?
+          refute_operator socket.options, :ipv6?
         end
       end
     end
@@ -564,20 +559,20 @@ describe CZTop::ZsockOptions do
       context 'with vague option name' do
         let(:identity) { 'foobar' }
         before do
-          options.identity = identity
+          socket.options.identity = identity
         end
 
         it 'gets option' do
-          assert_equal identity, options[:IDENTITY]
-          assert_equal identity, options['IDENTITY']
-          assert_equal options.tos, options[:ToS]
+          assert_equal identity, socket.options[:IDENTITY]
+          assert_equal identity, socket.options['IDENTITY']
+          assert_equal socket.options.tos, socket.options[:ToS]
         end
       end
       context 'with plain wrong option name' do
         it 'raises' do
-          assert_raises(NoMethodError) { options[:foo] }
-          assert_raises(NoMethodError) { options[5] }
-          assert_raises(NoMethodError) { options['!!'] }
+          assert_raises(NoMethodError) { socket.options[:foo] }
+          assert_raises(NoMethodError) { socket.options[5] }
+          assert_raises(NoMethodError) { socket.options['!!'] }
         end
       end
     end
@@ -585,20 +580,20 @@ describe CZTop::ZsockOptions do
       let(:identity) { 'foobar' }
       let(:tos) { 5 }
       before do
-        options[:IDENTITY] = identity
-        options[:ToS] = tos
+        socket.options[:IDENTITY] = identity
+        socket.options[:ToS] = tos
       end
       context 'with vague option name' do
         it 'sets option' do
-          assert_equal identity, options.identity
-          assert_equal tos, options.tos
+          assert_equal identity, socket.options.identity
+          assert_equal tos, socket.options.tos
         end
       end
       context 'with plain wrong option name' do
         it 'raises' do
-          assert_raises(NoMethodError) { options[:foo] = 5 }
-          assert_raises(NoMethodError) { options[5] = 'foo' }
-          assert_raises(NoMethodError) { options['!!'] = :bar }
+          assert_raises(NoMethodError) { socket.options[:foo] = 5 }
+          assert_raises(NoMethodError) { socket.options[5] = 'foo' }
+          assert_raises(NoMethodError) { socket.options['!!'] = :bar }
         end
       end
     end
@@ -608,17 +603,17 @@ describe CZTop::ZsockOptions do
         assert_kind_of(fd_type, socket.options.fd)
       end
     end
-    fdescribe '#reconnect_ivl' do
+    describe '#reconnect_ivl' do
       context 'with no RECONNECT_IVL' do
         it 'returns default' do
-          assert_equal 100, options.reconnect_ivl
+          assert_equal 100, socket.options.reconnect_ivl
         end
       end
       context 'with RECONNECT_IVL set' do
         let(:reconnect_ivl) { 500 }
-        before { options.reconnect_ivl = reconnect_ivl }
+        before { socket.options.reconnect_ivl = reconnect_ivl }
         it 'returns RECONNECT_IVL' do
-          assert_equal reconnect_ivl, options.reconnect_ivl
+          assert_equal reconnect_ivl, socket.options.reconnect_ivl
         end
       end
     end

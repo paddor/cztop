@@ -52,6 +52,7 @@ module CZTop
         timeout_at = now + timeout
 
         while true
+          # p wait_readable: self, timeout: timeout
           @fd_io.wait_readable(timeout)
           break if readable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
@@ -61,6 +62,7 @@ module CZTop
         end
       else
         while true
+          # p wait_readable: self
           @fd_io.wait_readable
           break if readable? # NOTE: ZMQ FD can't be trusted
 
@@ -86,6 +88,7 @@ module CZTop
         timeout_at = now + timeout
 
         while true
+          # p wait_writable: self, timeout: timeout
           @fd_io.wait_writable(timeout)
           break if writable? # NOTE: ZMQ FD can't be trusted
           raise ::IO::TimeoutError if now >= timeout_at
@@ -95,6 +98,7 @@ module CZTop
         end
       else
         while true
+          # p wait_writable: self
           @fd_io.wait_writable
           break if writable? # NOTE: ZMQ FD can't be trusted
 

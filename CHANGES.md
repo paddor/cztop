@@ -1,3 +1,7 @@
+1.2.1 (1/7/2024)
+-----
+* fix changelog URI
+
 1.2.0 (1/7/2024)
 -----
 * refactor waiting for socket readability/writability

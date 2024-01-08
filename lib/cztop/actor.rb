@@ -37,7 +37,7 @@ module CZTop
   class Actor
 
     include HasFFIDelegate
-    extend CZTop::HasFFIDelegate::ClassMethods
+    extend HasFFIDelegate::ClassMethods
     include ZsockOptions
     include SendReceiveMethods
     include PolymorphicZsockMethods

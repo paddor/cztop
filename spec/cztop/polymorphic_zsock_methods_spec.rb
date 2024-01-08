@@ -30,6 +30,25 @@ describe CZTop::PolymorphicZsockMethods do
     describe '#wait' do
       When { socket_b.signal(status) }
       Then { status == socket_a.wait }
+
+      it 'fails in a non-blocking Fiber' do
+        Fiber.new blocking: false do
+          assert_raises NotImplementedError do
+            socket_a.wait
+          end
+        end.resume
+      end
+
+      it 'works in a blocking Fiber' do
+        signaled = false
+
+        Fiber.new blocking: true do
+          socket_a.wait
+          signaled = true
+        end.resume
+
+        assert signaled
+      end
     end
   end
 

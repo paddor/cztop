@@ -14,7 +14,10 @@ module CZTop
 
     # Waits for a signal.
     # @return [Integer] the received signal
+    # @note This will block and is therefore not compatible with {Fiber.scheduler} (e.g. Async).
     def wait
+      fail NotImplementedError if !Fiber.blocking?
+
       ::CZMQ::FFI::Zsock.wait(ffi_delegate)
     end
 

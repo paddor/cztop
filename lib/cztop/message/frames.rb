@@ -6,7 +6,7 @@ module CZTop
     # @return [Integer] number of frames
     # @see content_size
     def size
-      frames.count
+      ffi_delegate.size
     end
 
 

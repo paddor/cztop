@@ -30,6 +30,12 @@ describe CZTop::Message::FramesAccessor do
   context 'message with content' do
     let(:frame_contents) { %w[foo bar baz] }
 
+    describe '#size' do
+      it 'returns correct number of frames' do
+        assert_equal 3, msg.size
+      end
+    end
+
     describe '#first' do
       it 'returns first frame' do
         assert_equal 'foo', frames.first.to_s
@@ -62,6 +68,13 @@ describe CZTop::Message::FramesAccessor do
 
   context 'message with no content' do
     let(:frame_contents) { [] }
+
+    describe '#size' do
+      it 'returns zero' do
+        assert_equal 0, msg.size
+      end
+    end
+
     describe '#first' do
       it 'returns nil' do
         assert_nil frames.first

@@ -4,7 +4,7 @@ require_relative 'spec_helper'
 
 describe CZTop::Message do
   include_examples 'has FFI delegate'
-  let(:msg) { CZTop::Message.new }
+  let(:msg)          { CZTop::Message.new }
   let(:ffi_delegate) { msg.ffi_delegate }
 
   describe '#initialize' do
@@ -28,6 +28,26 @@ describe CZTop::Message do
       it 'takes them as frames' do
         assert_equal parts.size, msg.size
         assert_equal parts, msg.frames.map(&:to_s)
+      end
+    end
+
+    context 'with empty part' do
+      let(:parts) { [''] }
+      let(:msg) { described_class.new(parts) }
+
+      it 'works' do
+        assert_equal parts.size, msg.size
+        assert_equal parts, msg.frames.map(&:to_s)
+        assert_equal 0, msg.content_size
+      end
+    end
+
+    context 'with empty array' do
+      let(:parts) { [] }
+      let(:msg) { described_class.new(parts) }
+
+      it 'works' do
+        msg
       end
     end
   end
@@ -190,7 +210,18 @@ describe CZTop::Message do
   end
 
   describe '#send_to' do
+    let(:msg)         { CZTop::Message.new 'foo' }
     let(:destination) { double 'destination socket' }
+
+    context 'with no frames' do
+      let(:msg) { CZTop::Message.new }
+
+      it 'fails' do
+        assert_raises ArgumentError do
+          msg.send_to(destination)
+        end
+      end
+    end
 
     it 'waits for writability' do
       # NOTE: we raise because we don't want it to actually send
@@ -304,6 +335,15 @@ describe CZTop::Message do
     context 'with content' do
       subject { CZTop::Message.new 'foo' }
       Then { !subject.empty? }
+    end
+    context 'with empty frame' do
+      subject { CZTop::Message.new '' }
+      Then { subject.empty? }
+    end
+
+    context 'with no frames' do
+      subject { CZTop::Message.new }
+      Then { subject.empty? }
     end
   end
 

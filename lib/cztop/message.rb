@@ -32,7 +32,7 @@ module CZTop
     end
 
 
-    # @return [Boolean] if this message is empty or not
+    # @return [Boolean] if this message is empty or not (no frames or every frame has length zero)
     def empty?
       content_size.zero?
     end
@@ -56,11 +56,13 @@ module CZTop
     #   corresponding
     #   to the given routing ID)
     # @raise [ArgumentError] if the message is invalid, e.g. when trying to
-    #   send a multi-part message over a CLIENT/SERVER socket
+    #   send a message with a no parts, or a multi-part message over a CLIENT/SERVER socket
     # @raise [SystemCallError] for any other error code set after +zmsg_send+
     #   returns with failure. Please report as bug.
     #
     def send_to(destination)
+      fail ArgumentError, "message has no frames" if size.zero?
+
       destination.wait_writable
 
       rc = Zmsg.send(ffi_delegate, destination)

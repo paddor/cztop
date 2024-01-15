@@ -353,6 +353,39 @@ end
 describe CZTop::Socket::REQ do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  context 'integration' do
+    let(:req) { CZTop::Socket::REQ.new }
+    let(:rep) { CZTop::Socket::REP.new }
+    i = 0
+    let(:endpoint) { "inproc://socket_types_spec_reqrep_#{i += 1}" }
+
+    before do
+      req.options.sndtimeo = 100
+      rep.options.rcvtimeo = 100
+
+      req.bind endpoint
+      rep.connect endpoint
+    end
+
+    it 'can send message' do
+      req << 'foobar'
+      msg = rep.receive
+      assert_equal ['foobar'], msg.to_a
+
+      rep << 'baz'
+      msg = req.receive
+      assert_equal ['baz'], msg.to_a
+
+      req << %w[foobar]
+      msg = rep.receive
+      assert_equal %w[foobar], msg.to_a
+
+      rep << %w[bazzz]
+      msg = req.receive
+      assert_equal %w[bazzz], msg.to_a
+    end
+  end
 end
 
 describe CZTop::Socket::REP do
@@ -457,6 +490,38 @@ end
 describe CZTop::Socket::PUSH do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  context 'integration' do
+    let(:push) { CZTop::Socket::PUSH.new }
+    let(:pull) { CZTop::Socket::PULL.new }
+    i = 0
+    let(:endpoint) { "inproc://socket_types_spec_push_#{i += 1}" }
+
+    before do
+      push.options.sndtimeo = 100
+      pull.options.rcvtimeo = 100
+
+      push.bind endpoint
+      pull.connect endpoint
+    end
+
+    it 'can send message' do
+      push << 'foobar'
+      msg = pull.receive
+      assert_equal ['foobar'], msg.to_a
+
+      push << %w[foobar]
+      msg = pull.receive
+      assert_equal %w[foobar], msg.to_a
+
+    end
+
+    it 'can send message with empty frame' do
+      expect(CZMQ::FFI::Zmsg).to receive(:send).with(CZMQ::FFI::Zmsg, push).and_call_original
+
+      push << ''
+    end
+  end
 end
 
 describe CZTop::Socket::PULL do

@@ -206,7 +206,7 @@ describe CZTop::Config do
     end
     context 'with invalid path' do
       it 'raises' do
-        assert_raises(Errno::EISDIR) { config.save('/') }
+        assert_raises(Errno::EISDIR) { config.save('/tmp') }
       end
     end
   end

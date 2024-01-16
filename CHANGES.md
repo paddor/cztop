@@ -1,3 +1,8 @@
+1.2.4 (1/16/2024)
+-----
+* PolymorphicZsockMethods#wait: fail with NotImplementedError inside non-blocking Fibers
+* fail with ArgumentError when sending message with no parts
+
 1.2.3 (1/7/2024)
 -----
 * no changes, just re-release to update README on https://www.rubydoc.info/gems/cztop

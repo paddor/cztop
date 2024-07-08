@@ -64,13 +64,23 @@ module CZTop
 
       # Fuzzy option getter. This is to make it easier when porting
       # applications from CZMQ libraries to CZTop.
+      #
       # @param option_name [Symbol, String] case insensitive option name
       # @raise [NoMethodError] if option name can't be recognized
       def [](option_name)
-        # NOTE: beware of predicates, especially #CURVE_server? & friends
-        meth = public_methods.grep_v(/=$/)
-                             .find { |m| m =~ /^#{option_name}\??$/i }
-        raise NoMethodError, option_name if meth.nil?
+        meth1 = :"#{option_name}"
+        meth2 = :"#{option_name}?"
+
+        if respond_to? meth1
+          meth = meth1
+        elsif respond_to? meth2
+          meth = meth2
+        else
+          # NOTE: beware of predicates, especially #CURVE_server? & friends
+          meth = public_methods.grep_v(/=$/)
+                               .find { |m| m =~ /^#{option_name}\??$/i }
+          raise NoMethodError, option_name if meth.nil?
+        end
 
         __send__(meth)
       end
@@ -78,12 +88,17 @@ module CZTop
 
       # Fuzzy option setter. This is to make it easier when porting
       # applications from CZMQ libraries to CZTop.
+      #
       # @param option_name [Symbol, String] case insensitive option name
       # @param new_value [String, Integer] new value
       # @raise [NoMethodError] if option name can't be recognized
       def []=(option_name, new_value)
-        meth = public_methods.find { |m| m =~ /^#{option_name}=$/i }
-        raise NoMethodError, option_name if meth.nil?
+        meth = :"#{option_name}="
+
+        unless respond_to? meth
+          meth = public_methods.find { |m| m =~ /^#{option_name}=$/i }
+          raise NoMethodError, option_name if meth.nil?
+        end
 
         __send__(meth, new_value)
       end

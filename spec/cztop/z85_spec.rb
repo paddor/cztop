@@ -51,7 +51,7 @@ describe CZTop::Z85 do
 
       it 'raises' do
         err = assert_raises(ArgumentError) { subject.encode(input) }
-        assert_match /wrong input length/, err.message
+        assert_match(/wrong input length/, err.message)
       end
     end
 
@@ -92,7 +92,7 @@ describe CZTop::Z85 do
       let(:input) { 'w]zPgvQTp1vQTO' } # 14 instead of 15 chars
       it 'raises' do
         err = assert_raises(ArgumentError) { subject.decode(input) }
-        assert_match /wrong input length/, err.message
+        assert_match(/wrong input length/, err.message)
       end
     end
 

@@ -123,10 +123,10 @@ describe CZTop::Config do
       context 'when serializing' do
         let(:serialized) { config.to_s }
         it 'serializes first comment' do
-          assert_match /#baz/, serialized
+          assert_match(/#baz/, serialized)
         end
         it 'serializes second comment' do
-          assert_match /#bii/, serialized
+          assert_match(/#bii/, serialized)
         end
       end
       context 'when loading' do

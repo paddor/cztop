@@ -376,39 +376,39 @@ describe CZTop::Message do
     let(:s) { msg.inspect }
     context 'with empty message' do
       it 'contains class name' do
-        assert_match /\A#<CZTop::Message:.*>\z/, s
+        assert_match(/\A#<CZTop::Message:.*>\z/, s)
       end
       it 'contains native address' do
-        assert_match /:0x[[:xdigit:]]+\b/, s
+        assert_match(/:0x[[:xdigit:]]+\b/, s)
       end
       it 'contains number of frames' do
-        assert_match /\bframes=0\b/, s
+        assert_match(/\bframes=0\b/, s)
       end
       it 'contains content size' do
-        assert_match /\bcontent_size=0\b/, s
+        assert_match(/\bcontent_size=0\b/, s)
       end
       it 'contains empty content description' do
-        assert_match /\bcontent=\[\]/, s
+        assert_match(/\bcontent=\[\]/, s)
       end
     end
 
     context 'with content' do
       before { msg << 'FOO' << 'BAR' }
       it 'contains number of frames' do
-        assert_match /\bframes=2\b/, s
+        assert_match(/\bframes=2\b/, s)
       end
       it 'contains content size' do
-        assert_match /\bcontent_size=6\b/, s
+        assert_match(/\bcontent_size=6\b/, s)
       end
       it 'contains content description' do
-        assert_match /\bcontent=\[.+\]/, s
+        assert_match(/\bcontent=\[.+\]/, s)
       end
     end
 
     context 'with huge message' do
       before { msg << 'FOO' * 1000 } # 3000 byte message
       it 'contains content placeholder' do
-        assert_match /\bcontent=\[\.\.\.\]/, s
+        assert_match(/\bcontent=\[\.\.\.\]/, s)
       end
     end
   end

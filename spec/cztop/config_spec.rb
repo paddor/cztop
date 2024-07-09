@@ -82,7 +82,7 @@ describe CZTop::Config do
 
     context '#inspect' do
       it 'has a nice output' do
-        assert_match /Config.+name=.+value=/, config.inspect
+        assert_match(/Config.+name=.+value=/, config.inspect)
       end
     end
 

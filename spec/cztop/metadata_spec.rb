@@ -125,28 +125,28 @@ describe CZTop::Metadata do
       end
       it 'raises' do
         ex = assert_raises(InvalidData) { subject.load(serialized) }
-        assert_match /zero-length property name/, ex.message
+        assert_match(/zero-length property name/, ex.message)
       end
     end
     context 'with case-insensitively duplicate names' do
       let(:serialized) { "\x01x\x00\x00\x00\x00\x01X\x00\x00\x00\x00" }
       it 'raises' do
         ex = assert_raises(InvalidData) { subject.load(serialized) }
-        assert_match /duplicate name/, ex.message
+        assert_match(/duplicate name/, ex.message)
       end
     end
     context 'with cut-off value length' do
       let(:serialized) { "\x01x\x00\x00\x00" }
       it 'raises' do
         ex = assert_raises(InvalidData) { subject.load(serialized) }
-        assert_match /incomplete length/, ex.message
+        assert_match(/incomplete length/, ex.message)
       end
     end
     context 'with cut-off value' do
       let(:serialized) { "\x01x\x00\x00\x00\x06fooba" }
       it 'raises' do
         ex = assert_raises(InvalidData) { subject.load(serialized) }
-        assert_match /incomplete value/, ex.message
+        assert_match(/incomplete value/, ex.message)
       end
     end
   end

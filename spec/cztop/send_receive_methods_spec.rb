@@ -117,7 +117,7 @@ describe CZTop::SendReceiveMethods do
     describe '#read_timeout' do
       describe 'with no rcvtimeout set' do
         before do
-          assert_equal -1, req.options.rcvtimeo
+          assert_equal(-1, req.options.rcvtimeo)
         end
 
         it 'returns nil' do
@@ -151,7 +151,7 @@ describe CZTop::SendReceiveMethods do
     describe '#write_timeout' do
       describe 'with no sndtimeout set' do
         before do
-          assert_equal -1, req.options.sndtimeo
+          assert_equal(-1, req.options.sndtimeo)
         end
 
         it 'returns nil' do

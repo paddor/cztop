@@ -189,7 +189,7 @@ describe CZTop::Config do
       before { config.children.new }
       it 'saves' do
         # NOTE: last line will be "(Unnamed)"
-        assert_match /^\(Unnamed\)$/, saved_file.read.lines.last
+        assert_match(/^\(Unnamed\)$/, saved_file.read.lines.last)
       end
     end
 

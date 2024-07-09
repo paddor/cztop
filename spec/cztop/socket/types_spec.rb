@@ -149,6 +149,13 @@ describe CZTop::Socket::SERVER, if: has_czmq_drafts? do
     server
   end
 
+  describe '#to_io' do
+    Given { server }
+    Then do
+      assert_kind_of IO, server.to_io
+    end
+  end
+
   describe 'when communicating' do
     i = 58_578
     Given(:endpoint) { "inproc://server_spec_#{i += 1}" }
@@ -239,6 +246,13 @@ end
 describe CZTop::Socket::RADIO, if: has_czmq_drafts? do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::DISH, if: has_czmq_drafts? do
@@ -258,6 +272,13 @@ describe CZTop::Socket::DISH, if: has_czmq_drafts? do
     end
   end
   Given(:group) { 'group1' }
+
+  describe '#to_io' do
+    Given { dish }
+    Then do
+      assert_kind_of IO, dish.to_io
+    end
+  end
 
   describe '#join' do
     context 'given a message sent to a joined group' do
@@ -354,6 +375,13 @@ describe CZTop::Socket::REQ do
   Given(:socket) { described_class.new }
   Then { socket }
 
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
+
   context 'integration' do
     let(:req) { CZTop::Socket::REQ.new }
     let(:rep) { CZTop::Socket::REP.new }
@@ -391,16 +419,37 @@ end
 describe CZTop::Socket::REP do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::DEALER do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::ROUTER do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 
   describe '#send_to' do
     let(:receiver) { 'mike' }
@@ -433,11 +482,25 @@ end
 describe CZTop::Socket::PUB do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::SUB do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 
   let(:subscription) { 'test_prefix' }
 
@@ -480,16 +543,37 @@ end
 describe CZTop::Socket::XPUB do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::XSUB do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::PUSH do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 
   context 'integration' do
     let(:push) { CZTop::Socket::PUSH.new }
@@ -527,6 +611,13 @@ end
 describe CZTop::Socket::PULL do
   Given(:socket) { described_class.new }
   Then { socket }
+
+  describe '#to_io' do
+    Given { socket }
+    Then do
+      assert_kind_of IO, socket.to_io
+    end
+  end
 end
 
 describe CZTop::Socket::PAIR do

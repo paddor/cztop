@@ -1,3 +1,7 @@
+next
+----
+* CZTop::ZsockOptions#[] and #[]=: avoid calling #public_methods if possible
+
 1.2.4 (1/16/2024)
 -----
 * PolymorphicZsockMethods#wait: fail with NotImplementedError inside non-blocking Fibers

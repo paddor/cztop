@@ -108,15 +108,6 @@ describe CZTop::Socket::CLIENT, if: has_czmq_drafts? do
     client
   end
 
-  context 'sending message while not connected' do
-    it 'raises' do
-      client = CZTop::Socket::CLIENT.new
-      assert_raises(SocketError) do
-        client << 'foo'
-      end
-    end
-  end
-
   context 'while connected' do
     before do
       server
@@ -462,17 +453,57 @@ describe CZTop::Socket::ROUTER do
     end
   end
 
-  describe '#wait_writable' do
-    context 'when ROUTER_MANDATORY is set' do
-      before do
-        socket.options.router_mandatory = true
+
+  context 'with ZMQ_ROUTER_MANDATORY flag set' do
+    before do
+      socket.options.router_mandatory = true
+    end
+
+    context 'when connected' do
+      let(:identity) { 'receiver identity' }
+      let(:content)  { 'foobar' }
+      let(:msg)      { [identity, '', content] }
+
+
+      i = 34_590
+      let(:endpoint) { "inproc://router_mandatory_spec_#{i += 1}" }
+
+      let(:dealer) do
+        CZTop::Socket::DEALER.new.tap do |dealer|
+          dealer.options.identity = identity
+          dealer.connect endpoint
+        end
       end
 
-      context 'when no peer is connected' do
-        it 'raises SocketError' do
-          assert_raises SocketError do
-            socket << ['john', '', 'foo']
-          end
+      before do
+        socket.bind endpoint
+        dealer.connect endpoint
+        sleep 0.1
+
+        assert_operator socket, :writable?
+      end
+
+      context 'for unroutable message' do
+        let(:msg_with_wrong_identity) { ['wrong_id', '', content] }
+
+        it 'raises' do
+          assert_raises(SocketError) { socket << msg_with_wrong_identity }
+        end
+      end
+
+      context 'for routable message' do
+        let(:identity) { 'receiver identity' }
+        let(:content)  { 'foobar' }
+        let(:msg)      { [identity, '', content] }
+
+        it 'accepts message' do
+          socket << msg
+        end
+
+        it 'and delivers it' do
+          socket << msg
+          msg = dealer.receive
+          assert_equal ['', content], msg.to_a
         end
       end
     end

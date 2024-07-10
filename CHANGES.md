@@ -1,5 +1,12 @@
 next
-----
+-----
+* CZTop::Socket::ROUTER#wait_writable: don't raise SocketError if no peer is connected
+    - even if ZMQ_ROUTER_MANDATORY is set
+    - this can be used to wait for connected peers
+    - set a #sndtimeo if you want a an exception
+* CZTop::Socket::CLIENT#wait_writable: don't raise SocketError if no peer is connected
+    - this can be used to wait for connected peers
+    - set a #sndtimeo if you want a an exception
 * CZTop::ZsockOptions#[] and #[]=: avoid calling #public_methods if possible
 
 1.2.4 (1/16/2024)

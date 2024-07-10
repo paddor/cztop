@@ -75,16 +75,6 @@ module CZTop
 
         attach_ffi_delegate(Zsock.new_client(endpoints))
       end
-
-
-      # @raise [SocketError] if no peer is connected
-      def wait_writable(...)
-        if !writable?
-          fail SocketError, "no peer connected"
-        end
-
-        super
-      end
     end
 
 
@@ -167,16 +157,6 @@ module CZTop
         message.prepend ''       # separator frame
         message.prepend receiver # receiver envelope
         self << message
-      end
-
-
-      # @raise [SocketError] if ZMQ_ROUTER_MANDATORY option and message is currently not routable
-      def wait_writable(...)
-        if options.router_mandatory? && !writable?
-          fail SocketError, "no peer connected"
-        end
-
-        super
       end
     end
 

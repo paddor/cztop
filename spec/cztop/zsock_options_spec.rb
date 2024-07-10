@@ -283,15 +283,7 @@ describe CZTop::ZsockOptions do
         expect(CZMQ::FFI::Zsock).to receive(:set_router_mandatory).with(router, 0)
         router.options.router_mandatory = false
       end
-      context 'with flag set and message unroutable' do
-        before { router.options.router_mandatory = true }
-        let(:identity) { 'receiver identity' }
-        let(:content) { 'foobar' }
-        let(:msg) { [identity, '', content] }
-        it 'raises' do
-          assert_raises(SocketError) { router << msg }
-        end
-      end
+
     end
 
     describe '#router_mandatory?' do

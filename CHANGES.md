@@ -1,4 +1,4 @@
-next
+1.2.5 (7/11/2024)
 -----
 * CZTop::Socket::ROUTER#wait_writable: don't raise SocketError if no peer is connected
     - even if ZMQ_ROUTER_MANDATORY is set

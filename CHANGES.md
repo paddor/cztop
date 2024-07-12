@@ -1,4 +1,4 @@
-next
+1.2.6 (7/12/2024)
 -----
 * add missing `require 'io/wait'` to get `IO#wait_readable`
 * CZTop::Socket#wait_readable

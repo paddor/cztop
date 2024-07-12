@@ -1,4 +1,4 @@
-next
+1.2.7 (7/12/2024)
 -----
 * CZTop::Socket#wait_readable: honor small (< 0.5s) timeouts
 * CZTop::Socket#wait_writable: honor small (< 0.5s) timeouts

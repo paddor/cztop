@@ -1,3 +1,14 @@
+next
+-----
+* add missing `require 'io/wait'` to get `IO#wait_readable`
+* CZTop::Socket#wait_readable
+    - drop broken support for Ruby < 3.2
+    - work around quirks of edge-triggered ZMQ FD
+* CZTop::Socket#wait_writable
+    - drop broken support for Ruby < 3.2
+    - work around quirks of edge-triggered ZMQ FD
+    - fix waiting for readiness on ZMQ FD
+
 1.2.5 (7/11/2024)
 -----
 * CZTop::Socket::ROUTER#wait_writable: don't raise SocketError if no peer is connected

@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
+begin
+  require 'io/wait'
+rescue LoadError
+end
+
 unless defined? IO::TimeoutError
-  # Support Ruby < 3.2
+  # Define this to avoid NameError on Ruby < 3.2
   class IO::TimeoutError < IOError
   end
 end
@@ -42,6 +47,21 @@ module CZTop
     end
 
 
+    # Because ZMQ sockets are edge-triggered, there's a small chance that we miss an edge (race condition). To avoid
+    # blocking forever, all waiting on the ZMQ FD is done with this timeout.
+    FD_TIMEOUT = 0.5
+
+
+    # @note Only available on Ruby >= 3.2
+    #
+    def wait_for_fd_signal
+      @fd_io ||= to_io
+      @fd_io.wait_readable FD_TIMEOUT # NOTE: always wait for readability on ZMQ FD
+    end if IO.method_defined?(:wait_readable)
+
+
+    # Sometimes the ZMQ FD just insists on readiness. To avoid hogging the CPU, a sleep of this many seconds is
+    # included in the tight loop.
     JIFFY = 0.015 # 15 ms
 
 
@@ -49,72 +69,54 @@ module CZTop
     # @param timeout [Numeric, nil] timeout in seconds
     # @return [true] if readable within timeout
     # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if timeout has been reached
+    # @raise [CZMQ::FFI::Zsock::DestroyedError] if socket has already been destroyed
+    # @note Only available on Ruby >= 3.2
+    #
     def wait_readable(timeout = read_timeout)
       return true if readable?
 
-      @fd_io ||= to_io
+      timeout_at = now + timeout if timeout
 
-      if timeout
-        timeout_at = now + timeout
+      while true
+        # p wait_readable: self, timeout: timeout
 
-        while true
-          # p wait_readable: self, timeout: timeout
-          @fd_io.wait_readable(timeout)
-          break if readable? # NOTE: ZMQ FD can't be trusted
-          raise ::IO::TimeoutError if now >= timeout_at
+        wait_for_fd_signal
+        break if readable? # NOTE: ZMQ FD can't be trusted
+        raise ::IO::TimeoutError if timeout_at && now >= timeout_at
 
-          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
-          sleep JIFFY
-        end
-      else
-        while true
-          # p wait_readable: self
-          @fd_io.wait_readable
-          break if readable? # NOTE: ZMQ FD can't be trusted
-
-          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
-          sleep JIFFY
-        end
+        sleep JIFFY # HACK
+        break if readable? # NOTE: ZMQ FD is edge-triggered. Check again before blocking.
       end
 
       true
-    end
+    end if IO.method_defined?(:wait_readable)
 
 
     # Waits for socket to become writable.
     # @param timeout [Numeric, nil] timeout in seconds
     # @return [true] if writable within timeout
     # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if timeout has been reached
+    # @raise [CZMQ::FFI::Zsock::DestroyedError] if socket has already been destroyed
+    # @note Only available on Ruby >= 3.2
+    #
     def wait_writable(timeout = write_timeout)
       return true if writable?
 
-      @fd_io ||= to_io
+      timeout_at = now + timeout if timeout
 
-      if timeout
-        timeout_at = now + timeout
+      while true
+        # p wait_writable: self, timeout: timeout
 
-        while true
-          # p wait_writable: self, timeout: timeout
-          @fd_io.wait_writable(timeout)
-          break if writable? # NOTE: ZMQ FD can't be trusted
-          raise ::IO::TimeoutError if now >= timeout_at
+        wait_for_fd_signal
+        break if writable? # NOTE: ZMQ FD can't be trusted
+        raise ::IO::TimeoutError if timeout_at && now >= timeout_at
 
-          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
-          sleep JIFFY
-        end
-      else
-        while true
-          # p wait_writable: self
-          @fd_io.wait_writable
-          break if writable? # NOTE: ZMQ FD can't be trusted
-
-          # HACK for edge case: avoid hogging CPU if FD for socket type doesn't block and just insists
-          sleep JIFFY
-        end
+        sleep JIFFY # HACK
+        break if writable? # NOTE: ZMQ FD is edge-triggered. Check again before blocking.
       end
 
       true
-    end
+    end if IO.method_defined?(:wait_readable)
 
 
     # @return [Float, nil] the timeout in seconds used by {IO#wait_readable}

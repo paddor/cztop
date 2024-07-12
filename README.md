@@ -100,7 +100,7 @@ A slightly more complex version (more sockets) is [here](https://github.com/padd
 ### Features
 
 * Ruby idiomatic API
-* Fiber Scheduler aware
+* compatible with Fiber Scheduler (only on Ruby >= 3.2)
 * errors as exceptions
 * CURVE security
 * supports CZMQ DRAFT API

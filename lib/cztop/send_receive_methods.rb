@@ -48,15 +48,29 @@ module CZTop
 
 
     # Because ZMQ sockets are edge-triggered, there's a small chance that we miss an edge (race condition). To avoid
-    # blocking forever, all waiting on the ZMQ FD is done with this timeout.
+    # blocking forever, all waiting on the ZMQ FD is done with this timeout or less.
+    #
+    # The race condition exists between the calls to {#readable?}/{#writable?} and waiting for the ZMQ FD. If the
+    # socke becomes readable/writable during that time, waiting for the FD could block forever without a timeout.
+    #
     FD_TIMEOUT = 0.5
 
 
     # @note Only available on Ruby >= 3.2
     #
-    def wait_for_fd_signal
+    def wait_for_fd_signal(timeout = nil)
       @fd_io ||= to_io
-      @fd_io.wait_readable FD_TIMEOUT # NOTE: always wait for readability on ZMQ FD
+
+      if timeout
+        if timeout > FD_TIMEOUT
+          timeout = FD_TIMEOUT
+        end
+      else
+        timeout = FD_TIMEOUT
+      end
+
+      # NOTE: always wait for readability on ZMQ FD
+      @fd_io.wait_readable timeout
     end if IO.method_defined?(:wait_readable)
 
 
@@ -80,7 +94,7 @@ module CZTop
       while true
         # p wait_readable: self, timeout: timeout
 
-        wait_for_fd_signal
+        wait_for_fd_signal timeout
         break if readable? # NOTE: ZMQ FD can't be trusted
         raise ::IO::TimeoutError if timeout_at && now >= timeout_at
 
@@ -107,7 +121,7 @@ module CZTop
       while true
         # p wait_writable: self, timeout: timeout
 
-        wait_for_fd_signal
+        wait_for_fd_signal timeout
         break if writable? # NOTE: ZMQ FD can't be trusted
         raise ::IO::TimeoutError if timeout_at && now >= timeout_at
 

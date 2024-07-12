@@ -1,3 +1,8 @@
+next
+-----
+* CZTop::Socket#wait_readable: honor small (< 0.5s) timeouts
+* CZTop::Socket#wait_writable: honor small (< 0.5s) timeouts
+
 1.2.6 (7/12/2024)
 -----
 * add missing `require 'io/wait'` to get `IO#wait_readable`

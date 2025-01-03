@@ -1,3 +1,8 @@
+1.3.1 (1/3/2025)
+-----
+* find libzmq in /usr/lib and respect LD_LIBRARY_PATH
+* relax dependency to allow czmq-ffi-gen 1.x
+
 1.2.7 (7/12/2024)
 -----
 * CZTop::Socket#wait_readable: honor small (< 0.5s) timeouts

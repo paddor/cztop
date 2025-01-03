@@ -6,12 +6,17 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
+    strategy:
+      matrix:
+        ruby:
+          - '3.3'
+          - '3.4'
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Ruby
+    - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.4'
+        ruby-version: ${{ matrix.ruby }}
     - name: Install ZMQ and CZMQ
       run: |
         export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)

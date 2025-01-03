@@ -1,3 +1,7 @@
+1.3.2 (1/3/2025)
+-----
+* add 'benchmark' dependency for specs
+
 1.3.1 (1/3/2025)
 -----
 * find libzmq in /usr/lib and respect LD_LIBRARY_PATH

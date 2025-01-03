@@ -1,0 +1,31 @@
+name: DRAFT API on Ruby 3.4
+
+on: [push,pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        ruby:
+          - '3.4'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install ZMQ and CZMQ
+      run: |
+        export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
+        env
+        env ZMQ_VERSION=HEAD ci/install-libzmq
+        env CZMQ_VERSION=HEAD ci/install-libczmq
+    - name: Run the default task
+      run: |
+        export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
+        env
+        gem install bundler
+        bundle install
+        bundle exec rake

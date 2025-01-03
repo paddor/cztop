@@ -1,4 +1,4 @@
-name: DRAFT API
+name: DRAFT API on Ruby 3.3
 
 on: [push,pull_request]
 
@@ -10,7 +10,6 @@ jobs:
       matrix:
         ruby:
           - '3.3'
-          - '3.4'
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby }}

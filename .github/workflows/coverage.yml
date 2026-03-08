@@ -17,4 +17,4 @@ jobs:
       run: |
         gem install bundler
         bundle install
-        env REPORT_COVERAGE=true bundle exec rake
+        bundle exec rake

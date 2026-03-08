@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'czmq-ffi-gen'
+require_relative 'cztop/ffi'
 require_relative 'cztop/version'
 
 # CZTop tries to provide a complete CZMQ binding with a nice, Ruby-like API.

@@ -1,0 +1,50 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  stable:
+    name: Ruby ${{ matrix.ruby }} (stable API)
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.3', '4.0']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install CZMQ
+      run: sudo apt-get install -y libczmq-dev
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: bundle exec rake
+
+  draft:
+    name: Ruby ${{ matrix.ruby }} (draft API)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.3', '4.0']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install ZMQ and CZMQ from source (with draft APIs)
+      run: |
+        export PKG_CONFIG_PATH=$HOME/lib/pkgconfig
+        env ZMQ_VERSION=HEAD ci/install-libzmq
+        env CZMQ_VERSION=HEAD ci/install-libczmq
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: |
+        export LD_LIBRARY_PATH=$HOME/lib
+        bundle exec rake

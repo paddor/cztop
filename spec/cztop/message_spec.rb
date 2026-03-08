@@ -10,10 +10,12 @@ describe CZTop::Message do
   let(:ffi_delegate) { msg.ffi_delegate }
   let(:subject)      { CZTop::Message.new }
 
+
   describe '#initialize' do
     describe 'with initial string' do
       let(:content) { 'foo' }
       let(:subject) { CZTop::Message.new(content) }
+
       it 'sets content' do
         assert_equal content, subject.frames.first.to_s
       end
@@ -23,14 +25,17 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with array of strings' do
       let(:parts) { ['foo', '', 'bar'] }
       let(:msg) { CZTop::Message.new(parts) }
+
       it 'takes them as frames' do
         assert_equal parts.size, msg.size
         assert_equal parts, msg.frames.map(&:to_s)
       end
     end
+
 
     describe 'with empty part' do
       let(:parts) { [''] }
@@ -43,6 +48,7 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with empty array' do
       let(:parts) { [] }
       let(:msg) { CZTop::Message.new(parts) }
@@ -53,6 +59,7 @@ describe CZTop::Message do
     end
   end
 
+
   describe '.coerce' do
     describe 'with a Message' do
       it 'takes the Message as is' do
@@ -60,9 +67,11 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with a String' do
       let(:content) { 'foobar' }
       let(:coerced_msg) { CZTop::Message.coerce(content) }
+
       it 'creates a new Message from the String' do
         assert_kind_of CZTop::Message, coerced_msg
         assert_equal 1, coerced_msg.size
@@ -70,9 +79,11 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with a Frame' do
       let(:frame_content) { 'foobar special content' }
       let(:frame) { CZTop::Frame.new(frame_content) }
+
       it 'creates a Message from the Frame' do
         coerced_msg = CZTop::Message.coerce(frame)
         assert_kind_of CZTop::Message, coerced_msg
@@ -81,14 +92,17 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with array of strings' do
       let(:parts) { ['foo', '', 'bar'] }
       let(:coerced_msg) { CZTop::Message.coerce(parts) }
+
       it 'takes them as frames' do
         assert_equal parts.size, coerced_msg.size
         assert_equal parts, coerced_msg.frames.map(&:to_s)
       end
     end
+
 
     describe 'given something else' do
       it 'raises' do
@@ -97,6 +111,7 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#<<' do
     let(:msg) { CZTop::Message.new 'foo' }
 
@@ -104,12 +119,14 @@ describe CZTop::Message do
       assert_equal 1, msg.size
     end
 
+
     describe 'with a string' do
       it 'appends the string as a frame' do
         msg << 'bar'
         assert_equal 2, msg.size
         assert_equal %w[foo bar], msg.to_a
       end
+
 
       describe 'when this fails' do
         it 'raises' do
@@ -121,14 +138,17 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with binary data' do
       let(:frame) { "foo\x08\0\0bar\0\0\0\x11" } # contains NULL bytes
+
       it 'appends the binary data' do
         msg << frame
         assert_equal 2, msg.size
         assert_equal frame, msg[-1]
       end
     end
+
 
     describe 'with a frame' do
       it 'appends the frame' do
@@ -137,6 +157,7 @@ describe CZTop::Message do
         assert_equal 2, msg.size
         assert_equal %w[foo bar], msg.to_a
       end
+
 
       describe 'when this fails' do
         it 'raises' do
@@ -148,11 +169,13 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with something else' do
       it 'raises' do
         assert_raises(ArgumentError) { msg << Object.new }
       end
     end
+
 
     describe 'method chaining' do
       it 'supports chaining' do
@@ -162,12 +185,14 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#prepend' do
     let(:msg) { CZTop::Message.new 'foo' }
 
     it 'starts with one frame' do
       assert_equal 1, msg.size
     end
+
 
     describe 'with a string' do
       it 'prepends the string' do
@@ -177,13 +202,16 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with binary data' do
       let(:frame) { "foo\0\0\0bar" } # contains NULL byte
+
       it 'prepends the binary data' do
         msg.prepend frame
         assert_equal 2, msg.size
         assert_equal frame, msg[0]
       end
+
 
       describe 'when this fails' do
         it 'raises' do
@@ -195,12 +223,14 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with a frame' do
       it 'prepends the frame' do
         msg.prepend CZTop::Frame.new('bar')
         assert_equal 2, msg.size
         assert_equal %w[bar foo], msg.to_a
       end
+
 
       describe 'when this fails' do
         it 'raises' do
@@ -212,6 +242,7 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with something else' do
       it 'raises' do
         assert_raises(ArgumentError) { msg.prepend Object.new }
@@ -219,19 +250,24 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#pop' do
     before { subject << 'FOO' << 'BAR' }
+
     it 'returns first part' do
       assert_equal 'FOO', subject.pop
     end
+
     it 'removes it from message' do
       subject.pop
       assert_equal %w[BAR], subject.to_a
     end
   end
 
+
   describe '#send_to' do
     let(:msg) { CZTop::Message.new 'foo' }
+
 
     describe 'with no frames' do
       let(:msg) { CZTop::Message.new }
@@ -253,6 +289,7 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'when successful' do
       it 'sends its delegate to the destination' do
         dest = Object.new
@@ -265,12 +302,14 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'when NOT successful' do
       let(:dest) do
         obj = Object.new
         obj.define_singleton_method(:wait_writable) { true }
         obj
       end
+
 
       describe 'with sndtimeo reached' do
         it 'raises IO::EAGAINWaitWritable' do
@@ -281,6 +320,7 @@ describe CZTop::Message do
           end
         end
       end
+
 
       describe 'with host unreachable' do
         # NOTE: unroutable message given to ROUTER with ZMQ_ROUTER_MANDATORY
@@ -294,6 +334,7 @@ describe CZTop::Message do
         end
       end
 
+
       describe 'with other error' do
         it 'raises' do
           CZMQ::FFI::Zmsg.stub(:send, ->(*) { -1 }) do
@@ -305,6 +346,7 @@ describe CZTop::Message do
       end
     end
   end
+
 
   describe '.receive_from' do
     let(:src) do
@@ -323,6 +365,7 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'when successful' do
       it 'receives message from source' do
         ffi_del = CZMQ::FFI::Zmsg.new
@@ -334,8 +377,10 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'when NOT successful' do
       let(:nullptr) { ::FFI::Pointer::NULL }
+
 
       describe 'when interrupted' do
         it 'raises Interrupt' do
@@ -347,6 +392,7 @@ describe CZTop::Message do
         end
       end
 
+
       describe 'with rcvtimeo reached' do
         it 'raises IO::EAGAINWaitReadable' do
           CZMQ::FFI.stub(:zmsg_recv, ->(_) { nullptr }) do
@@ -356,6 +402,7 @@ describe CZTop::Message do
           end
         end
       end
+
 
       describe 'with other error' do
         it 'raises RuntimeError' do
@@ -369,32 +416,42 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#empty?' do
     describe 'with no content' do
       it 'is empty' do
         assert_operator subject, :empty?
       end
     end
+
+
     describe 'with content' do
       let(:subject) { CZTop::Message.new 'foo' }
+
       it 'is not empty' do
         refute_operator subject, :empty?
       end
     end
+
+
     describe 'with empty frame' do
       let(:subject) { CZTop::Message.new '' }
+
       it 'is empty' do
         assert_operator subject, :empty?
       end
     end
 
+
     describe 'with no frames' do
       let(:subject) { CZTop::Message.new }
+
       it 'is empty' do
         assert_operator subject, :empty?
       end
     end
   end
+
 
   describe '#content_size' do
     describe 'with no content' do
@@ -402,13 +459,17 @@ describe CZTop::Message do
         assert_equal 0, subject.content_size
       end
     end
+
+
     describe 'with content' do
       let(:subject) { CZTop::Message.new 'foo' }
+
       it 'returns correct content size' do
         assert_equal 3, subject.content_size
       end
     end
   end
+
 
   describe '#to_a' do
     describe 'with no frames' do
@@ -416,82 +477,107 @@ describe CZTop::Message do
         assert_equal [], subject.to_a
       end
     end
+
+
     describe 'with frames' do
       let(:parts) { %w[foo bar] }
       let(:subject) { CZTop::Message.new parts }
+
       it 'returns array of frame strings' do
         assert_equal parts, subject.to_a
       end
     end
   end
 
+
   describe '#inspect' do
     let(:s) { msg.inspect }
+
+
     describe 'with empty message' do
       it 'contains class name' do
         assert_match(/\A#<CZTop::Message:.*>\z/, s)
       end
+
       it 'contains native address' do
         assert_match(/:0x[[:xdigit:]]+\b/, s)
       end
+
       it 'contains number of frames' do
         assert_match(/\bframes=0\b/, s)
       end
+
       it 'contains content size' do
         assert_match(/\bcontent_size=0\b/, s)
       end
+
       it 'contains empty content description' do
         assert_match(/\bcontent=\[\]/, s)
       end
     end
 
+
     describe 'with content' do
       before { msg << 'FOO' << 'BAR' }
+
       it 'contains number of frames' do
         assert_match(/\bframes=2\b/, s)
       end
+
       it 'contains content size' do
         assert_match(/\bcontent_size=6\b/, s)
       end
+
       it 'contains content description' do
         assert_match(/\bcontent=\[.+\]/, s)
       end
     end
 
+
     describe 'with huge message' do
       before { msg << 'FOO' * 1000 } # 3000 byte message
+
       it 'contains content placeholder' do
         assert_match(/\bcontent=\[\.\.\.\]/, s)
       end
     end
   end
 
+
   describe '#[]' do
     describe 'with existing frame' do
       let(:subject) { CZTop::Message.new %w[foo] }
+
       it 'returns frame content' do
         assert_equal 'foo', subject[0]
       end
     end
 
+
     describe 'with non-existing frame' do
       let(:subject) { CZTop::Message.new %w[foo] }
+
       it 'returns nil' do
         assert_nil subject[1]
       end
     end
   end
 
+
   describe '#routing_id' do
     before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
+
 
     describe 'with no routing ID set' do
       it 'returns zero' do
         assert_equal 0, msg.routing_id
       end
     end
+
+
     describe 'with routing ID set' do
       let(:routing_id) { 12_345 }
+
       it 'returns the routing ID' do
         msg.routing_id = routing_id
         assert_equal routing_id, msg.routing_id
@@ -499,16 +585,20 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#routing_id=' do
     before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
 
+
     describe 'with valid routing ID' do
       let(:new_routing_id) { 123_456 }
+
       it 'sets routing ID' do
         msg.routing_id = new_routing_id
         assert_equal new_routing_id, msg.routing_id
       end
     end
+
 
     describe 'with negative routing ID' do
       it 'raises' do
@@ -516,11 +606,13 @@ describe CZTop::Message do
       end
     end
 
+
     describe 'with too big routing ID' do
       it 'raises' do
         assert_raises(RangeError) { msg.routing_id = 123_456_345_676_543_456_765 }
       end
     end
+
 
     describe 'with non-integer' do
       it 'raises' do

@@ -12,15 +12,18 @@ describe CZTop::Z85 do
     assert_kind_of CZTop::Z85, subject
   end
 
+
   describe '#encode' do
     describe 'with empty data' do
       it 'encodes' do
         assert_equal '', subject.encode('')
       end
+
       it 'returns ASCII encoded string' do
         assert_equal Encoding::ASCII, subject.encode('').encoding
       end
     end
+
 
     describe 'with even data' do
       # "even" means its length is divisible by 4 with no remainder
@@ -46,6 +49,7 @@ describe CZTop::Z85 do
       end
     end
 
+
     describe 'with odd data' do
       # input length is not divisible by 4 with no remainder
       let(:input) { 'foo bar' } # 7 bytes
@@ -56,8 +60,10 @@ describe CZTop::Z85 do
       end
     end
 
+
     describe 'with failure' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+
       it 'raises' do
         ffi_delegate.stub(:encode, nullptr) do
           assert_raises(SystemCallError) { subject.encode('abcd') }
@@ -66,12 +72,14 @@ describe CZTop::Z85 do
     end
   end
 
+
   describe '#decode' do
     describe 'with empty data' do
       it 'decodes' do
         assert_equal '', subject.decode('')
       end
     end
+
 
     describe 'with even data' do
       let(:input) { 'HelloWorld' }
@@ -88,16 +96,20 @@ describe CZTop::Z85 do
       end
     end
 
+
     describe 'with odd data' do
       let(:input) { 'w]zPgvQTp1vQTO' } # 14 instead of 15 chars
+
       it 'raises' do
         err = assert_raises(ArgumentError) { subject.decode(input) }
         assert_match(/wrong input length/, err.message)
       end
     end
 
+
     describe 'with failure' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+
       it 'raises' do
         ffi_delegate.stub(:decode, nullptr) do
           assert_raises(SystemCallError) { subject.decode('abcde') }
@@ -106,11 +118,14 @@ describe CZTop::Z85 do
     end
   end
 
+
   describe '.encode' do
     let(:input) { 'abcd' * 1_000 }
+
     it 'does the same as #encode' do
       assert_equal CZTop::Z85.new.encode(input), CZTop::Z85.encode(input)
     end
+
     it 'is thread-safe' do
       # NOTE: kind of of course, since the data manipulated isn't shared
       should = CZTop::Z85.new.encode(input)
@@ -119,8 +134,11 @@ describe CZTop::Z85 do
       end
     end
   end
+
+
   describe '.decode' do
     let(:input) { 'abcde' }
+
     it 'does the same as #decode' do
       assert_equal CZTop::Z85.new.decode(input), CZTop::Z85.decode(input)
     end

@@ -12,31 +12,44 @@ describe CZTop::Z85::Pipe do
   let(:output_len) { output.bytesize }
   let(:input_len) { input.bytesize }
 
+
   describe 'when encoding' do
     let(:output) { pipe.encode; sink.string }
+
+
     describe 'with zero-length input' do
       let(:input) { '' }
+
       it 'produces zero-length output' do
         assert_equal input, output
       end
     end
+
+
     describe 'with chunk-sized input' do
       let(:input) { '.' * ENC_SZ }
+
       it 'works correctly' do
         correct = Z85.encode('.' * ENC_SZ + ("\x04" * 4))
         assert_equal correct, output
       end
+
       it 'produces output of correct length' do
         assert_equal (ENC_SZ + 4) / 4 * 5, output_len
       end
+
+
       describe 'times two' do
         let(:input) { '.' * 2 * ENC_SZ }
+
         it 'works correctly' do
           correct = Z85.encode('.' * ENC_SZ * 2 + ("\x04" * 4))
           assert_equal correct, output
         end
       end
     end
+
+
     describe 'with long input' do
       let(:input) { '.' * (ENC_SZ * 1.1).to_i } # >chunk
       let(:nfull_chunks) { input_len / ENC_SZ } # number of full chunks
@@ -51,9 +64,11 @@ describe CZTop::Z85::Pipe do
       let(:correct_length) do # encoded length
         full_chunks_len + last_chunk_len
       end
+
       it 'produces output of correct length' do
         assert_equal correct_length, output_len
       end
+
       it 'produces correct output' do
         beginning = input.byteslice(0, ENC_SZ)
         rest = input.byteslice(ENC_SZ..-1)
@@ -66,6 +81,7 @@ describe CZTop::Z85::Pipe do
     end
   end
 
+
   describe 'when decoding' do
     let(:output) { pipe.decode; sink.string }
     let(:input) do
@@ -74,24 +90,35 @@ describe CZTop::Z85::Pipe do
       Z85::Pipe.new(source, sink).encode
       sink.string
     end
+
+
     describe 'with zero-length input' do
       let(:input) { '' }
+
       it 'output is also zero-length' do
         assert_equal input, output
       end
     end
+
+
     describe 'with chunks-sized input' do
       let(:unencoded_input) { '.' * ENC_SZ }
+
       it 'works correctly' do
         assert_equal unencoded_input, output
       end
+
+
       describe 'times two' do
         let(:unencoded_input) { '.' * 2 * ENC_SZ }
+
         it 'works correctly' do
           assert_equal unencoded_input, output
         end
       end
     end
+
+
     describe 'with long input' do
       # a bit more than a full chunk size
       let(:unencoded_input) { '.' * (ENC_SZ * 1.1).to_i } # >chunk
@@ -103,6 +130,7 @@ describe CZTop::Z85::Pipe do
     end
   end
 end
+
 
 describe CZTop::Z85::Pipe::Strategy do
   Sequential = CZTop::Z85::Pipe::Strategy::Sequential
@@ -127,18 +155,23 @@ describe CZTop::Z85::Pipe::Strategy do
   let(:read_sz) { 4 }
   let(:calls) { [] }
 
+
   describe Sequential do
     let(:strategy_class) { Sequential }
+
+
     describe 'when used' do
       it 'roundtrips' do
         assert_equal input, roundtrip_output
       end
     end
 
+
     describe '#execute' do
       describe 'with even input' do
         let(:input) { 'abcdefgh' } # multiple of chunk
         before { strategy.execute }
+
         it 'passes chunks one by one, and trailing nil' do
           assert_equal [
             [nil, 'abcd'],
@@ -147,9 +180,12 @@ describe CZTop::Z85::Pipe::Strategy do
           ], calls
         end
       end
+
+
       describe 'with uneven input' do
         let(:input) { 'abcdef' }
         before { strategy.execute }
+
         it 'passes chunks one by one, and trailing nil' do
           assert_equal [
             [nil, 'abcd'],
@@ -161,17 +197,23 @@ describe CZTop::Z85::Pipe::Strategy do
     end
   end
 
+
   describe Parallel do
     let(:strategy_class) { Parallel }
+
+
     describe 'when used' do
       it 'roundtrips' do
         assert_equal input, roundtrip_output
       end
     end
+
+
     describe '#execute' do
       describe 'with even input' do
         let(:input) { 'abcdefgh' } # multiple of chunk
         before { strategy.execute }
+
         it 'passes chunks one by one, and trailing nil' do
           assert_equal [
             [nil, 'abcd'],
@@ -180,9 +222,12 @@ describe CZTop::Z85::Pipe::Strategy do
           ], calls
         end
       end
+
+
       describe 'with uneven input' do
         let(:input) { 'abcdef' }
         before { strategy.execute }
+
         it 'passes chunks one by one, and trailing nil' do
           assert_equal [
             [nil, 'abcd'],

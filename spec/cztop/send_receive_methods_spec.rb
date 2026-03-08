@@ -9,6 +9,7 @@ describe CZTop::SendReceiveMethods do
     o
   end
 
+
   describe '#<<' do
     describe 'when sending message' do
       let(:content) { 'foobar' }
@@ -33,9 +34,11 @@ describe CZTop::SendReceiveMethods do
     end
   end
 
+
   describe '#receive' do
     describe 'given a sent content' do
       let(:content) { 'foobar' }
+
       it 'receives the content' do
         msg = Object.new
         CZTop::Message.stub(:receive_from, ->(_) { msg }) do
@@ -45,8 +48,10 @@ describe CZTop::SendReceiveMethods do
     end
   end
 
+
   describe '#read_timeout' do
     let(:req) { CZTop::Socket::REQ.new }
+
 
     describe 'with no rcvtimeout set' do
       before do
@@ -69,6 +74,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
+
     describe 'with rcvtimeout set' do
       before do
         req.options.rcvtimeo = 10 # ms
@@ -80,8 +86,10 @@ describe CZTop::SendReceiveMethods do
     end
   end
 
+
   describe '#write_timeout' do
     let(:req) { CZTop::Socket::REQ.new }
+
 
     describe 'with no sndtimeout set' do
       before do
@@ -104,6 +112,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
+
     describe 'with sndtimeout set' do
       before do
         req.options.sndtimeo = 10
@@ -114,6 +123,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
   end
+
 
   describe 'Async with Fiber Scheduler' do
     require 'async'
@@ -140,6 +150,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
+
     describe '#wait_readable' do
       describe 'if readable' do
         it 'returns true' do
@@ -150,6 +161,7 @@ describe CZTop::SendReceiveMethods do
           end
         end
       end
+
 
       describe 'if not readable' do
         it 'waits' do
@@ -162,6 +174,7 @@ describe CZTop::SendReceiveMethods do
             assert rep.wait_readable
           end
         end
+
 
         describe 'when timed out' do
           it 'raises IO::TimeoutError' do
@@ -180,6 +193,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
+
     describe '#wait_writable' do
       describe 'if writable' do
         it 'returns true' do
@@ -189,6 +203,7 @@ describe CZTop::SendReceiveMethods do
           end
         end
       end
+
 
       describe 'if not writable' do
         before do
@@ -202,6 +217,7 @@ describe CZTop::SendReceiveMethods do
             end
           end
         end
+
 
         describe 'when not timed out' do
           it 'returns true' do
@@ -224,6 +240,7 @@ describe CZTop::SendReceiveMethods do
           end
         end
 
+
         describe 'when timed out' do
           it 'raises IO::TimeoutError' do
             Async do |_task|
@@ -240,6 +257,7 @@ describe CZTop::SendReceiveMethods do
         end
       end
     end
+
 
     describe '#wait_for_fd_signal' do
       let(:req) { CZTop::Socket::REQ.new }
@@ -266,6 +284,7 @@ describe CZTop::SendReceiveMethods do
         assert_equal 1, call_count
       end
 
+
       describe 'with small timeout' do
         it 'uses that timeout' do
           received_timeout = nil
@@ -277,6 +296,7 @@ describe CZTop::SendReceiveMethods do
           assert_equal 0.05, received_timeout
         end
       end
+
 
       describe 'with large timeout' do
         it 'uses reasonably small timeout' do
@@ -290,6 +310,7 @@ describe CZTop::SendReceiveMethods do
         end
       end
 
+
       describe 'with no timeout' do
         it 'still uses a timeout' do
           received_timeout = nil
@@ -302,6 +323,7 @@ describe CZTop::SendReceiveMethods do
         end
       end
     end
+
 
     describe 'with rcvtimeo' do
       before do
@@ -317,6 +339,7 @@ describe CZTop::SendReceiveMethods do
         end
       end
     end
+
 
     describe 'with sndtimeo' do
       before do

@@ -8,6 +8,7 @@ describe 'CZTop::Monitor::ZMONITOR_FPTR' do
   end
 end
 
+
 describe CZTop::Monitor do
   let(:subject) { CZTop::Monitor.new(rep_socket) }
   let(:actor) { subject.actor }
@@ -27,6 +28,7 @@ describe CZTop::Monitor do
     subject
   end
 
+
   describe '#initialize' do
     describe 'with socket' do
       it 'creates actor with ZMONITOR_FPTR and socket' do
@@ -41,6 +43,7 @@ describe CZTop::Monitor do
     end
   end
 
+
   describe '#verbose' do
     it 'sends correct message to actor' do
       sent = nil
@@ -52,9 +55,11 @@ describe CZTop::Monitor do
     end
   end
 
+
   describe '#listen' do
     describe 'with one valid event' do
       let(:event) { 'CONNECTED' }
+
       it 'tells zmonitor actor' do
         sent = nil
         actor.stub(:<<, ->(*args) { sent = args[0] }) do
@@ -63,8 +68,11 @@ describe CZTop::Monitor do
         assert_equal ['LISTEN', event], sent
       end
     end
+
+
     describe 'with multiple valid events' do
       let(:events) { %w[CONNECTED DISCONNECTED] }
+
       it 'tells zmonitor actor' do
         sent = nil
         actor.stub(:<<, ->(*args) { sent = args[0] }) do
@@ -73,8 +81,11 @@ describe CZTop::Monitor do
         assert_equal ['LISTEN', *events], sent
       end
     end
+
+
     describe 'with invalid event' do
       let(:event) { :FOO }
+
       it 'raises' do
         assert_raises(ArgumentError) do
           subject.listen(event)
@@ -82,6 +93,7 @@ describe CZTop::Monitor do
       end
     end
   end
+
 
   describe '#start' do
     it 'tells zmonitor to start' do
@@ -94,11 +106,13 @@ describe CZTop::Monitor do
     end
   end
 
+
   describe '#fd' do
     it 'returns FD' do
       assert_equal subject.actor.options.fd, subject.fd
     end
   end
+
 
   describe '#readable?' do
     it 'returns false if no event is available' do
@@ -116,6 +130,7 @@ describe CZTop::Monitor do
     end
   end
 
+
   describe '#next' do
     it 'returns Message' do
       subject.listen(*%w[ACCEPTED CLOSED MONITOR_STOPPED])
@@ -124,6 +139,7 @@ describe CZTop::Monitor do
       req_socket # connects
       assert_kind_of CZTop::Message, subject.next
     end
+
     it 'gets the next event' do
       subject.listen(*%w[ACCEPTED CLOSED MONITOR_STOPPED])
       subject.start

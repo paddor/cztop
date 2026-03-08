@@ -5,6 +5,7 @@ require_relative '../../spec_helper'
 describe CZTop::Message do
   let(:subject) { CZTop::Message.new }
 
+
   describe 'empty message' do
     describe '#size' do
       it 'return zero' do
@@ -13,13 +14,16 @@ describe CZTop::Message do
     end
   end
 
+
   describe '#frames' do
     let(:frames) { subject.frames }
+
     it 'returns FramesAccessor' do
       assert_kind_of CZTop::Message::FramesAccessor, frames
     end
   end
 end
+
 
 describe CZTop::Message::FramesAccessor do
   it 'is enumerable' do
@@ -29,8 +33,10 @@ describe CZTop::Message::FramesAccessor do
   let(:frames) { msg.frames }
   let(:msg) { CZTop::Message.new(frame_contents) }
 
+
   describe 'message with content' do
     let(:frame_contents) { %w[foo bar baz] }
+
 
     describe '#size' do
       it 'returns correct number of frames' do
@@ -38,17 +44,20 @@ describe CZTop::Message::FramesAccessor do
       end
     end
 
+
     describe '#first' do
       it 'returns first frame' do
         assert_equal 'foo', frames.first.to_s
       end
     end
 
+
     describe '#last' do
       it 'returns last frame' do
         assert_equal 'baz', frames.last.to_s
       end
     end
+
 
     describe '#[]' do
       it 'returns correct frame' do
@@ -60,18 +69,22 @@ describe CZTop::Message::FramesAccessor do
       end
     end
 
+
     describe '#each' do
       it 'yields frames' do
         frames.each { |frame| assert_kind_of CZTop::Frame, frame }
       end
+
       it 'yields all frames' do
         assert_equal frame_contents, frames.to_a.map(&:to_s)
       end
     end
   end
 
+
   describe 'message with no content' do
     let(:frame_contents) { [] }
+
 
     describe '#size' do
       it 'returns zero' do
@@ -79,17 +92,20 @@ describe CZTop::Message::FramesAccessor do
       end
     end
 
+
     describe '#first' do
       it 'returns nil' do
         assert_nil frames.first
       end
     end
 
+
     describe '#last' do
       it 'returns nil' do
         assert_nil frames.last
       end
     end
+
 
     describe '#[]' do
       it 'returns nil' do
@@ -100,6 +116,7 @@ describe CZTop::Message::FramesAccessor do
         assert_nil frames[99]
       end
     end
+
 
     describe '#each' do
       it "doesn't yield" do

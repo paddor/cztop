@@ -8,6 +8,7 @@ describe 'CZTop::Beacon::ZBEACON_FPTR' do
   end
 end
 
+
 describe CZTop::Beacon do
   let(:subject) { CZTop::Beacon.new }
   let(:actor) { subject.actor }
@@ -20,6 +21,7 @@ describe CZTop::Beacon do
     subject
   end
 
+
   describe '#verbose!' do
     it 'sends correct message to actor' do
       sent = nil
@@ -31,10 +33,13 @@ describe CZTop::Beacon do
     end
   end
 
+
   describe '#configure' do
     let(:port) { 9999 }
     let(:hostname) { 'example.com' }
     let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
+
+
     describe 'with support for UDP broadcasts' do
       it 'sends correct message to actor' do
         sent_args = nil
@@ -47,9 +52,12 @@ describe CZTop::Beacon do
         assert_equal [:string, 'CONFIGURE', :int, port], sent_args[1..]
       end
     end
+
+
     describe 'no support for UDP broadcasts' do
       let(:hostname) { '' }
       let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
+
       it 'raises' do
         actor.stub(:send_picture, ->(*) {}) do
           CZMQ::FFI::Zstr.stub(:recv, ->(_) { ptr }) do
@@ -60,8 +68,11 @@ describe CZTop::Beacon do
         end
       end
     end
+
+
     describe 'when interrupted' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
+
       it 'raises' do
         actor.stub(:send_picture, ->(*) {}) do
           CZMQ::FFI::Zstr.stub(:recv, ->(_) { nullptr }) do
@@ -76,10 +87,13 @@ describe CZTop::Beacon do
     end
   end
 
+
   describe '#publish' do
     let(:data) { 'foobar data' }
     let(:data_size) { data.bytesize }
     let(:interval) { 1000 }
+
+
     describe 'with data' do
       it 'sends correct message to actor' do
         sent_args = nil
@@ -91,8 +105,11 @@ describe CZTop::Beacon do
                      sent_args[1..]
       end
     end
+
+
     describe 'with data too long' do
       let(:data) { 'x' * 256 } # max = 255 bytes
+
       it 'raises' do
         assert_raises(ArgumentError) do
           subject.publish(data, interval)
@@ -100,6 +117,7 @@ describe CZTop::Beacon do
       end
     end
   end
+
 
   describe '#silence' do
     it 'sends correct message to actor' do
@@ -111,9 +129,11 @@ describe CZTop::Beacon do
     end
   end
 
+
   describe '#subscribe' do
     let(:filter) { 'foo filter' }
     let(:filter_size) { filter.bytesize }
+
     it 'sends correct message to actor' do
       sent_args = nil
       actor.stub(:send_picture, ->(*args) { sent_args = args }) do
@@ -124,6 +144,7 @@ describe CZTop::Beacon do
                    sent_args[1..]
     end
   end
+
 
   describe '#listen' do
     it 'sends correct message to actor' do
@@ -136,6 +157,7 @@ describe CZTop::Beacon do
     end
   end
 
+
   describe '#unsubscribe' do
     it 'sends correct message to actor' do
       sent = nil
@@ -145,6 +167,7 @@ describe CZTop::Beacon do
       assert_equal 'UNSUBSCRIBE', sent
     end
   end
+
 
   describe '#receive' do
     it 'receives a message from actor' do

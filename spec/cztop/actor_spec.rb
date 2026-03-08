@@ -27,8 +27,10 @@ describe CZTop::Actor do
   let(:received_messages) { [] }
   let(:yielded) { [] }
 
+
   describe '#initialize' do
     let(:callback_shim) { actor.instance_variable_get(:@callback) }
+
 
     describe 'with C callback' do # pointer to C function
       let(:c_function) { CZTop::Beacon::ZBEACON_FPTR }
@@ -38,6 +40,7 @@ describe CZTop::Actor do
         assert_same c_function, callback_shim
       end
     end
+
 
     describe 'with Proc callback' do
       let(:proc_) do
@@ -49,6 +52,7 @@ describe CZTop::Actor do
       let(:actor) do
         CZTop::Actor.new(proc_)
       end
+
       it 'shims it' do
         refute_nil callback_shim
         refute_same proc_, callback_shim
@@ -61,6 +65,7 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with block' do
       # can use default actor
       it 'works' do
@@ -71,12 +76,14 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#shim' do
     describe 'with invalid handler' do
       it 'raises' do
         assert_raises(ArgumentError) { actor.__send__(:shim, 'foo') }
       end
     end
+
 
     describe 'with faulty handler' do
       let(:error) { RuntimeError.new('foobar') }
@@ -85,23 +92,30 @@ describe CZTop::Actor do
         actor << 'foo'
         actor.terminate
       end
+
       it 'stores exception' do
         assert_same error, actor.exception
       end
     end
   end
 
+
   describe '#crashed?' do
     before do
       actor << 'foo'
       actor.terminate
     end
+
+
     describe 'with crashed actor' do
       let(:actor) { CZTop::Actor.new { raise } }
+
       it 'returns true' do
         assert_operator actor, :crashed?
       end
     end
+
+
     describe 'with normally terminated actor' do
       it 'returns false' do
         refute_operator actor, :crashed?
@@ -109,23 +123,31 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#exception' do
     before do
       actor << 'foo'
       actor.terminate
     end
+
+
     describe 'with crashed actor' do
       let(:error) { RuntimeError.new('foobar') }
       let(:actor) { CZTop::Actor.new { raise error } }
+
       it 'returns stored exception' do
         assert_same error, actor.exception
       end
     end
+
+
     describe 'with alive actor' do
       it 'returns nil' do
         assert_nil actor.exception
       end
     end
+
+
     describe 'with normally terminated actor' do
       it 'returns nil' do
         assert_nil actor.exception
@@ -133,10 +155,12 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#send_picture' do
     let(:ffi_delegate) { actor.ffi_delegate }
     let(:picture) { 'si' }
     let(:ffi_args) { [:string, 'foo', :int, 42] }
+
     it 'sends picture' do
       called_with = nil
       ::CZMQ::FFI::Zsock.stub(:send, ->(*args) { called_with = args }) do
@@ -145,8 +169,10 @@ describe CZTop::Actor do
       assert_equal [ffi_delegate, picture, *ffi_args], called_with
     end
 
+
     describe 'with dead actor' do
       before { actor.terminate }
+
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor.send_picture('s', :string, 'foo')
@@ -154,6 +180,7 @@ describe CZTop::Actor do
       end
     end
   end
+
 
   describe '#wait' do
     let(:actor) do
@@ -174,6 +201,7 @@ describe CZTop::Actor do
       assert_equal 1, actor.wait
     end
   end
+
 
   describe '#process_messages' do
     describe 'when sending $TERM' do
@@ -197,6 +225,7 @@ describe CZTop::Actor do
         assert_empty received_messages
       end
     end
+
 
     describe 'when interrupted' do
       it 'terminates actor' do
@@ -227,6 +256,7 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#dead?' do
     describe 'when terminated' do
       it 'returns true' do
@@ -234,12 +264,15 @@ describe CZTop::Actor do
         assert actor.dead?
       end
     end
+
+
     describe 'when not yet terminated' do
       it 'returns false' do
         refute actor.dead?
       end
     end
   end
+
 
   describe '#<<' do
     describe 'threads' do
@@ -251,6 +284,7 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with commands' do
       let(:commands) { %w[PRINT SHOW DO] }
       let(:received_commands) do
@@ -260,6 +294,7 @@ describe CZTop::Actor do
         commands.each { |c| actor << c }
         actor.terminate
       end
+
       it 'sends commands to actor' do
         assert_equal commands, received_commands
       end
@@ -268,6 +303,7 @@ describe CZTop::Actor do
     it 'returns self' do # so it can be chained
       assert_same actor, actor << 'foo'
     end
+
 
     describe 'with array' do
       let(:msg) { %w[SHOW foo bar] }
@@ -283,8 +319,10 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with dead actor' do
       before { actor.terminate }
+
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor << 'FOO'
@@ -292,12 +330,14 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with $TERM' do
       it 'terminates actor' do
         actor << '$TERM'
         assert_operator actor, :dead?
       end
     end
+
 
     describe 'sndtimeo reached' do
       it 'retries' do
@@ -316,6 +356,7 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#receive' do
     let(:actor) do
       # echo actor
@@ -323,6 +364,7 @@ describe CZTop::Actor do
         pipe << msg
       end
     end
+
 
     describe 'threads' do
       it 'is thread-safe' do
@@ -332,6 +374,7 @@ describe CZTop::Actor do
         actor.receive
       end
     end
+
 
     describe 'with messages available' do
       before do
@@ -344,8 +387,10 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with dead actor' do
       before { actor.terminate }
+
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
           actor.receive
@@ -353,6 +398,7 @@ describe CZTop::Actor do
       end
     end
   end
+
 
   describe '#request' do
     let(:actor) do
@@ -364,9 +410,11 @@ describe CZTop::Actor do
     let(:response) do
       actor.request(word).to_a[0]
     end
+
     it 'returns response' do
       assert_equal word.downcase, response
     end
+
 
     describe 'threads' do
       it 'is thread-safe' do
@@ -375,8 +423,11 @@ describe CZTop::Actor do
         response
       end
     end
+
+
     describe 'with dead actor' do
       before { actor.terminate }
+
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
           response
@@ -384,14 +435,17 @@ describe CZTop::Actor do
       end
     end
 
+
     describe 'with $TERM message' do
       let(:word) { '$TERM' }
+
       it 'raises' do
         assert_raises(ArgumentError) do
           response
         end
       end
     end
+
 
     describe 'sndtimeo reached' do
       it 'retries' do
@@ -410,6 +464,7 @@ describe CZTop::Actor do
     end
   end
 
+
   describe '#terminate' do
     describe 'when actor is alive' do
       it 'returns true' do
@@ -421,6 +476,7 @@ describe CZTop::Actor do
         assert actor.dead?
       end
     end
+
 
     describe 'sndtimeo reached' do
       it 'retries sending $TERM' do
@@ -445,6 +501,7 @@ describe CZTop::Actor do
         assert_operator call_count, :>, 1
       end
     end
+
 
     describe 'with dead actor' do
       before { actor.terminate }

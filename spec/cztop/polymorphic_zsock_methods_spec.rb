@@ -8,9 +8,12 @@ describe CZTop::PolymorphicZsockMethods do
   let(:socket_a) { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:socket_b) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
+
   describe 'signals' do
     let(:delegate_b) { socket_b.ffi_delegate }
     let(:status) { 5 }
+
+
     describe '#signal' do
       describe 'with signal' do
         it 'sends a signal' do
@@ -22,6 +25,7 @@ describe CZTop::PolymorphicZsockMethods do
         end
       end
 
+
       describe 'with no signal given' do
         it 'sends signal 0' do
           called_with = nil
@@ -32,6 +36,7 @@ describe CZTop::PolymorphicZsockMethods do
         end
       end
     end
+
 
     describe '#wait' do
       it 'returns the signal status' do
@@ -60,6 +65,7 @@ describe CZTop::PolymorphicZsockMethods do
       end
     end
   end
+
 
   describe '#set_unbounded' do
     it 'sets sndhwm and rcvhwm to 0' do

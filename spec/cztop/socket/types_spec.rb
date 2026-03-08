@@ -24,49 +24,69 @@ describe CZTop::Socket::Types do
   end
 end
 
+
 describe CZTop::Socket do
   describe '.new_by_type' do
     let(:socket) { CZTop::Socket.new_by_type(type) }
+
+
     describe 'given valid type' do
       let(:expected_class) { CZTop::Socket::PUSH }
+
+
       describe 'by integer' do
         let(:type) { CZTop::Socket::Types::PUSH }
+
         it 'returns socket' do
           assert_kind_of Integer, type
           assert_kind_of expected_class, socket
         end
       end
+
+
       describe 'by symbol' do
         let(:type) { :PUSH }
+
         it 'returns socket' do
           assert_kind_of expected_class, socket
         end
       end
     end
 
+
     describe 'given invalid type name' do
       describe 'by integer' do
         let(:type) { 99 } # non-existent type
+
         it 'raises' do
           assert_raises(ArgumentError) { socket }
         end
       end
+
+
       describe 'by symbol' do
         let(:type) { :FOOBAR } # non-existent type
+
         it 'raises' do
           assert_raises(NameError) { socket }
         end
       end
+
+
       describe 'by string' do
         # NOTE: No support for Strings as socket types for now.
         let(:type) { 'PUB' }
+
         it 'raises' do
           assert_raises(ArgumentError) { socket }
         end
       end
+
+
       describe 'by Socket::* class' do
         # NOTE: No support for socket Socket::* classes as types for now.
         let(:type) { CZTop::Socket::PUB }
+
         it 'raises' do
           assert_raises(ArgumentError) { socket }
         end
@@ -74,6 +94,7 @@ describe CZTop::Socket do
     end
   end
 end
+
 
 describe CZTop::Socket::CLIENT do
   include ZMQHelper
@@ -97,6 +118,7 @@ describe CZTop::Socket::CLIENT do
     client
   end
 
+
   describe 'while connected' do
     before do
       server
@@ -113,6 +135,7 @@ describe CZTop::Socket::CLIENT do
       assert_equal ['bar'], client.receive.to_a
     end
 
+
     describe 'when sending multi-part message' do
       it 'raises' do
         assert_raises(ArgumentError) do
@@ -122,6 +145,7 @@ describe CZTop::Socket::CLIENT do
     end
   end
 end
+
 
 describe CZTop::Socket::SERVER do
   include ZMQHelper
@@ -133,11 +157,13 @@ describe CZTop::Socket::SERVER do
     server
   end
 
+
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, server.to_io
     end
   end
+
 
   describe 'when communicating' do
     i = 58_578
@@ -161,13 +187,16 @@ describe CZTop::Socket::SERVER do
     let(:msg) { CZTop::Message.new(msg_content) }
     let(:received_msg) { server.receive }
 
+
     describe 'when receiving message from CLIENT' do
       before { client << msg_content }
+
       it 'receives message with routing_id' do
         assert_equal msg_content, received_msg[0].to_s
         assert_operator received_msg.routing_id, :>, 0
       end
     end
+
 
     describe 'when responding to a message from CLIENT' do
       let(:response) { CZTop::Message.new('BAR') }
@@ -177,6 +206,7 @@ describe CZTop::Socket::SERVER do
         received_msg
       end
 
+
       describe 'with routing_id set' do
         it 'delivers response to client' do
           response.routing_id = received_msg.routing_id
@@ -185,8 +215,10 @@ describe CZTop::Socket::SERVER do
         end
       end
 
+
       describe 'with two responses with routing_id set' do
         let(:second_response) { CZTop::Message.new('BAZ') }
+
         it 'delivers both responses' do
           response.routing_id = received_msg.routing_id
           second_response.routing_id = received_msg.routing_id
@@ -196,16 +228,21 @@ describe CZTop::Socket::SERVER do
         end
       end
 
+
       describe 'with wrong routing_id set' do
         describe 'with SERVER SNDTIMEO set' do
           let(:server_timeo) { 50 }
+
           it 'raises' do
             response.routing_id = 1234 # wrong routing_id
             assert_raises(SocketError) { server << response }
           end
         end
+
+
         describe 'with no SERVER SNDTIMEO set' do
           let(:server_timeo) { 0 }
+
           it 'raises' do
             response.routing_id = 1234 # wrong routing_id
             assert_raises(SocketError) { server << response }
@@ -213,11 +250,13 @@ describe CZTop::Socket::SERVER do
         end
       end
 
+
       describe 'without routing_id set' do
         it 'raises' do
           assert_raises(SocketError) { server << response }
         end
       end
+
 
       describe 'with disconnected CLIENT' do
         it 'raises' do
@@ -227,14 +266,17 @@ describe CZTop::Socket::SERVER do
         end
       end
 
+
       describe 'with multi-part response' do
         let(:response) { CZTop::Message.new(%w[BAR BAZ]) }
+
         it 'raises' do
           response.routing_id = received_msg.routing_id
           assert_raises(ArgumentError) { server << response }
         end
       end
     end
+
 
     describe 'when SERVER tries to initiate a conversation' do
       it 'raises' do
@@ -247,6 +289,7 @@ describe CZTop::Socket::SERVER do
   end
 end
 
+
 describe CZTop::Socket::RADIO do
   include ZMQHelper
   before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
@@ -257,12 +300,14 @@ describe CZTop::Socket::RADIO do
     socket
   end
 
+
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, socket.to_io
     end
   end
 end
+
 
 describe CZTop::Socket::DISH do
   include ZMQHelper
@@ -285,11 +330,13 @@ describe CZTop::Socket::DISH do
   end
   let(:group) { 'group1' }
 
+
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, dish.to_io
     end
   end
+
 
   describe '#join' do
     describe 'given a message sent to a joined group' do
@@ -303,6 +350,7 @@ describe CZTop::Socket::DISH do
       end
     end
 
+
     describe 'given a message sent to an unjoined group' do
       it 'times out' do
         dish.join group
@@ -312,15 +360,19 @@ describe CZTop::Socket::DISH do
       end
     end
 
+
     describe 'given an invalid group name' do
       let(:group) { 'x' * 256 }
+
       it 'raises' do
         assert_raises(ArgumentError) { dish.join group }
       end
     end
 
+
     describe 'given an already joined group' do
       let(:group) { 'group1' }
+
       it 'raises' do
         dish.join group
         assert_raises(ArgumentError) { dish.join group }
@@ -328,17 +380,21 @@ describe CZTop::Socket::DISH do
     end
   end
 
+
   describe '#leave' do
     describe 'leaving a previously joined group' do
       let(:group) { 'group1' }
+
       it 'leaves without error' do
         dish.join group
         dish.leave group
       end
     end
 
+
     describe 'leaving an unjoined group' do
       let(:unjoined_group) { 'group1' }
+
       it 'raises' do
         assert_raises(ArgumentError) { dish.leave unjoined_group }
       end
@@ -346,15 +402,18 @@ describe CZTop::Socket::DISH do
   end
 end
 
+
 describe CZTop::Socket::SCATTER do
   include ZMQHelper
   before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
 
   let(:socket) { CZTop::Socket::SCATTER.new }
+
   it 'instantiates' do
     socket
   end
 end
+
 
 describe CZTop::Socket::GATHER do
   include ZMQHelper
@@ -376,6 +435,7 @@ describe CZTop::Socket::GATHER do
     end
   end
 
+
   describe 'given message from SCATTER' do
     it 'receives message' do
       gather
@@ -384,6 +444,7 @@ describe CZTop::Socket::GATHER do
       assert_equal 'foo', msg.to_a[0]
     end
   end
+
 
   describe 'given message from SCATTER and multiple GATHER sockets' do
     it 'delivers to only one gather socket' do
@@ -403,17 +464,21 @@ describe CZTop::Socket::GATHER do
   end
 end
 
+
 describe CZTop::Socket::REQ do
   let(:socket) { CZTop::Socket::REQ.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, socket.to_io
     end
   end
+
 
   describe 'integration' do
     let(:req) { CZTop::Socket::REQ.new }
@@ -449,11 +514,14 @@ describe CZTop::Socket::REQ do
   end
 end
 
+
 describe CZTop::Socket::REP do
   let(:socket) { CZTop::Socket::REP.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -461,12 +529,15 @@ describe CZTop::Socket::REP do
     end
   end
 end
+
 
 describe CZTop::Socket::DEALER do
   let(:socket) { CZTop::Socket::DEALER.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -475,21 +546,26 @@ describe CZTop::Socket::DEALER do
   end
 end
 
+
 describe CZTop::Socket::ROUTER do
   let(:socket) { CZTop::Socket::ROUTER.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, socket.to_io
     end
   end
+
 
   describe '#send_to' do
     let(:receiver) { 'mike' }
     let(:content) { 'foobar' }
+
     it 'sends message to receiver' do
       sent = nil
       socket.stub(:<<, ->(msg) { sent = msg }) do
@@ -499,10 +575,12 @@ describe CZTop::Socket::ROUTER do
     end
   end
 
+
   describe 'with ZMQ_ROUTER_MANDATORY flag set' do
     before do
       socket.options.router_mandatory = true
     end
+
 
     describe 'when connected' do
       let(:identity) { 'receiver identity' }
@@ -527,6 +605,7 @@ describe CZTop::Socket::ROUTER do
         assert_operator socket, :writable?
       end
 
+
       describe 'for unroutable message' do
         let(:msg_with_wrong_identity) { ['wrong_id', '', content] }
 
@@ -534,6 +613,7 @@ describe CZTop::Socket::ROUTER do
           assert_raises(SocketError) { socket << msg_with_wrong_identity }
         end
       end
+
 
       describe 'for routable message' do
         let(:identity) { 'receiver identity' }
@@ -554,11 +634,14 @@ describe CZTop::Socket::ROUTER do
   end
 end
 
+
 describe CZTop::Socket::PUB do
   let(:socket) { CZTop::Socket::PUB.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -567,11 +650,14 @@ describe CZTop::Socket::PUB do
   end
 end
 
+
 describe CZTop::Socket::SUB do
   let(:socket) { CZTop::Socket::SUB.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -580,6 +666,7 @@ describe CZTop::Socket::SUB do
   end
 
   let(:subscription) { 'test_prefix' }
+
 
   describe 'with subscription' do
     it 'subscribes' do
@@ -592,18 +679,22 @@ describe CZTop::Socket::SUB do
     end
   end
 
+
   describe '#subscribe' do
     describe 'with subscription prefix' do
       it 'subscribes' do
         socket.subscribe(subscription)
       end
     end
+
+
     describe 'without subscription prefix' do
       it 'subscribes to everything' do
         socket.subscribe
       end
     end
   end
+
 
   describe '#unsubscribe' do
     it 'unsubscribes' do
@@ -613,11 +704,14 @@ describe CZTop::Socket::SUB do
   end
 end
 
+
 describe CZTop::Socket::XPUB do
   let(:socket) { CZTop::Socket::XPUB.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -625,12 +719,15 @@ describe CZTop::Socket::XPUB do
     end
   end
 end
+
 
 describe CZTop::Socket::XSUB do
   let(:socket) { CZTop::Socket::XSUB.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -639,17 +736,21 @@ describe CZTop::Socket::XSUB do
   end
 end
 
+
 describe CZTop::Socket::PUSH do
   let(:socket) { CZTop::Socket::PUSH.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
       assert_kind_of IO, socket.to_io
     end
   end
+
 
   describe 'integration' do
     let(:push) { CZTop::Socket::PUSH.new }
@@ -683,11 +784,14 @@ describe CZTop::Socket::PUSH do
   end
 end
 
+
 describe CZTop::Socket::PULL do
   let(:socket) { CZTop::Socket::PULL.new }
+
   it 'instantiates' do
     socket
   end
+
 
   describe '#to_io' do
     it 'returns IO' do
@@ -695,6 +799,7 @@ describe CZTop::Socket::PULL do
     end
   end
 end
+
 
 describe CZTop::Socket::PAIR do
   i = 0
@@ -719,8 +824,10 @@ describe CZTop::Socket::PAIR do
   end
 end
 
+
 describe CZTop::Socket::STREAM do
   let(:socket) { CZTop::Socket::STREAM.new }
+
   it 'instantiates' do
     socket
   end

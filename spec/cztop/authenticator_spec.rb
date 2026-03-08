@@ -9,6 +9,7 @@ describe 'CZTop::Authenticator::ZAUTH_FPTR' do
   end
 end
 
+
 describe CZTop::Authenticator do
   include ZMQHelper
 
@@ -22,11 +23,13 @@ describe CZTop::Authenticator do
     subject
   end
 
+
   describe '#actor' do
     it 'returns an Actor' do
       assert_kind_of CZTop::Actor, actor
     end
   end
+
 
   describe '#verbose!' do
     it 'sends correct message to actor' do
@@ -39,8 +42,10 @@ describe CZTop::Authenticator do
     end
   end
 
+
   describe '#allow' do
     let(:addrs) { %w[1.1.1.1 2.2.2.2] }
+
     it 'whitelists addresses' do
       sent = nil
       original_send = actor.method(:<<)
@@ -51,8 +56,10 @@ describe CZTop::Authenticator do
     end
   end
 
+
   describe '#deny' do
     let(:addrs) { %w[3.3.3.3 4.4.4.4 foobar] }
+
     it 'blacklists addresses' do
       sent = nil
       original_send = actor.method(:<<)
@@ -63,8 +70,10 @@ describe CZTop::Authenticator do
     end
   end
 
+
   describe '#plain' do
     let(:filename) { '/path/to/file' }
+
     it 'enables PLAIN security' do
       sent = nil
       original_send = actor.method(:<<)
@@ -75,9 +84,11 @@ describe CZTop::Authenticator do
     end
   end
 
+
   describe '#curve' do
     describe 'when allowing keys from directory' do
       let(:directory) { '/path/to/directory' }
+
       it 'enables CURVE security for keys in directory' do
         sent = nil
         original_send = actor.method(:<<)
@@ -87,6 +98,8 @@ describe CZTop::Authenticator do
         assert_equal ['CURVE', directory], sent
       end
     end
+
+
     describe 'when allowing any key' do
       it 'enables CURVE security for any key' do
         sent = nil
@@ -99,6 +112,7 @@ describe CZTop::Authenticator do
     end
   end
 
+
   describe '#gssapi' do
     it 'enables GSSAPI security' do
       sent = nil
@@ -109,6 +123,7 @@ describe CZTop::Authenticator do
       assert_equal 'GSSAPI', sent
     end
   end
+
 
   describe 'with certificate store' do
     let(:subject) { CZTop::Authenticator.new(cert_store) }
@@ -137,6 +152,7 @@ describe CZTop::Authenticator do
       assert_kind_of CZTop::Certificate, cert
     end
 
+
     describe 'authentication' do
       let(:domain) { 'global' }
       let(:req) do
@@ -158,15 +174,20 @@ describe CZTop::Authenticator do
         req << zap_request.to_msg
       end
 
+
       describe 'with valid credentials' do
         let(:credentials) { [pubkey_bin] }
+
         it 'authenticates' do
           assert_operator zap_response, :success?
           assert_equal request_id, zap_response.request_id
         end
       end
+
+
       describe 'with invalid credentials' do
         let(:credentials) { ['f' * 32] } # unknown public key
+
         it 'does not authenticate' do
           refute_operator zap_response, :success?
           assert_equal request_id, zap_response.request_id

@@ -22,6 +22,7 @@ describe CZTop::Config do
   end
   let(:config) { CZTop::Config.from_string(config_contents) }
 
+
   describe '#execute' do
     describe 'with a block' do
       it 'yields config and level' do
@@ -41,8 +42,10 @@ describe CZTop::Config do
         assert_equal 0, first_level
       end
 
+
       describe 'starting from non-root element' do
         let(:child) { config.children.first }
+
         it 'level still starts at 0' do
           first_level = nil
           child.execute do |_, level|
@@ -63,6 +66,7 @@ describe CZTop::Config do
       end
     end
 
+
     describe 'with a block that breaks' do
       it 'calls block no more' do
         called = 0
@@ -79,6 +83,7 @@ describe CZTop::Config do
       it 'returns nil' do
         assert_nil config.execute { |_| break }
       end
+
 
       describe 'with break value' do
         # NOTE: broken on JRuby
@@ -103,12 +108,14 @@ describe CZTop::Config do
       end
 
       let(:exception) { Class.new(RuntimeError) }
+
       it 'raises' do
         assert_raises(exception) do
           config.execute { raise exception }
         end
       end
     end
+
 
     describe 'with no block' do
       it 'raises' do
@@ -117,56 +124,75 @@ describe CZTop::Config do
     end
   end
 
+
   describe '#children' do
     let(:parent) { config }
     let(:children) { parent.children }
+
     it 'returns SiblingsAccessor' do
       assert_kind_of CZTop::Config::ChildrenAccessor, children
     end
 
+
     describe 'with children' do
       let(:parent) { config.locate('/main/frontend/option') }
+
       it 'returns first child' do
         refute_nil children.first
         assert_equal 'hwm', children.first.name
       end
+
       it 'returns all children' do
         assert_equal %w[hwm swap], children.to_a.map(&:name)
       end
     end
+
+
     describe 'with no children' do
       let(:parent) { config.locate('/main/frontend/option/swap') }
+
       it 'has no children' do
         assert_nil parent.children.first
         assert_empty parent.children.to_a
       end
     end
 
+
     describe 'adding a new child' do
       let(:new_child) { children.new }
+
       it 'returns new child' do
         assert_kind_of CZTop::Config, new_child
       end
+
       it 'adds new child' do
         new_child
         assert_equal 2 + 1, children.count
         assert_equal new_child, parent.last_at_depth(1)
       end
+
+
       describe 'with name' do
         let(:child_name) { 'foo' }
+
         it 'sets name' do
           assert_equal child_name, children.new(child_name).name
         end
       end
+
+
       describe 'with name and value' do
         let(:child_name) { 'foo' }
         let(:child_value) { 'bar' }
         let(:new_child) { children.new(child_name, child_value) }
+
         it 'sets name and value' do
           assert_equal child_name, new_child.name
           assert_equal child_value, new_child.value
         end
       end
+
+
       describe 'with block given' do
         it 'yields new child' do
           yielded = nil
@@ -177,12 +203,16 @@ describe CZTop::Config do
     end
   end
 
+
   describe '#siblings' do
     let(:item) { config }
     let(:siblings) { item.siblings }
+
     it 'returns SiblingsAccessor' do
       assert_kind_of CZTop::Config::SiblingsAccessor, siblings
     end
+
+
     describe 'with no siblings' do
       it 'has no siblings' do
         refute_operator siblings, :any?
@@ -190,24 +220,33 @@ describe CZTop::Config do
         assert_nil siblings.first
       end
     end
+
+
     describe 'with siblings' do
       let(:item) { config.locate('main/frontend/option') }
+
       it 'has siblings' do
         assert_operator siblings, :any?
       end
+
       it 'returns correct first sibling' do
         assert_equal config.locate('main/frontend/bind'), siblings.first
       end
+
       it 'returns all siblings' do
         assert_equal 2, siblings.count
       end
+
       it 'returns siblings as Config objects' do
         siblings.each { |s| assert_kind_of CZTop::Config, s }
       end
     end
+
+
     describe 'with no younger siblings' do
       # has only an "older" sibling
       let(:item) { config.locate('main/backend') }
+
       it 'acts like it has no siblings' do
         assert_empty siblings.to_a
         assert_nil siblings.first
@@ -215,49 +254,66 @@ describe CZTop::Config do
     end
   end
 
+
   describe '#locate' do
     describe 'given existing path' do
       let(:located_item) { config.locate('/main/frontend/option/swap') }
+
       it 'returns config item' do
         assert_kind_of CZTop::Config, located_item
         assert_equal 'swap', located_item.name
       end
     end
 
+
     describe 'given non-existent path' do
       let(:nonexistent_path) { '/foo/bar' }
       let(:located_item) { config.locate nonexistent_path }
+
       it 'returns nil' do
         assert_nil located_item
       end
     end
   end
 
+
   describe '#last_at_depth' do
     let(:found) { config.last_at_depth(level) }
+
+
     describe 'with level 0' do
       let(:level) { 0 }
       let(:expected) { config }
+
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
+
+
     describe 'with level 1' do
       let(:level) { 1 }
       let(:expected) { config.locate('main') }
+
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
+
+
     describe 'with level 2' do
       let(:level) { 2 }
       let(:expected) { config.locate('main/backend') }
+
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
+
+
     describe 'with level 99' do
       let(:level) { 99 }
+
       it 'returns nil' do
         assert_nil nil, found
       end

@@ -13,7 +13,15 @@ SimpleCov.start do
 end
 
 require_relative 'zmq_helper'
+
+# Suppress czmq-ffi-gen warnings about unavailable draft functions
+original_stderr = $stderr
+$stderr = File.open(File::NULL, 'w')
 require_relative '../lib/cztop'
+$stderr = original_stderr
+
+# Suppress CZMQ C library log messages (e.g. "I: zmonitor: API command=$TERM")
+CZMQ::FFI::Zsys.set_logstream(FFI::Pointer::NULL)
 
 
 if ENV['REPORT_COVERAGE'] == 'true'

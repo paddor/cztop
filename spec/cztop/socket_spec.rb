@@ -4,9 +4,6 @@ require_relative 'spec_helper'
 require 'tmpdir'
 require 'pathname'
 
-unless ::CZMQ::FFI::Zsys.has_curve
-  warn "Skipping some CZTop::Socket specs because CURVE is not available."
-end
 
 describe CZTop::Socket do
   include HasFFIDelegateExamples

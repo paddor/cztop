@@ -4,24 +4,10 @@ require_relative '../../spec_helper'
 
 describe CZTop::Socket::Types do
   it 'has constants' do
-    CZTop::Socket::Types::PAIR
-    CZTop::Socket::Types::PUB
-    CZTop::Socket::Types::SUB
-    CZTop::Socket::Types::REQ
-    CZTop::Socket::Types::REP
-    CZTop::Socket::Types::DEALER
-    CZTop::Socket::Types::ROUTER
-    CZTop::Socket::Types::PULL
-    CZTop::Socket::Types::PUSH
-    CZTop::Socket::Types::XPUB
-    CZTop::Socket::Types::XSUB
-    CZTop::Socket::Types::STREAM
-    CZTop::Socket::Types::SERVER
-    CZTop::Socket::Types::CLIENT
-    CZTop::Socket::Types::RADIO
-    CZTop::Socket::Types::DISH
-    CZTop::Socket::Types::GATHER
-    CZTop::Socket::Types::SCATTER
+    %i[PAIR PUB SUB REQ REP DEALER ROUTER PULL PUSH XPUB XSUB STREAM
+       SERVER CLIENT RADIO DISH GATHER SCATTER].each do |name|
+      assert_operator CZTop::Socket::Types, :const_defined?, name
+    end
   end
 
   it 'has names for each type' do

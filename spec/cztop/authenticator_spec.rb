@@ -2,9 +2,6 @@
 
 require_relative '../spec_helper'
 
-unless ::CZMQ::FFI::Zsys.has_curve
-  warn "Skipping most CZTop::Authenticator specs because CURVE is not available."
-end
 
 describe 'CZTop::Authenticator::ZAUTH_FPTR' do
   it 'points to a dynamic library symbol' do

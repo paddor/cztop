@@ -58,7 +58,7 @@ describe CZTop::ZAP do
 
       let(:request) { CZTop::ZAP::Request.from_message(msg) }
 
-      context 'with valid request message' do
+      describe 'with valid request message' do
         it 'builds a request' do
           assert_kind_of CZTop::ZAP::Request, request
         end
@@ -72,7 +72,7 @@ describe CZTop::ZAP do
           assert_equal credentials, request.credentials
         end
       end
-      context 'with invalid version' do
+      describe 'with invalid version' do
         let(:version) { '0.9' }
         it 'raises' do
           assert_raises(CZTop::ZAP::VersionMismatch) do
@@ -83,10 +83,10 @@ describe CZTop::ZAP do
     end
 
     describe '#initialize' do
-      context 'with only domain and credentials' do
+      describe 'with only domain and credentials' do
         let(:domain) { 'example.com' }
         let(:credentials) { %w[user pass] }
-        subject { CZTop::ZAP::Request.new(domain, credentials) }
+        let(:subject) { CZTop::ZAP::Request.new(domain, credentials) }
 
         it 'sets domain' do
           assert_equal domain, subject.domain
@@ -102,9 +102,9 @@ describe CZTop::ZAP do
         end
       end
 
-      context 'with only a domain' do
+      describe 'with only a domain' do
         let(:domain) { 'example.com' }
-        subject { CZTop::ZAP::Request.new(domain) }
+        let(:subject) { CZTop::ZAP::Request.new(domain) }
 
         it 'sets credentials to empty array' do
           assert_equal [], subject.credentials
@@ -118,13 +118,13 @@ describe CZTop::ZAP do
     describe '#to_msg' do
       let(:msg) { request.to_msg }
 
-      context 'with no credentials' do
+      describe 'with no credentials' do
         let(:request) { CZTop::ZAP::Request.new(domain) }
         it "doesn't include credential frames" do
           assert_equal 6, msg.size
         end
       end
-      context 'with credentials' do
+      describe 'with credentials' do
         let(:request) { CZTop::ZAP::Request.new(domain, %w[one two three]) }
         it 'includes credential frames' do
           assert_equal 9, msg.size
@@ -141,7 +141,7 @@ describe CZTop::ZAP do
     let(:user_id) { 'jane77' }
     let(:meta_data) { 'properties in ZMTP 3.0 format' }
 
-    subject do
+    let(:subject) do
       CZTop::ZAP::Response.new(status_code).tap do |r|
         r.version = version
         r.request_id = request_id
@@ -158,9 +158,9 @@ describe CZTop::ZAP do
                   user_id, meta_data].map(&:to_s)
         CZTop::Message.new(fields)
       end
-      subject { CZTop::ZAP::Response.from_message(msg) }
+      let(:subject) { CZTop::ZAP::Response.from_message(msg) }
 
-      context 'given a valid response message' do
+      describe 'given a valid response message' do
         it 'builds a response' do
           assert_kind_of CZTop::ZAP::Response, subject
         end
@@ -174,7 +174,7 @@ describe CZTop::ZAP do
         end
       end
 
-      context 'given invalid version' do
+      describe 'given invalid version' do
         let(:version) { '0.9' }
         it 'raises' do
           assert_raises(CZTop::ZAP::VersionMismatch) do
@@ -182,7 +182,7 @@ describe CZTop::ZAP do
           end
         end
       end
-      context 'given status code for temporary failure' do
+      describe 'given status code for temporary failure' do
         let(:status_code) { 300 }
         it 'raises' do
           assert_raises(CZTop::ZAP::Response::TemporaryError) do
@@ -190,7 +190,7 @@ describe CZTop::ZAP do
           end
         end
       end
-      context 'given status code for internal error' do
+      describe 'given status code for internal error' do
         let(:status_code) { 500 }
         it 'raises' do
           assert_raises(CZTop::ZAP::Response::InternalError) do
@@ -198,7 +198,7 @@ describe CZTop::ZAP do
           end
         end
       end
-      context 'given invalid status code' do
+      describe 'given invalid status code' do
         let(:status_code) { 666 }
         it 'raises' do
           assert_raises(CZTop::ZAP::Response::InternalError) do
@@ -209,17 +209,17 @@ describe CZTop::ZAP do
     end
 
     describe '#initialize' do
-      subject { described_class.new(status_code) }
+      let(:subject) { CZTop::ZAP::Response.new(status_code) }
       it 'sets default version' do
         assert_equal '1.0', subject.version
       end
-      context 'with valid status code' do
+      describe 'with valid status code' do
         let(:status_code) { 500 }
         it 'initializes' do
           subject
         end
       end
-      context 'with invalid status code' do
+      describe 'with invalid status code' do
         let(:status_code) { 333 }
         it 'raises' do
           assert_raises(ArgumentError) do
@@ -228,20 +228,22 @@ describe CZTop::ZAP do
         end
       end
     end
+
     describe '#success?' do
       let(:status_code) { '200' }
-      context 'with successful authentication' do
+      describe 'with successful authentication' do
         it 'returns true' do
           assert_operator subject, :success?
         end
       end
-      context 'with failed authentication' do
+      describe 'with failed authentication' do
         let(:status_code) { '400' }
         it 'returns false' do
           refute_operator subject, :success?
         end
       end
     end
+
     describe '#to_msg' do
       let(:fields) do
         [version, request_id, status_code, status_text, user_id, meta_data]
@@ -250,26 +252,28 @@ describe CZTop::ZAP do
         assert_equal fields, subject.to_msg.to_a
       end
     end
+
     describe '#user_id' do
-      context 'when authenticated' do
+      describe 'when authenticated' do
         it 'returns user ID' do
           assert_equal user_id, subject.user_id
         end
       end
-      context 'when not authenticated' do
+      describe 'when not authenticated' do
         let(:status_code) { '300' }
         it 'returns nil' do
           assert_nil subject.user_id
         end
       end
     end
+
     describe '#meta_data' do
-      context 'when authenticated' do
+      describe 'when authenticated' do
         it 'returns meta data' do
           assert_equal meta_data, subject.meta_data
         end
       end
-      context 'when not authenticated' do
+      describe 'when not authenticated' do
         let(:status_code) { '300' }
         it 'returns meta data' do
           assert_nil subject.meta_data

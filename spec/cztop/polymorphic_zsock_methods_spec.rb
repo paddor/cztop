@@ -12,24 +12,32 @@ describe CZTop::PolymorphicZsockMethods do
     let(:delegate_b) { socket_b.ffi_delegate }
     let(:status) { 5 }
     describe '#signal' do
-      context 'with signal' do
+      describe 'with signal' do
         it 'sends a signal' do
-          expect(CZMQ::FFI::Zsock).to receive(:signal).with(delegate_b, status)
-          socket_b.signal(status)
+          called_with = nil
+          CZMQ::FFI::Zsock.stub(:signal, ->(*args) { called_with = args }) do
+            socket_b.signal(status)
+          end
+          assert_equal [delegate_b, status], called_with
         end
       end
 
-      context 'with no signal given' do
+      describe 'with no signal given' do
         it 'sends signal 0' do
-          expect(CZMQ::FFI::Zsock).to receive(:signal).with(delegate_b, 0)
-          socket_b.signal
+          called_with = nil
+          CZMQ::FFI::Zsock.stub(:signal, ->(*args) { called_with = args }) do
+            socket_b.signal
+          end
+          assert_equal [delegate_b, 0], called_with
         end
       end
     end
 
     describe '#wait' do
-      When { socket_b.signal(status) }
-      Then { status == socket_a.wait }
+      it 'returns the signal status' do
+        socket_b.signal(status)
+        assert_equal status, socket_a.wait
+      end
 
       it 'fails in a non-blocking Fiber' do
         Fiber.new blocking: false do
@@ -41,6 +49,7 @@ describe CZTop::PolymorphicZsockMethods do
 
       it 'works in a blocking Fiber' do
         signaled = false
+        socket_b.signal(status)
 
         Fiber.new blocking: true do
           socket_a.wait
@@ -53,9 +62,10 @@ describe CZTop::PolymorphicZsockMethods do
   end
 
   describe '#set_unbounded' do
-    Given(:options) { socket_a.options }
-    When { socket_a.set_unbounded }
-    Then { options.sndhwm == 0 }
-    And { options.rcvhwm == 0 }
+    it 'sets sndhwm and rcvhwm to 0' do
+      socket_a.set_unbounded
+      assert_equal 0, socket_a.options.sndhwm
+      assert_equal 0, socket_a.options.rcvhwm
+    end
   end
 end

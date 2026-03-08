@@ -9,7 +9,7 @@ unless ::CZMQ::FFI::Zsys.has_curve
 end
 
 describe CZTop::Socket do
-  include_examples 'has FFI delegate'
+  include HasFFIDelegateExamples
 
   i = 0
   let(:endpoint) { "inproc://endpoint_socket_spec_#{i += 1}" }
@@ -19,19 +19,19 @@ describe CZTop::Socket do
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
   it 'has Zsock options' do
-    assert_operator described_class, :<, CZTop::ZsockOptions
+    assert_operator CZTop::Socket, :<, CZTop::ZsockOptions
   end
 
   it 'has send/receive methods' do
-    assert_operator described_class, :<, CZTop::SendReceiveMethods
+    assert_operator CZTop::Socket, :<, CZTop::SendReceiveMethods
   end
 
   it 'has polymorphic Zsock methods' do
-    assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
+    assert_operator CZTop::Socket, :<, CZTop::PolymorphicZsockMethods
   end
 
   describe '#initialize' do
-    context 'given invalid endpoint' do
+    describe 'given invalid endpoint' do
       let(:endpoint) { 'foo://bar' }
       it 'raises' do
         assert_raises(SystemCallError) do
@@ -40,7 +40,7 @@ describe CZTop::Socket do
       end
     end
 
-    context 'given same binding endpoint to multiple REP sockets' do
+    describe 'given same binding endpoint to multiple REP sockets' do
       let(:endpoint) { 'inproc://the_one_and_only' }
       let(:sock1) { CZTop::Socket::REP.new(endpoint) }
       before { sock1 }
@@ -54,30 +54,41 @@ describe CZTop::Socket do
   end
 
   describe '#<< and #receive' do
-    context 'given a sent content' do
+    describe 'given a sent content' do
       let(:content) { 'foobar' }
       it 'receives the content' do
-        connecting_pair_socket << content # REQ => REP
-        msg = binding_pair_socket.receive # REQ <= REP
+        connecting_pair_socket << content
+        msg = binding_pair_socket.receive
         assert_equal content, msg.frames.first.to_s
       end
     end
   end
 
-  describe '#CURVE_server!', if: ::CZMQ::FFI::Zsys.has_curve do
+  describe '#CURVE_server!' do
+    before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
+
     let(:certificate) { CZTop::Certificate.new }
     let(:options) { rep_socket.options }
 
-    context 'with valid certificate' do
-      When do
+    describe 'with valid certificate' do
+      before do
         rep_socket.CURVE_server!(certificate)
       end
-      Then { rep_socket.options.CURVE_server? }
-      Then { options.CURVE_secretkey == certificate.secret_key }
-      Then { options.CURVE_publickey == certificate.public_key }
+
+      it 'enables CURVE server' do
+        assert rep_socket.options.CURVE_server?
+      end
+
+      it 'sets secret key' do
+        assert_equal certificate.secret_key, options.CURVE_secretkey
+      end
+
+      it 'sets public key' do
+        assert_equal certificate.public_key, options.CURVE_publickey
+      end
     end
 
-    context 'with no secret key in certificate' do
+    describe 'with no secret key in certificate' do
       let(:certificate) do
         tmpdir = Pathname.new(Dir.mktmpdir('zsock_test'))
         path = tmpdir + 'server_cert.txt'
@@ -86,14 +97,17 @@ describe CZTop::Socket do
         CZTop::Certificate.load(path)
       end
 
-      When(:result) do
-        rep_socket.CURVE_server!(certificate)
+      it 'raises' do
+        assert_raises(ArgumentError) do
+          rep_socket.CURVE_server!(certificate)
+        end
       end
-      Then { result == Failure(ArgumentError) }
     end
   end
 
-  describe '#CURVE_client!', if: ::CZMQ::FFI::Zsys.has_curve do
+  describe '#CURVE_client!' do
+    before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
+
     let(:tmpdir) do
       Pathname.new(Dir.mktmpdir('zsock_test'))
     end
@@ -106,7 +120,7 @@ describe CZTop::Socket do
     let(:client_cert) { CZTop::Certificate.new }
     let(:options) { req_socket.options }
 
-    context 'with client certificate' do
+    describe 'with client certificate' do
       before do
         req_socket.CURVE_client!(client_cert, server_cert)
       end
@@ -127,7 +141,7 @@ describe CZTop::Socket do
         assert_equal :CURVE, options.mechanism
       end
     end
-    context 'with secret key in server certificate' do
+    describe 'with secret key in server certificate' do
       let(:server_cert) { CZTop::Certificate.new }
       it 'raises' do # server's secret key compromised
         assert_raises(SecurityError) do
@@ -135,7 +149,7 @@ describe CZTop::Socket do
         end
       end
     end
-    context 'with no secret key in certificate' do
+    describe 'with no secret key in certificate' do
       let(:client_cert) do
         # NOTE: ensure only public key is set
         path = tmpdir + 'client_cert.txt'
@@ -151,7 +165,7 @@ describe CZTop::Socket do
   end
 
   describe '#last_endpoint' do
-    context 'unbound socket' do
+    describe 'unbound socket' do
       let(:socket) { CZTop::Socket.new_by_type(:REP) }
 
       it 'returns nil' do
@@ -159,7 +173,7 @@ describe CZTop::Socket do
       end
     end
 
-    context 'bound socket' do
+    describe 'bound socket' do
       it 'returns endpoint' do
         assert_equal endpoint, rep_socket.last_endpoint
       end
@@ -167,104 +181,118 @@ describe CZTop::Socket do
   end
 
   describe '#connect' do
-    Given(:socket) { rep_socket }
-    context 'with valid endpoint' do
+    let(:socket) { rep_socket }
+    describe 'with valid endpoint' do
       let(:another_endpoint) { 'inproc://foo' }
       it 'connects' do
         req_socket.connect(another_endpoint)
       end
     end
-    context 'with invalid endpoint' do
-      Given(:another_endpoint) { 'foo://bar' }
-      When(:result) { socket.connect(another_endpoint) }
-      Then { result == Failure(ArgumentError) }
+    describe 'with invalid endpoint' do
+      let(:another_endpoint) { 'foo://bar' }
+      it 'raises' do
+        assert_raises(ArgumentError) { socket.connect(another_endpoint) }
+      end
     end
     it 'does safe format handling' do
-      expect(socket.ffi_delegate).to receive(:connect).with('%s', any_args).and_return(0)
-      socket.connect(double('endpoint'))
+      # format specifiers in endpoint should not be expanded
+      assert_raises(ArgumentError) { socket.connect('tcp://%s:1234') }
     end
   end
 
   describe '#disconnect' do
-    Given(:socket) { rep_socket }
-    context 'with valid endpoint' do
+    let(:socket) { rep_socket }
+    describe 'with valid endpoint' do
       it 'disconnects' do
-        expect(socket.ffi_delegate).to receive(:disconnect)
-        socket.disconnect(endpoint)
+        connecting_socket = CZTop::Socket::REQ.new
+        connecting_socket.connect(endpoint)
+        connecting_socket.disconnect(endpoint)
       end
     end
-    context 'with invalid endpoint' do
-      Given(:another_endpoint) { 'foo://bar' }
-      When(:result) { socket.disconnect(another_endpoint) }
-      Then { result == Failure(ArgumentError) }
+    describe 'with invalid endpoint' do
+      let(:another_endpoint) { 'foo://bar' }
+      it 'raises' do
+        assert_raises(ArgumentError) { socket.disconnect(another_endpoint) }
+      end
     end
     it 'does safe format handling' do
-      expect(socket.ffi_delegate).to receive(:disconnect).with('%s', any_args).and_return(0)
-      socket.disconnect(double('endpoint'))
+      assert_raises(ArgumentError) { socket.disconnect('tcp://%s:1234') }
     end
   end
 
   describe '#close' do
-    Given(:socket) { rep_socket }
-    When { rep_socket.close }
-    Then { rep_socket.ffi_delegate.null? }
+    it 'nullifies ffi delegate' do
+      rep_socket.close
+      assert rep_socket.ffi_delegate.null?
+    end
   end
 
   describe '#bind' do
-    Given(:socket) { rep_socket }
-    context 'with valid endpoint' do
-      Then { assert_nil socket.last_tcp_port }
-      context 'with automatic TCP port selection endpoint' do
-        Given(:another_endpoint) { 'tcp://127.0.0.1:*' }
-        When { socket.bind(another_endpoint) }
-        Then { assert_kind_of Integer, socket.last_tcp_port }
-        And { socket.last_tcp_port > 0 }
+    let(:socket) { rep_socket }
+    describe 'with valid endpoint' do
+      it 'has no last_tcp_port initially' do
+        assert_nil socket.last_tcp_port
       end
-      context 'with explicit TCP port endpoint' do
-        Given(:port) { rand(55_755..58_665) }
-        Given(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
-        When { socket.bind(another_endpoint) }
-        Then { socket.last_tcp_port == port }
+
+      describe 'with automatic TCP port selection endpoint' do
+        let(:another_endpoint) { 'tcp://127.0.0.1:*' }
+        before { socket.bind(another_endpoint) }
+        it 'sets last_tcp_port to a positive integer' do
+          assert_kind_of Integer, socket.last_tcp_port
+          assert_operator socket.last_tcp_port, :>, 0
+        end
       end
-      context 'with non-TCP endpoint' do
-        Given(:another_endpoint) { 'inproc://non_tcp_endpoint' }
-        When { socket.bind(another_endpoint) }
-        Then { assert_nil socket.last_tcp_port }
+
+      describe 'with explicit TCP port endpoint' do
+        let(:port) { rand(55_755..58_665) }
+        let(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
+        before { socket.bind(another_endpoint) }
+        it 'sets last_tcp_port to the specified port' do
+          assert_equal port, socket.last_tcp_port
+        end
+      end
+
+      describe 'with non-TCP endpoint' do
+        let(:another_endpoint) { 'inproc://non_tcp_endpoint' }
+        before { socket.bind(another_endpoint) }
+        it 'has no last_tcp_port' do
+          assert_nil socket.last_tcp_port
+        end
       end
     end
-    context 'with invalid endpoint' do
-      Given(:another_endpoint) { 'foo://bar' }
-      When(:result) { socket.bind(another_endpoint) }
-      Then { result == Failure(SystemCallError) }
+
+    describe 'with invalid endpoint' do
+      let(:another_endpoint) { 'foo://bar' }
+      it 'raises' do
+        assert_raises(SystemCallError) { socket.bind(another_endpoint) }
+      end
     end
 
     it 'does safe format handling' do
-      expect(socket.ffi_delegate).to receive(:bind).with('%s', any_args).and_return(0)
-      socket.bind(double('endpoint'))
+      assert_raises(ArgumentError, SystemCallError) { socket.bind('tcp://%s:1234') }
     end
   end
 
   describe '#unbind' do
-    Given(:socket) { rep_socket }
-    context 'with valid endpoint' do
+    let(:socket) { rep_socket }
+    describe 'with valid endpoint' do
       it 'unbinds' do
-        expect(socket.ffi_delegate).to receive(:unbind)
         socket.unbind(endpoint)
       end
     end
-    context 'with invalid endpoint' do
-      Given(:another_endpoint) { 'bar://foo' }
-      When(:result) { socket.unbind(another_endpoint) }
-      Then { result == Failure(ArgumentError) }
+    describe 'with invalid endpoint' do
+      let(:another_endpoint) { 'bar://foo' }
+      it 'raises' do
+        assert_raises(ArgumentError) { socket.unbind(another_endpoint) }
+      end
     end
     it 'does safe format handling' do
-      expect(socket.ffi_delegate).to receive(:unbind).with('%s', any_args).and_return(0)
-      socket.unbind(double('endpoint'))
+      assert_raises(ArgumentError) { socket.unbind('bar://%s') }
     end
   end
 
   describe '#inspect' do
-    context 'with native object alive' do
+    describe 'with native object alive' do
       it 'contains class name' do
         assert_match(/\A#<CZTop::Socket::[A-Z]\w+:.*>\z/, req_socket.inspect)
       end
@@ -275,7 +303,7 @@ describe CZTop::Socket do
         assert_match(/\blast_endpoint=.+\b/, req_socket.inspect)
       end
     end
-    context 'with native object destroyed' do
+    describe 'with native object destroyed' do
       before { req_socket.close }
       it 'describes socket as invalid' do
         assert_match(/invalid/, req_socket.inspect)

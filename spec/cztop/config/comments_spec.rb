@@ -39,7 +39,7 @@ describe CZTop::Config do
           assert_equal 1, comments.size
         end
 
-        context 'with malicious comment' do
+        describe 'with malicious comment' do
           let(:new_comment) { '%s foo' }
           it 'is safe' do # uses %s in comment
             assert_equal new_comment, comments.to_a.last
@@ -57,19 +57,19 @@ describe CZTop::Config do
       end
 
       describe '#size' do
-        context 'with no comment' do
+        describe 'with no comment' do
           let(:item) { config.locate('test/has_no_comments') }
           it 'returns zero' do
             assert_equal 0, comments.size
           end
         end
-        context 'with one comment' do
+        describe 'with one comment' do
           let(:item) { config.locate('test/has_one_comment') }
           it 'returns one' do
             assert_equal 1, comments.size
           end
         end
-        context 'with two comments' do
+        describe 'with two comments' do
           let(:item) { config.locate('test/has_two_comments') }
           it 'returns two' do
             assert_equal 2, comments.size
@@ -80,7 +80,7 @@ describe CZTop::Config do
       describe '#each' do
         let(:block) { ->(_) { @called += 1 } }
         before { @called = 0; comments.each(&block) }
-        context 'with no comment' do
+        describe 'with no comment' do
           let(:item) { config.locate('test/has_no_comments') }
           it 'does not call block' do
             assert_equal 0, @called
@@ -89,7 +89,7 @@ describe CZTop::Config do
             assert_empty comments.to_a
           end
         end
-        context 'with one comment' do
+        describe 'with one comment' do
           let(:item) { config.locate('test/has_one_comment') }
           it 'returns one' do
             assert_equal 1, @called
@@ -98,7 +98,7 @@ describe CZTop::Config do
             assert_equal %w[foo], comments.to_a
           end
         end
-        context 'with two comments' do
+        describe 'with two comments' do
           let(:item) { config.locate('test/has_two_comments') }
           it 'returns two' do
             assert_equal 2, @called
@@ -112,7 +112,7 @@ describe CZTop::Config do
 
     describe 'serialization' do
       let(:config) do
-        root = described_class.new
+        root = CZTop::Config.new
         root.children.new('foo') do |c|
           c.value = 'bar'
           c.comments << 'baz'
@@ -120,7 +120,7 @@ describe CZTop::Config do
         end
         root
       end
-      context 'when serializing' do
+      describe 'when serializing' do
         let(:serialized) { config.to_s }
         it 'serializes first comment' do
           assert_match(/#baz/, serialized)
@@ -129,8 +129,8 @@ describe CZTop::Config do
           assert_match(/#bii/, serialized)
         end
       end
-      context 'when loading' do
-        let(:loaded_config) { described_class.from_string(config.to_s) }
+      describe 'when loading' do
+        let(:loaded_config) { CZTop::Config.from_string(config.to_s) }
         let(:comments) { loaded_config.locate('foo').comments }
         it 'ignores comments' do
           assert_operator comments, :none?

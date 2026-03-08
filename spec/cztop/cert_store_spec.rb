@@ -8,21 +8,22 @@ unless ::CZMQ::FFI::Zsys.has_curve
   warn "Skipping CZTop::Certificate specs because CURVE is not available."
 end
 
-describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
-  include_examples 'has FFI delegate'
+describe CZTop::CertStore do
+  include HasFFIDelegateExamples
 
-  context 'with disk location' do
-    subject { CZTop::CertStore.new(location) }
+  before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
 
-    let(:location) do
+  describe 'with disk location' do
+    let(:store_location) do
       Pathname.new(Dir.mktmpdir('zcertstore_test'))
     end
 
+    let(:subject) { CZTop::CertStore.new(store_location) }
     let(:cert1) { CZTop::Certificate.new }
 
     before do
       CZTop::Certificate.check_curve_availability
-      cert1.save(location + 'cert1')
+      cert1.save(store_location + 'cert1')
     end
 
     it 'initializes' do
@@ -30,7 +31,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
     end
 
     describe '#lookup' do
-      context 'with known public key' do
+      describe 'with known public key' do
         let(:key) { cert1.public_key(format: :z85) }
         it 'finds certificate' do
           assert_kind_of CZTop::Certificate, subject.lookup(key)
@@ -38,7 +39,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
         end
       end
 
-      context 'with unknown public key' do
+      describe 'with unknown public key' do
         let(:key) { CZTop::Certificate.new.public_key(format: :z85) }
         it 'returns nil' do
           assert_nil subject.lookup(key)
@@ -47,7 +48,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
     end
 
     describe '#insert' do
-      context 'with certificate' do
+      describe 'with certificate' do
         let(:cert) { CZTop::Certificate.new }
         let(:key) { cert.public_key(format: :z85) }
 
@@ -62,7 +63,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
           assert_equal key, looked_up_cert.public_key
         end
 
-        context 'when inserting duplicate certificate' do
+        describe 'when inserting duplicate certificate' do
           it 'raises ArgumentError' do
             assert_equal key, subject.lookup(key).public_key
             dup_cert = CZTop::Certificate.new_from key
@@ -70,7 +71,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
           end
         end
       end
-      context 'with invalid argument' do
+      describe 'with invalid argument' do
         it 'raises' do
           assert_raises(ArgumentError) do
             subject.insert(CZTop::Message.new('foo'))
@@ -80,15 +81,15 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
     end
   end
 
-  context 'without disk location' do
-    subject { CZTop::CertStore.new }
+  describe 'without disk location' do
+    let(:subject) { CZTop::CertStore.new }
 
     it 'initializes' do
       subject
     end
 
     describe '#insert' do
-      context 'with certificate' do
+      describe 'with certificate' do
         let(:cert) { CZTop::Certificate.new }
         let(:key) { cert.public_key(format: :z85) }
 
@@ -103,7 +104,7 @@ describe CZTop::CertStore, if: ::CZMQ::FFI::Zsys.has_curve do
           assert_equal key, looked_up_cert.public_key
         end
       end
-      context 'with invalid argument' do
+      describe 'with invalid argument' do
         it 'raises' do
           assert_raises(ArgumentError) do
             subject.insert(CZTop::Message.new('foo'))

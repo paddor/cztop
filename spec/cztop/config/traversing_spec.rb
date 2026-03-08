@@ -20,13 +20,13 @@ describe CZTop::Config do
               bind = inproc:@@//@@addr3
     EOF
   end
-  let(:config) { described_class.from_string(config_contents) }
+  let(:config) { CZTop::Config.from_string(config_contents) }
 
   describe '#execute' do
-    context 'with a block' do
+    describe 'with a block' do
       it 'yields config and level' do
         config.execute do |c, l|
-          assert_kind_of described_class, c
+          assert_kind_of CZTop::Config, c
           assert_kind_of Integer, l
         end
       end
@@ -41,7 +41,7 @@ describe CZTop::Config do
         assert_equal 0, first_level
       end
 
-      context 'starting from non-root element' do
+      describe 'starting from non-root element' do
         let(:child) { config.children.first }
         it 'level still starts at 0' do
           first_level = nil
@@ -63,7 +63,7 @@ describe CZTop::Config do
       end
     end
 
-    context 'with a block that breaks' do
+    describe 'with a block that breaks' do
       it 'calls block no more' do
         called = 0
         config.execute { |_| called += 1; break }
@@ -80,19 +80,19 @@ describe CZTop::Config do
         assert_nil config.execute { |_| break }
       end
 
-      context 'with break value' do
+      describe 'with break value' do
         # NOTE: broken on JRuby
         # see https://github.com/jruby/jruby/issues/3559 (JRuby only because
         # it keeps calling the block, even though it break'd)
-        it 'returns break value', skip: (%w[jruby].include?(RUBY_ENGINE) \
-                                         && 'broken on JRuby') do
+        it 'returns break value' do
+          skip 'broken on JRuby' if %w[jruby].include?(RUBY_ENGINE)
           assert_equal :foo, config.execute { |_| break :foo }
         end
       end
     end
 
 
-    context 'with a block that raises' do
+    describe 'with a block that raises' do
       it 'calls block no more' do
         called = 0
         begin
@@ -110,7 +110,7 @@ describe CZTop::Config do
       end
     end
 
-    context 'with no block' do
+    describe 'with no block' do
       it 'raises' do
         assert_raises(ArgumentError) { config.execute }
       end
@@ -124,7 +124,7 @@ describe CZTop::Config do
       assert_kind_of CZTop::Config::ChildrenAccessor, children
     end
 
-    context 'with children' do
+    describe 'with children' do
       let(:parent) { config.locate('/main/frontend/option') }
       it 'returns first child' do
         refute_nil children.first
@@ -134,7 +134,7 @@ describe CZTop::Config do
         assert_equal %w[hwm swap], children.to_a.map(&:name)
       end
     end
-    context 'with no children' do
+    describe 'with no children' do
       let(:parent) { config.locate('/main/frontend/option/swap') }
       it 'has no children' do
         assert_nil parent.children.first
@@ -142,7 +142,7 @@ describe CZTop::Config do
       end
     end
 
-    context 'adding a new child' do
+    describe 'adding a new child' do
       let(:new_child) { children.new }
       it 'returns new child' do
         assert_kind_of CZTop::Config, new_child
@@ -152,22 +152,22 @@ describe CZTop::Config do
         assert_equal 2 + 1, children.count
         assert_equal new_child, parent.last_at_depth(1)
       end
-      context 'with name' do
-        let(:name) { 'foo' }
+      describe 'with name' do
+        let(:child_name) { 'foo' }
         it 'sets name' do
-          assert_equal name, children.new(name).name
+          assert_equal child_name, children.new(child_name).name
         end
       end
-      context 'with name and value' do
-        let(:name) { 'foo' }
-        let(:value) { 'bar' }
-        let(:new_child) { children.new(name, value) }
+      describe 'with name and value' do
+        let(:child_name) { 'foo' }
+        let(:child_value) { 'bar' }
+        let(:new_child) { children.new(child_name, child_value) }
         it 'sets name and value' do
-          assert_equal name, new_child.name
-          assert_equal value, new_child.value
+          assert_equal child_name, new_child.name
+          assert_equal child_value, new_child.value
         end
       end
-      context 'with block given' do
+      describe 'with block given' do
         it 'yields new child' do
           yielded = nil
           new_child = children.new { |c| yielded = c }
@@ -183,14 +183,14 @@ describe CZTop::Config do
     it 'returns SiblingsAccessor' do
       assert_kind_of CZTop::Config::SiblingsAccessor, siblings
     end
-    context 'with no siblings' do
+    describe 'with no siblings' do
       it 'has no siblings' do
         refute_operator siblings, :any?
         assert_equal 0, siblings.count
         assert_nil siblings.first
       end
     end
-    context 'with siblings' do
+    describe 'with siblings' do
       let(:item) { config.locate('main/frontend/option') }
       it 'has siblings' do
         assert_operator siblings, :any?
@@ -205,7 +205,7 @@ describe CZTop::Config do
         siblings.each { |s| assert_kind_of CZTop::Config, s }
       end
     end
-    context 'with no younger siblings' do
+    describe 'with no younger siblings' do
       # has only an "older" sibling
       let(:item) { config.locate('main/backend') }
       it 'acts like it has no siblings' do
@@ -216,15 +216,15 @@ describe CZTop::Config do
   end
 
   describe '#locate' do
-    context 'given existing path' do
+    describe 'given existing path' do
       let(:located_item) { config.locate('/main/frontend/option/swap') }
       it 'returns config item' do
-        assert_kind_of described_class, located_item
+        assert_kind_of CZTop::Config, located_item
         assert_equal 'swap', located_item.name
       end
     end
 
-    context 'given non-existent path' do
+    describe 'given non-existent path' do
       let(:nonexistent_path) { '/foo/bar' }
       let(:located_item) { config.locate nonexistent_path }
       it 'returns nil' do
@@ -235,28 +235,28 @@ describe CZTop::Config do
 
   describe '#last_at_depth' do
     let(:found) { config.last_at_depth(level) }
-    context 'with level 0' do
+    describe 'with level 0' do
       let(:level) { 0 }
       let(:expected) { config }
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
-    context 'with level 1' do
+    describe 'with level 1' do
       let(:level) { 1 }
       let(:expected) { config.locate('main') }
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
-    context 'with level 2' do
+    describe 'with level 2' do
       let(:level) { 2 }
       let(:expected) { config.locate('main/backend') }
       it 'finds correct item' do
         assert_equal expected, found
       end
     end
-    context 'with level 99' do
+    describe 'with level 99' do
       let(:level) { 99 }
       it 'returns nil' do
         assert_nil nil, found

@@ -3,8 +3,9 @@
 require_relative 'spec_helper'
 
 describe CZTop::Z85 do
-  include_examples 'has FFI delegate'
-  subject { CZTop::Z85.new }
+  include HasFFIDelegateExamples
+
+  let(:subject) { CZTop::Z85.new }
   let(:ffi_delegate) { subject.ffi_delegate }
 
   it 'instantiates' do
@@ -12,7 +13,7 @@ describe CZTop::Z85 do
   end
 
   describe '#encode' do
-    context 'with empty data' do
+    describe 'with empty data' do
       it 'encodes' do
         assert_equal '', subject.encode('')
       end
@@ -21,7 +22,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context 'with even data' do
+    describe 'with even data' do
       # "even" means its length is divisible by 4 with no remainder
 
       # test data from https://github.com/zeromq/rfc/blob/master/src/spec_32.c
@@ -45,7 +46,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context 'with odd data' do
+    describe 'with odd data' do
       # input length is not divisible by 4 with no remainder
       let(:input) { 'foo bar' } # 7 bytes
 
@@ -55,25 +56,24 @@ describe CZTop::Z85 do
       end
     end
 
-    context 'with failure' do
+    describe 'with failure' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before do
-        allow(ffi_delegate).to receive(:encode).and_return(nullptr)
-      end
       it 'raises' do
-        assert_raises(SystemCallError) { subject.encode('abcd') }
+        ffi_delegate.stub(:encode, nullptr) do
+          assert_raises(SystemCallError) { subject.encode('abcd') }
+        end
       end
     end
   end
 
   describe '#decode' do
-    context 'with empty data' do
+    describe 'with empty data' do
       it 'decodes' do
         assert_equal '', subject.decode('')
       end
     end
 
-    context 'with even data' do
+    describe 'with even data' do
       let(:input) { 'HelloWorld' }
       let(:expected_output) do
         (+"\x86\x4F\xD2\x6F\xB5\x59\xF7\x5B").force_encoding Encoding::BINARY
@@ -88,7 +88,7 @@ describe CZTop::Z85 do
       end
     end
 
-    context 'with odd data' do
+    describe 'with odd data' do
       let(:input) { 'w]zPgvQTp1vQTO' } # 14 instead of 15 chars
       it 'raises' do
         err = assert_raises(ArgumentError) { subject.decode(input) }
@@ -96,13 +96,12 @@ describe CZTop::Z85 do
       end
     end
 
-    context 'with failure' do
+    describe 'with failure' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before do
-        allow(ffi_delegate).to receive(:decode).and_return(nullptr)
-      end
       it 'raises' do
-        assert_raises(SystemCallError) { subject.decode('abcde') }
+        ffi_delegate.stub(:decode, nullptr) do
+          assert_raises(SystemCallError) { subject.decode('abcde') }
+        end
       end
     end
   end

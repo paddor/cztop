@@ -3,16 +3,17 @@
 require_relative 'spec_helper'
 
 describe CZTop::Message do
-  include_examples 'has FFI delegate'
+  include HasFFIDelegateExamples
+  include ZMQHelper
+
   let(:msg)          { CZTop::Message.new }
   let(:ffi_delegate) { msg.ffi_delegate }
+  let(:subject)      { CZTop::Message.new }
 
   describe '#initialize' do
-    subject { CZTop::Message.new }
-
-    context 'with initial string' do
+    describe 'with initial string' do
       let(:content) { 'foo' }
-      subject { described_class.new(content) }
+      let(:subject) { CZTop::Message.new(content) }
       it 'sets content' do
         assert_equal content, subject.frames.first.to_s
       end
@@ -22,18 +23,18 @@ describe CZTop::Message do
       end
     end
 
-    context 'with array of strings' do
+    describe 'with array of strings' do
       let(:parts) { ['foo', '', 'bar'] }
-      let(:msg) { described_class.new(parts) }
+      let(:msg) { CZTop::Message.new(parts) }
       it 'takes them as frames' do
         assert_equal parts.size, msg.size
         assert_equal parts, msg.frames.map(&:to_s)
       end
     end
 
-    context 'with empty part' do
+    describe 'with empty part' do
       let(:parts) { [''] }
-      let(:msg) { described_class.new(parts) }
+      let(:msg) { CZTop::Message.new(parts) }
 
       it 'works' do
         assert_equal parts.size, msg.size
@@ -42,9 +43,9 @@ describe CZTop::Message do
       end
     end
 
-    context 'with empty array' do
+    describe 'with empty array' do
       let(:parts) { [] }
-      let(:msg) { described_class.new(parts) }
+      let(:msg) { CZTop::Message.new(parts) }
 
       it 'works' do
         msg
@@ -53,148 +54,168 @@ describe CZTop::Message do
   end
 
   describe '.coerce' do
-    context 'with a Message' do
+    describe 'with a Message' do
       it 'takes the Message as is' do
-        assert_same msg, described_class.coerce(msg)
+        assert_same msg, CZTop::Message.coerce(msg)
       end
     end
 
-    context 'with a String' do
+    describe 'with a String' do
       let(:content) { 'foobar' }
-      let(:coerced_msg) { described_class.coerce(content) }
+      let(:coerced_msg) { CZTop::Message.coerce(content) }
       it 'creates a new Message from the String' do
-        assert_kind_of described_class, coerced_msg
+        assert_kind_of CZTop::Message, coerced_msg
         assert_equal 1, coerced_msg.size
         assert_equal content, coerced_msg.frames.first.to_s
       end
     end
 
-    context 'with a Frame' do
-      Given(:frame_content) { 'foobar special content' }
-      Given(:frame) { CZTop::Frame.new(frame_content) }
-      When(:coerced_msg) { described_class.coerce(frame) }
-      Then { coerced_msg.is_a? described_class }
-      And { coerced_msg.size == 1 }
-      And { coerced_msg.frames.first.to_s == frame_content }
+    describe 'with a Frame' do
+      let(:frame_content) { 'foobar special content' }
+      let(:frame) { CZTop::Frame.new(frame_content) }
+      it 'creates a Message from the Frame' do
+        coerced_msg = CZTop::Message.coerce(frame)
+        assert_kind_of CZTop::Message, coerced_msg
+        assert_equal 1, coerced_msg.size
+        assert_equal frame_content, coerced_msg.frames.first.to_s
+      end
     end
 
-    context 'with array of strings' do
+    describe 'with array of strings' do
       let(:parts) { ['foo', '', 'bar'] }
-      let(:coerced_msg) { described_class.coerce(parts) }
+      let(:coerced_msg) { CZTop::Message.coerce(parts) }
       it 'takes them as frames' do
         assert_equal parts.size, coerced_msg.size
         assert_equal parts, coerced_msg.frames.map(&:to_s)
       end
     end
 
-    context 'given something else' do
-      Given(:something) { Object.new }
-      When(:result) { described_class.coerce(something) }
-      Then { result == Failure(ArgumentError) }
+    describe 'given something else' do
+      it 'raises' do
+        assert_raises(ArgumentError) { CZTop::Message.coerce(Object.new) }
+      end
     end
   end
 
   describe '#<<' do
-    Given(:msg) { CZTop::Message.new 'foo' }
-    Then { msg.size == 1 }
-    context 'with a string' do
-      Given(:frame) { 'bar' }
-      When { msg << frame }
-      Then { msg.size == 2 }
-      And { msg.to_a == %w[foo bar] }
+    let(:msg) { CZTop::Message.new 'foo' }
 
-      context 'when this fails' do
-        before do
-          expect(ffi_delegate).to receive(:addmem).and_return(-1)
-          expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EPERM::Errno)
-        end
+    it 'starts with one frame' do
+      assert_equal 1, msg.size
+    end
+
+    describe 'with a string' do
+      it 'appends the string as a frame' do
+        msg << 'bar'
+        assert_equal 2, msg.size
+        assert_equal %w[foo bar], msg.to_a
+      end
+
+      describe 'when this fails' do
         it 'raises' do
-          assert_raises(Errno::EPERM) { msg << frame }
+          ffi_delegate.define_singleton_method(:addmem) { |*| -1 }
+          CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+            assert_raises(Errno::EPERM) { msg << 'bar' }
+          end
         end
       end
     end
-    context 'with binary data' do
-      Given(:frame) { "foo\x08\0\0bar\0\0\0\x11" } # contains NULL bytes
-      When { msg << frame }
-      Then { msg.size == 2 }
-      And { msg[-1] == frame }
-    end
-    context 'with a frame' do
-      Given(:frame) { CZTop::Frame.new('bar') }
-      When { msg << frame }
-      Then { msg.size == 2 }
-      And { msg.to_a == %w[foo bar] }
 
-      context 'when this fails' do
-        before do
-          expect(ffi_delegate).to receive(:append).and_return(-1)
-          expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EPERM::Errno)
-        end
+    describe 'with binary data' do
+      let(:frame) { "foo\x08\0\0bar\0\0\0\x11" } # contains NULL bytes
+      it 'appends the binary data' do
+        msg << frame
+        assert_equal 2, msg.size
+        assert_equal frame, msg[-1]
+      end
+    end
+
+    describe 'with a frame' do
+      it 'appends the frame' do
+        frame = CZTop::Frame.new('bar')
+        msg << frame
+        assert_equal 2, msg.size
+        assert_equal %w[foo bar], msg.to_a
+      end
+
+      describe 'when this fails' do
         it 'raises' do
-          assert_raises(Errno::EPERM) { msg << frame }
+          ffi_delegate.define_singleton_method(:append) { |*| -1 }
+          CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+            assert_raises(Errno::EPERM) { msg << CZTop::Frame.new('bar') }
+          end
         end
       end
     end
-    context 'with something else' do
-      Given(:frame) { Object.new }
-      When(:result) { msg << frame }
-      Then { result == Failure(ArgumentError) }
+
+    describe 'with something else' do
+      it 'raises' do
+        assert_raises(ArgumentError) { msg << Object.new }
+      end
     end
-    context 'method chaining' do
-      When { msg << 'FOO' << 'BAR' }
-      Then { msg.to_a == %w[foo FOO BAR] }
+
+    describe 'method chaining' do
+      it 'supports chaining' do
+        msg << 'FOO' << 'BAR'
+        assert_equal %w[foo FOO BAR], msg.to_a
+      end
     end
   end
 
   describe '#prepend' do
-    Given(:msg) { CZTop::Message.new 'foo' }
-    Then { msg.size == 1 }
-    context 'with a string' do
-      Given(:frame) { 'bar' }
-      When { msg.prepend frame }
-      Then { msg.size == 2 }
-      And { msg.to_a == %w[bar foo] }
-    end
-    context 'with binary data' do
-      Given(:frame) { "foo\0\0\0bar" } # contains NULL byte
-      When { msg.prepend frame }
-      Then { msg.size == 2 }
-      And { msg[0] == frame }
+    let(:msg) { CZTop::Message.new 'foo' }
 
-      context 'when this fails' do
-        before do
-          expect(ffi_delegate).to receive(:pushmem).and_return(-1)
-          expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EPERM::Errno)
-        end
+    it 'starts with one frame' do
+      assert_equal 1, msg.size
+    end
+
+    describe 'with a string' do
+      it 'prepends the string' do
+        msg.prepend 'bar'
+        assert_equal 2, msg.size
+        assert_equal %w[bar foo], msg.to_a
+      end
+    end
+
+    describe 'with binary data' do
+      let(:frame) { "foo\0\0\0bar" } # contains NULL byte
+      it 'prepends the binary data' do
+        msg.prepend frame
+        assert_equal 2, msg.size
+        assert_equal frame, msg[0]
+      end
+
+      describe 'when this fails' do
         it 'raises' do
-          assert_raises(Errno::EPERM) { msg.prepend frame }
+          ffi_delegate.define_singleton_method(:pushmem) { |*| -1 }
+          CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+            assert_raises(Errno::EPERM) { msg.prepend "foo\0\0\0bar" }
+          end
         end
       end
     end
-    context 'with a frame' do
-      Given(:frame) { CZTop::Frame.new('bar') }
-      When { msg.prepend frame }
-      Then { msg.size == 2 }
-      And { msg.to_a == %w[bar foo] }
 
-      context 'when this fails' do
-        before do
-          expect(ffi_delegate).to receive(:prepend).and_return(-1)
-          expect(CZMQ::FFI::Errors).to receive(:errno)
-            .and_return(Errno::EPERM::Errno)
-        end
+    describe 'with a frame' do
+      it 'prepends the frame' do
+        msg.prepend CZTop::Frame.new('bar')
+        assert_equal 2, msg.size
+        assert_equal %w[bar foo], msg.to_a
+      end
+
+      describe 'when this fails' do
         it 'raises' do
-          assert_raises(Errno::EPERM) { msg.prepend frame }
+          ffi_delegate.define_singleton_method(:prepend) { |*| -1 }
+          CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+            assert_raises(Errno::EPERM) { msg.prepend CZTop::Frame.new('bar') }
+          end
         end
       end
     end
-    context 'with something else' do
-      Given(:frame) { Object.new }
-      When(:result) { msg.prepend frame }
-      Then { result == Failure(ArgumentError) }
+
+    describe 'with something else' do
+      it 'raises' do
+        assert_raises(ArgumentError) { msg.prepend Object.new }
+      end
     end
   end
 
@@ -210,151 +231,179 @@ describe CZTop::Message do
   end
 
   describe '#send_to' do
-    let(:msg)         { CZTop::Message.new 'foo' }
-    let(:destination) { double 'destination socket' }
+    let(:msg) { CZTop::Message.new 'foo' }
 
-    context 'with no frames' do
+    describe 'with no frames' do
       let(:msg) { CZTop::Message.new }
 
       it 'fails' do
         assert_raises ArgumentError do
-          msg.send_to(destination)
+          msg.send_to(Object.new)
         end
       end
     end
 
     it 'waits for writability' do
       # NOTE: we raise because we don't want it to actually send
-      expect(destination).to receive(:wait_writable).and_raise(IO::TimeoutError)
+      dest = Object.new
+      dest.define_singleton_method(:wait_writable) { raise IO::TimeoutError }
 
       assert_raises IO::TimeoutError do
-        msg.send_to(destination)
+        msg.send_to(dest)
       end
     end
 
-    context 'when successful' do
-      before do
-        allow(destination).to receive(:wait_writable) { true }
-      end
-      after { msg.send_to(destination) }
+    describe 'when successful' do
       it 'sends its delegate to the destination' do
-        expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
-                                                 .and_return(0)
+        dest = Object.new
+        dest.define_singleton_method(:wait_writable) { true }
+        sent_args = nil
+        CZMQ::FFI::Zmsg.stub(:send, ->(del, dst) { sent_args = [del, dst]; 0 }) do
+          msg.send_to(dest)
+        end
+        assert_equal [ffi_delegate, dest], sent_args
       end
     end
 
-    context 'when NOT successful' do
-      before do
-        allow(destination).to receive(:wait_writable) { true }
-        expect(CZMQ::FFI::Zmsg).to receive(:send).with(ffi_delegate, destination)
-                                                 .and_return(-1)
-        expect(CZMQ::FFI::Errors).to receive(:errno)
-          .and_return(errno)
+    describe 'when NOT successful' do
+      let(:dest) do
+        obj = Object.new
+        obj.define_singleton_method(:wait_writable) { true }
+        obj
       end
-      context 'with sndtimeo reached' do
-        let(:errno) { Errno::EAGAIN::Errno }
+
+      describe 'with sndtimeo reached' do
         it 'raises IO::EAGAINWaitWritable' do
-          assert_raises(IO::EAGAINWaitWritable) { msg.send_to(destination) }
+          CZMQ::FFI::Zmsg.stub(:send, ->(*) { -1 }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EAGAIN::Errno) do
+              assert_raises(IO::EAGAINWaitWritable) { msg.send_to(dest) }
+            end
+          end
         end
       end
-      context 'with host unreachable' do
+
+      describe 'with host unreachable' do
         # NOTE: unroutable message given to ROUTER with ZMQ_ROUTER_MANDATORY
         # option set.
-        let(:errno) { Errno::EHOSTUNREACH::Errno }
         it 'raises' do
-          assert_raises(SocketError) { msg.send_to(destination) }
+          CZMQ::FFI::Zmsg.stub(:send, ->(*) { -1 }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EHOSTUNREACH::Errno) do
+              assert_raises(SocketError) { msg.send_to(dest) }
+            end
+          end
         end
       end
-      context 'with other error' do
-        let(:errno) { Errno::EPERM::Errno }
+
+      describe 'with other error' do
         it 'raises' do
-          assert_raises(Errno::EPERM) { msg.send_to(destination) }
+          CZMQ::FFI::Zmsg.stub(:send, ->(*) { -1 }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+              assert_raises(Errno::EPERM) { msg.send_to(dest) }
+            end
+          end
         end
       end
     end
   end
 
   describe '.receive_from' do
-    let(:received_message) { CZTop::Message.receive_from(src) }
-    let(:src) { double 'source' }
+    let(:src) do
+      obj = Object.new
+      obj.define_singleton_method(:wait_readable) { true }
+      obj
+    end
 
     it 'waits for readability' do
       # NOTE: we raise because we don't want it to actually receive
-      expect(src).to receive(:wait_readable).and_raise(IO::TimeoutError)
+      src_obj = Object.new
+      src_obj.define_singleton_method(:wait_readable) { raise IO::TimeoutError }
 
       assert_raises IO::TimeoutError do
-        received_message
+        CZTop::Message.receive_from(src_obj)
       end
     end
 
-    context 'when successful' do
-      before do
-        allow(src).to receive(:wait_readable) { true }
-      end
+    describe 'when successful' do
       it 'receives message from source' do
-        expect(CZMQ::FFI::Zmsg).to receive(:recv).with(src)
-                                                 .and_return(ffi_delegate)
-        assert_kind_of CZTop::Message, received_message
-        assert_same msg.ffi_delegate, received_message.ffi_delegate
+        ffi_del = CZMQ::FFI::Zmsg.new
+        CZMQ::FFI::Zmsg.stub(:recv, ->(_s) { ffi_del }) do
+          received = CZTop::Message.receive_from(src)
+          assert_kind_of CZTop::Message, received
+          assert_same ffi_del, received.ffi_delegate
+        end
       end
     end
 
-    context 'when NOT successful' do
+    describe 'when NOT successful' do
       let(:nullptr) { ::FFI::Pointer::NULL }
-      before do
-        allow(src).to receive(:wait_readable) { true }
-        expect(CZMQ::FFI).to receive(:zmsg_recv).and_return(nullptr)
-        expect(CZMQ::FFI::Errors).to receive(:errno)
-          .and_return(errno)
-      end
-      context 'when interrupted' do
-        let(:errno) { Errno::EINTR::Errno }
+
+      describe 'when interrupted' do
         it 'raises Interrupt' do
-          assert_raises(Interrupt) { received_message }
+          CZMQ::FFI.stub(:zmsg_recv, ->(_) { nullptr }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EINTR::Errno) do
+              assert_raises(Interrupt) { CZTop::Message.receive_from(src) }
+            end
+          end
         end
       end
-      context 'with rcvtimeo reached' do
-        let(:errno) { Errno::EAGAIN::Errno }
+
+      describe 'with rcvtimeo reached' do
         it 'raises IO::EAGAINWaitReadable' do
-          assert_raises(IO::EAGAINWaitReadable) { received_message }
+          CZMQ::FFI.stub(:zmsg_recv, ->(_) { nullptr }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EAGAIN::Errno) do
+              assert_raises(IO::EAGAINWaitReadable) { CZTop::Message.receive_from(src) }
+            end
+          end
         end
       end
-      context 'with other error' do
-        let(:errno) { Errno::EPERM::Errno }
+
+      describe 'with other error' do
         it 'raises RuntimeError' do
-          assert_raises(Errno::EPERM) { received_message }
+          CZMQ::FFI.stub(:zmsg_recv, ->(_) { nullptr }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EPERM::Errno) do
+              assert_raises(Errno::EPERM) { CZTop::Message.receive_from(src) }
+            end
+          end
         end
       end
     end
   end
 
   describe '#empty?' do
-    context 'with no content' do
-      Then { subject.empty? }
+    describe 'with no content' do
+      it 'is empty' do
+        assert_operator subject, :empty?
+      end
     end
-    context 'with content' do
-      subject { CZTop::Message.new 'foo' }
-      Then { !subject.empty? }
+    describe 'with content' do
+      let(:subject) { CZTop::Message.new 'foo' }
+      it 'is not empty' do
+        refute_operator subject, :empty?
+      end
     end
-    context 'with empty frame' do
-      subject { CZTop::Message.new '' }
-      Then { subject.empty? }
+    describe 'with empty frame' do
+      let(:subject) { CZTop::Message.new '' }
+      it 'is empty' do
+        assert_operator subject, :empty?
+      end
     end
 
-    context 'with no frames' do
-      subject { CZTop::Message.new }
-      Then { subject.empty? }
+    describe 'with no frames' do
+      let(:subject) { CZTop::Message.new }
+      it 'is empty' do
+        assert_operator subject, :empty?
+      end
     end
   end
 
   describe '#content_size' do
-    context 'with no content' do
+    describe 'with no content' do
       it 'has content size zero' do
         assert_equal 0, subject.content_size
       end
     end
-    context 'with content' do
-      subject { CZTop::Message.new 'foo' }
+    describe 'with content' do
+      let(:subject) { CZTop::Message.new 'foo' }
       it 'returns correct content size' do
         assert_equal 3, subject.content_size
       end
@@ -362,19 +411,23 @@ describe CZTop::Message do
   end
 
   describe '#to_a' do
-    context 'with no frames' do
-      Then { [] == subject.to_a }
+    describe 'with no frames' do
+      it 'returns empty array' do
+        assert_equal [], subject.to_a
+      end
     end
-    context 'with frames' do
-      Given(:parts) { %w[foo bar] }
-      subject { CZTop::Message.new parts }
-      Then { parts == subject.to_a }
+    describe 'with frames' do
+      let(:parts) { %w[foo bar] }
+      let(:subject) { CZTop::Message.new parts }
+      it 'returns array of frame strings' do
+        assert_equal parts, subject.to_a
+      end
     end
   end
 
   describe '#inspect' do
     let(:s) { msg.inspect }
-    context 'with empty message' do
+    describe 'with empty message' do
       it 'contains class name' do
         assert_match(/\A#<CZTop::Message:.*>\z/, s)
       end
@@ -392,7 +445,7 @@ describe CZTop::Message do
       end
     end
 
-    context 'with content' do
+    describe 'with content' do
       before { msg << 'FOO' << 'BAR' }
       it 'contains number of frames' do
         assert_match(/\bframes=2\b/, s)
@@ -405,7 +458,7 @@ describe CZTop::Message do
       end
     end
 
-    context 'with huge message' do
+    describe 'with huge message' do
       before { msg << 'FOO' * 1000 } # 3000 byte message
       it 'contains content placeholder' do
         assert_match(/\bcontent=\[\.\.\.\]/, s)
@@ -414,52 +467,65 @@ describe CZTop::Message do
   end
 
   describe '#[]' do
-    context 'with existing frame' do
-      subject { CZTop::Message.new %w[foo] }
-      Then { 'foo' == subject[0] }
+    describe 'with existing frame' do
+      let(:subject) { CZTop::Message.new %w[foo] }
+      it 'returns frame content' do
+        assert_equal 'foo', subject[0]
+      end
     end
 
-    context 'with non-existing frame' do
-      subject { CZTop::Message.new %w[foo] }
-      Then { subject[1].nil? }
+    describe 'with non-existing frame' do
+      let(:subject) { CZTop::Message.new %w[foo] }
+      it 'returns nil' do
+        assert_nil subject[1]
+      end
     end
   end
 
-  describe '#routing_id', if: has_czmq_drafts? do
-    context 'with no routing ID set' do
-      Then { msg.routing_id == 0 }
+  describe '#routing_id' do
+    before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
+
+    describe 'with no routing ID set' do
+      it 'returns zero' do
+        assert_equal 0, msg.routing_id
+      end
     end
-    context 'with routing ID set' do
-      Given(:routing_id) { 12_345 }
-      When { msg.routing_id = routing_id }
-      Then { msg.routing_id == routing_id }
+    describe 'with routing ID set' do
+      let(:routing_id) { 12_345 }
+      it 'returns the routing ID' do
+        msg.routing_id = routing_id
+        assert_equal routing_id, msg.routing_id
+      end
     end
   end
 
-  describe '#routing_id=', if: has_czmq_drafts? do
-    context 'with valid routing ID' do
-      # code duplication for completeness' sake
-      Given(:new_routing_id) { 123_456 }
-      When { msg.routing_id = new_routing_id }
-      Then { msg.routing_id == new_routing_id }
+  describe '#routing_id=' do
+    before { skip 'requires CZMQ drafts' unless has_czmq_drafts? }
+
+    describe 'with valid routing ID' do
+      let(:new_routing_id) { 123_456 }
+      it 'sets routing ID' do
+        msg.routing_id = new_routing_id
+        assert_equal new_routing_id, msg.routing_id
+      end
     end
 
-    context 'with negative routing ID' do
-      Given(:new_routing_id) { -123_456 }
-      When(:result) { msg.routing_id = new_routing_id }
-      Then { result == Failure(RangeError) }
+    describe 'with negative routing ID' do
+      it 'raises' do
+        assert_raises(RangeError) { msg.routing_id = -123_456 }
+      end
     end
 
-    context 'with too big routing ID' do
-      Given(:new_routing_id) { 123_456_345_676_543_456_765 }
-      When(:result) { msg.routing_id = new_routing_id }
-      Then { result == Failure(RangeError) }
+    describe 'with too big routing ID' do
+      it 'raises' do
+        assert_raises(RangeError) { msg.routing_id = 123_456_345_676_543_456_765 }
+      end
     end
 
-    context 'with non-integer' do
-      Given(:new_routing_id) { 'foo' }
-      When(:result) { msg.routing_id = new_routing_id }
-      Then { result == Failure(ArgumentError) }
+    describe 'with non-integer' do
+      it 'raises' do
+        assert_raises(ArgumentError) { msg.routing_id = 'foo' }
+      end
     end
   end
 end

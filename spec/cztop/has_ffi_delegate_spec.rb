@@ -37,11 +37,13 @@ describe CZTop::HasFFIDelegate do
   let(:delegator) { delegator_class.new }
 
   describe '.ffi_delegate' do
-    let(:method) { :m1 }
+    let(:method_name) { :m1 }
     it 'defines delegator method' do
-      expect(delegator_class).to receive(:def_delegator)
-        .with(:@ffi_delegate, method)
-      delegator_class.ffi_delegate(method)
+      called_with = nil
+      delegator_class.stub(:def_delegator, ->(*args) { called_with = args }) do
+        delegator_class.ffi_delegate(method_name)
+      end
+      assert_equal [:@ffi_delegate, method_name], called_with
     end
 
     it "doesn't take multiple method names" do # for better documentation
@@ -52,12 +54,12 @@ describe CZTop::HasFFIDelegate do
   end
 
   describe '#ffi_delegate' do
-    context 'with no delegate attached' do
+    describe 'with no delegate attached' do
       it 'returns nil' do
         assert_nil delegator.ffi_delegate
       end
     end
-    context 'with delegate attached' do
+    describe 'with delegate attached' do
       before { delegator.attach_ffi_delegate(delegate) }
       it 'returns delegate' do
         assert_same delegator.ffi_delegate, delegate
@@ -71,27 +73,28 @@ describe CZTop::HasFFIDelegate do
       assert_same ptr, delegator.to_ptr
     end
     it 'delegates' do
-      expect(delegate).to receive(:to_ptr)
-      delegator.to_ptr
+      called = false
+      delegate.stub(:to_ptr, -> { called = true; ptr }) do
+        delegator.to_ptr
+      end
+      assert called
     end
   end
 
   describe '#attach_ffi_delegate' do
-    context 'with valid delegate' do
+    describe 'with valid delegate' do
       it 'attaches delegate' do
         delegator.attach_ffi_delegate(delegate)
         assert_same delegate, delegator.ffi_delegate
       end
     end
-    context 'with nullified delegate' do
+    describe 'with nullified delegate' do
       let(:ptr) { nil } # represents nullpointer
-      before do
-        expect(CZMQ::FFI::Errors).to receive(:errno)
-          .and_return(Errno::EINVAL::Errno)
-      end
       it 'raises' do
-        assert_raises(ArgumentError) do
-          delegator.attach_ffi_delegate(delegate)
+        CZMQ::FFI::Errors.stub(:errno, Errno::EINVAL::Errno) do
+          assert_raises(ArgumentError) do
+            delegator.attach_ffi_delegate(delegate)
+          end
         end
       end
     end
@@ -100,9 +103,11 @@ describe CZTop::HasFFIDelegate do
   describe '#from_ffi_delegate' do
     let(:arg) { 'foo' }
     it 'delegates to class method equivalent' do
-      expect(delegator_class).to \
-        receive(:from_ffi_delegate).with(arg)
-      delegator.from_ffi_delegate(arg)
+      called_with = nil
+      delegator_class.stub(:from_ffi_delegate, ->(a) { called_with = a }) do
+        delegator.from_ffi_delegate(arg)
+      end
+      assert_equal arg, called_with
     end
   end
 
@@ -116,7 +121,7 @@ describe CZTop::HasFFIDelegate do
       assert_same delegate, obj.ffi_delegate
     end
 
-    context "with constructor that shouldn't be called in this case" do
+    describe "with constructor that shouldn't be called in this case" do
       # A typical constructor would be:
       #
       #   def initialize(content = "")

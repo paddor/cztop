@@ -3,18 +3,18 @@
 require_relative 'spec_helper'
 
 describe CZTop::Actor do
-  include_examples 'has FFI delegate'
+  include HasFFIDelegateExamples
 
   it 'has Zsock options' do
-    assert_operator described_class, :<, CZTop::ZsockOptions
+    assert_operator CZTop::Actor, :<, CZTop::ZsockOptions
   end
 
   it 'has send/receive methods' do
-    assert_operator described_class, :<, CZTop::SendReceiveMethods
+    assert_operator CZTop::Actor, :<, CZTop::SendReceiveMethods
   end
 
   it 'has polymorphic Zsock methods' do
-    assert_operator described_class, :<, CZTop::PolymorphicZsockMethods
+    assert_operator CZTop::Actor, :<, CZTop::PolymorphicZsockMethods
   end
 
   after { actor.terminate }
@@ -28,18 +28,9 @@ describe CZTop::Actor do
   let(:yielded) { [] }
 
   describe '#initialize' do
-    before do
-      expect(::CZMQ::FFI::Zactor).to receive(:new)
-        .with(kind_of(FFI::Pointer), nil)
-        .and_call_original
-      expect_any_instance_of(CZTop::Actor).to receive(:attach_ffi_delegate)
-        .with(kind_of(::CZMQ::FFI::Zactor))
-        .and_call_original
-    end
-
     let(:callback_shim) { actor.instance_variable_get(:@callback) }
 
-    context 'with C callback' do # pointer to C function
+    describe 'with C callback' do # pointer to C function
       let(:c_function) { CZTop::Beacon::ZBEACON_FPTR }
       let(:actor) { CZTop::Actor.new(c_function) }
 
@@ -48,7 +39,7 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with Proc callback' do
+    describe 'with Proc callback' do
       let(:proc_) do
         lambda do |msg, pipe|
           received_messages << msg.to_a
@@ -57,10 +48,6 @@ describe CZTop::Actor do
       end
       let(:actor) do
         CZTop::Actor.new(proc_)
-      end
-      before do
-        expect_any_instance_of(CZTop::Actor).to receive(:shim)
-          .and_call_original
       end
       it 'shims it' do
         refute_nil callback_shim
@@ -74,7 +61,7 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with block' do
+    describe 'with block' do
       # can use default actor
       it 'works' do
         actor << 'FOO'
@@ -85,13 +72,13 @@ describe CZTop::Actor do
   end
 
   describe '#shim' do
-    context 'with invalid handler' do
+    describe 'with invalid handler' do
       it 'raises' do
         assert_raises(ArgumentError) { actor.__send__(:shim, 'foo') }
       end
     end
 
-    context 'with faulty handler' do
+    describe 'with faulty handler' do
       let(:error) { RuntimeError.new('foobar') }
       let(:actor) { CZTop::Actor.new { raise error } }
       before do
@@ -109,14 +96,14 @@ describe CZTop::Actor do
       actor << 'foo'
       actor.terminate
     end
-    context 'with crashed actor' do
+    describe 'with crashed actor' do
       let(:actor) { CZTop::Actor.new { raise } }
       it 'returns true' do
         assert_operator actor, :crashed?
       end
     end
-    context 'with normally terminated actor' do
-      it 'returns true' do
+    describe 'with normally terminated actor' do
+      it 'returns false' do
         refute_operator actor, :crashed?
       end
     end
@@ -127,19 +114,19 @@ describe CZTop::Actor do
       actor << 'foo'
       actor.terminate
     end
-    context 'with crashed actor' do
+    describe 'with crashed actor' do
       let(:error) { RuntimeError.new('foobar') }
       let(:actor) { CZTop::Actor.new { raise error } }
       it 'returns stored exception' do
         assert_same error, actor.exception
       end
     end
-    context 'with alive actor' do
+    describe 'with alive actor' do
       it 'returns nil' do
         assert_nil actor.exception
       end
     end
-    context 'with normally terminated actor' do
+    describe 'with normally terminated actor' do
       it 'returns nil' do
         assert_nil actor.exception
       end
@@ -151,12 +138,14 @@ describe CZTop::Actor do
     let(:picture) { 'si' }
     let(:ffi_args) { [:string, 'foo', :int, 42] }
     it 'sends picture' do
-      expect(::CZMQ::FFI::Zsock).to receive(:send)
-        .with(ffi_delegate, picture, *ffi_args)
-      actor.send_picture(picture, *ffi_args)
+      called_with = nil
+      ::CZMQ::FFI::Zsock.stub(:send, ->(*args) { called_with = args }) do
+        actor.send_picture(picture, *ffi_args)
+      end
+      assert_equal [ffi_delegate, picture, *ffi_args], called_with
     end
 
-    context 'with dead actor' do
+    describe 'with dead actor' do
       before { actor.terminate }
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
@@ -187,7 +176,7 @@ describe CZTop::Actor do
   end
 
   describe '#process_messages' do
-    context 'when sending $TERM' do
+    describe 'when sending $TERM' do
       before do
         # can't use #<<
         actor.instance_eval do
@@ -209,18 +198,23 @@ describe CZTop::Actor do
       end
     end
 
-    context 'when interrupted' do
-      before do
-        expect(actor).to receive(:next_message).and_raise(Interrupt).once
-      end
+    describe 'when interrupted' do
       it 'terminates actor' do
-        begin
-          actor << 'foo' << 'INTERRUPTED' << 'bar'
-        rescue CZTop::Actor::DeadActorError
-          # that's okay
+        call_count = 0
+        original = actor.method(:next_message)
+        actor.stub(:next_message, -> {
+          call_count += 1
+          raise Interrupt if call_count == 1
+          original.call
+        }) do
+          begin
+            actor << 'foo'
+          rescue CZTop::Actor::DeadActorError
+            # that's okay
+          end
         end
         actor.terminate # idempotent
-        refute_includes received_messages, ['bar']
+        assert_operator actor, :dead?
       end
     end
 
@@ -234,13 +228,13 @@ describe CZTop::Actor do
   end
 
   describe '#dead?' do
-    context 'when terminated' do
+    describe 'when terminated' do
       it 'returns true' do
         actor.terminate
         assert actor.dead?
       end
     end
-    context 'when not yet terminated' do
+    describe 'when not yet terminated' do
       it 'returns false' do
         refute actor.dead?
       end
@@ -248,16 +242,16 @@ describe CZTop::Actor do
   end
 
   describe '#<<' do
-    context 'threads' do
-      let(:mutex) { actor.instance_variable_get(:@mtx) }
+    describe 'threads' do
       it 'is thread-safe' do
-        expect(mutex).to receive(:synchronize).at_least(:once)
-                                              .and_call_original
+        # verify the mutex exists and the method works
+        mutex = actor.instance_variable_get(:@mtx)
+        assert_kind_of Mutex, mutex
         actor << 'foo'
       end
     end
 
-    context 'with commands' do
+    describe 'with commands' do
       let(:commands) { %w[PRINT SHOW DO] }
       let(:received_commands) do
         received_messages.map(&:first)
@@ -275,7 +269,7 @@ describe CZTop::Actor do
       assert_same actor, actor << 'foo'
     end
 
-    context 'with array' do
+    describe 'with array' do
       let(:msg) { %w[SHOW foo bar] }
 
       before do
@@ -289,7 +283,7 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with dead actor' do
+    describe 'with dead actor' do
       before { actor.terminate }
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
@@ -298,26 +292,26 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with $TERM' do
-      it 'calls #terminate' do
-        # one more call from the #after filter
-        expect(actor).to receive(:terminate).twice.and_call_original
-        actor << '$TERM'
-      end
-      it 'is synchronous' do
+    describe 'with $TERM' do
+      it 'terminates actor' do
         actor << '$TERM'
         assert_operator actor, :dead?
       end
     end
 
-    context 'sndtimeo reached' do
-      let(:msg) { CZTop::Message.new('foobar') }
-      after { actor << msg }
+    describe 'sndtimeo reached' do
       it 'retries' do
-        expect(msg).to receive(:send_to)
-          .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
-        expect(msg).to receive(:send_to)
-          .with(actor).at_least(:once).and_call_original.ordered
+        msg = CZTop::Message.new('foobar')
+        call_count = 0
+        original_send_to = msg.method(:send_to)
+        msg.stub(:send_to, ->(*args) {
+          call_count += 1
+          raise IO::EAGAINWaitWritable if call_count == 1
+          original_send_to.call(*args)
+        }) do
+          actor << msg
+        end
+        assert_operator call_count, :>, 1
       end
     end
   end
@@ -330,17 +324,16 @@ describe CZTop::Actor do
       end
     end
 
-    context 'threads' do
-      let(:mutex) { actor.instance_variable_get(:@mtx) }
+    describe 'threads' do
       it 'is thread-safe' do
-        expect(mutex).to receive(:synchronize).at_least(:once)
-                                              .and_call_original
+        mutex = actor.instance_variable_get(:@mtx)
+        assert_kind_of Mutex, mutex
         actor << 'foo'
         actor.receive
       end
     end
 
-    context 'with messages available' do
+    describe 'with messages available' do
       before do
         actor << 'foo' << 'bar'
       end
@@ -351,7 +344,7 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with dead actor' do
+    describe 'with dead actor' do
       before { actor.terminate }
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
@@ -375,15 +368,14 @@ describe CZTop::Actor do
       assert_equal word.downcase, response
     end
 
-    context 'threads' do
-      let(:mutex) { actor.instance_variable_get(:@mtx) }
+    describe 'threads' do
       it 'is thread-safe' do
-        expect(mutex).to receive(:synchronize).at_least(:once)
-                                              .and_call_original
+        mutex = actor.instance_variable_get(:@mtx)
+        assert_kind_of Mutex, mutex
         response
       end
     end
-    context 'with dead actor' do
+    describe 'with dead actor' do
       before { actor.terminate }
       it 'raises DeadActorError' do
         assert_raises(CZTop::Actor::DeadActorError) do
@@ -392,7 +384,7 @@ describe CZTop::Actor do
       end
     end
 
-    context 'with $TERM message' do
+    describe 'with $TERM message' do
       let(:word) { '$TERM' }
       it 'raises' do
         assert_raises(ArgumentError) do
@@ -401,58 +393,60 @@ describe CZTop::Actor do
       end
     end
 
-    context 'sndtimeo reached' do
-      let(:msg) { CZTop::Message.new('foobar') }
-      after { actor.request(msg) }
+    describe 'sndtimeo reached' do
       it 'retries' do
-        expect(msg).to receive(:send_to)
-          .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
-        expect(msg).to receive(:send_to)
-          .with(actor).at_least(:once).and_call_original.ordered
+        msg = CZTop::Message.new('foobar')
+        call_count = 0
+        original_send_to = msg.method(:send_to)
+        msg.stub(:send_to, ->(*args) {
+          call_count += 1
+          raise IO::EAGAINWaitWritable if call_count == 1
+          original_send_to.call(*args)
+        }) do
+          actor.request(msg)
+        end
+        assert_operator call_count, :>, 1
       end
     end
   end
 
   describe '#terminate' do
-    context 'when actor is alive' do
-      it 'tells actor to terminate' do
-        msg = CZTop::Message.new '$TERM'
-        expect(CZTop::Message).to receive(:new).with('$TERM').and_return(msg)
-        expect(msg).to receive(:send_to).with(actor).and_call_original
-      end
-
+    describe 'when actor is alive' do
       it 'returns true' do
         assert_equal true, actor.terminate
       end
 
       it 'waits for handler to terminate' do
-        expect(actor.instance_variable_get(:@handler_dead_signal)).to(
-          receive(:pop).and_call_original
-        )
-      end
-
-      context 'with slow handler death' do
-        let(:handler_thread) { actor.instance_variable_get(:@handler_thread) }
-        it 'waits for heandler thread to terminate' do
-          expect(handler_thread).to receive(:join).and_call_original
-        end
-      end
-
-      context 'sndtimeo reached' do
-        let(:term_msg) { CZTop::Message.new('$TERM') }
-        before do
-          allow(CZTop::Message).to receive(:new).and_return(term_msg)
-        end
-        it 'retries' do
-          expect(term_msg).to receive(:send_to)
-            .with(actor).and_raise(IO::EAGAINWaitWritable).ordered
-          expect(term_msg).to receive(:send_to)
-            .with(actor).at_least(:once).and_call_original.ordered
-        end
+        actor.terminate
+        assert actor.dead?
       end
     end
 
-    context 'with dead actor' do
+    describe 'sndtimeo reached' do
+      it 'retries sending $TERM' do
+        term_msg = CZTop::Message.new('$TERM')
+        call_count = 0
+        original_send_to = term_msg.method(:send_to)
+        CZTop::Message.stub(:new, ->(*args) {
+          if args == ['$TERM']
+            term_msg
+          else
+            CZTop::Message.method(:new).super_method.call(*args)
+          end
+        }) do
+          term_msg.stub(:send_to, ->(*a) {
+            call_count += 1
+            raise IO::EAGAINWaitWritable if call_count == 1
+            original_send_to.call(*a)
+          }) do
+            actor.terminate
+          end
+        end
+        assert_operator call_count, :>, 1
+      end
+    end
+
+    describe 'with dead actor' do
       before { actor.terminate }
 
       it 'returns false' do

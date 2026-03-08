@@ -3,14 +3,16 @@
 require_relative '../../spec_helper'
 
 describe CZTop::Message do
-  subject { CZTop::Message.new }
-  context 'empty message' do
+  let(:subject) { CZTop::Message.new }
+
+  describe 'empty message' do
     describe '#size' do
       it 'return zero' do
         assert_equal 0, subject.size
       end
     end
   end
+
   describe '#frames' do
     let(:frames) { subject.frames }
     it 'returns FramesAccessor' do
@@ -21,13 +23,13 @@ end
 
 describe CZTop::Message::FramesAccessor do
   it 'is enumerable' do
-    assert_operator described_class, :<, Enumerable
+    assert_operator CZTop::Message::FramesAccessor, :<, Enumerable
   end
 
   let(:frames) { msg.frames }
   let(:msg) { CZTop::Message.new(frame_contents) }
 
-  context 'message with content' do
+  describe 'message with content' do
     let(:frame_contents) { %w[foo bar baz] }
 
     describe '#size' do
@@ -47,6 +49,7 @@ describe CZTop::Message::FramesAccessor do
         assert_equal 'baz', frames.last.to_s
       end
     end
+
     describe '#[]' do
       it 'returns correct frame' do
         assert_equal frames.to_a[0], frames[0]
@@ -56,6 +59,7 @@ describe CZTop::Message::FramesAccessor do
         assert_nil frames[99]
       end
     end
+
     describe '#each' do
       it 'yields frames' do
         frames.each { |frame| assert_kind_of CZTop::Frame, frame }
@@ -66,7 +70,7 @@ describe CZTop::Message::FramesAccessor do
     end
   end
 
-  context 'message with no content' do
+  describe 'message with no content' do
     let(:frame_contents) { [] }
 
     describe '#size' do
@@ -86,6 +90,7 @@ describe CZTop::Message::FramesAccessor do
         assert_nil frames.last
       end
     end
+
     describe '#[]' do
       it 'returns nil' do
         assert_nil frames[0]
@@ -95,6 +100,7 @@ describe CZTop::Message::FramesAccessor do
         assert_nil frames[99]
       end
     end
+
     describe '#each' do
       it "doesn't yield" do
         frames.each { flunk }

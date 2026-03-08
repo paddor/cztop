@@ -9,7 +9,9 @@ unless ::CZMQ::FFI::Zsys.has_curve
 end
 
 
-describe CZTop::Certificate, if: !::CZMQ::FFI::Zsys.has_curve do
+describe CZTop::Certificate do
+  before { skip 'CURVE is available' if ::CZMQ::FFI::Zsys.has_curve }
+
   describe '#initialize' do
     it 'raises' do
       assert_raises(NotImplementedError) do
@@ -20,119 +22,154 @@ describe CZTop::Certificate, if: !::CZMQ::FFI::Zsys.has_curve do
 end
 
 
-describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
-  include_examples 'has FFI delegate'
+describe CZTop::Certificate do
+  include HasFFIDelegateExamples
+  include ZMQHelper
 
-  context 'with certificate' do
+  before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
+
+  describe 'with certificate' do
     let(:cert) { CZTop::Certificate.new }
     let(:ffi_delegate) { cert.ffi_delegate }
 
     describe '#initialize' do
-      Then { cert }
-      Then { !cert.zero? }
+      it 'creates a valid certificate' do
+        assert cert
+        refute cert.zero?
+      end
     end
 
     describe '#public_key' do
-      context 'with :z85 format' do
-        Given(:key) { cert.public_key(format: :z85) }
-        Then { Encoding::ASCII == key.encoding }
-        And { 40 == key.size }
-        And { CZTop::Z85.new.encode(cert.public_key(format: :binary)) == key }
+      describe 'with :z85 format' do
+        it 'returns ASCII encoded 40-char key matching binary encoding' do
+          key = cert.public_key(format: :z85)
+          assert_equal Encoding::ASCII, key.encoding
+          assert_equal 40, key.size
+          assert_equal CZTop::Z85.new.encode(cert.public_key(format: :binary)), key
+        end
       end
 
-      context 'with no format' do
-        let(:key) { cert.public_key }
-        Then { cert.public_key(format: :z85) == key } # same as with no format
+      describe 'with no format' do
+        it 'returns same as z85 format' do
+          assert_equal cert.public_key(format: :z85), cert.public_key
+        end
       end
 
-      context 'with :binary format' do
-        Given(:key) { cert.public_key(format: :binary) }
-        Then { Encoding::BINARY == key.encoding }
-        And { 32 == key.bytesize }
+      describe 'with :binary format' do
+        it 'returns binary encoded 32-byte key' do
+          key = cert.public_key(format: :binary)
+          assert_equal Encoding::BINARY, key.encoding
+          assert_equal 32, key.bytesize
+        end
       end
 
-      context 'with invalid format' do
-        When(:result) { cert.public_key(format: :foo) }
-        Then { result == Failure(ArgumentError) }
+      describe 'with invalid format' do
+        it 'raises' do
+          assert_raises(ArgumentError) { cert.public_key(format: :foo) }
+        end
       end
     end
 
     describe '#secret_key' do
-      context 'with :z85 format' do
-        Given(:key) { cert.secret_key(format: :z85) }
-        Then { Encoding::ASCII == key.encoding }
-        And { 40 == key.size }
-        And { CZTop::Z85.new.encode(cert.secret_key(format: :binary)) == key }
+      describe 'with :z85 format' do
+        it 'returns ASCII encoded 40-char key matching binary encoding' do
+          key = cert.secret_key(format: :z85)
+          assert_equal Encoding::ASCII, key.encoding
+          assert_equal 40, key.size
+          assert_equal CZTop::Z85.new.encode(cert.secret_key(format: :binary)), key
+        end
       end
-      context 'with no format' do
-        let(:key) { cert.secret_key }
-        Then { cert.secret_key(format: :z85) == key } # same as with no format
+
+      describe 'with no format' do
+        it 'returns same as z85 format' do
+          assert_equal cert.secret_key(format: :z85), cert.secret_key
+        end
       end
-      context 'with :binary format' do
-        Given(:key) { cert.secret_key(format: :binary) }
-        Then { Encoding::BINARY == key.encoding }
-        And { 32 == key.bytesize }
+
+      describe 'with :binary format' do
+        it 'returns binary encoded 32-byte key' do
+          key = cert.secret_key(format: :binary)
+          assert_equal Encoding::BINARY, key.encoding
+          assert_equal 32, key.bytesize
+        end
       end
-      context 'with undefined secret key' do
+
+      describe 'with undefined secret key' do
         # NOTE: this happens when cert was loaded from file created with
         # #save_public
-        let(:undefined_z85) { '0' * 40 }
-        let(:undefined_bin) { "\0" * 32 }
-
-        # the zcert API defines zcert_secret_key()'s return value as buffer,
-        # so it'll be a pointer, not a String
-        let(:pointer_bin) { double(read_string: undefined_bin) }
-
-        before do
-          expect(ffi_delegate).to(receive(:secret_txt).and_return(undefined_z85))
-          expect(ffi_delegate).to(receive(:secret_key).and_return(pointer_bin))
-        end
         it 'returns nil' do
-          assert_nil cert.secret_key(format: :z85)
-          assert_nil cert.secret_key(format: :binary)
+          undefined_z85 = '0' * 40
+          undefined_bin = "\0" * 32
+          pointer_bin = Object.new
+          pointer_bin.define_singleton_method(:read_string) { |*| undefined_bin }
+
+          ffi_delegate.stub(:secret_txt, undefined_z85) do
+            ffi_delegate.stub(:secret_key, pointer_bin) do
+              assert_nil cert.secret_key(format: :z85)
+              assert_nil cert.secret_key(format: :binary)
+            end
+          end
         end
       end
-      context 'with invalid format' do
-        When(:result) { cert.secret_key(format: :foo) }
-        Then { result == Failure(ArgumentError) }
+
+      describe 'with invalid format' do
+        it 'raises' do
+          assert_raises(ArgumentError) { cert.secret_key(format: :foo) }
+        end
       end
     end
 
     describe 'meta information' do
-      Given(:key) { 'foo' }
-      Given(:value) { 'bar' }
+      let(:key) { 'foo' }
+      let(:val) { 'bar' }
+
       describe '#meta' do
-        context 'with existing meta key' do
-          Given { cert[key] = value }
-          Then { cert[key] == value }
+        describe 'with existing meta key' do
+          it 'returns the val' do
+            cert[key] = val
+            assert_equal val, cert[key]
+          end
         end
-        context 'with non-existing meta key' do
-          Then { cert[key].nil? }
+        describe 'with non-existing meta key' do
+          it 'returns nil' do
+            assert_nil cert[key]
+          end
         end
       end
 
       describe '#meta=' do
-        context 'when setting' do
-          it 'sets' do
-            expect(ffi_delegate).to(
-              receive(:set_meta).with(key, String, :string, value)
-            )
-            cert[key] = value
+        describe 'when setting' do
+          it 'calls set_meta with correct args' do
+            called_with = nil
+            ffi_delegate.stub(:set_meta, ->(*args) { called_with = args }) do
+              cert[key] = val
+            end
+            assert_kind_of String, called_with[0]
+            assert_equal :string, called_with[2]
+            assert_equal val, called_with[3]
           end
         end
-        context 'when unsetting', if: has_czmq_drafts? && ::CZMQ::FFI::Zsys.has_curve do
-          Given { cert[key] = value }
-          When { cert[key] = nil }
-          Then { cert[key].nil? }
+
+        describe 'when unsetting' do
+          before { skip 'requires CZMQ drafts and CURVE' unless has_czmq_drafts? && ::CZMQ::FFI::Zsys.has_curve }
+          it 'unsets the meta val' do
+            cert[key] = val
+            cert[key] = nil
+            assert_nil cert[key]
+          end
         end
+
         it 'does safe format handling' do
-          expect(ffi_delegate).to receive(:set_meta).with(String, '%s', any_args)
-          cert[key] = value
+          called_with = nil
+          ffi_delegate.stub(:set_meta, ->(*args) { called_with = args }) do
+            cert[key] = val
+          end
+          assert_equal '%s', called_with[1]
         end
       end
 
       describe '#meta_keys' do
-        context 'with meta keys set' do
+        describe 'with meta keys set' do
           let(:values) { { 'key1' => 'value1', 'key2' => 'value2' } }
           before do
             values.each { |k, v| cert[k] = v }
@@ -141,7 +178,7 @@ describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
             assert_equal values.keys.sort, cert.meta_keys.sort
           end
         end
-        context 'with no meta keys set' do
+        describe 'with no meta keys set' do
           it 'returns empty array' do
             assert_equal [], cert.meta_keys
           end
@@ -149,115 +186,139 @@ describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
       end
 
       describe '#dup' do
-        When(:duplicate_cert) { cert.dup }
-        Then { cert == duplicate_cert }
+        it 'creates equal duplicate' do
+          assert_equal cert, cert.dup
+        end
 
-        context 'with failure' do
+        describe 'with failure' do
           it 'raises' do
-            expect(cert.ffi_delegate).to(
-              receive(:dup).and_return(::FFI::Pointer::NULL)
-            )
-            assert_raises(SystemCallError) { cert.dup }
+            cert.ffi_delegate.stub(:dup, ::FFI::Pointer::NULL) do
+              assert_raises(SystemCallError) { cert.dup }
+            end
           end
         end
       end
 
       describe '.check_curve_availability' do
-        context 'with CURVE available' do
-          before do
-            expect(::CZMQ::FFI::Zsys).to receive(:has_curve).and_return(true)
-          end
+        describe 'with CURVE available' do
           it "doesn't warn" do
-            assert_output('', '') do
-              described_class.check_curve_availability
+            ::CZMQ::FFI::Zsys.stub(:has_curve, true) do
+              assert_output('', '') do
+                CZTop::Certificate.check_curve_availability
+              end
             end
           end
         end
-        context 'with CURVE not available' do
-          before do
-            expect(::CZMQ::FFI::Zsys).to receive(:has_curve).and_return(false)
-          end
+        describe 'with CURVE not available' do
           it 'warns' do
-            assert_output('', /curve.*libsodium/i) do
-              described_class.check_curve_availability
+            ::CZMQ::FFI::Zsys.stub(:has_curve, false) do
+              assert_output('', /curve.*libsodium/i) do
+                CZTop::Certificate.check_curve_availability
+              end
             end
           end
         end
       end
 
       describe '.new_from' do
-        Given(:public_key) { cert.public_key(format: :binary) }
-        Given(:secret_key) { cert.secret_key(format: :binary) }
-        When(:new_cert) do
-          CZTop::Certificate.new_from(public_key, secret_key)
+        let(:public_key) { cert.public_key(format: :binary) }
+        let(:secret_key) { cert.secret_key(format: :binary) }
+
+        describe 'with valid binary key pair' do
+          it 'creates equal certificate' do
+            new_cert = CZTop::Certificate.new_from(public_key, secret_key)
+            assert_equal cert, new_cert
+            assert_equal new_cert, cert
+          end
         end
-        context 'with valid binary key pair' do
-          Then { cert == new_cert && new_cert == cert }
+
+        describe 'with valid Z85 (text) key pair' do
+          let(:public_key) { cert.public_key(format: :z85) }
+          let(:secret_key) { cert.secret_key(format: :z85) }
+          it 'creates equal certificate' do
+            new_cert = CZTop::Certificate.new_from(public_key, secret_key)
+            assert_equal cert, new_cert
+            assert_equal new_cert, cert
+          end
         end
-        context 'with valid Z85 (text) key pair' do
-          Given(:public_key) { cert.public_key(format: :z85) }
-          Given(:secret_key) { cert.secret_key(format: :z85) }
-          Then { cert == new_cert && new_cert == cert }
+
+        describe 'with invalid public key size' do
+          let(:public_key) { 'too short' }
+          it 'raises' do
+            assert_raises(ArgumentError) { CZTop::Certificate.new_from(public_key, secret_key) }
+          end
         end
-        context 'with invalid public key size' do
-          Given(:public_key) { 'too short' }
-          Then { new_cert == Failure(ArgumentError) }
+
+        describe 'with invalid secret key size' do
+          let(:secret_key) { 'too short' }
+          it 'raises' do
+            assert_raises(ArgumentError) { CZTop::Certificate.new_from(public_key, secret_key) }
+          end
         end
-        context 'with invalid secret key size' do
-          Given(:secret_key) { 'too short' }
-          Then { new_cert == Failure(ArgumentError) }
+
+        describe 'with missing public key' do
+          let(:public_key) { nil }
+          it 'raises' do
+            assert_raises(ArgumentError) { CZTop::Certificate.new_from(public_key, secret_key) }
+          end
         end
-        context 'with missing public key' do
-          Given(:public_key) { nil }
-          Then { new_cert == Failure(ArgumentError) }
-        end
-        context 'with missing secret key' do
+
+        describe 'with missing secret key' do
           # public key only certificate, should work
-          Given(:secret_key) { nil }
-          Then { cert.public_key == new_cert.public_key }
+          let(:secret_key) { nil }
+          it 'creates cert with matching public key' do
+            new_cert = CZTop::Certificate.new_from(public_key, secret_key)
+            assert_equal cert.public_key, new_cert.public_key
+          end
         end
       end
 
       describe '#==' do
-        context 'with equal certificate' do
-          Given(:other) { cert.dup }
-          Then { cert  == other }
-          And  { other == cert  }
+        describe 'with equal certificate' do
+          it 'is equal' do
+            other = cert.dup
+            assert_operator cert, :==, other
+            assert_operator other, :==, cert
+          end
         end
-        context 'with different certificate' do
-          Given(:other) { CZTop::Certificate.new }
-          Then { cert  != other }
-          And  { other != cert  }
+        describe 'with different certificate' do
+          it 'is not equal' do
+            other = CZTop::Certificate.new
+            refute_operator cert, :==, other
+            refute_operator other, :==, cert
+          end
         end
       end
 
       describe '#apply' do
-        let(:zocket) { double('zocket') }
+        let(:zocket) { Object.new }
 
         it 'applies to socket' do
-          expect(ffi_delegate).to(receive(:apply).with(zocket))
-          cert.apply(zocket)
+          called_with = nil
+          ffi_delegate.stub(:apply, ->(z) { called_with = z }) do
+            cert.apply(zocket)
+          end
+          assert_same zocket, called_with
         end
 
-        context 'with undefined secret key' do
-          before do
-            expect(cert).to(receive(:secret_key).and_return(nil))
-          end
+        describe 'with undefined secret key' do
           it 'raises' do
-            assert_raises(SystemCallError) do
-              cert.apply(zocket)
+            cert.stub(:secret_key, nil) do
+              assert_raises(SystemCallError) do
+                cert.apply(zocket)
+              end
             end
           end
         end
 
-        context 'with invalid socket' do
+        describe 'with invalid socket' do
           let(:zocket) { nil }
           it 'raises' do
             assert_raises(ArgumentError) { cert.apply(zocket) }
           end
         end
 
-        context 'with real socket' do
+        describe 'with real socket' do
           let(:zocket) { CZTop::Socket::REQ.new }
           it 'works' do
             cert.apply(zocket)
@@ -273,52 +334,69 @@ describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
       let(:path) { tmpdir + 'zcert.txt' }
 
       describe '#save' do
-        When(:result) { cert.save(path) }
-        context 'with valid path' do
-          Given { !path.exist? }
-          Then { path.exist? }
+        describe 'with valid path' do
+          it 'creates the file' do
+            refute path.exist?
+            cert.save(path)
+            assert path.exist?
+          end
         end
-        context 'with invalid path' do
-          Given(:path) { '/' }
-          Then { result == Failure(SystemCallError) }
+        describe 'with invalid path' do
+          let(:path) { '/' }
+          it 'raises' do
+            assert_raises(SystemCallError) { cert.save(path) }
+          end
         end
-        context 'with empty path' do
-          Given(:path) { '' }
-          Then { result == Failure(ArgumentError) }
+        describe 'with empty path' do
+          let(:path) { '' }
+          it 'raises' do
+            assert_raises(ArgumentError) { cert.save(path) }
+          end
         end
       end
 
       describe '#save_public' do
-        When(:result) { cert.save_public(path) }
-        context 'with valid path' do
-          Given { !path.exist? }
-          Then { path.exist? }
+        describe 'with valid path' do
+          it 'creates the file' do
+            refute path.exist?
+            cert.save_public(path)
+            assert path.exist?
+          end
         end
-        context 'with invalid path' do
-          Given(:path) { '/' }
-          Then { result == Failure(SystemCallError) }
+        describe 'with invalid path' do
+          let(:path) { '/' }
+          it 'raises' do
+            assert_raises(SystemCallError) { cert.save_public(path) }
+          end
         end
-        context 'reading such a file' do
-          Given { cert.save_public(path) }
-          Given(:loaded_cert) { CZTop::Certificate.load(path) }
-          Then { loaded_cert.secret_key.nil? }
-          And { loaded_cert.public_key }
+        describe 'reading such a file' do
+          it 'has no secret key but has public key' do
+            cert.save_public(path)
+            loaded_cert = CZTop::Certificate.load(path)
+            assert_nil loaded_cert.secret_key
+            assert loaded_cert.public_key
+          end
         end
       end
+
       describe '#save_secret' do
-        When(:result) { cert.save_secret(path) }
-        context 'with valid path' do
-          Given { !path.exist? }
-          Then { path.exist? }
+        describe 'with valid path' do
+          it 'creates the file' do
+            refute path.exist?
+            cert.save_secret(path)
+            assert path.exist?
+          end
         end
-        context 'with invalid path' do
-          Given(:path) { '/' }
-          Then { result == Failure(SystemCallError) }
+        describe 'with invalid path' do
+          let(:path) { '/' }
+          it 'raises' do
+            assert_raises(SystemCallError) { cert.save_secret(path) }
+          end
         end
       end
 
       describe '.load' do
-        context 'with existing file' do
+        describe 'with existing file' do
           before { cert.save(path) }
           let(:loaded_cert) { CZTop::Certificate.load(path) }
           it 'loads the certificate' do
@@ -326,7 +404,7 @@ describe CZTop::Certificate, if: ::CZMQ::FFI::Zsys.has_curve do
             assert_equal cert, loaded_cert
           end
         end
-        context 'with non-existing file' do
+        describe 'with non-existing file' do
           it 'raises' do
             assert_raises(Errno::ENOENT) do
               CZTop::Certificate.load('/does/not/exist')

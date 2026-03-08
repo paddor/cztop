@@ -12,8 +12,12 @@ describe 'CZTop::Authenticator::ZAUTH_FPTR' do
   end
 end
 
-describe CZTop::Authenticator, if: ::CZMQ::FFI::Zsys.has_curve do
-  subject { CZTop::Authenticator.new }
+describe CZTop::Authenticator do
+  include ZMQHelper
+
+  before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
+
+  let(:subject) { CZTop::Authenticator.new }
   let(:actor) { subject.actor }
   after { subject.terminate }
 
@@ -22,68 +26,95 @@ describe CZTop::Authenticator, if: ::CZMQ::FFI::Zsys.has_curve do
   end
 
   describe '#actor' do
-    Then { actor.is_a? CZTop::Actor }
+    it 'returns an Actor' do
+      assert_kind_of CZTop::Actor, actor
+    end
   end
 
   describe '#verbose!' do
-    after { subject.verbose! }
     it 'sends correct message to actor' do
-      expect(actor).to receive(:<<).with('VERBOSE').and_call_original
-    end
-    it 'waits for signal' do
-      expect(actor).to receive(:wait).and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.verbose!
+      end
+      assert_equal 'VERBOSE', sent
     end
   end
 
   describe '#allow' do
     let(:addrs) { %w[1.1.1.1 2.2.2.2] }
-    after { subject.allow(*addrs) }
     it 'whitelists addresses' do
-      expect(actor).to receive(:<<).with(['ALLOW', *addrs]).and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.allow(*addrs)
+      end
+      assert_equal ['ALLOW', *addrs], sent
     end
   end
 
   describe '#deny' do
     let(:addrs) { %w[3.3.3.3 4.4.4.4 foobar] }
-    after { subject.deny(*addrs) }
     it 'blacklists addresses' do
-      expect(actor).to receive(:<<).with(['DENY', *addrs]).and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.deny(*addrs)
+      end
+      assert_equal ['DENY', *addrs], sent
     end
   end
 
   describe '#plain' do
     let(:filename) { '/path/to/file' }
-    after { subject.plain(filename) }
     it 'enables PLAIN security' do
-      expect(actor).to receive(:<<).with(['PLAIN', filename]).and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.plain(filename)
+      end
+      assert_equal ['PLAIN', filename], sent
     end
   end
 
   describe '#curve' do
-    context 'when allowing keys from directory' do
+    describe 'when allowing keys from directory' do
       let(:directory) { '/path/to/directory' }
-      after { subject.curve(directory) }
       it 'enables CURVE security for keys in directory' do
-        expect(actor).to receive(:<<).with(['CURVE', directory]).and_call_original
+        sent = nil
+        original_send = actor.method(:<<)
+        actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+          subject.curve(directory)
+        end
+        assert_equal ['CURVE', directory], sent
       end
     end
-    context 'when allowing any key' do
-      after { subject.curve }
+    describe 'when allowing any key' do
       it 'enables CURVE security for any key' do
-        expect(actor).to receive(:<<).with(['CURVE', '*']).and_call_original
+        sent = nil
+        original_send = actor.method(:<<)
+        actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+          subject.curve
+        end
+        assert_equal ['CURVE', '*'], sent
       end
     end
   end
 
   describe '#gssapi' do
-    after { subject.gssapi }
     it 'enables GSSAPI security' do
-      expect(actor).to receive(:<<).with('GSSAPI').and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.gssapi
+      end
+      assert_equal 'GSSAPI', sent
     end
   end
 
   describe 'with certificate store' do
-    subject { CZTop::Authenticator.new(cert_store) }
+    let(:subject) { CZTop::Authenticator.new(cert_store) }
     let(:cert_store) { CZTop::CertStore.new }
     let(:cert) { CZTop::Certificate.new }
     let(:pubkey_z85) { cert.public_key(format: :z85) }
@@ -109,7 +140,7 @@ describe CZTop::Authenticator, if: ::CZMQ::FFI::Zsys.has_curve do
       assert_kind_of CZTop::Certificate, cert
     end
 
-    context 'authentication' do
+    describe 'authentication' do
       let(:domain) { 'global' }
       let(:req) do
         # REQ socket acting as a CURVE server trying to authenticate a client
@@ -130,14 +161,14 @@ describe CZTop::Authenticator, if: ::CZMQ::FFI::Zsys.has_curve do
         req << zap_request.to_msg
       end
 
-      context 'with valid credentials' do
+      describe 'with valid credentials' do
         let(:credentials) { [pubkey_bin] }
         it 'authenticates' do
           assert_operator zap_response, :success?
           assert_equal request_id, zap_response.request_id
         end
       end
-      context 'with invalid credentials' do
+      describe 'with invalid credentials' do
         let(:credentials) { ['f' * 32] } # unknown public key
         it 'does not authenticate' do
           refute_operator zap_response, :success?

@@ -2,8 +2,9 @@
 
 require 'bundler/setup'
 require 'simplecov'
-require 'rspec'
-require 'rspec/given'
+require 'minitest/spec'
+require 'minitest/autorun'
+require 'minitest/mock'
 SimpleCov.start do
   # skip DRAFT API
   add_filter '/lib/cztop/poller.rb'
@@ -20,15 +21,6 @@ if ENV['REPORT_COVERAGE'] == 'true'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
-
-RSpec.configure do |config|
-  config.expect_with :minitest
-  config.filter_run_excluding if: false
-  config.filter_run focus: true
-  config.run_all_when_everything_filtered = true
-
-  include ZMQHelper
-end
 
 # NOTE: as of January 28, 2016, the test suite opens about ~650 file
 # descriptors. Some OS (like OSX) has a very low default limit of 256. Let's

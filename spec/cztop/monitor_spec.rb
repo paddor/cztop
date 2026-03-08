@@ -9,12 +9,15 @@ describe 'CZTop::Monitor::ZMONITOR_FPTR' do
 end
 
 describe CZTop::Monitor do
-  subject { CZTop::Monitor.new(rep_socket) }
+  let(:subject) { CZTop::Monitor.new(rep_socket) }
   let(:actor) { subject.actor }
-  i = 55_578
-  let(:endpoint) { "tcp://127.0.0.1:#{i += 1}" }
+  let(:rep_socket) do
+    s = CZTop::Socket::REP.new
+    s.bind("tcp://127.0.0.1:*")
+    s
+  end
+  let(:endpoint) { rep_socket.last_endpoint }
   let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
-  let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
 
   after do
     subject.terminate
@@ -25,38 +28,52 @@ describe CZTop::Monitor do
   end
 
   describe '#initialize' do
-    context 'with socket' do
-      it 'passes socket' do
-        expect(CZTop::Actor).to receive(:new)
-          .with(CZTop::Monitor::ZMONITOR_FPTR, rep_socket).and_call_original
-        subject
+    describe 'with socket' do
+      it 'creates actor with ZMONITOR_FPTR and socket' do
+        created_with = nil
+        original_new = CZTop::Actor.method(:new)
+        CZTop::Actor.stub(:new, ->(*args) { created_with = args; original_new.call(*args) }) do
+          subject
+        end
+        assert_equal CZTop::Monitor::ZMONITOR_FPTR, created_with[0]
+        assert_same rep_socket, created_with[1]
       end
     end
   end
 
   describe '#verbose' do
     it 'sends correct message to actor' do
-      expect(actor).to receive(:<<).with('VERBOSE').and_call_original
-      subject.verbose!
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.verbose!
+      end
+      assert_equal 'VERBOSE', sent
     end
   end
 
   describe '#listen' do
-    context 'with one valid event' do
+    describe 'with one valid event' do
       let(:event) { 'CONNECTED' }
-      after { subject.listen(event) }
       it 'tells zmonitor actor' do
-        expect(actor).to receive(:<<).with(['LISTEN', event])
+        sent = nil
+        actor.stub(:<<, ->(*args) { sent = args[0] }) do
+          subject.listen(event)
+        end
+        assert_equal ['LISTEN', event], sent
       end
     end
-    context 'with multiple valid events' do
+    describe 'with multiple valid events' do
       let(:events) { %w[CONNECTED DISCONNECTED] }
-      after { subject.listen(*events) }
       it 'tells zmonitor actor' do
-        expect(actor).to receive(:<<).with(['LISTEN', *events])
+        sent = nil
+        actor.stub(:<<, ->(*args) { sent = args[0] }) do
+          subject.listen(*events)
+        end
+        assert_equal ['LISTEN', *events], sent
       end
     end
-    context 'with invalid event' do
+    describe 'with invalid event' do
       let(:event) { :FOO }
       it 'raises' do
         assert_raises(ArgumentError) do
@@ -67,12 +84,13 @@ describe CZTop::Monitor do
   end
 
   describe '#start' do
-    after { subject.start }
     it 'tells zmonitor to start' do
-      expect(actor).to receive(:<<).with('START').and_call_original
-    end
-    it 'waits' do
-      expect(actor).to receive(:wait).and_call_original
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.start
+      end
+      assert_equal 'START', sent
     end
   end
 

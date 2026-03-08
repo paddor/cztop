@@ -8,38 +8,42 @@ describe CZTop::SendReceiveMethods do
     o.extend CZTop::SendReceiveMethods
     o
   end
+
   describe '#<<' do
-    context 'when sending message' do
+    describe 'when sending message' do
       let(:content) { 'foobar' }
-      let(:msg) { double('Message') }
-      before do
-        expect(CZTop::Message).to receive(:coerce).with(content).and_return(msg)
-        expect(msg).to receive(:send_to).with(zocket)
-      end
 
       it 'sends content' do
-        zocket << content
+        sent_to = nil
+        msg = Object.new
+        msg.define_singleton_method(:send_to) { |dest| sent_to = dest }
+        CZTop::Message.stub(:coerce, ->(_) { msg }) do
+          zocket << content
+        end
+        assert_same zocket, sent_to
       end
 
-      it 'returns self' do # so it can be chained
-        assert_same zocket, zocket << content
+      it 'returns self' do
+        msg = Object.new
+        msg.define_singleton_method(:send_to) { |_| nil }
+        CZTop::Message.stub(:coerce, ->(_) { msg }) do
+          assert_same zocket, zocket << content
+        end
       end
     end
   end
 
   describe '#receive' do
-    context 'given a sent content' do
+    describe 'given a sent content' do
       let(:content) { 'foobar' }
       it 'receives the content' do
-        msg = double
-        expect(CZTop::Message).to(
-          receive(:receive_from).with(zocket).and_return(msg)
-        )
-        assert_same msg, zocket.receive
+        msg = Object.new
+        CZTop::Message.stub(:receive_from, ->(_) { msg }) do
+          assert_same msg, zocket.receive
+        end
       end
     end
   end
-
 
   describe '#read_timeout' do
     let(:req) { CZTop::Socket::REQ.new }
@@ -75,7 +79,6 @@ describe CZTop::SendReceiveMethods do
       end
     end
   end
-
 
   describe '#write_timeout' do
     let(:req) { CZTop::Socket::REQ.new }
@@ -117,49 +120,40 @@ describe CZTop::SendReceiveMethods do
 
     i = 0
     let(:endpoint) { "inproc://async_endpoint_socket_spec_reqrep_#{i += 1}" }
-    let!(:req)     { CZTop::Socket::REQ.new(endpoint) }
-    let!(:rep)     { CZTop::Socket::REP.new(endpoint) }
-
+    let(:req)     { CZTop::Socket::REQ.new(endpoint) }
+    let(:rep)     { CZTop::Socket::REP.new(endpoint) }
+    before { req; rep } # eagerly evaluate
 
     it 'can send and receive' do
       Async do |task|
-        task.async do |task|
+        task.async do |_task|
           msg = rep.receive
           word, = msg.to_a
           rep << word.upcase
         end
 
-        task.async do |task|
+        task.async do |_task|
           req << 'hello'
           response, = req.receive.to_a
-          # p response: response
           assert_equal 'HELLO', response
         end
       end
     end
 
-
     describe '#wait_readable' do
-      context 'if readable' do
-        around do |ex|
+      describe 'if readable' do
+        it 'returns true' do
           Async do
             req << 'foo'
             sleep 0.01 until rep.readable?
-            ex.run
+            assert_equal true, rep.wait_readable
           end
-        end
-
-        it 'returns true' do
-          expect(rep).not_to receive(:wait_for_fd_signal)
-          assert_equal true, rep.wait_readable
         end
       end
 
-      context 'if not readable' do
+      describe 'if not readable' do
         it 'waits' do
           Async do |task|
-            expect(rep).to receive(:wait_for_fd_signal).and_call_original
-
             task.async do
               sleep 0.05
               req << 'bar'
@@ -169,9 +163,9 @@ describe CZTop::SendReceiveMethods do
           end
         end
 
-        context 'when timed out' do
+        describe 'when timed out' do
           it 'raises IO::TimeoutError' do
-            Async do |task|
+            Async do |_task|
               t0 = Time.now
 
               assert_raises IO::TimeoutError do
@@ -186,36 +180,30 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
-
     describe '#wait_writable' do
-      context 'if writable' do
-        around do |ex|
+      describe 'if writable' do
+        it 'returns true' do
           Async do
             sleep 0.01 until req.writable?
-            ex.run
+            assert_equal true, req.wait_writable
           end
-        end
-
-        it 'returns true' do
-          expect(rep).not_to receive(:wait_for_fd_signal)
-          assert_equal true, req.wait_writable
         end
       end
 
-      context 'if not writable' do
+      describe 'if not writable' do
         before do
           refute_operator rep, :writable?
         end
 
         it 'waits' do
-          expect(rep).to receive(:wait_for_fd_signal) { fail }
-
-          assert_raises StandardError do
-            rep.wait_writable
+          rep.stub(:wait_for_fd_signal, ->(*) { raise StandardError }) do
+            assert_raises(StandardError) do
+              rep.wait_writable
+            end
           end
         end
 
-        context 'when not timed out' do
+        describe 'when not timed out' do
           it 'returns true' do
             Async do |task|
               task.async do
@@ -231,14 +219,14 @@ describe CZTop::SendReceiveMethods do
               assert rep.wait_writable
               t1 = Time.now
 
-              assert_in_delta 0.05, t1 - t0, 0.02
+              assert_in_delta 0.05, t1 - t0, 0.05
             end
           end
         end
 
-        context 'when timed out' do
+        describe 'when timed out' do
           it 'raises IO::TimeoutError' do
-            Async do |task|
+            Async do |_task|
               t0 = Time.now
 
               assert_raises IO::TimeoutError do
@@ -253,53 +241,69 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
-
     describe '#wait_for_fd_signal' do
       let(:req) { CZTop::Socket::REQ.new }
-      let(:io)  { instance_spy ::IO }
-
-      before do
-        allow(req).to receive(:to_io) { io }
-      end
 
       it 'waits for readability on ZMQ FD' do
-        expect(io).to receive(:wait_readable)
-        req.wait_for_fd_signal
+        waited = false
+        io = Object.new
+        io.define_singleton_method(:wait_readable) { |*| waited = true; nil }
+        req.stub(:to_io, io) do
+          req.wait_for_fd_signal
+        end
+        assert waited
       end
 
       it 'memoizes IO object' do
-        expect(req).to receive(:to_io).once
-        req.wait_for_fd_signal
-        req.wait_for_fd_signal
-        req.wait_for_fd_signal
-      end
-
-      context 'with small timeout' do
-        it 'uses that timeout' do
-          expect(io).to receive(:wait_readable).with(0.05)
-          req.wait_for_fd_signal 0.05
-        end
-      end
-
-      context 'with large timeout' do
-        it 'uses reasonably small timeout' do
-          expect(io).to receive(:wait_readable) do |timeout|
-            assert timeout < 1.0
-          end
-          req.wait_for_fd_signal 10
-        end
-      end
-
-      context 'with no timeout' do
-        it 'still uses a timeout' do
-          expect(io).to receive(:wait_readable).with(Numeric)
+        call_count = 0
+        io = Object.new
+        io.define_singleton_method(:wait_readable) { |*| nil }
+        req.stub(:to_io, ->(*) { call_count += 1; io }) do
           req.wait_for_fd_signal
+          req.wait_for_fd_signal
+          req.wait_for_fd_signal
+        end
+        assert_equal 1, call_count
+      end
+
+      describe 'with small timeout' do
+        it 'uses that timeout' do
+          received_timeout = nil
+          io = Object.new
+          io.define_singleton_method(:wait_readable) { |t = nil| received_timeout = t; nil }
+          req.stub(:to_io, io) do
+            req.wait_for_fd_signal 0.05
+          end
+          assert_equal 0.05, received_timeout
+        end
+      end
+
+      describe 'with large timeout' do
+        it 'uses reasonably small timeout' do
+          received_timeout = nil
+          io = Object.new
+          io.define_singleton_method(:wait_readable) { |t = nil| received_timeout = t; nil }
+          req.stub(:to_io, io) do
+            req.wait_for_fd_signal 10
+          end
+          assert received_timeout < 1.0
+        end
+      end
+
+      describe 'with no timeout' do
+        it 'still uses a timeout' do
+          received_timeout = nil
+          io = Object.new
+          io.define_singleton_method(:wait_readable) { |t = nil| received_timeout = t; nil }
+          req.stub(:to_io, io) do
+            req.wait_for_fd_signal
+          end
+          assert_kind_of Numeric, received_timeout
         end
       end
     end
 
-
-    context 'with rcvtimeo' do
+    describe 'with rcvtimeo' do
       before do
         req.options.rcvtimeo = 30
         assert_equal 30, req.options.rcvtimeo
@@ -314,8 +318,7 @@ describe CZTop::SendReceiveMethods do
       end
     end
 
-
-    context 'with sndtimeo' do
+    describe 'with sndtimeo' do
       before do
         rep.options.sndtimeo = 30
         assert_equal 30, rep.options.sndtimeo

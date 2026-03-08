@@ -9,7 +9,7 @@ describe 'CZTop::Beacon::ZBEACON_FPTR' do
 end
 
 describe CZTop::Beacon do
-  subject { CZTop::Beacon.new }
+  let(:subject) { CZTop::Beacon.new }
   let(:actor) { subject.actor }
 
   after do
@@ -21,11 +21,13 @@ describe CZTop::Beacon do
   end
 
   describe '#verbose!' do
-    before do
-      expect(actor).to receive(:<<).with('VERBOSE').and_call_original
-    end
     it 'sends correct message to actor' do
-      subject.verbose!
+      sent = nil
+      original_send = actor.method(:<<)
+      actor.stub(:<<, ->(*args) { sent = args[0]; original_send.call(*args) }) do
+        subject.verbose!
+      end
+      assert_equal 'VERBOSE', sent
     end
   end
 
@@ -33,60 +35,63 @@ describe CZTop::Beacon do
     let(:port) { 9999 }
     let(:hostname) { 'example.com' }
     let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
-    context 'with support for UDP broadcasts' do
-      before do
-        expect(actor).to receive(:send_picture)
-          .with(kind_of(String), :string, 'CONFIGURE', :int, port)
-        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
-                                                 .and_return(ptr)
-      end
+    describe 'with support for UDP broadcasts' do
       it 'sends correct message to actor' do
-        assert_equal hostname, subject.configure(port)
+        sent_args = nil
+        actor.stub(:send_picture, ->(*args) { sent_args = args }) do
+          CZMQ::FFI::Zstr.stub(:recv, ->(_) { ptr }) do
+            assert_equal hostname, subject.configure(port)
+          end
+        end
+        assert_kind_of String, sent_args[0]
+        assert_equal [:string, 'CONFIGURE', :int, port], sent_args[1..]
       end
     end
-    context 'no support for UDP broadcasts' do
+    describe 'no support for UDP broadcasts' do
       let(:hostname) { '' }
       let(:ptr) { FFI::MemoryPointer.from_string(hostname) }
-      before do
-        allow(actor).to receive(:send_picture)
-        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor).and_return(ptr)
-      end
       it 'raises' do
-        assert_raises(NotImplementedError) do
-          subject.configure(port)
+        actor.stub(:send_picture, ->(*) {}) do
+          CZMQ::FFI::Zstr.stub(:recv, ->(_) { ptr }) do
+            assert_raises(NotImplementedError) do
+              subject.configure(port)
+            end
+          end
         end
       end
     end
-    context 'when interrupted' do
+    describe 'when interrupted' do
       let(:nullptr) { ::FFI::Pointer::NULL } # represents failure
-      before do
-        expect(CZMQ::FFI::Zstr).to receive(:recv).with(actor)
-                                                 .and_return(nullptr)
-        expect(CZMQ::FFI::Errors).to receive(:errno)
-          .and_return(Errno::EINTR::Errno)
-      end
       it 'raises' do
-        assert_raises(Interrupt) do
-          subject.configure(port)
+        actor.stub(:send_picture, ->(*) {}) do
+          CZMQ::FFI::Zstr.stub(:recv, ->(_) { nullptr }) do
+            CZMQ::FFI::Errors.stub(:errno, Errno::EINTR::Errno) do
+              assert_raises(Interrupt) do
+                subject.configure(port)
+              end
+            end
+          end
         end
       end
     end
   end
+
   describe '#publish' do
     let(:data) { 'foobar data' }
     let(:data_size) { data.bytesize }
     let(:interval) { 1000 }
-    context 'with data' do
-      before do
-        expect(actor).to receive(:send_picture)
-          .with(kind_of(String), :string, 'PUBLISH', :string, data,
-                :int, data_size, :int, interval)
-      end
+    describe 'with data' do
       it 'sends correct message to actor' do
-        subject.publish(data, interval)
+        sent_args = nil
+        actor.stub(:send_picture, ->(*args) { sent_args = args }) do
+          subject.publish(data, interval)
+        end
+        assert_kind_of String, sent_args[0]
+        assert_equal [:string, 'PUBLISH', :string, data, :int, data_size, :int, interval],
+                     sent_args[1..]
       end
     end
-    context 'with data too long' do
+    describe 'with data too long' do
       let(:data) { 'x' * 256 } # max = 255 bytes
       it 'raises' do
         assert_raises(ArgumentError) do
@@ -95,48 +100,58 @@ describe CZTop::Beacon do
       end
     end
   end
+
   describe '#silence' do
     it 'sends correct message to actor' do
-      expect(actor).to receive(:<<).with('SILENCE')
-      subject.silence
+      sent = nil
+      actor.stub(:<<, ->(*args) { sent = args[0] }) do
+        subject.silence
+      end
+      assert_equal 'SILENCE', sent
     end
   end
+
   describe '#subscribe' do
     let(:filter) { 'foo filter' }
     let(:filter_size) { filter.bytesize }
-    before do
-      expect(actor).to receive(:send_picture)
-        .with(kind_of(String), :string, 'SUBSCRIBE', :string, filter, :int,
-              filter_size)
-    end
     it 'sends correct message to actor' do
-      subject.subscribe(filter)
+      sent_args = nil
+      actor.stub(:send_picture, ->(*args) { sent_args = args }) do
+        subject.subscribe(filter)
+      end
+      assert_kind_of String, sent_args[0]
+      assert_equal [:string, 'SUBSCRIBE', :string, filter, :int, filter_size],
+                   sent_args[1..]
     end
   end
+
   describe '#listen' do
-    before do
-      expect(actor).to receive(:send_picture)
-        .with(kind_of(String), :string, 'SUBSCRIBE', :string, nil, :int, 0)
-    end
     it 'sends correct message to actor' do
-      subject.listen
+      sent_args = nil
+      actor.stub(:send_picture, ->(*args) { sent_args = args }) do
+        subject.listen
+      end
+      assert_kind_of String, sent_args[0]
+      assert_equal [:string, 'SUBSCRIBE', :string, nil, :int, 0], sent_args[1..]
     end
   end
+
   describe '#unsubscribe' do
-    before do
-      expect(actor).to receive(:<<).with('UNSUBSCRIBE')
-    end
     it 'sends correct message to actor' do
-      subject.unsubscribe
+      sent = nil
+      actor.stub(:<<, ->(*args) { sent = args[0] }) do
+        subject.unsubscribe
+      end
+      assert_equal 'UNSUBSCRIBE', sent
     end
   end
+
   describe '#receive' do
-    let(:msg) { double('message') }
-    before do
-      expect(actor).to receive(:receive).and_return(msg)
-    end
     it 'receives a message from actor' do
-      assert_equal msg, subject.receive
+      fake_msg = Object.new
+      actor.stub(:receive, fake_msg) do
+        assert_equal fake_msg, subject.receive
+      end
     end
   end
 end

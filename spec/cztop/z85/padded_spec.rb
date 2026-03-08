@@ -3,20 +3,20 @@
 require_relative '../../spec_helper'
 
 describe CZTop::Z85::Padded do
-  subject { CZTop::Z85::Padded.new }
+  let(:subject) { CZTop::Z85::Padded.new }
 
   describe '#encode' do
     let(:encoded) { subject.encode(input) }
     let(:output_size) { encoded.bytesize }
 
-    context 'with empty data' do
+    describe 'with empty data' do
       let(:input) { '' }
       it 'returns empty string' do
         assert_equal '', encoded
       end
     end
 
-    context 'with even data' do
+    describe 'with even data' do
       let(:input) { 'abcd' }
 
       it 'encodes to correct size' do
@@ -24,7 +24,7 @@ describe CZTop::Z85::Padded do
       end
     end
 
-    context 'with uneven data' do
+    describe 'with uneven data' do
       let(:input) { 'abc' }
 
       it 'encodes to correct size' do
@@ -34,7 +34,7 @@ describe CZTop::Z85::Padded do
   end
 
   describe '#decode' do
-    context 'with empty data' do
+    describe 'with empty data' do
       it 'decodes without trying chop off padding' do
         assert_equal '', subject.decode('')
       end
@@ -54,6 +54,7 @@ describe CZTop::Z85::Padded do
                    CZTop::Z85::Padded.encode(input)
     end
   end
+
   describe '.decode' do
     let(:input) { CZTop::Z85::Padded.new.encode('abcde' * 1_000) }
     it 'does the same as #decode' do

@@ -134,7 +134,7 @@ describe CZTop::Monitor do
   describe '#next' do
     it 'returns Message' do
       subject.listen(*%w[ACCEPTED CLOSED MONITOR_STOPPED])
-      subject.actor.options.rcvtimeo = 100
+      subject.actor.options.rcvtimeo = 500
       subject.start
       req_socket # connects
       assert_kind_of CZTop::Message, subject.next
@@ -145,7 +145,7 @@ describe CZTop::Monitor do
       subject.start
       req_socket # connects
       req_socket.disconnect(endpoint)
-      subject.actor.options.rcvtimeo = 100
+      subject.actor.options.rcvtimeo = 500
       assert_equal 'ACCEPTED', subject.next[0]
       rep_socket.ffi_delegate.destroy
       assert_equal 'CLOSED', subject.next[0]

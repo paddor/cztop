@@ -754,7 +754,7 @@ describe CZTop::Poller::ZPoller do
       it 'remembers the reader' do
         p = CZTop::Poller::ZPoller.new(reader1)
         sockets = p.instance_variable_get(:@sockets)
-        assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(reader1)
+        assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(reader1).to_i
       end
     end
 
@@ -773,7 +773,7 @@ describe CZTop::Poller::ZPoller do
         p = CZTop::Poller::ZPoller.new(reader1, reader2, reader3)
         sockets = p.instance_variable_get(:@sockets)
         [reader1, reader2, reader3].each do |r|
-          assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(r)
+          assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(r).to_i
         end
       end
     end
@@ -793,7 +793,7 @@ describe CZTop::Poller::ZPoller do
     it 'remembers the reader' do
       poller.add(reader2)
       sockets = poller.instance_variable_get(:@sockets)
-      assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(reader2)
+      assert_includes sockets.keys, CZMQ::FFI::Zsock.resolve(reader2).to_i
     end
 
 

@@ -40,55 +40,10 @@ jobs:
     - name: Install ZMQ and CZMQ from source (with draft APIs)
       run: |
         export PKG_CONFIG_PATH=$HOME/lib/pkgconfig
-        env ZMQ_VERSION=v4.3.5 ci/install-libzmq
+        env ZMQ_VERSION=HEAD ci/install-libzmq
         env CZMQ_VERSION=v4.2.1 ci/install-libczmq
     - name: Install dependencies
       run: bundle install
-    - name: Debug draft socket fds
-      run: |
-        export LD_LIBRARY_PATH=$HOME/lib
-        bundle exec ruby -e '
-          require "ffi"
-
-          module ZMQ
-            extend FFI::Library
-            ffi_lib "zmq"
-            attach_function :zmq_ctx_new, [], :pointer
-            attach_function :zmq_socket, [:pointer, :int], :pointer
-            attach_function :zmq_getsockopt, [:pointer, :int, :pointer, :pointer], :int
-            attach_function :zmq_errno, [], :int
-            attach_function :zmq_strerror, [:int], :string
-            attach_function :zmq_close, [:pointer], :int
-            attach_function :zmq_ctx_term, [:pointer], :int
-            attach_function :zmq_has, [:string], :int
-          end
-
-          puts "zmq_has(draft): #{ZMQ.zmq_has("draft")}"
-          ctx = ZMQ.zmq_ctx_new
-          puts "ctx: #{ctx.inspect}"
-
-          # ZMQ_REQ=3, ZMQ_SERVER=12, ZMQ_FD=14
-          {REQ: 3, SERVER: 12, RADIO: 14, DISH: 15}.each do |name, type|
-            handle = ZMQ.zmq_socket(ctx, type)
-            if handle.null?
-              puts "#{name}: zmq_socket FAILED errno=#{ZMQ.zmq_errno} (#{ZMQ.zmq_strerror(ZMQ.zmq_errno)})"
-              next
-            end
-            puts "#{name}: handle=#{handle.inspect}"
-
-            fd_buf = FFI::MemoryPointer.new(:int)
-            len_buf = FFI::MemoryPointer.new(:size_t)
-            len_buf.write(:size_t, FFI.type_size(:int))
-            rc = ZMQ.zmq_getsockopt(handle, 14, fd_buf, len_buf)
-            if rc == 0
-              puts "#{name}: fd=#{fd_buf.read_int}"
-            else
-              puts "#{name}: getsockopt FAILED errno=#{ZMQ.zmq_errno} (#{ZMQ.zmq_strerror(ZMQ.zmq_errno)})"
-            end
-            ZMQ.zmq_close(handle)
-          end
-          ZMQ.zmq_ctx_term(ctx)
-        '
     - name: Run tests
       run: |
         export LD_LIBRARY_PATH=$HOME/lib

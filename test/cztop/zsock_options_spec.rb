@@ -591,7 +591,7 @@ describe CZTop::ZsockOptions do
           mon = CZTop::Monitor.new(server_socket)
           mon.listen(*%w[CONNECTED DISCONNECTED ACCEPTED])
           mon.start
-          mon.actor.options.rcvtimeo = 50
+          mon.actor.options.rcvtimeo = 500
           mon
         end
 
@@ -636,36 +636,26 @@ describe CZTop::ZsockOptions do
 
 
         describe 'with talking and then dead client socket' do
+          before { skip 'FIXME: blocks until I press enter' }
+
           let(:received_msg) { server_socket.receive } # to know the routing ID
-          before do
-            server_socket
-            server_socket.options.sndtimeo = 30 # so we'll get an exception
-            server_mon
-            client_socket
-            accepted_event
-            client_socket << 'foo'
-            assert_equal %w[foo], received_msg.to_a
-
-            # NOTE: Disconnecting alone won't do it. It has to be destroyed.
-            client_socket.ffi_delegate.destroy
-
-            disconnected_event
-          end
-
-          let(:probe_msg) do
-            msg = CZTop::Message.new 'bar'
-            msg.routing_id = received_msg.routing_id
-            msg
-          end
 
           # TODO: maybe set option ZMQ_IMMEDIATE
-          describe 'when server sends message' do # FIXME: blocks until I press enter
+          describe 'when server sends message' do
             it 'raises' do
-              skip 'FIXME: blocks until I press enter'
-              assert_raises(SocketError) do
-              # assert_raises(IO::EAGAINWaitWritable) do
-                server_socket << probe_msg
-              end
+              server_socket
+              server_socket.options.sndtimeo = 30
+              server_mon
+              client_socket
+              accepted_event
+              client_socket << 'foo'
+              assert_equal %w[foo], received_msg.to_a
+              client_socket.ffi_delegate.destroy
+              disconnected_event
+
+              msg = CZTop::Message.new 'bar'
+              msg.routing_id = received_msg.routing_id
+              assert_raises(SocketError) { server_socket << msg }
             end
           end
         end

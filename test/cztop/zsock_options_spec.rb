@@ -29,7 +29,7 @@ describe CZTop::ZsockOptions do
     describe '#readable?' do
       describe 'with read event set' do
         it 'returns true' do
-          socket.options.stub(:events, CZTop::Poller::ZMQ::POLLIN) do
+          socket.options.stub(:events, CZTop::ZsockOptions::POLLIN) do
             assert_operator socket, :readable?
           end
         end
@@ -49,7 +49,7 @@ describe CZTop::ZsockOptions do
     describe '#writable?' do
       describe 'with write event set' do
         it 'returns true' do
-          socket.options.stub(:events, CZTop::Poller::ZMQ::POLLOUT) do
+          socket.options.stub(:events, CZTop::ZsockOptions::POLLOUT) do
             assert_operator socket, :writable?
           end
         end
@@ -636,7 +636,7 @@ describe CZTop::ZsockOptions do
         before { writer << 'foo' }
 
         it 'is readable' do
-          assert (reader.options.events & CZTop::Poller::ZMQ::POLLIN) > 0,
+          assert (reader.options.events & CZTop::ZsockOptions::POLLIN) > 0,
                  'should be readable'
         end
       end
@@ -644,7 +644,7 @@ describe CZTop::ZsockOptions do
 
       describe 'with non-readable socket' do
         it 'is not readable' do
-          assert (reader.options.events & CZTop::Poller::ZMQ::POLLIN) == 0,
+          assert (reader.options.events & CZTop::ZsockOptions::POLLIN) == 0,
                  'should not be readable'
         end
       end
@@ -652,7 +652,7 @@ describe CZTop::ZsockOptions do
 
       describe 'with writable socket' do
         it 'is writable' do
-          assert (writer.options.events & CZTop::Poller::ZMQ::POLLOUT) > 0,
+          assert (writer.options.events & CZTop::ZsockOptions::POLLOUT) > 0,
                  'should be writable'
         end
       end
@@ -668,7 +668,7 @@ describe CZTop::ZsockOptions do
         end
 
         it 'is not writable' do
-          assert (full_writer.options.events & CZTop::Poller::ZMQ::POLLOUT) == 0,
+          assert (full_writer.options.events & CZTop::ZsockOptions::POLLOUT) == 0,
                  'should not be writable'
         end
       end

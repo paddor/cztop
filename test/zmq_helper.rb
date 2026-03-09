@@ -27,13 +27,4 @@ module ZMQHelper
   end
 
 
-  # @return [Boolean] whether zmq_poller_*() draft functions are available
-  def has_zmq_poller?
-    CZTop::Poller::ZMQ.poller_new
-    true
-  rescue NotImplementedError
-    false
-  end
-
-
 end

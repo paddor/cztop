@@ -19,11 +19,15 @@ module CZTop
     end
 
 
+    # @api private
+    POLLIN  = 1
+    POLLOUT = 2
+
     # Checks whether there's a message that can be read from the socket
     # without blocking.
     # @return [Boolean] whether the socket is readable
     def readable?
-      (options.events & Poller::ZMQ::POLLIN).positive?
+      (options.events & POLLIN).positive?
     end
 
 
@@ -31,7 +35,7 @@ module CZTop
     # blocking.
     # @return [Boolean] whether the socket is writable
     def writable?
-      (options.events & Poller::ZMQ::POLLOUT).positive?
+      (options.events & POLLOUT).positive?
     end
 
 
@@ -476,7 +480,8 @@ module CZTop
 
 
       # @return [Integer] socket events (readable/writable)
-      # @see CZTop::Poller::ZMQ::POLLIN and CZTop::Poller::ZMQ::POLLOUT
+      # @see CZTop::ZsockOptions::POLLIN
+      # @see CZTop::ZsockOptions::POLLOUT
       def events
         Zsock.events(@zocket)
       end

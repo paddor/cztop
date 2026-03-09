@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff4444"/>
+      <stop offset="100%" stop-color="#8b0000"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#444"/>
+      <stop offset="40%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#333"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="480" height="320" fill="#111118"/>
+  <!-- Signal waveform across the background representing message stream -->
+  <g filter="url(#glow)">
+    <path d="M0,160 Q20,160 40,140 Q60,120 80,160 Q100,200 120,160 Q140,120 160,160 Q170,180 180,160
+             Q200,120 220,160 Q240,200 260,160 Q280,120 300,160 Q320,200 340,160
+             Q360,120 380,160 Q400,200 420,160 Q440,120 460,160 Q470,180 480,160"
+          fill="none" stroke="#e8423f" stroke-width="1.5" opacity="0.2"/>
+    <path d="M0,160 Q30,155 60,145 Q90,135 120,160 Q150,185 180,160
+             Q210,135 240,160 Q270,185 300,160 Q330,135 360,160
+             Q390,185 420,160 Q450,140 480,155"
+          fill="none" stroke="#e8423f" stroke-width="1" opacity="0.12"/>
+  </g>
+  <!-- Sunglasses -->
+  <g transform="translate(240, 82)">
+    <path d="M-15,0 Q0,-10 15,0" fill="none" stroke="#ddd" stroke-width="4.5"/>
+    <ellipse cx="-48" cy="5" rx="42" ry="30" fill="url(#lens)" stroke="#ccc" stroke-width="3"/>
+    <ellipse cx="48" cy="5" rx="42" ry="30" fill="url(#lens)" stroke="#ccc" stroke-width="3"/>
+    <ellipse cx="-60" cy="-5" rx="10" ry="6" fill="#fff" opacity="0.08" transform="rotate(-20,-60,-5)"/>
+    <ellipse cx="36" cy="-5" rx="10" ry="6" fill="#fff" opacity="0.08" transform="rotate(-20,36,-5)"/>
+    <line x1="-90" y1="0" x2="-105" y2="-8" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="0" x2="105" y2="-8" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+    <!-- Waveform reflected in lenses -->
+    <g opacity="0.25">
+      <path d="M-72,5 Q-62,-2 -52,5 Q-42,12 -32,5 Q-22,-2 -12,5" fill="none" stroke="#e8423f" stroke-width="1"/>
+      <path d="M24,5 Q34,-2 44,5 Q54,12 64,5 Q74,-2 80,5" fill="none" stroke="#e8423f" stroke-width="1"/>
+    </g>
+  </g>
+  <!-- Thick long beard -->
+  <g transform="translate(240, 118)">
+    <g stroke="url(#redGrad)" stroke-linecap="round" fill="none">
+      <path d="M-70,0 Q-78,50 -85,105 Q-88,130 -82,148" stroke-width="3.5"/>
+      <path d="M-62,2 Q-68,55 -73,110 Q-76,138 -70,155" stroke-width="3.5"/>
+      <path d="M-54,4 Q-58,58 -62,115 Q-64,145 -58,162" stroke-width="4"/>
+      <path d="M-46,5 Q-48,60 -50,118 Q-52,150 -47,168" stroke-width="4"/>
+      <path d="M-38,6 Q-38,65 -40,122 Q-41,155 -37,175" stroke-width="4.5"/>
+      <path d="M-30,7 Q-28,68 -30,125 Q-31,160 -28,180" stroke-width="4.5"/>
+      <path d="M-22,7 Q-20,72 -22,128 Q-23,165 -20,185" stroke-width="5"/>
+      <path d="M-14,8 Q-12,74 -14,130 Q-14,168 -12,188" stroke-width="5"/>
+      <path d="M-6,8 Q-4,75 -6,132 Q-6,170 -5,190" stroke-width="5"/>
+      <path d="M2,8 Q4,75 2,132 Q2,170 3,190" stroke-width="5"/>
+      <path d="M10,8 Q12,74 10,130 Q10,168 12,188" stroke-width="5"/>
+      <path d="M18,7 Q20,72 18,128 Q19,165 20,185" stroke-width="5"/>
+      <path d="M26,7 Q28,68 26,125 Q27,160 28,180" stroke-width="4.5"/>
+      <path d="M34,6 Q36,65 34,122 Q35,155 37,175" stroke-width="4.5"/>
+      <path d="M42,5 Q44,60 42,118 Q44,150 47,168" stroke-width="4"/>
+      <path d="M50,4 Q54,58 52,115 Q56,145 58,162" stroke-width="4"/>
+      <path d="M58,2 Q64,55 60,110 Q68,138 70,155" stroke-width="3.5"/>
+      <path d="M66,0 Q72,50 68,105 Q78,130 82,148" stroke-width="3.5"/>
+    </g>
+  </g>
+  <text x="240" y="282" text-anchor="middle" font-family="'Arial Black','Impact',sans-serif"
+        font-size="48" font-weight="900" fill="#e0e0e0" letter-spacing="3">CZTop</text>
+  <text x="240" y="305" text-anchor="middle" font-family="'Courier New',monospace"
+        font-size="11" fill="#666" letter-spacing="3">ZEROMQ FOR RUBY</text>
+</svg>

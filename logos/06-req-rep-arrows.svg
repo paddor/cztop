@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff4444"/>
+      <stop offset="100%" stop-color="#8b0000"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#333"/>
+      <stop offset="40%" stop-color="#111"/>
+      <stop offset="100%" stop-color="#222"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="480" height="320" fill="#f5f0e8"/>
+  <!-- REQ/REP arrows: request goes right, reply comes back -->
+  <g opacity="0.18">
+    <!-- Request arrows (going right) -->
+    <line x1="30" y1="55" x2="180" y2="55" stroke="#e8423f" stroke-width="2.5"/>
+    <polygon points="180,48 198,55 180,62" fill="#e8423f"/>
+    <line x1="30" y1="75" x2="160" y2="75" stroke="#e8423f" stroke-width="2" opacity="0.6"/>
+    <polygon points="160,69 175,75 160,81" fill="#e8423f" opacity="0.6"/>
+    <!-- Reply arrows (going left) -->
+    <line x1="450" y1="55" x2="300" y2="55" stroke="#4488cc" stroke-width="2.5"/>
+    <polygon points="300,48 282,55 300,62" fill="#4488cc"/>
+    <line x1="450" y1="75" x2="320" y2="75" stroke="#4488cc" stroke-width="2" opacity="0.6"/>
+    <polygon points="320,69 305,75 320,81" fill="#4488cc" opacity="0.6"/>
+    <!-- Labels -->
+    <text x="100" y="45" font-family="'Courier New',monospace" font-size="9" fill="#e8423f">REQ</text>
+    <text x="365" y="45" font-family="'Courier New',monospace" font-size="9" fill="#4488cc">REP</text>
+  </g>
+  <!-- Sunglasses -->
+  <g transform="translate(240, 88)" filter="url(#shadow)">
+    <path d="M-15,0 Q0,-10 15,0" fill="none" stroke="#222" stroke-width="5"/>
+    <ellipse cx="-48" cy="5" rx="42" ry="30" fill="url(#lens)" stroke="#222" stroke-width="3.5"/>
+    <ellipse cx="48" cy="5" rx="42" ry="30" fill="url(#lens)" stroke="#222" stroke-width="3.5"/>
+    <ellipse cx="-60" cy="-5" rx="10" ry="6" fill="#fff" opacity="0.12" transform="rotate(-20,-60,-5)"/>
+    <ellipse cx="36" cy="-5" rx="10" ry="6" fill="#fff" opacity="0.12" transform="rotate(-20,36,-5)"/>
+    <line x1="-90" y1="0" x2="-105" y2="-8" stroke="#222" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="90" y1="0" x2="105" y2="-8" stroke="#222" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <!-- Thick long beard -->
+  <g transform="translate(240, 124)">
+    <g stroke="url(#redGrad)" stroke-linecap="round" fill="none">
+      <path d="M-70,0 Q-78,48 -85,100 Q-88,125 -82,142" stroke-width="3.5"/>
+      <path d="M-62,2 Q-68,52 -73,105 Q-76,133 -70,150" stroke-width="3.5"/>
+      <path d="M-54,4 Q-58,55 -62,110 Q-64,140 -58,157" stroke-width="4"/>
+      <path d="M-46,5 Q-48,58 -50,113 Q-52,145 -47,163" stroke-width="4"/>
+      <path d="M-38,6 Q-38,62 -40,117 Q-41,150 -37,168" stroke-width="4.5"/>
+      <path d="M-30,7 Q-28,65 -30,120 Q-31,155 -28,173" stroke-width="4.5"/>
+      <path d="M-22,7 Q-20,68 -22,123 Q-23,158 -20,178" stroke-width="5"/>
+      <path d="M-14,8 Q-12,70 -14,126 Q-14,162 -12,182" stroke-width="5"/>
+      <path d="M-6,8 Q-4,71 -6,128 Q-6,164 -5,184" stroke-width="5"/>
+      <path d="M2,8 Q4,71 2,128 Q2,164 3,184" stroke-width="5"/>
+      <path d="M10,8 Q12,70 10,126 Q10,162 12,182" stroke-width="5"/>
+      <path d="M18,7 Q20,68 18,123 Q19,158 20,178" stroke-width="5"/>
+      <path d="M26,7 Q28,65 26,120 Q27,155 28,173" stroke-width="4.5"/>
+      <path d="M34,6 Q36,62 34,117 Q35,150 37,168" stroke-width="4.5"/>
+      <path d="M42,5 Q44,58 42,113 Q44,145 47,163" stroke-width="4"/>
+      <path d="M50,4 Q54,55 52,110 Q56,140 58,157" stroke-width="4"/>
+      <path d="M58,2 Q64,52 60,105 Q68,133 70,150" stroke-width="3.5"/>
+      <path d="M66,0 Q72,48 68,100 Q78,125 82,142" stroke-width="3.5"/>
+    </g>
+  </g>
+  <text x="240" y="282" text-anchor="middle" font-family="'Arial Black','Impact',sans-serif"
+        font-size="48" font-weight="900" fill="#222" letter-spacing="3">CZTop</text>
+  <text x="240" y="305" text-anchor="middle" font-family="'Courier New',monospace"
+        font-size="11" fill="#888" letter-spacing="3">ZEROMQ FOR RUBY</text>
+</svg>

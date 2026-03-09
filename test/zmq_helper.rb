@@ -27,23 +27,13 @@ module ZMQHelper
   end
 
 
-  # This can be used to run certain test examples only if ZMQ draft API is
-  # available.
-  #
-  # @return [Boolean] whether the ZMQ DRAFT API is available
-  #
-  def has_zmq_drafts?
-    CZMQ::FFI::LibZMQ.has_draft?
+  # @return [Boolean] whether zmq_poller_*() draft functions are available
+  def has_zmq_poller?
+    CZTop::Poller::ZMQ.poller_new
+    true
+  rescue NotImplementedError
+    false
   end
 
-
-  # This can be used to run certain test examples only if CZMQ draft API is
-  # available.
-  #
-  # @return [Boolean] whether the CZMQ DRAFT API is available
-  #
-  def has_czmq_drafts?
-    ::CZMQ::FFI.has_draft?
-  end
 
 end

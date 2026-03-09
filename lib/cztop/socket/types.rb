@@ -19,12 +19,6 @@ module CZTop
       XPUB    = 9
       XSUB    = 10
       STREAM  = 11
-      SERVER  = 12
-      CLIENT  = 13
-      RADIO   = 14
-      DISH    = 15
-      GATHER  = 16
-      SCATTER = 17
 
     end
 
@@ -63,33 +57,6 @@ module CZTop
 
 
     def initialize(endpoints = nil); end
-
-
-    # Client socket for the ZeroMQ Client-Server Pattern.
-    # @see http://rfc.zeromq.org/spec:41
-    class CLIENT < Socket
-
-      # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_client(endpoints))
-      end
-    end
-
-
-    # Server socket for the ZeroMQ Client-Server Pattern.
-    # @see http://rfc.zeromq.org/spec:41
-    class SERVER < Socket
-
-      # @param endpoints [String] endpoints to bind to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_server(endpoints))
-      end
-
-    end
 
 
     # Request socket for the ZeroMQ Request-Reply Pattern.
@@ -292,84 +259,6 @@ module CZTop
 
     end
 
-
-    # Group-based pub/sub (vs topic-based). This is the publisher socket.
-    # @see https://github.com/zeromq/libzmq/pull/1727
-    class RADIO < Socket
-
-      # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_radio(endpoints))
-      end
-
-    end
-
-
-    # Group-based pub/sub (vs topic-based). This is the subscriber socket.
-    # @see https://github.com/zeromq/libzmq/pull/1727
-    class DISH < Socket
-
-      # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_dish(endpoints))
-      end
-
-
-      # Joins the given group.
-      # @param group [String] group to join, up to 15 characters
-      # @return [void]
-      # @raise [ArgumentError] when group name is invalid or group has already
-      #   been joined before
-      # @raise [SystemCallError] in case of failure
-      def join(group)
-        rc = ffi_delegate.join(group)
-        raise_zmq_err(format('unable to join group %p', group)) if rc == -1
-      end
-
-
-      # Leaves the given group.
-      # @param group [String] group to leave
-      # @return [void]
-      # @raise [ArgumentError] when group wasn't joined before
-      # @raise [SystemCallError] in case of another failure
-      def leave(group)
-        rc = ffi_delegate.leave(group)
-        raise_zmq_err(format('unable to leave group %p', group)) if rc == -1
-      end
-
-    end
-
-
-    # Scatter/gather pattern.
-    # @see https://github.com/zeromq/libzmq/pull/1909
-    class SCATTER < Socket
-
-      # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_scatter(endpoints))
-      end
-
-    end
-
-
-    # Scatter/gather pattern.
-    # @see https://github.com/zeromq/libzmq/pull/1909
-    class GATHER < Socket
-
-      # @param endpoints [String] endpoints to connect to
-      def initialize(endpoints = nil)
-        super
-
-        attach_ffi_delegate(Zsock.new_gather(endpoints))
-      end
-
-    end
 
   end
 end

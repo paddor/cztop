@@ -99,7 +99,6 @@ A slightly more complex version (more sockets) is [here](https://github.com/padd
 * compatible with Fiber Scheduler
 * errors as exceptions
 * CURVE security
-* supports CZMQ DRAFT API
 * extensive test coverage
 
 ## Requirements
@@ -169,12 +168,6 @@ Here's an overview of the core classes:
     * [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB) < Socket
     * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR) < Socket
     * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
-    * [CLIENT](http://www.rubydoc.info/gems/cztop/CZTop/Socket/CLIENT) < Socket
-    * [SERVER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SERVER) < Socket
-    * [RADIO](http://www.rubydoc.info/gems/cztop/CZTop/Socket/RADIO) < Socket
-    * [DISH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DISH) < Socket
-    * [SCATTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SCATTER) < Socket
-    * [GATHER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/GATHER) < Socket
   * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
     * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
     * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)

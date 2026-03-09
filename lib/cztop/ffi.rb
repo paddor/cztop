@@ -31,13 +31,6 @@ module CZMQ
     attach_function :zsock_new,            [:int], :pointer, **opts
     attach_function :zsock_destroy,        [:pointer], :void, **opts
 
-    begin
-      attach_function :zsock_new_client,     [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zsock_new_server,     [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-
     attach_function :zsock_new_req,        [:string], :pointer, **opts
     attach_function :zsock_new_rep,        [:string], :pointer, **opts
     attach_function :zsock_new_dealer,     [:string], :pointer, **opts
@@ -51,19 +44,6 @@ module CZMQ
     attach_function :zsock_new_pair,       [:string], :pointer, **opts
     attach_function :zsock_new_stream,     [:string], :pointer, **opts
 
-    begin
-      attach_function :zsock_new_radio,    [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zsock_new_dish,     [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zsock_new_scatter,  [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zsock_new_gather,   [:string], :pointer, **opts
-    rescue ::FFI::NotFoundError; end
-
     attach_function :zsock_endpoint,       [:pointer], :string, **opts
     attach_function :zsock_connect,        [:pointer, :string, :varargs], :int, **opts
     attach_function :zsock_disconnect,     [:pointer, :string, :varargs], :int, **opts
@@ -76,13 +56,6 @@ module CZMQ
 
     attach_function :zsock_set_subscribe,   [:pointer, :string], :void, **opts
     attach_function :zsock_set_unsubscribe, [:pointer, :string], :void, **opts
-
-    begin
-      attach_function :zsock_join,         [:pointer, :string], :int, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zsock_leave,        [:pointer, :string], :int, **opts
-    rescue ::FFI::NotFoundError; end
 
     # zsock_send is variadic: int zsock_send(void *self, const char *picture, ...)
     begin
@@ -154,11 +127,6 @@ module CZMQ
     attach_function :zmsg_last,         [:pointer], :pointer, **opts
     attach_function :zmsg_size,         [:pointer], :size_t, **opts
 
-    begin
-      attach_function :zmsg_routing_id,     [:pointer], :uint32, **opts
-      attach_function :zmsg_set_routing_id,  [:pointer, :uint32], :void, **opts
-    rescue ::FFI::NotFoundError; end
-
     # -----------------------------------------------------------------
     # zframe functions
     # -----------------------------------------------------------------
@@ -174,15 +142,6 @@ module CZMQ
     attach_function :zframe_more,        [:pointer], :int, **opts
     attach_function :zframe_set_more,    [:pointer, :int], :void, **opts
     attach_function :zframe_eq,          [:pointer, :pointer], :bool, **opts
-
-    begin
-      attach_function :zframe_routing_id,     [:pointer], :uint32, **opts
-      attach_function :zframe_set_routing_id, [:pointer, :uint32], :void, **opts
-    rescue ::FFI::NotFoundError; end
-    begin
-      attach_function :zframe_group,          [:pointer], :string, **opts
-      attach_function :zframe_set_group,      [:pointer, :string], :int, **opts
-    rescue ::FFI::NotFoundError; end
 
     # -----------------------------------------------------------------
     # zactor functions
@@ -272,9 +231,6 @@ module CZMQ
     attach_function :zpoller_remove,           [:pointer, :pointer], :int, **opts
     attach_function :zpoller_wait,             [:pointer, :int], :pointer, **opts
     attach_function :zpoller_terminated,       [:pointer], :bool, **opts
-    begin
-      attach_function :zpoller_ignore_interrupts, [:pointer], :void, **opts
-    rescue ::FFI::NotFoundError; end
     attach_function :zpoller_set_nonstop,      [:pointer, :bool], :void, **opts
 
     # -----------------------------------------------------------------
@@ -392,17 +348,6 @@ module CZMQ
     zsys_version(czmq_maj, czmq_min, czmq_pat)
     CZMQ_VERSION = "#{czmq_maj.read_int}.#{czmq_min.read_int}.#{czmq_pat.read_int}".freeze
 
-    # Draft API detection
-    def self.has_draft?
-      respond_to?(:zsock_new_client)
-    end
-
-    module LibZMQ
-      def self.has_draft?
-        CZMQ::FFI.has_draft?
-      end
-    end
-
     # -----------------------------------------------------------------
     # Zsock
     # -----------------------------------------------------------------
@@ -425,8 +370,6 @@ module CZMQ
       end
 
       # Factory methods
-      def self.new_client(endpoint)  = _wrap(CZMQ::FFI.zsock_new_client(endpoint))
-      def self.new_server(endpoint)  = _wrap(CZMQ::FFI.zsock_new_server(endpoint))
       def self.new_req(endpoint)     = _wrap(CZMQ::FFI.zsock_new_req(endpoint))
       def self.new_rep(endpoint)     = _wrap(CZMQ::FFI.zsock_new_rep(endpoint))
       def self.new_dealer(endpoint)  = _wrap(CZMQ::FFI.zsock_new_dealer(endpoint))
@@ -439,32 +382,6 @@ module CZMQ
       def self.new_pull(endpoint)    = _wrap(CZMQ::FFI.zsock_new_pull(endpoint))
       def self.new_pair(endpoint)    = _wrap(CZMQ::FFI.zsock_new_pair(endpoint))
       def self.new_stream(endpoint)  = _wrap(CZMQ::FFI.zsock_new_stream(endpoint))
-
-      class << self
-        def new_radio(endpoint)
-          _wrap(CZMQ::FFI.zsock_new_radio(endpoint))
-        rescue NoMethodError
-          raise NotImplementedError, 'RADIO sockets require DRAFT API'
-        end
-
-        def new_dish(endpoint)
-          _wrap(CZMQ::FFI.zsock_new_dish(endpoint))
-        rescue NoMethodError
-          raise NotImplementedError, 'DISH sockets require DRAFT API'
-        end
-
-        def new_scatter(endpoint)
-          _wrap(CZMQ::FFI.zsock_new_scatter(endpoint))
-        rescue NoMethodError
-          raise NotImplementedError, 'SCATTER sockets require DRAFT API'
-        end
-
-        def new_gather(endpoint)
-          _wrap(CZMQ::FFI.zsock_new_gather(endpoint))
-        rescue NoMethodError
-          raise NotImplementedError, 'GATHER sockets require DRAFT API'
-        end
-      end
 
       def self._wrap(ptr)
         obj = allocate
@@ -514,14 +431,6 @@ module CZMQ
 
       def set_unsubscribe(prefix)
         CZMQ::FFI.zsock_set_unsubscribe(@ptr, prefix)
-      end
-
-      def join(group)
-        CZMQ::FFI.zsock_join(@ptr, group)
-      end
-
-      def leave(group)
-        CZMQ::FFI.zsock_leave(@ptr, group)
       end
 
       # Class methods that take a zsock pointer (or wrapper with to_ptr)
@@ -695,18 +604,6 @@ module CZMQ
         CZMQ::FFI.zmsg_size(@ptr)
       end
 
-      def routing_id
-        CZMQ::FFI.zmsg_routing_id(@ptr)
-      rescue NoMethodError
-        raise NotImplementedError, 'routing_id requires DRAFT API'
-      end
-
-      def set_routing_id(id)
-        CZMQ::FFI.zmsg_set_routing_id(@ptr, id)
-      rescue NoMethodError
-        raise NotImplementedError, 'set_routing_id requires DRAFT API'
-      end
-
       private
 
       # Returns a Zframe that does NOT own the pointer (borrowed from zmsg).
@@ -807,29 +704,6 @@ module CZMQ
         CZMQ::FFI.zframe_eq(@ptr, other_ptr)
       end
 
-      def routing_id
-        CZMQ::FFI.zframe_routing_id(@ptr)
-      rescue NoMethodError
-        raise NotImplementedError, 'routing_id requires DRAFT API'
-      end
-
-      def set_routing_id(id)
-        CZMQ::FFI.zframe_set_routing_id(@ptr, id)
-      rescue NoMethodError
-        raise NotImplementedError, 'set_routing_id requires DRAFT API'
-      end
-
-      def group
-        CZMQ::FFI.zframe_group(@ptr)
-      rescue NoMethodError
-        raise NotImplementedError, 'group requires DRAFT API'
-      end
-
-      def set_group(group)
-        CZMQ::FFI.zframe_set_group(@ptr, group)
-      rescue NoMethodError
-        raise NotImplementedError, 'set_group requires DRAFT API'
-      end
     end
 
     # -----------------------------------------------------------------
@@ -1271,10 +1145,6 @@ module CZMQ
 
       def terminated
         CZMQ::FFI.zpoller_terminated(@ptr)
-      end
-
-      def ignore_interrupts
-        CZMQ::FFI.zpoller_ignore_interrupts(@ptr)
       end
 
       def set_nonstop(nonstop)

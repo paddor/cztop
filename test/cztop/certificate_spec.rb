@@ -164,16 +164,6 @@ describe CZTop::Certificate do
         end
 
 
-        describe 'when unsetting' do
-          before { skip 'requires CZMQ drafts and CURVE' unless has_czmq_drafts? && ::CZMQ::FFI::Zsys.has_curve }
-
-          it 'unsets the meta val' do
-            cert[key] = val
-            cert[key] = nil
-            assert_nil cert[key]
-          end
-        end
-
         it 'does safe format handling' do
           called_with = nil
           ffi_delegate.stub(:set_meta, ->(*args) { called_with = args }) do

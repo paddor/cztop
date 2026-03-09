@@ -45,20 +45,3 @@ require_relative 'cztop/zap'
 # make Ctrl-C work in case a low-level call hangs
 CZMQ::FFI::Signals.disable_default_handling
 
-##
-# Probably useless in this Ruby binding:
-#
-#  * CertificateStore
-#  * UUID
-#  * Dir
-#  * DirPatch
-#  * File
-#  * HashX
-#  * String
-#  * Trie
-#  * Hash
-#  * List
-
-# Implemented before, but removed because useless:
-#
-#  * Loop

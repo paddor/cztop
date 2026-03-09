@@ -1,7 +1,7 @@
 {
-  "lib/*.rb": { "alternate": "spec/{}_spec.rb" },
-  "spec/*_spec.rb": {
+  "lib/*.rb": { "alternate": "test/{}_spec.rb" },
+  "test/*_spec.rb": {
     "alternate": "lib/{}.rb",
-    "dispatch": "bundle exec rspec {file}"
+    "dispatch": "bundle exec ruby -Ilib:test {file}"
   }
 }

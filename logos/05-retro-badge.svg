@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f4d03f"/>
+      <stop offset="50%" stop-color="#c9a726"/>
+      <stop offset="100%" stop-color="#f4d03f"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="320" fill="#2c1810"/>
+  <!-- Outer ring -->
+  <circle cx="240" cy="160" r="140" fill="none" stroke="url(#gold)" stroke-width="3"/>
+  <circle cx="240" cy="160" r="130" fill="none" stroke="url(#gold)" stroke-width="1"/>
+  <!-- Inner circle fill -->
+  <circle cx="240" cy="160" r="128" fill="#1a0e08"/>
+  <!-- Decorative dots around ring -->
+  <g fill="#c9a726">
+    <circle cx="240" cy="22" r="2.5"/><circle cx="240" cy="298" r="2.5"/>
+    <circle cx="102" cy="160" r="2.5"/><circle cx="378" cy="160" r="2.5"/>
+    <circle cx="142" cy="62" r="2"/><circle cx="338" cy="62" r="2"/>
+    <circle cx="142" cy="258" r="2"/><circle cx="338" cy="258" r="2"/>
+  </g>
+  <!-- Curved text top -->
+  <path id="topArc" d="M150,95 A100,100 0 0,1 330,95" fill="none"/>
+  <text font-family="'Georgia', serif" font-size="13" fill="#c9a726" letter-spacing="3">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">★ ZEROMQ FOR RUBY ★</textPath>
+  </text>
+  <!-- Main text -->
+  <text x="240" y="170" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif"
+        font-size="68" font-weight="900" fill="url(#gold)" letter-spacing="-1">CZTop</text>
+  <!-- Beard strokes -->
+  <g stroke="#c9a726" stroke-width="2" stroke-linecap="round" opacity="0.7">
+    <line x1="200" y1="178" x2="195" y2="205"/><line x1="208" y1="178" x2="205" y2="210"/>
+    <line x1="216" y1="178" x2="216" y2="212"/><line x1="224" y1="178" x2="227" y2="210"/>
+    <line x1="232" y1="178" x2="237" y2="205"/>
+  </g>
+  <!-- Network nodes inside badge -->
+  <g fill="#c9a726" opacity="0.5">
+    <circle cx="160" cy="135" r="3"/><circle cx="320" cy="135" r="3"/>
+    <circle cx="160" cy="210" r="3"/><circle cx="320" cy="210" r="3"/>
+  </g>
+  <g stroke="#c9a72640" stroke-width="0.5">
+    <line x1="160" y1="135" x2="320" y2="135"/><line x1="160" y1="210" x2="320" y2="210"/>
+    <line x1="160" y1="135" x2="160" y2="210"/><line x1="320" y1="135" x2="320" y2="210"/>
+    <line x1="160" y1="135" x2="320" y2="210"/><line x1="320" y1="135" x2="160" y2="210"/>
+  </g>
+  <!-- Curved text bottom -->
+  <path id="botArc" d="M155,235 A100,100 0 0,0 325,235" fill="none"/>
+  <text font-family="'Courier New', monospace" font-size="11" fill="#c9a726" letter-spacing="1">
+    <textPath href="#botArc" startOffset="50%" text-anchor="middle">EST. 2016</textPath>
+  </text>
+</svg>

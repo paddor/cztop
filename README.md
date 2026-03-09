@@ -2,11 +2,9 @@
 
 # CZTop
 
-CZTop is a CZMQ binding for Ruby. It is based on
-[czmq-ffi-gen](https://github.com/paddor/czmq-ffi-gen), the generated low-level
-FFI binding of [CZMQ](https://github.com/zeromq/czmq) and has a focus on being
-easy to use for Rubyists (POLS) and providing first class support for security
-mechanisms (like CURVE).
+CZTop is a CZMQ binding for Ruby with handcrafted FFI bindings. It has a focus
+on being easy to use for Rubyists (POLS) and providing first class support for
+security mechanisms (like CURVE).
 
 
 ## Example with Async
@@ -98,11 +96,11 @@ A slightly more complex version (more sockets) is [here](https://github.com/padd
 ### Features
 
 * Ruby idiomatic API
-* compatible with Fiber Scheduler (only on Ruby >= 3.2)
+* compatible with Fiber Scheduler
 * errors as exceptions
 * CURVE security
 * supports CZMQ DRAFT API
-* extensive spec coverage
+* extensive test coverage
 
 ## Requirements
 
@@ -121,9 +119,7 @@ On macOS using Homebrew, run:
 
 ### Supported Rubies
 
-At least:
-
-* Ruby 3.0, 3.1, 3.2, 3.3
+* Ruby 3.3+
 
 ## Installation
 
@@ -197,7 +193,7 @@ Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
 
 ## Performance
 
-CZTop is just a convenience layer on top of the thin czmq-ffi-gen library.
+CZTop is a thin convenience layer on top of CZMQ via FFI.
 
 Make sure to check out the
 [perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
@@ -212,8 +208,7 @@ See the [examples](https://github.com/paddor/cztop/blob/master/examples) directo
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/paddor/cztop.
 
-To run the tests before/after you made any changes to the source and have
-created a test case for it, use `rake spec`.
+To run the tests, use `rake test`.
 
 ## License
 

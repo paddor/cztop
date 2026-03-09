@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="50%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e8423f"/>
+      <stop offset="50%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#e8423f"/>
+    </linearGradient>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="480" height="320" fill="url(#sky)"/>
+  <!-- Synthwave grid floor -->
+  <g stroke="#e8423f30" stroke-width="0.8">
+    <line x1="0" y1="230" x2="480" y2="230"/>
+    <line x1="0" y1="250" x2="480" y2="250"/>
+    <line x1="0" y1="275" x2="480" y2="275"/>
+    <line x1="0" y1="305" x2="480" y2="305"/>
+    <!-- Perspective lines -->
+    <line x1="240" y1="230" x2="0" y2="320"/>
+    <line x1="240" y1="230" x2="80" y2="320"/>
+    <line x1="240" y1="230" x2="160" y2="320"/>
+    <line x1="240" y1="230" x2="320" y2="320"/>
+    <line x1="240" y1="230" x2="400" y2="320"/>
+    <line x1="240" y1="230" x2="480" y2="320"/>
+  </g>
+  <!-- Sun/circle behind text -->
+  <circle cx="240" cy="140" r="80" fill="none" stroke="#ff6b6b20" stroke-width="40"/>
+  <circle cx="240" cy="140" r="60" fill="#ff6b6b10"/>
+  <!-- Horizontal scan lines through sun -->
+  <g stroke="#0f0c29" stroke-width="2" opacity="0.6">
+    <line x1="160" y1="145" x2="320" y2="145"/>
+    <line x1="165" y1="155" x2="315" y2="155"/>
+    <line x1="170" y1="165" x2="310" y2="165"/>
+    <line x1="178" y1="175" x2="302" y2="175"/>
+  </g>
+  <!-- Main text -->
+  <g filter="url(#glow2)">
+    <text x="240" y="145" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif"
+          font-size="80" font-weight="900" fill="url(#waveGrad)" letter-spacing="-1">CZTop</text>
+  </g>
+  <!-- Beard as signal waves -->
+  <g stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round" opacity="0.7" fill="none">
+    <path d="M198,155 Q193,170 198,185 Q203,200 198,215"/>
+    <path d="M210,155 Q205,172 210,189 Q215,206 210,220"/>
+    <path d="M222,155 Q217,174 222,193 Q227,210 222,224"/>
+    <path d="M234,155 Q239,174 234,193 Q229,210 234,224"/>
+    <path d="M246,155 Q251,172 246,189 Q241,206 246,220"/>
+    <path d="M258,155 Q263,170 258,185 Q253,200 258,215"/>
+  </g>
+  <!-- Floating message nodes -->
+  <g filter="url(#glow2)">
+    <circle cx="80" cy="60" r="4" fill="#ff6b6b"/>
+    <circle cx="400" cy="50" r="4" fill="#ff6b6b"/>
+    <circle cx="60" cy="180" r="3" fill="#ff6b6b" opacity="0.6"/>
+    <circle cx="420" cy="170" r="3" fill="#ff6b6b" opacity="0.6"/>
+  </g>
+  <!-- Connection lines with message dots -->
+  <g stroke="#ff6b6b40" stroke-width="0.8">
+    <line x1="80" y1="60" x2="400" y2="50"/>
+    <line x1="80" y1="60" x2="60" y2="180"/>
+    <line x1="400" y1="50" x2="420" y2="170"/>
+  </g>
+  <circle cx="200" cy="56" r="2.5" fill="#ffcc02" opacity="0.8"/>
+  <circle cx="75" cy="120" r="2" fill="#ffcc02" opacity="0.7"/>
+  <text x="240" y="205" text-anchor="middle" font-family="'Courier New', monospace"
+        font-size="11" fill="#ff6b6b88" letter-spacing="5">ZEROMQ FOR RUBY</text>
+</svg>

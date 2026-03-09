@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <filter id="neon">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="neonSm">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="480" height="320" rx="12" fill="#0a0a1a"/>
+  <!-- Circuit board traces -->
+  <g stroke="#00ff8820" stroke-width="1">
+    <path d="M40,160 H140 V80 H200" fill="none"/>
+    <path d="M440,160 H340 V240 H280" fill="none"/>
+    <path d="M240,40 V100" fill="none"/>
+    <path d="M240,220 V280" fill="none"/>
+    <path d="M80,60 H160 V100" fill="none"/>
+    <path d="M400,260 H320 V220" fill="none"/>
+  </g>
+  <!-- Circuit nodes -->
+  <g fill="#00ff88" opacity="0.4">
+    <circle cx="40" cy="160" r="3"/><circle cx="140" cy="80" r="2"/>
+    <circle cx="440" cy="160" r="3"/><circle cx="340" cy="240" r="2"/>
+    <circle cx="240" cy="40" r="3"/><circle cx="240" cy="280" r="3"/>
+    <circle cx="80" cy="60" r="2"/><circle cx="400" cy="260" r="2"/>
+  </g>
+  <!-- Main text -->
+  <g transform="translate(240, 155)" filter="url(#neon)">
+    <text text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif"
+          font-size="90" font-weight="900" fill="none" stroke="#00ff88" stroke-width="2"
+          letter-spacing="-2">CZTop</text>
+  </g>
+  <g transform="translate(240, 155)">
+    <text text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif"
+          font-size="90" font-weight="900" fill="#00ff88" opacity="0.15"
+          letter-spacing="-2">CZTop</text>
+  </g>
+  <!-- Beard strokes in neon -->
+  <g transform="translate(240, 155)" filter="url(#neonSm)">
+    <g stroke="#00ff88" stroke-width="2" stroke-linecap="round" opacity="0.7">
+      <line x1="-42" y1="10" x2="-52" y2="50"/><line x1="-34" y1="10" x2="-38" y2="54"/>
+      <line x1="-26" y1="10" x2="-26" y2="56"/><line x1="-18" y1="10" x2="-14" y2="54"/>
+      <line x1="-10" y1="10" x2="-2" y2="50"/><line x1="-2" y1="10" x2="8" y2="44"/>
+    </g>
+  </g>
+  <!-- Flying packets as small diamonds -->
+  <g filter="url(#neonSm)">
+    <polygon points="120,90 126,96 120,102 114,96" fill="#00ff88" opacity="0.8"/>
+    <polygon points="350,230 355,235 350,240 345,235" fill="#00ff88" opacity="0.6"/>
+    <polygon points="240,60 244,64 240,68 236,64" fill="#00ff88" opacity="0.7"/>
+  </g>
+  <text x="240" y="238" text-anchor="middle" font-family="'Courier New', monospace"
+        font-size="12" fill="#00ff8888" letter-spacing="6">ZEROMQ FOR RUBY</text>
+</svg>

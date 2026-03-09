@@ -44,6 +44,29 @@ jobs:
         env CZMQ_VERSION=v4.2.1 ci/install-libczmq
     - name: Install dependencies
       run: bundle install
+    - name: Debug draft socket fds
+      run: |
+        export LD_LIBRARY_PATH=$HOME/lib
+        bundle exec ruby -e "
+          require_relative 'lib/cztop'
+          puts 'ZMQ: ' + CZMQ::FFI::ZMQ_VERSION
+          puts 'CZMQ: ' + CZMQ::FFI::CZMQ_VERSION
+          puts 'has_draft?: ' + CZMQ::FFI.has_draft?.to_s
+          puts
+          %w[REQ SERVER RADIO DISH].each do |type|
+            begin
+              klass = CZTop::Socket.const_get(type)
+              s = klass.new
+              fd = s.fd
+              puts \"#{type}: fd=#{fd}\"
+              io = IO.for_fd(fd, autoclose: false)
+              puts \"#{type}: IO=#{io.inspect}\"
+              s.close
+            rescue => e
+              puts \"#{type}: #{e.class}: #{e.message}\"
+            end
+          end
+        "
     - name: Run tests
       run: |
         export LD_LIBRARY_PATH=$HOME/lib

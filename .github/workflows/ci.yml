@@ -47,42 +47,47 @@ jobs:
     - name: Debug draft socket fds
       run: |
         export LD_LIBRARY_PATH=$HOME/lib
-        echo "=== Library check ==="
-        ldd $HOME/lib/libczmq.so | grep zmq || true
-        ls -la $HOME/lib/libzmq* || true
-        ldconfig -p | grep -i zmq || true
-        echo
         bundle exec ruby -e '
           require "ffi"
-          require_relative "lib/cztop"
 
-          puts "ZMQ: #{CZMQ::FFI::ZMQ_VERSION}"
-          puts "CZMQ: #{CZMQ::FFI::CZMQ_VERSION}"
-          puts "has_draft?: #{CZMQ::FFI.has_draft?}"
-          puts "ffi_libraries: #{CZMQ::FFI.ffi_libraries.map { |l| "#{l.name}" }}"
-
-          # Check /proc maps for actual loaded libraries
-          maps = File.read("/proc/self/maps")
-          zmq_libs = maps.lines.select { |l| l.include?("zmq") || l.include?("czmq") }.map { |l| l.strip.split.last }.uniq
-          puts "Loaded libraries: #{zmq_libs}"
-          puts
-
-          %w[REQ SERVER].each do |type|
-            begin
-              klass = CZTop::Socket.const_get(type)
-              s = klass.new
-              zsock_ptr = s.ffi_delegate.to_ptr
-
-              resolved = CZMQ::FFI.zsock_resolve(zsock_ptr)
-              fd_via_czmq = CZMQ::FFI.zsock_fd(zsock_ptr)
-              errno_after = CZMQ::FFI.zmq_errno
-              puts "#{type}: fd=#{fd_via_czmq} errno=#{errno_after} (#{CZMQ::FFI.zmq_strerror(errno_after)})"
-
-              s.close
-            rescue => e
-              puts "#{type}: ERROR #{e.class}: #{e.message}"
-            end
+          module ZMQ
+            extend FFI::Library
+            ffi_lib "zmq"
+            attach_function :zmq_ctx_new, [], :pointer
+            attach_function :zmq_socket, [:pointer, :int], :pointer
+            attach_function :zmq_getsockopt, [:pointer, :int, :pointer, :pointer], :int
+            attach_function :zmq_errno, [], :int
+            attach_function :zmq_strerror, [:int], :string
+            attach_function :zmq_close, [:pointer], :int
+            attach_function :zmq_ctx_term, [:pointer], :int
+            attach_function :zmq_has, [:string], :int
           end
+
+          puts "zmq_has(draft): #{ZMQ.zmq_has("draft")}"
+          ctx = ZMQ.zmq_ctx_new
+          puts "ctx: #{ctx.inspect}"
+
+          # ZMQ_REQ=3, ZMQ_SERVER=12, ZMQ_FD=14
+          {REQ: 3, SERVER: 12, RADIO: 14, DISH: 15}.each do |name, type|
+            handle = ZMQ.zmq_socket(ctx, type)
+            if handle.null?
+              puts "#{name}: zmq_socket FAILED errno=#{ZMQ.zmq_errno} (#{ZMQ.zmq_strerror(ZMQ.zmq_errno)})"
+              next
+            end
+            puts "#{name}: handle=#{handle.inspect}"
+
+            fd_buf = FFI::MemoryPointer.new(:int)
+            len_buf = FFI::MemoryPointer.new(:size_t)
+            len_buf.write(:size_t, FFI.type_size(:int))
+            rc = ZMQ.zmq_getsockopt(handle, 14, fd_buf, len_buf)
+            if rc == 0
+              puts "#{name}: fd=#{fd_buf.read_int}"
+            else
+              puts "#{name}: getsockopt FAILED errno=#{ZMQ.zmq_errno} (#{ZMQ.zmq_strerror(ZMQ.zmq_errno)})"
+            end
+            ZMQ.zmq_close(handle)
+          end
+          ZMQ.zmq_ctx_term(ctx)
         '
     - name: Run tests
       run: |

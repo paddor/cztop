@@ -223,17 +223,6 @@ module CZMQ
     attach_function :zchunk_size,      [:pointer], :size_t, **opts
 
     # -----------------------------------------------------------------
-    # zpoller functions
-    # -----------------------------------------------------------------
-    attach_function :zpoller_new,              [:pointer, :varargs], :pointer, **opts
-    attach_function :zpoller_destroy,          [:pointer], :void, **opts
-    attach_function :zpoller_add,              [:pointer, :pointer], :int, **opts
-    attach_function :zpoller_remove,           [:pointer, :pointer], :int, **opts
-    attach_function :zpoller_wait,             [:pointer, :int], :pointer, **opts
-    attach_function :zpoller_terminated,       [:pointer], :bool, **opts
-    attach_function :zpoller_set_nonstop,      [:pointer, :bool], :void, **opts
-
-    # -----------------------------------------------------------------
     # zstr functions
     # -----------------------------------------------------------------
     attach_function :zstr_recv,  [:pointer], :pointer, **opts
@@ -1089,66 +1078,6 @@ module CZMQ
 
       def size
         CZMQ::FFI.zchunk_size(@ptr)
-      end
-    end
-
-    # -----------------------------------------------------------------
-    # Zpoller
-    # -----------------------------------------------------------------
-    class Zpoller
-      include Wrapper
-
-      DestroyedError = CZMQ::FFI::DestroyedError
-
-      # zpoller_new(void *reader, ...) — variadic, NULL-terminated
-      def initialize(reader, *args)
-        reader_ptr = reader.respond_to?(:to_ptr) ? reader.to_ptr : reader
-        CZMQ::FFI.zpoller_new(reader_ptr, *args)
-      end
-
-      # Alternative: wrap from raw pointer
-      def self._wrap(ptr)
-        obj = allocate
-        obj.instance_variable_set(:@ptr, ptr)
-        obj.instance_variable_set(:@moved, false)
-        unless ptr.null?
-          ObjectSpace.define_finalizer(obj,
-            prevent_leak(ptr, :zpoller_destroy))
-        end
-        obj
-      end
-
-      # Override initialize to store result
-      def initialize(reader, *args)
-        reader_ptr = reader.respond_to?(:to_ptr) ? reader.to_ptr : reader
-        @ptr = CZMQ::FFI.zpoller_new(reader_ptr, *args)
-        @moved = false
-        unless @ptr.null?
-          ObjectSpace.define_finalizer(self,
-            self.class.prevent_leak(@ptr, :zpoller_destroy))
-        end
-      end
-
-      def add(reader)
-        reader_ptr = reader.respond_to?(:to_ptr) ? reader.to_ptr : reader
-        CZMQ::FFI.zpoller_add(@ptr, reader_ptr)
-      end
-
-      def remove(reader)
-        reader_ptr = reader.respond_to?(:to_ptr) ? reader.to_ptr : reader
-        CZMQ::FFI.zpoller_remove(@ptr, reader_ptr)
-      end
-
-      def wait(timeout)
-        CZMQ::FFI.zpoller_wait(@ptr, timeout)
-      end
-
-      def terminated
-        CZMQ::FFI.zpoller_terminated(@ptr)
-      end
-
-      def set_nonstop(nonstop)
-        CZMQ::FFI.zpoller_set_nonstop(@ptr, nonstop)
       end
     end
 

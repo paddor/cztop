@@ -47,26 +47,51 @@ jobs:
     - name: Debug draft socket fds
       run: |
         export LD_LIBRARY_PATH=$HOME/lib
-        bundle exec ruby -e "
-          require_relative 'lib/cztop'
-          puts 'ZMQ: ' + CZMQ::FFI::ZMQ_VERSION
-          puts 'CZMQ: ' + CZMQ::FFI::CZMQ_VERSION
-          puts 'has_draft?: ' + CZMQ::FFI.has_draft?.to_s
+        bundle exec ruby -e '
+          require "ffi"
+          require_relative "lib/cztop"
+
+          # attach zmq_getsockopt for direct testing
+          module DebugFFI
+            extend FFI::Library
+            ffi_lib "zmq"
+            attach_function :zmq_getsockopt, [:pointer, :int, :pointer, :pointer], :int
+          end
+
+          puts "ZMQ: #{CZMQ::FFI::ZMQ_VERSION}"
+          puts "CZMQ: #{CZMQ::FFI::CZMQ_VERSION}"
+          puts "has_draft?: #{CZMQ::FFI.has_draft?}"
+          puts "ffi_libraries: #{CZMQ::FFI.ffi_libraries.map(&:name)}"
           puts
+
           %w[REQ SERVER RADIO DISH].each do |type|
             begin
               klass = CZTop::Socket.const_get(type)
               s = klass.new
-              fd = s.fd
-              puts \"#{type}: fd=#{fd}\"
-              io = IO.for_fd(fd, autoclose: false)
-              puts \"#{type}: IO=#{io.inspect}\"
+              zsock_ptr = s.ffi_delegate.to_ptr
+              puts "#{type}: zsock_ptr=#{zsock_ptr.inspect}"
+
+              resolved = CZMQ::FFI.zsock_resolve(zsock_ptr)
+              puts "#{type}: resolved=#{resolved.inspect} null?=#{resolved.null?}"
+
+              fd_via_czmq = CZMQ::FFI.zsock_fd(zsock_ptr)
+              puts "#{type}: zsock_fd=#{fd_via_czmq}"
+
+              # direct zmq_getsockopt(resolved, ZMQ_FD=14, &fd, &len)
+              fd_buf = FFI::MemoryPointer.new(:int)
+              len_buf = FFI::MemoryPointer.new(:size_t)
+              len_buf.write(:size_t, FFI.type_size(:int))
+              rc = DebugFFI.zmq_getsockopt(resolved, 14, fd_buf, len_buf)
+              puts "#{type}: direct zmq_getsockopt rc=#{rc} fd=#{fd_buf.read_int} len=#{len_buf.read(:size_t)}"
+
               s.close
             rescue => e
-              puts \"#{type}: #{e.class}: #{e.message}\"
+              puts "#{type}: ERROR #{e.class}: #{e.message}"
+              puts e.backtrace.first(3).map { |l| "  #{l}" }.join("\n")
             end
+            puts
           end
-        "
+        '
     - name: Run tests
       run: |
         export LD_LIBRARY_PATH=$HOME/lib

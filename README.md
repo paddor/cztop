@@ -1,34 +1,58 @@
-![CI](https://github.com/paddor/cztop/workflows/CI/badge.svg)
+[![CI](https://github.com/paddor/cztop/actions/workflows/ci.yml/badge.svg)](https://github.com/paddor/cztop/actions/workflows/ci.yml)
 
 # CZTop
 
-CZTop is a CZMQ binding for Ruby with handcrafted FFI bindings. It has a focus
-on being easy to use for Rubyists (POLS) and providing first class support for
-security mechanisms (like CURVE).
+CZTop is a CZMQ binding for Ruby with handcrafted FFI bindings. It focuses on
+being easy to use for Rubyists (POLS) and provides first-class support for
+security mechanisms (CURVE).
 
+## Features
 
-## Example with Async
+* Ruby-idiomatic API
+* Fiber Scheduler compatible
+* errors as exceptions
+* CURVE security
+* extensive test coverage
 
-See [this example](https://github.com/paddor/cztop/blob/master/examples/async.rb):
+## Requirements
+
+* CZMQ >= 4.2
+* ZMQ >= 4.3
+* Ruby 3.3+
+
+### Installing dependencies
+
+Ubuntu 20.04+:
+
+    $ sudo apt install libczmq-dev
+
+macOS (Homebrew):
+
+    $ brew install czmq
+
+## Installation
+
+Add to your Gemfile:
 
 ```ruby
-#! /usr/bin/env ruby
+gem 'cztop'
+```
 
-require 'bundler/inline'
+Then run `bundle install`. Or install directly:
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'cztop', path: '../../'
-  gem 'async'
-end
+    $ gem install cztop
+
+## Quick example
+
+```ruby
+require 'cztop'
+require 'async'
 
 ENDPOINT = 'inproc://req_rep_example'
-# ENDPOINT = 'ipc:///tmp/req_rep_example0'
-# ENDPOINT = 'tcp://localhost:5556'
 
 Async do |task|
-  rep_task = task.async do |t|
-    socket = CZTop::Socket::REP.new ENDPOINT
+  rep_task = task.async do
+    socket = CZTop::Socket::REP.new(ENDPOINT)
 
     loop do
       msg = socket.receive
@@ -40,7 +64,7 @@ Async do |task|
   end
 
   task.async do
-    socket = CZTop::Socket::REQ.new ENDPOINT
+    socket = CZTop::Socket::REQ.new(ENDPOINT)
 
     10.times do |i|
       socket << "foobar ##{i}"
@@ -54,94 +78,12 @@ Async do |task|
 end
 ```
 
+More examples in the [examples](https://github.com/paddor/cztop/tree/master/examples) directory.
 
-Output:
-```
-$ cd examples
-$ time ./async.rb
-<<< ["foobar #0"]
->>> ["FOOBAR #0"]
-<<< ["foobar #1"]
->>> ["FOOBAR #1"]
-<<< ["foobar #2"]
->>> ["FOOBAR #2"]
-<<< ["foobar #3"]
->>> ["FOOBAR #3"]
-<<< ["foobar #4"]
->>> ["FOOBAR #4"]
-<<< ["foobar #5"]
->>> ["FOOBAR #5"]
-<<< ["foobar #6"]
->>> ["FOOBAR #6"]
-<<< ["foobar #7"]
->>> ["FOOBAR #7"]
-<<< ["foobar #8"]
->>> ["FOOBAR #8"]
-<<< ["foobar #9"]
->>> ["FOOBAR #9"]
-REQ done.
-REP done.
-
-________________________________________________________
-Executed in  401.51 millis    fish           external
-   usr time  308.44 millis  605.00 micros  307.83 millis
-   sys time   40.08 millis  278.00 micros   39.81 millis
-
-```
-
-A slightly more complex version (more sockets) is [here](https://github.com/paddor/cztop/blob/master/examples/massive_async.rb).
-
-## Overview
-
-### Features
-
-* Ruby idiomatic API
-* compatible with Fiber Scheduler
-* errors as exceptions
-* CURVE security
-* extensive test coverage
-
-## Requirements
-
-
-* CZMQ >= 4.2
-* ZMQ >= 4.3
-
-
-On Ubuntu 20.04+:
-
-    $ sudo apt install libczmq-dev
-
-On macOS using Homebrew, run:
-
-    $ brew install czmq
-
-### Supported Rubies
-
-* Ruby 3.3+
-
-## Installation
-
-To use this gem, add this line to your application's Gemfile:
-
-```ruby
-gem 'cztop'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install cztop
-
-### Class Hierarchy
-
-Here's an overview of the core classes:
+## Class overview
 
 * [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop)
+  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop/Actor)
   * [Authenticator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
   * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
   * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
@@ -149,58 +91,32 @@ Here's an overview of the core classes:
   * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
   * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
   * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
-  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
   * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
+  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
   * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy)
   * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
-    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ) < Socket
-    * [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP) < Socket
-    * [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER) < Socket
-    * [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER) < Socket
-    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH) < Socket
-    * [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL) < Socket
-    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB) < Socket
-    * [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB) < Socket
-    * [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB) < Socket
-    * [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB) < Socket
-    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR) < Socket
-    * [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM) < Socket
+    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ), [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP), [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER), [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER)
+    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB), [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB), [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB), [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB)
+    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH), [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL)
+    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR), [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM)
   * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
-    * [Padded](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Padded) < Z85
-    * [Pipe](http://www.rubydoc.info/gems/cztop/CZTop/Z85/Pipe)
   * [ZAP](http://www.rubydoc.info/gems/cztop/CZTop/ZAP)
 
-More information in the [API documentation](http://www.rubydoc.info/github/paddor/cztop).
-
-## Documentation
-
-The API should be fairly straight-forward to anyone who is familiar with CZMQ
-and Ruby.  The following API documentation is currently available:
-
-* [YARD API documentation](http://www.rubydoc.info/gems/cztop) (release)
-
-Feel free to start a [wiki](https://github.com/paddor/cztop/wiki) page.
+Full [API documentation](http://www.rubydoc.info/gems/cztop).
 
 ## Performance
 
-CZTop is a thin convenience layer on top of CZMQ via FFI.
-
-Make sure to check out the
-[perf](https://github.com/paddor/cztop/blob/master/perf) directory for latency
-and throughput measurement scripts.
-
-## Usage
-
-See the [examples](https://github.com/paddor/cztop/blob/master/examples) directory for some examples.
-
+CZTop is a thin convenience layer on top of CZMQ via FFI. See the
+[perf](https://github.com/paddor/cztop/tree/master/perf) directory for
+latency and throughput measurement scripts.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/paddor/cztop.
+Bug reports and pull requests are welcome at https://github.com/paddor/cztop.
 
-To run the tests, use `rake test`.
+Run the tests with `bundle exec rake`.
 
 ## License
 
-The gem is available as open source under the terms of the [ISC License](http://opensource.org/licenses/ISC).
+Available as open source under the [ISC License](http://opensource.org/licenses/ISC).
 See the [LICENSE](https://github.com/paddor/cztop/blob/master/LICENSE) file.

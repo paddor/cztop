@@ -1,11 +1,7 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require 'bundler/inline'
-
-gemfile do
-  source 'https://rubygems.org'
-  gem 'cztop', path: '../../'
-end
+require "cztop"
 
 t1 = Thread.new do
   socket = CZTop::Socket::REP.new("inproc://req_rep_example")

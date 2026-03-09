@@ -1,41 +1,29 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require 'bundler/inline'
+require "cztop"
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'cztop', path: '../../'
-end
-
-# connect
 socket = CZTop::Socket::REQ.new("ipc:///tmp/req_rep_example")
 puts ">>> Socket connected."
 
 # simple string
 socket << "foobar"
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
+puts ">>> #{socket.receive.to_a.inspect}"
 
-# multi frame message as array
+# multi-frame message as array
 socket << %w[foo bar baz]
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
+puts ">>> #{socket.receive.to_a.inspect}"
 
 # manually instantiating a Message
 msg = CZTop::Message.new("bla")
-msg << "another frame" # append a frame
+msg << "another frame"
 socket << msg
-msg = socket.receive
-puts ">>> #{msg.to_a.inspect}"
+puts ">>> #{socket.receive.to_a.inspect}"
 
-##
-# This will send 20 additional messages:
-#
-#   ./req.rb 20
-#
+# optional: send N additional messages
 if ARGV.first
   ARGV.first.to_i.times do
     socket << ["fooooooooo", "baaaaaar"]
-    puts ">>> " + socket.receive.to_a.inspect
+    puts ">>> #{socket.receive.to_a.inspect}"
   end
 end

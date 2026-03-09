@@ -1,20 +1,14 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require 'bundler/inline'
+require "cztop"
+require "async"
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'cztop', path: '../../'
-  gem 'async'
-end
-
-ENDPOINT = 'inproc://req_rep_example'
-# ENDPOINT = 'ipc:///tmp/req_rep_example0'
-# ENDPOINT = 'tcp://localhost:5556'
+ENDPOINT = "inproc://req_rep_example"
 
 Async do |task|
-  rep_task = task.async do |t|
-    socket = CZTop::Socket::REP.new ENDPOINT
+  rep_task = task.async do
+    socket = CZTop::Socket::REP.new(ENDPOINT)
 
     loop do
       msg = socket.receive
@@ -26,7 +20,7 @@ Async do |task|
   end
 
   task.async do
-    socket = CZTop::Socket::REQ.new ENDPOINT
+    socket = CZTop::Socket::REQ.new(ENDPOINT)
 
     10.times do |i|
       socket << "foobar ##{i}"

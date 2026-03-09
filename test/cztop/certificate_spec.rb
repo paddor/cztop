@@ -6,20 +6,6 @@ require 'pathname'
 
 
 describe CZTop::Certificate do
-  before { skip 'CURVE is available' if ::CZMQ::FFI::Zsys.has_curve }
-
-
-  describe '#initialize' do
-    it 'raises' do
-      assert_raises(NotImplementedError) do
-        CZTop::Certificate.new
-      end
-    end
-  end
-end
-
-
-describe CZTop::Certificate do
   include HasFFIDelegateExamples
   include ZMQHelper
 

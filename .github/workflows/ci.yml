@@ -40,8 +40,8 @@ jobs:
     - name: Install ZMQ and CZMQ from source (with draft APIs)
       run: |
         export PKG_CONFIG_PATH=$HOME/lib/pkgconfig
-        env ZMQ_VERSION=HEAD ci/install-libzmq
-        env CZMQ_VERSION=HEAD ci/install-libczmq
+        env ZMQ_VERSION=v4.3.5 ci/install-libzmq
+        env CZMQ_VERSION=v4.2.1 ci/install-libczmq
     - name: Install dependencies
       run: bundle install
     - name: Run tests

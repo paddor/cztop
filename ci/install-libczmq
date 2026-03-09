@@ -7,8 +7,11 @@ cd ~/src
 case "$CZMQ_VERSION" in
 HEAD)
 	echo "Using HEAD and compiling with --enable-drafts ..."
-	git clone https://github.com/zeromq/czmq czmq
-	CONFIGURE_OPTS="--enable-drafts=yes"
+	git clone --depth 1 https://github.com/zeromq/czmq czmq
+	;;
+v*)
+	echo "Using $CZMQ_VERSION and compiling with --enable-drafts ..."
+	git clone --depth 1 --branch "$CZMQ_VERSION" https://github.com/zeromq/czmq czmq
 	;;
 *)
 	echo '$CZMQ_VERSION not set.'
@@ -17,6 +20,6 @@ esac
 
 cd czmq
 ./autogen.sh
-./configure --prefix=$HOME $CONFIGURE_OPTS
+./configure --prefix=$HOME --enable-drafts=yes
 make
 make install

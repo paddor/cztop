@@ -7,8 +7,11 @@ cd ~/src
 case "$ZMQ_VERSION" in
 HEAD)
 	echo "Using HEAD and compiling with --enable-drafts ..."
-	git clone https://github.com/zeromq/libzmq libzmq
-	CONFIGURE_OPTS="--enable-drafts=yes"
+	git clone --depth 1 https://github.com/zeromq/libzmq libzmq
+	;;
+v*)
+	echo "Using $ZMQ_VERSION and compiling with --enable-drafts ..."
+	git clone --depth 1 --branch "$ZMQ_VERSION" https://github.com/zeromq/libzmq libzmq
 	;;
 *)
 	echo '$ZMQ_VERSION not set.'
@@ -17,6 +20,6 @@ esac
 
 cd libzmq
 ./autogen.sh
-./configure --prefix=$HOME $CONFIGURE_OPTS
+./configure --prefix=$HOME --enable-drafts=yes
 make
 make install

@@ -9,9 +9,8 @@ describe CZTop::Actor do
     assert_operator CZTop::Actor, :<, CZTop::ZsockOptions
   end
 
-  it 'has send/receive methods' do
-    assert_operator CZTop::Actor, :<, CZTop::SendReceiveMethods
-  end
+  it('is readable') { assert_operator CZTop::Actor, :<, CZTop::Socket::Readable }
+  it('is writable') { assert_operator CZTop::Actor, :<, CZTop::Socket::Writable }
 
   it 'has polymorphic Zsock methods' do
     assert_operator CZTop::Actor, :<, CZTop::PolymorphicZsockMethods

@@ -39,7 +39,8 @@ module CZTop
     include HasFFIDelegate
     extend HasFFIDelegate::ClassMethods
     include ZsockOptions
-    include SendReceiveMethods
+    include Socket::Readable
+    include Socket::Writable
     include PolymorphicZsockMethods
     include ::CZMQ::FFI
 
@@ -93,7 +94,7 @@ module CZTop
     #   raised by {Message#send_to}
     # @note Normally this method is asynchronous, but if the message is
     #   {TERMINATE}, it blocks until the actor is terminated.
-    def <<(message)
+    def send(message)
       message = Message.coerce(message)
 
       if TERMINATE == message[0]
@@ -128,6 +129,8 @@ module CZTop
 
       self
     end
+
+    alias << send
 
 
     # Receive a message from the actor.
@@ -167,7 +170,7 @@ module CZTop
     # @see zsock_send() on http://api.zeromq.org/czmq3-0:zsock
     # @note Mainly added for {Beacon}. If implemented there, it wouldn't be
     #   thread safe. And it's not that useful to be added to
-    #   {SendReceiveMethods}.
+    #   {Socket::Writable}.
     # @param picture [String] message's part types
     # @param args [String, Integer, ...] values, in FFI style (each one
     #   preceeded with it's type, like <tt>:string, "foo"</tt>)

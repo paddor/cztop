@@ -19,10 +19,6 @@ describe CZTop::Socket do
     assert_operator CZTop::Socket, :<, CZTop::ZsockOptions
   end
 
-  it 'has send/receive methods' do
-    assert_operator CZTop::Socket, :<, CZTop::SendReceiveMethods
-  end
-
   it 'has polymorphic Zsock methods' do
     assert_operator CZTop::Socket, :<, CZTop::PolymorphicZsockMethods
   end

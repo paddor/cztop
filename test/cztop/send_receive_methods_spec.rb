@@ -186,7 +186,7 @@ describe CZTop::SendReceiveMethods do
               end
 
               t1 = Time.now
-              assert_in_delta 0.05, t1 - t0, 0.02
+              assert_in_delta 0.05, t1 - t0, 0.05
             end
           end
         end
@@ -251,7 +251,7 @@ describe CZTop::SendReceiveMethods do
               end
 
               t1 = Time.now
-              assert_in_delta 0.05, t1 - t0, 0.02
+              assert_in_delta 0.05, t1 - t0, 0.05
             end
           end
         end

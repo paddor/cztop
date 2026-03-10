@@ -2,7 +2,7 @@
 
 # CZTop
 
-CZTop is a CZMQ binding for Ruby with handcrafted FFI bindings. It focuses on
+CZTop is a CZMQ binding for Ruby with hardcoded FFI bindings. It focuses on
 being easy to use for Rubyists (POLS) and provides first-class support for
 security mechanisms (CURVE).
 
@@ -17,12 +17,11 @@ security mechanisms (CURVE).
 ## Requirements
 
 * CZMQ >= 4.2
-* ZMQ >= 4.3
 * Ruby 3.3+
 
 ### Installing dependencies
 
-Ubuntu 20.04+:
+Debian / Ubuntu:
 
     $ sudo apt install libczmq-dev
 
@@ -107,8 +106,8 @@ Full [API documentation](http://www.rubydoc.info/gems/cztop).
 ## Performance
 
 CZTop is a thin convenience layer on top of CZMQ via FFI. See the
-[perf](https://github.com/paddor/cztop/tree/master/perf) directory for
-latency and throughput measurement scripts.
+[bench](https://github.com/paddor/cztop/tree/master/bench) directory for
+latency and throughput benchmarks.
 
 ## Contributing
 

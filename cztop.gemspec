@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["paddor@gmail.com"]
 
   spec.summary       = 'CZMQ FFI binding to bring ZMQ sockets to Ruby'
-  spec.description   = 'CZMQ binding with handcrafted FFI bindings, providing a Ruby-like API for ZMQ sockets'
+  spec.description   = 'CZMQ binding with hardcoded FFI bindings, providing a Ruby-like API for ZMQ sockets'
   spec.homepage      = "https://rubygems.org/gems/cztop"
   spec.license       = "ISC"
   spec.required_ruby_version = Gem::Requirement.new(">= 3.3.0")
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/paddor/cztop"
   spec.metadata["changelog_uri"]   = "https://github.com/paddor/cztop/blob/master/CHANGES.md"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match?(%r{^(\.|Rakefile|test/|examples/|ci/|perf/)}) }
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match?(%r{^(\.|Rakefile|test/|examples/|bench/)}) }
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "ffi"
 
   spec.add_development_dependency "bundler"
-  spec.add_development_dependency "benchmark"
+  spec.add_development_dependency "benchmark-ips"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "minitest-mock"

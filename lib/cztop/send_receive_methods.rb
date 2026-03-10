@@ -62,7 +62,7 @@ module CZTop
       @fd_io ||= to_io
       wait = remaining ? [remaining, FD_TIMEOUT].min : FD_TIMEOUT
       @fd_io.wait_readable(wait)
-    end if IO.method_defined?(:wait_readable)
+    end
 
 
     # ZMQ's edge-triggered FD can signal readiness before the socket is
@@ -78,7 +78,7 @@ module CZTop
     #
     def wait_readable(timeout = read_timeout)
       wait_for_socket_state(:readable?, timeout)
-    end if IO.method_defined?(:wait_readable)
+    end
 
 
     # Waits for socket to become writable.
@@ -89,7 +89,7 @@ module CZTop
     #
     def wait_writable(timeout = write_timeout)
       wait_for_socket_state(:writable?, timeout)
-    end if IO.method_defined?(:wait_readable)
+    end
 
 
     # Shared implementation for {#wait_readable} and {#wait_writable}.
@@ -114,7 +114,7 @@ module CZTop
       end
 
       true
-    end if IO.method_defined?(:wait_readable)
+    end
 
 
     # @return [Float, nil] the timeout in seconds used by {IO#wait_readable}

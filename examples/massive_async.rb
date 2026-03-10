@@ -30,7 +30,7 @@ Async do |task|
         n = 0
 
         loop do
-          msg = socket.receive.to_a
+          msg = socket.receive
           socket << msg.map(&:upcase)
           n += 1
         end

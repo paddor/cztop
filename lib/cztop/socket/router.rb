@@ -21,14 +21,10 @@ module CZTop
       # Send a message to a specific receiver. This is a shorthand for when
       # you send a message to a specific receiver with no hops in between.
       # @param receiver [String] receiving peer's socket identity
-      # @param message [Message] the message to send
-      # @note Do NOT use the message afterwards. It'll have been modified and
-      #   destroyed.
+      # @param message [String, Array<String>] the message to send
       def send_to(receiver, message)
-        message = Message.coerce(message)
-        message.prepend ''       # separator frame
-        message.prepend receiver # receiver envelope
-        self << message
+        parts = message.is_a?(Array) ? message : [message]
+        send([receiver, '', *parts])
       end
     end
 

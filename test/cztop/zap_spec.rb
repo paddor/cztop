@@ -58,9 +58,8 @@ describe CZTop::ZAP do
 
     describe '.from_message' do
       let(:msg) do
-        fields = [version, request_id, domain, address,
-                  identity, mechanism, *credentials]
-        CZTop::Message.new(fields)
+        [version, request_id, domain, address,
+         identity, mechanism, *credentials]
       end
 
       let(:request) { CZTop::ZAP::Request.from_message(msg) }
@@ -180,9 +179,8 @@ describe CZTop::ZAP do
 
     describe '.from_message' do
       let(:msg) do
-        fields = [version, request_id, status_code, status_text,
-                  user_id, meta_data].map(&:to_s)
-        CZTop::Message.new(fields)
+        [version, request_id, status_code, status_text,
+         user_id, meta_data].map(&:to_s)
       end
       let(:subject) { CZTop::ZAP::Response.from_message(msg) }
 
@@ -303,8 +301,8 @@ describe CZTop::ZAP do
         [version, request_id, status_code, status_text, user_id, meta_data]
       end
 
-      it 'packs response into a message' do
-        assert_equal fields, subject.to_msg.to_a
+      it 'packs response into an array' do
+        assert_equal fields, subject.to_msg
       end
     end
 

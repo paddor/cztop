@@ -9,20 +9,31 @@ module CZTop
 
       # Sends a message.
       #
-      # @param message [Message, String, Array<parts>] the message to send
+      # @param message [String, Array<String>] the message to send
       # @raise [IO::EAGAINWaitWritable, IO::TimeoutError] if send timeout has been reached (see
       #   {ZsockOptions::OptionsAccessor#sndtimeo=})
-      # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
-      #   {Message#send_to}
       # @return [self]
-      # @see Message.coerce
-      # @see Message#send_to
       def send(message)
-        Message.coerce(message).send_to(self)
-        self
+        parts = message.is_a?(Array) ? message : [message]
+        raise ArgumentError, 'message has no parts' if parts.empty?
+
+        wait_writable
+
+        zmsg = CZMQ::FFI::Zmsg.new
+        parts.each do |part|
+          rc = zmsg.add_buffer(part.to_s)
+          HasFFIDelegate.raise_zmq_err unless rc.zero?
+        end
+
+        rc = CZMQ::FFI::Zmsg.send(zmsg, self)
+        return self if rc.zero?
+
+        HasFFIDelegate.raise_zmq_err
+      rescue Errno::EAGAIN
+        raise IO::EAGAINWaitWritable
       end
 
-      alias << send
+      alias_method :<<, :send
 
 
       # Waits for socket to become writable.

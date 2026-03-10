@@ -46,7 +46,7 @@ module CZTop
 
       # Crafts a new {Request} from a message.
       #
-      # @param msg [CZTop::message] the message
+      # @param msg [Array<String>] the message parts
       # @return [Request] the request
       # @raise [VersionMismatch] if the message contains an unsupported version
       def self.from_message(msg)
@@ -57,7 +57,7 @@ module CZTop
         identity,      # The identity, the connection Identity, if any.
         mechanism,     # The mechanism, which SHALL contain a string.
         *credentials = # The credentials, which SHALL be zero or more opaque frames.
-          msg.to_a
+          msg
 
         raise VersionMismatch if version != VERSION
 
@@ -106,12 +106,10 @@ module CZTop
 
 
       # Creates a sendable message from this {Request}.
-      # @return [CZTop::Message} this request packed into a message
+      # @return [Array<String>] this request packed into an array of strings
       def to_msg
-        fields = [@version, @request_id, @domain, @address,
-                  @identity, @mechanism, @credentials].flatten.map(&:to_s)
-
-        CZTop::Message.new(fields)
+        [@version, @request_id, @domain, @address,
+         @identity, @mechanism, @credentials].flatten.map(&:to_s)
       end
 
     end
@@ -151,7 +149,7 @@ module CZTop
 
       # Crafts a new {Response} from a message.
       #
-      # @param msg [CZTop::message] the message
+      # @param msg [Array<String>] the message parts
       # @return [Response] the response
       # @raise [VersionMismatch] if the message contains an unsupported version
       # @raise [TemporaryError] if the status code indicates a temporary error
@@ -164,7 +162,7 @@ module CZTop
         status_text, # The status text, which MAY contain a string.
         user_id,     # The user id, which SHALL contain a string.
         meta_data =  # The meta data, which MAY contain a blob.
-          msg.to_a
+          msg
 
         raise VersionMismatch if version != VERSION
 
@@ -246,11 +244,10 @@ module CZTop
 
 
       # Creates a sendable message from this {Response}.
-      # @return [CZTop::Message} this request packed into a message
+      # @return [Array<String>] this request packed into an array of strings
       def to_msg
-        fields = [@version, @request_id, @status_code,
-                  @status_text, @user_id, @meta_data].map(&:to_s)
-        CZTop::Message.new(fields)
+        [@version, @request_id, @status_code,
+         @status_text, @user_id, @meta_data].map(&:to_s)
       end
 
     end

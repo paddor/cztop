@@ -4,32 +4,37 @@ require_relative '../spec_helper'
 
 describe CZTop::Socket::Writable do
   describe '#send' do
-    let(:req) { CZTop::Socket::REQ.new }
+    i = 0
+    let(:endpoint) { "inproc://writable_send_spec_#{i += 1}" }
+    let(:push) { CZTop::Socket::PUSH.new(endpoint) }
+    let(:pull) { CZTop::Socket::PULL.new(endpoint) }
 
-    describe 'when sending message' do
-      let(:content) { 'foobar' }
+    before do
+      push.options.sndtimeo = 100
+      pull.options.rcvtimeo = 100
+    end
 
-      it 'sends content' do
-        sent_to = nil
-        msg = Object.new
-        msg.define_singleton_method(:send_to) { |dest| sent_to = dest }
-        CZTop::Message.stub(:coerce, ->(_) { msg }) do
-          req.send(content)
-        end
-        assert_same req, sent_to
-      end
+    it 'sends a string' do
+      push.send('hello')
+      assert_equal ['hello'], pull.receive
+    end
 
-      it 'returns self' do
-        msg = Object.new
-        msg.define_singleton_method(:send_to) { |_| nil }
-        CZTop::Message.stub(:coerce, ->(_) { msg }) do
-          assert_same req, req.send(content)
-        end
-      end
+    it 'sends an array' do
+      push.send(%w[hello world])
+      assert_equal %w[hello world], pull.receive
+    end
+
+    it 'returns self' do
+      assert_same push, push.send('hello')
+      pull.receive # drain
     end
 
     it 'is aliased as #<<' do
-      assert_equal req.method(:send).unbind, req.method(:<<).unbind
+      assert_equal push.method(:send).unbind, push.method(:<<).unbind
+    end
+
+    it 'raises on empty array' do
+      assert_raises(ArgumentError) { push.send([]) }
     end
   end
 

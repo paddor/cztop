@@ -9,8 +9,8 @@ t1 = Thread.new do
 
   loop do
     msg = socket.receive
-    puts "<<< #{msg.to_a.inspect}"
-    socket << msg.to_a.map(&:upcase)
+    puts "<<< #{msg.inspect}"
+    socket << msg.map(&:upcase)
   rescue IO::TimeoutError
     break
   end
@@ -24,7 +24,7 @@ t2 = Thread.new do
   10.times do |i|
     socket << "foobar ##{i}"
     msg = socket.receive
-    puts ">>> #{msg.to_a.inspect}"
+    puts ">>> #{msg.inspect}"
   end
 
   puts "REQ done."

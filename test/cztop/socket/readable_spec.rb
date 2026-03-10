@@ -4,17 +4,21 @@ require_relative '../spec_helper'
 
 describe CZTop::Socket::Readable do
   describe '#receive' do
-    let(:req) { CZTop::Socket::REQ.new }
+    i = 0
+    let(:endpoint) { "inproc://readable_receive_spec_#{i += 1}" }
+    let(:push) { CZTop::Socket::PUSH.new(endpoint) }
+    let(:pull) { CZTop::Socket::PULL.new(endpoint) }
 
-    describe 'given a sent content' do
-      let(:content) { 'foobar' }
+    before do
+      push.options.sndtimeo = 100
+      pull.options.rcvtimeo = 100
+    end
 
-      it 'receives the content' do
-        msg = Object.new
-        CZTop::Message.stub(:receive_from, ->(_) { msg }) do
-          assert_same msg, req.receive
-        end
-      end
+    it 'returns an Array of Strings' do
+      push << 'hello'
+      msg = pull.receive
+      assert_kind_of Array, msg
+      assert_equal ['hello'], msg
     end
   end
 

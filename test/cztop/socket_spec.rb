@@ -58,7 +58,7 @@ describe CZTop::Socket do
       it 'receives the content' do
         connecting_pair_socket << content
         msg = binding_pair_socket.receive
-        assert_equal content, msg.frames.first.to_s
+        assert_equal content, msg[0]
       end
     end
   end

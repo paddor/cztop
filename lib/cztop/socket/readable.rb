@@ -9,14 +9,24 @@ module CZTop
 
       # Receives a message.
       #
-      # @return [Message]
+      # @return [Array<String>] message parts
       # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if receive timeout has been reached (see
       #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
-      # @raise [Interrupt, ArgumentError, SystemCallError] anything raised by
-      #   {Message.receive_from}
-      # @see Message.receive_from
       def receive
-        Message.receive_from(self)
+        wait_readable
+
+        zmsg = CZMQ::FFI::Zmsg.recv(self)
+        HasFFIDelegate.raise_zmq_err if zmsg.null?
+
+        parts = []
+        frame = zmsg.first
+        while frame
+          parts << frame.data.read_bytes(frame.size)
+          frame = zmsg.next
+        end
+        parts
+      rescue Errno::EAGAIN
+        raise IO::EAGAINWaitReadable
       end
 
 

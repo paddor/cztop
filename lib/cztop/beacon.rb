@@ -108,7 +108,7 @@ module CZTop
 
 
     # Receive next beacon from a peer.
-    # @return [Message] 2-frame message with ([ipaddr, data])
+    # @return [Array<String>] 2-element array with [ipaddr, data]
     def receive
       @actor.receive
     end

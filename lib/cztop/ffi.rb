@@ -117,6 +117,7 @@ module CZMQ
     attach_function :zmsg_send,         [:pointer, :pointer], :int, **opts
     attach_function :zmsg_recv,         [:pointer], :pointer, **opts
     attach_function :zmsg_addmem,       [:pointer, :pointer, :size_t], :int, **opts
+    attach_function :zmsg_addmem_s, 'zmsg_addmem', [:pointer, :buffer_in, :size_t], :int, **opts
     attach_function :zmsg_append,       [:pointer, :pointer], :int, **opts
     attach_function :zmsg_pushmem,      [:pointer, :pointer, :size_t], :int, **opts
     attach_function :zmsg_prepend,      [:pointer, :pointer], :int, **opts
@@ -551,6 +552,12 @@ module CZMQ
         CZMQ::FFI.zmsg_addmem(@ptr, data, size)
       end
 
+      # Appends a Ruby string directly without intermediate MemoryPointer copy.
+      # Uses :buffer_in to pass the string's internal buffer pointer to C.
+      def add_buffer(str)
+        CZMQ::FFI.zmsg_addmem_s(@ptr, str, str.bytesize)
+      end
+
       def append(frame)
         frame_ptr = frame.respond_to?(:__ptr_give_ref) ? frame.__ptr_give_ref : frame
         CZMQ::FFI.zmsg_append(@ptr, frame_ptr)
@@ -576,11 +583,13 @@ module CZMQ
 
       def first
         ptr = CZMQ::FFI.zmsg_first(@ptr)
+        return nil if ptr.null?
         _borrowed_frame(ptr)
       end
 
       def next
         ptr = CZMQ::FFI.zmsg_next(@ptr)
+        return nil if ptr.null?
         _borrowed_frame(ptr)
       end
 

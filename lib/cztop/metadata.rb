@@ -52,7 +52,7 @@ module CZTop
     end
 
 
-    # @param data [String, Frame, #to_s] the data representing the metadata
+    # @param data [String, #byteslice] the data representing the metadata
     # @return [Hash]
     def self.load(data)
       properties = {}

@@ -6,9 +6,7 @@ module CZTop
   # = About Thread-Safety
   # The instance methods of this class are thread-safe. So it's safe to call
   # {#<<}, {#request} or even {#terminate} from different threads. Caution:
-  # Use only these methods to communicate with the low-level zactor. Don't use
-  # {Message#send_to} directly to send itself to an {Actor} instance, as it
-  # wouldn't be thread-safe.
+  # Use only these methods to communicate with the low-level zactor.
   #
   # = About termination
   # Actors should be terminated explicitly, either by calling {#terminate}
@@ -23,7 +21,7 @@ module CZTop
   #     when "foo"
   #       pipe << "bar"
   #     when "append"
-  #       result << msg[1].to_s
+  #       result << msg[1]
   #     when "result"
   #       pipe << result
   #     end
@@ -71,7 +69,7 @@ module CZTop
     #   just anything callable
     # @param c_args [FFI::Pointer, nil] args, only useful if callback is an
     #   FFI::Pointer
-    # @yieldparam message [Message]
+    # @yieldparam message [Array<String>]
     # @yieldparam pipe [Socket::PAIR]
     # @see #process_messages
     def initialize(callback = nil, c_args = nil, &handler)
@@ -87,17 +85,17 @@ module CZTop
 
 
     # Send a message to the actor.
-    # @param message [Object] message to send to the actor, see {Message.coerce}
+    # @param message [String, Array<String>] message to send to the actor
     # @return [self] so it's chainable
     # @raise [DeadActorError] if actor is terminated
     # @raise [IO::EAGAINWaitWritable, RuntimeError] anything that could be
-    #   raised by {Message#send_to}
+    #   raised during send
     # @note Normally this method is asynchronous, but if the message is
     #   {TERMINATE}, it blocks until the actor is terminated.
     def send(message)
-      message = Message.coerce(message)
+      parts = message.is_a?(Array) ? message : [message.to_s]
 
-      if TERMINATE == message[0]
+      if TERMINATE == parts[0]
         # NOTE: can't just send this to the actor. The sender might call
         # #terminate immediately, which most likely causes a hang due to race
         # conditions.
@@ -107,7 +105,7 @@ module CZTop
           @mtx.synchronize do
             raise DeadActorError unless @running
 
-            message.send_to(self)
+            zmsg_send_raw(parts)
           end
         rescue IO::EAGAINWaitWritable, IO::TimeoutError
           # The sndtimeo has been reached.
@@ -134,7 +132,7 @@ module CZTop
 
 
     # Receive a message from the actor.
-    # @return [Message]
+    # @return [Array<String>]
     # @raise [DeadActorError] if actor is terminated
     def receive
       @mtx.synchronize do
@@ -147,18 +145,18 @@ module CZTop
 
     # Same as {#<<}, but also waits for a response from the actor and returns
     # it.
-    # @param message [Message] the request to the actor
-    # @return [Message] the actor's response
+    # @param message [String, Array<String>] the request to the actor
+    # @return [Array<String>] the actor's response
     # @raise [ArgumentError] if the message is {TERMINATE} (use {#terminate})
     def request(message)
       @mtx.synchronize do
         raise DeadActorError unless @running
 
-        message = Message.coerce(message)
-        raise ArgumentError, 'use #terminate' if TERMINATE == message[0]
+        parts = message.is_a?(Array) ? message : [message.to_s]
+        raise ArgumentError, 'use #terminate' if TERMINATE == parts[0]
 
-        message.send_to(self)
-        Message.receive_from(self)
+        zmsg_send_raw(parts)
+        zmsg_receive_raw
       end
     rescue IO::EAGAINWaitWritable
       # same as in #<<
@@ -200,7 +198,7 @@ module CZTop
       @mtx.synchronize do
         return false unless @running
 
-        Message.new(TERMINATE).send_to(self)
+        zmsg_send_raw([TERMINATE])
         await_handler_death
         true
       end
@@ -271,7 +269,7 @@ module CZTop
     # interrupted, execution is aborted and the actor will terminate.
     #
     # @param handler [Proc, #call] the handler used to process messages
-    # @yieldparam message [Message] message (e.g. command) received
+    # @yieldparam message [Array<String>] message (e.g. command) received
     # @yieldparam pipe [Socket::PAIR] pipe to write back something into the
     #   actor
     def process_messages(handler)
@@ -290,7 +288,7 @@ module CZTop
 
 
     # Receives the next message even across any interrupts.
-    # @return [Message] the next message
+    # @return [Array<String>] the next message
     def next_message
       @pipe.receive
     end
@@ -337,6 +335,37 @@ module CZTop
 
         @running = false
       end
+    end
+
+
+    # Send message parts directly via zmsg without wait_writable.
+    # Used internally by Actor to avoid re-coercion inside the mutex.
+    def zmsg_send_raw(parts)
+      zmsg = CZMQ::FFI::Zmsg.new
+      parts.each do |part|
+        zmsg.add_buffer(part.to_s)
+      end
+      rc = CZMQ::FFI::Zmsg.send(zmsg, self)
+      HasFFIDelegate.raise_zmq_err unless rc.zero?
+    rescue Errno::EAGAIN
+      raise IO::EAGAINWaitWritable
+    end
+
+
+    # Receive message parts directly via zmsg without wait_readable.
+    # Used internally by Actor to avoid re-coercion inside the mutex.
+    def zmsg_receive_raw
+      zmsg = CZMQ::FFI::Zmsg.recv(self)
+      HasFFIDelegate.raise_zmq_err if zmsg.null?
+      parts = []
+      frame = zmsg.first
+      while frame
+        parts << frame.data.read_bytes(frame.size)
+        frame = zmsg.next
+      end
+      parts
+    rescue Errno::EAGAIN
+      raise IO::EAGAINWaitReadable
     end
 
   end

@@ -8,22 +8,20 @@ puts ">>> Socket connected."
 
 # simple string
 socket << "foobar"
-puts ">>> #{socket.receive.to_a.inspect}"
+puts ">>> #{socket.receive.inspect}"
 
 # multi-frame message as array
 socket << %w[foo bar baz]
-puts ">>> #{socket.receive.to_a.inspect}"
+puts ">>> #{socket.receive.inspect}"
 
-# manually instantiating a Message
-msg = CZTop::Message.new("bla")
-msg << "another frame"
-socket << msg
-puts ">>> #{socket.receive.to_a.inspect}"
+# multi-frame message
+socket << %w[bla another\ frame]
+puts ">>> #{socket.receive.inspect}"
 
 # optional: send N additional messages
 if ARGV.first
   ARGV.first.to_i.times do
     socket << ["fooooooooo", "baaaaaar"]
-    puts ">>> #{socket.receive.to_a.inspect}"
+    puts ">>> #{socket.receive.inspect}"
   end
 end

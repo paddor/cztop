@@ -115,7 +115,7 @@ module CZTop
     #     end
     #   end
     #
-    # @return [Message] one of the events from (after {#to_a} it's something like
+    # @return [Array<String>] one of the events (something like
     #   <tt>["ACCEPTED", "73", "tcp://127.0.0.1:55585"]</tt>)
     def next
       @actor.receive

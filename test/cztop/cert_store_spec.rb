@@ -81,7 +81,7 @@ describe CZTop::CertStore do
       describe 'with invalid argument' do
         it 'raises' do
           assert_raises(ArgumentError) do
-            subject.insert(CZTop::Message.new('foo'))
+            subject.insert('not a certificate')
           end
         end
       end
@@ -118,7 +118,7 @@ describe CZTop::CertStore do
       describe 'with invalid argument' do
         it 'raises' do
           assert_raises(ArgumentError) do
-            subject.insert(CZTop::Message.new('foo'))
+            subject.insert('not a certificate')
           end
         end
       end

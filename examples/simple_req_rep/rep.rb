@@ -8,6 +8,6 @@ puts "<<< Socket bound to #{socket.last_endpoint.inspect}"
 
 loop do
   msg = socket.receive
-  puts "<<< #{msg.to_a.inspect}"
-  socket << msg.to_a.map(&:upcase)
+  puts "<<< #{msg.inspect}"
+  socket << msg.map(&:upcase)
 end

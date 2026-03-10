@@ -19,7 +19,7 @@ socket.subscribe(filter)
 print "Gathering #{COUNT} samples for: #{filter.inspect}"
 total_temp = 0
 1.upto(COUNT) do
-  zipcode, temperature, relhumidity = socket.receive.to_a.map(&:to_i)
+  zipcode, temperature, relhumidity = socket.receive.map(&:to_i)
   p(zipcode:, temperature:, relhumidity:)
   total_temp += temperature
 end

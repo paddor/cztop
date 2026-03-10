@@ -132,12 +132,12 @@ describe CZTop::Monitor do
 
 
   describe '#next' do
-    it 'returns Message' do
+    it 'returns Array' do
       subject.listen(*%w[ACCEPTED CLOSED MONITOR_STOPPED])
       subject.actor.options.rcvtimeo = 500
       subject.start
       req_socket # connects
-      assert_kind_of CZTop::Message, subject.next
+      assert_kind_of Array, subject.next
     end
 
     it 'gets the next event' do

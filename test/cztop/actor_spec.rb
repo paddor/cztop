@@ -19,7 +19,7 @@ describe CZTop::Actor do
   after { actor.terminate }
   let(:actor) do
     CZTop::Actor.new do |msg, pipe|
-      received_messages << msg.to_a
+      received_messages << msg
       yielded << [msg, pipe]
     end
   end
@@ -44,7 +44,7 @@ describe CZTop::Actor do
     describe 'with Proc callback' do
       let(:proc_) do
         lambda do |msg, pipe|
-          received_messages << msg.to_a
+          received_messages << msg
           yielded << [msg, pipe]
         end
       end
@@ -205,10 +205,9 @@ describe CZTop::Actor do
   describe '#process_messages' do
     describe 'when sending $TERM' do
       before do
-        # can't use #<<
         actor.instance_eval do
           @mtx.synchronize do
-            CZTop::Message.new('$TERM').send_to(self)
+            zmsg_send_raw(['$TERM'])
           end
         end
       end
@@ -250,7 +249,7 @@ describe CZTop::Actor do
       actor << 'foo'
       actor.terminate
       assert_equal 2, yielded[0].size
-      assert_kind_of CZTop::Message, yielded[0][0]
+      assert_kind_of Array, yielded[0][0]
       assert_kind_of CZTop::Socket::PAIR, yielded[0][1]
     end
   end
@@ -336,23 +335,6 @@ describe CZTop::Actor do
         assert_operator actor, :dead?
       end
     end
-
-
-    describe 'sndtimeo reached' do
-      it 'retries' do
-        msg = CZTop::Message.new('foobar')
-        call_count = 0
-        original_send_to = msg.method(:send_to)
-        msg.stub(:send_to, ->(*args) {
-          call_count += 1
-          raise IO::EAGAINWaitWritable if call_count == 1
-          original_send_to.call(*args)
-        }) do
-          actor << msg
-        end
-        assert_operator call_count, :>, 1
-      end
-    end
   end
 
 
@@ -402,12 +384,12 @@ describe CZTop::Actor do
   describe '#request' do
     let(:actor) do
       CZTop::Actor.new do |msg, pipe|
-        pipe << msg.to_a.map(&:downcase)
+        pipe << msg.map(&:downcase)
       end
     end
     let(:word) { 'FOO' }
     let(:response) do
-      actor.request(word).to_a[0]
+      actor.request(word)[0]
     end
 
     it 'returns response' do
@@ -444,23 +426,6 @@ describe CZTop::Actor do
         end
       end
     end
-
-
-    describe 'sndtimeo reached' do
-      it 'retries' do
-        msg = CZTop::Message.new('foobar')
-        call_count = 0
-        original_send_to = msg.method(:send_to)
-        msg.stub(:send_to, ->(*args) {
-          call_count += 1
-          raise IO::EAGAINWaitWritable if call_count == 1
-          original_send_to.call(*args)
-        }) do
-          actor.request(msg)
-        end
-        assert_operator call_count, :>, 1
-      end
-    end
   end
 
 
@@ -473,31 +438,6 @@ describe CZTop::Actor do
       it 'waits for handler to terminate' do
         actor.terminate
         assert actor.dead?
-      end
-    end
-
-
-    describe 'sndtimeo reached' do
-      it 'retries sending $TERM' do
-        term_msg = CZTop::Message.new('$TERM')
-        call_count = 0
-        original_send_to = term_msg.method(:send_to)
-        CZTop::Message.stub(:new, ->(*args) {
-          if args == ['$TERM']
-            term_msg
-          else
-            CZTop::Message.method(:new).super_method.call(*args)
-          end
-        }) do
-          term_msg.stub(:send_to, ->(*a) {
-            call_count += 1
-            raise IO::EAGAINWaitWritable if call_count == 1
-            original_send_to.call(*a)
-          }) do
-            actor.terminate
-          end
-        end
-        assert_operator call_count, :>, 1
       end
     end
 

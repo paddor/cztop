@@ -127,19 +127,19 @@ describe CZTop::Socket::REQ do
     it 'can send message' do
       req << 'foobar'
       msg = rep.receive
-      assert_equal ['foobar'], msg.to_a
+      assert_equal ['foobar'], msg
 
       rep << 'baz'
       msg = req.receive
-      assert_equal ['baz'], msg.to_a
+      assert_equal ['baz'], msg
 
       req << %w[foobar]
       msg = rep.receive
-      assert_equal %w[foobar], msg.to_a
+      assert_equal %w[foobar], msg
 
       rep << %w[bazzz]
       msg = req.receive
-      assert_equal %w[bazzz], msg.to_a
+      assert_equal %w[bazzz], msg
     end
   end
 end
@@ -198,10 +198,10 @@ describe CZTop::Socket::ROUTER do
 
     it 'sends message to receiver' do
       sent = nil
-      socket.stub(:<<, ->(msg) { sent = msg }) do
+      socket.stub(:send, ->(msg) { sent = msg }) do
         socket.send_to(receiver, content)
       end
-      assert_equal [receiver, '', content], sent.to_a
+      assert_equal [receiver, '', content], sent
     end
   end
 
@@ -257,7 +257,7 @@ describe CZTop::Socket::ROUTER do
         it 'and delivers it' do
           socket << msg
           msg = dealer.receive
-          assert_equal ['', content], msg.to_a
+          assert_equal ['', content], msg
         end
       end
     end
@@ -399,17 +399,17 @@ describe CZTop::Socket::PUSH do
     it 'can send message' do
       push << 'foobar'
       msg = pull.receive
-      assert_equal ['foobar'], msg.to_a
+      assert_equal ['foobar'], msg
 
       push << %w[foobar]
       msg = pull.receive
-      assert_equal %w[foobar], msg.to_a
+      assert_equal %w[foobar], msg
     end
 
     it 'can send message with empty frame' do
       push << ''
       msg = pull.receive
-      assert_equal [''], msg.to_a
+      assert_equal [''], msg
     end
   end
 end

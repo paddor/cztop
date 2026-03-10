@@ -38,6 +38,3 @@ require_relative 'cztop/z85/padded'
 require_relative 'cztop/z85/pipe'
 require_relative 'cztop/zap'
 
-# make Ctrl-C work in case a low-level call hangs
-CZMQ::FFI::Signals.disable_default_handling
-

@@ -1124,4 +1124,8 @@ module CZMQ
     end
 
   end
+
+  # Disable CZMQ's default signal handlers so Ruby's own signal handling
+  # (e.g. Ctrl-C) works correctly.
+  FFI::Signals.disable_default_handling
 end

@@ -44,7 +44,7 @@ module CZTop
     # The race condition exists between the calls to {#readable?}/{#writable?} and waiting for the ZMQ FD. If the
     # socke becomes readable/writable during that time, waiting for the FD could block forever without a timeout.
     #
-    FD_TIMEOUT = 0.5
+    FD_TIMEOUT = 0.25
 
 
     # Waits for the ZMQ file descriptor to signal readiness.
@@ -67,7 +67,7 @@ module CZTop
 
     # ZMQ's edge-triggered FD can signal readiness before the socket is
     # actually ready. This small sleep avoids busy-looping in that case.
-    JIFFY = 0.015 # 15 ms
+    JIFFY = 0.001 # 1 ms
 
 
     # Waits for socket to become readable.

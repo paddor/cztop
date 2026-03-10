@@ -8,19 +8,19 @@ CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
 
 | Size | inproc | ipc | tcp |
 |------|--------|-----|-----|
-| 64B | 35.8k | 11.9k | 9.5k |
-| 256B | 32.5k | 12.2k | 9.5k |
-| 1024B | 34.5k | 11.2k | 9.6k |
-| 4096B | 33.6k | 10.0k | 10.1k |
+| 64B | 36.9k | 12.3k | 10.0k |
+| 256B | 37.5k | 12.5k | 10.2k |
+| 1024B | 35.2k | 12.0k | 10.1k |
+| 4096B | 33.5k | 11.2k | 10.0k |
 
 ### Threads
 
 | Size | inproc | ipc | tcp |
 |------|--------|-----|-----|
-| 64B | 40.9k | 12.4k | 10.7k |
-| 256B | 39.6k | 12.1k | 10.7k |
-| 1024B | 40.4k | 12.0k | 11.5k |
-| 4096B | 35.8k | 12.1k | 9.5k |
+| 64B | 34.6k | 12.1k | 10.4k |
+| 256B | 36.7k | 12.0k | 10.5k |
+| 1024B | 34.9k | 11.7k | 10.5k |
+| 4096B | 31.6k | 11.5k | 10.2k |
 
 ## Latency (req/rep roundtrip)
 
@@ -28,17 +28,17 @@ CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
 
 | Transport | roundtrips/s | latency |
 |-----------|-------------|---------|
-| inproc | 10.5k | 95 us |
-| ipc | 4.0k | 252 us |
-| tcp | 3.9k | 259 us |
+| inproc | 12.2k | 82 us |
+| ipc | 6.8k | 148 us |
+| tcp | 5.5k | 182 us |
 
 ### Threads
 
 | Transport | roundtrips/s | latency |
 |-----------|-------------|---------|
-| inproc | 4.6k | 217 us |
-| ipc | 3.4k | 293 us |
-| tcp | 3.3k | 305 us |
+| inproc | 6.1k | 163 us |
+| ipc | 5.1k | 196 us |
+| tcp | 4.9k | 203 us |
 
 ## Notes
 

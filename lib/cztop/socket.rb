@@ -2,6 +2,7 @@
 
 module CZTop
   # Represents a CZMQ::FFI::Zsock.
+  #
   class Socket
 
     include HasFFIDelegate
@@ -15,6 +16,7 @@ module CZTop
     # @see Types
     # @example Creating a socket by providing its type as a parameter
     #   my_sock = CZTop::Socket.new_by_type(:DEALER, "tcp://example.com:4000")
+    #
     def self.new_by_type(type)
       case type
       when Integer
@@ -40,6 +42,7 @@ module CZTop
 
     # @return [String] last bound endpoint, if any
     # @return [nil] if not bound
+    #
     def last_endpoint
       ffi_delegate.endpoint
     end
@@ -49,6 +52,7 @@ module CZTop
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
+    #
     def connect(endpoint)
       rc = ffi_delegate.connect('%s', :string, endpoint)
       raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
@@ -59,6 +63,7 @@ module CZTop
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
+    #
     def disconnect(endpoint)
       rc = ffi_delegate.disconnect('%s', :string, endpoint)
       raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
@@ -68,12 +73,14 @@ module CZTop
     # Closes and destroys the native socket.
     # @return [void]
     # @note Don't try to use it anymore afterwards.
+    #
     def close
       ffi_delegate.destroy
     end
 
     # @return [Integer] last automatically selected, bound TCP port, if any
     # @return [nil] if not bound to a TCP port yet
+    #
     attr_reader :last_tcp_port
 
     # Binds to an endpoint.
@@ -82,6 +89,7 @@ module CZTop
     # @param endpoint [String]
     # @return [void]
     # @raise [SystemCallError] in case of failure
+    #
     def bind(endpoint)
       rc = ffi_delegate.bind('%s', :string, endpoint)
       raise_zmq_err(format('unable to bind to %p', endpoint)) if rc == -1
@@ -93,6 +101,7 @@ module CZTop
     # @param endpoint [String]
     # @return [void]
     # @raise [ArgumentError] if the endpoint is incorrect
+    #
     def unbind(endpoint)
       rc = ffi_delegate.unbind('%s', :string, endpoint)
       raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
@@ -101,6 +110,7 @@ module CZTop
 
     # Set socket to use unbounded pipes (HWM=0); use this in cases when you are
     # totally certain the message volume can fit in memory.
+    #
     def set_unbounded
       ::CZMQ::FFI::Zsock.set_unbounded(ffi_delegate)
     end
@@ -108,6 +118,7 @@ module CZTop
 
     # Inspects this {Socket}.
     # @return [String] shows class, native address, and {#last_endpoint}
+    #
     def inspect
       format('#<%s:0x%x last_endpoint=%p>', self.class, to_ptr.address, last_endpoint)
     rescue Zsock::DestroyedError

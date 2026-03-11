@@ -5,11 +5,13 @@ module CZTop
 
     # Pull socket for the ZeroMQ Pipeline Pattern.
     # @see http://rfc.zeromq.org/spec:30
+    #
     class PULL < Socket
 
       include Readable
 
       # @param endpoints [String] endpoints to bind to
+      #
       def initialize(endpoints = nil)
         super
 

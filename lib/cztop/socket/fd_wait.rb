@@ -9,6 +9,7 @@ module CZTop
     # ZMQ uses a single edge-triggered FD for both read/write signaling.
     # This module provides the low-level wait loop that checks socket
     # readiness and polls the FD.
+    #
     module FdWait
 
       # Because ZMQ sockets are edge-triggered, there's a small chance that we miss an edge (race condition). To avoid
@@ -47,6 +48,7 @@ module CZTop
       # @param timeout [Numeric, nil] timeout in seconds
       # @return [true]
       # @raise [IO::TimeoutError]
+      #
       def wait_for_socket_state(check, timeout)
         return true if __send__(check)
 

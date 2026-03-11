@@ -82,8 +82,8 @@ describe CZTop::Socket::Writable do
 
     i = 0
     let(:endpoint) { "inproc://async_writable_spec_#{i += 1}" }
-    let(:req)     { CZTop::Socket::REQ.new(endpoint) }
-    let(:rep)     { CZTop::Socket::REP.new(endpoint) }
+    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
+    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
     before { req; rep } # eagerly evaluate
 
 

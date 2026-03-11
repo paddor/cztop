@@ -5,12 +5,14 @@ module CZTop
 
     # Extended publish socket for the ZeroMQ Publish-Subscribe Pattern.
     # @see http://rfc.zeromq.org/spec:29
+    #
     class XPUB < Socket
 
       include Readable
       include Writable
 
       # @param endpoints [String] endpoints to bind to
+      #
       def initialize(endpoints = nil)
         super
 

@@ -4,6 +4,7 @@ require_relative 'cztop/ffi'
 require_relative 'cztop/version'
 
 # CZTop provides a minimal, focused ZMQ socket library via CZMQ FFI bindings.
+#
 module CZTop
 end
 

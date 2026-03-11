@@ -5,6 +5,7 @@ module CZTop
 
     #  Socket types. Each constant in this namespace holds the type code used
     #  for the zsock_new() function.
+    #
     module Types
 
       PAIR    = 0
@@ -25,6 +26,7 @@ module CZTop
 
     # All the available type codes, mapped to their Symbol equivalent.
     # @return [Hash<Integer, Symbol>]
+    #
     TypeNames = Types.constants.to_h do |name|
       i = Types.const_get(name)
       [i, name]

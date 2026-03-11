@@ -5,12 +5,14 @@ module CZTop
 
     # Pair socket for inter-thread communication.
     # @see http://rfc.zeromq.org/spec:31
+    #
     class PAIR < Socket
 
       include Readable
       include Writable
 
       # @param endpoints [String] endpoints to connect to
+      #
       def initialize(endpoints = nil)
         super
 

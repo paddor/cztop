@@ -194,7 +194,7 @@ describe CZTop::Socket::ROUTER do
 
   describe '#send_to' do
     let(:receiver) { 'mike' }
-    let(:content) { 'foobar' }
+    let(:content)  { 'foobar' }
 
     it 'sends message to receiver' do
       sent = nil

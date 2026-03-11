@@ -352,7 +352,7 @@ describe CZTop::ZsockOptions do
 
     describe '#[]=' do
       let(:identity) { 'foobar' }
-      let(:tos) { 5 }
+      let(:tos)      { 5 }
       before do
         socket.options[:IDENTITY] = identity
         socket.options[:ToS] = tos

@@ -3,6 +3,7 @@
 module CZTop
   class Socket
     # Write capability for ZMQ sockets.
+    #
     module Writable
 
       include FdWait
@@ -13,6 +14,7 @@ module CZTop
       # @raise [IO::EAGAINWaitWritable, IO::TimeoutError] if send timeout has been reached (see
       #   {ZsockOptions::OptionsAccessor#sndtimeo=})
       # @return [self]
+      #
       def send(message)
         parts = message.is_a?(Array) ? message : [message]
         raise ArgumentError, 'message has no parts' if parts.empty?
@@ -47,6 +49,7 @@ module CZTop
 
 
       # @return [Float, nil] the timeout in seconds used by {#wait_writable}
+      #
       def write_timeout
         timeout = options.sndtimeo
 

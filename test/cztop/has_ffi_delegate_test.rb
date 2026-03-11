@@ -26,7 +26,7 @@ describe CZTop::HasFFIDelegate do
     end
   end
 
-  let(:ptr) { 'some pointer' }
+  let(:ptr)      { 'some pointer' }
   let(:delegate) { delegate_class.new(ptr) }
   let(:delegator_class) do
     Class.new do

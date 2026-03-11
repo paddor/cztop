@@ -32,7 +32,7 @@ describe CZTop::Socket do
 
     describe 'given same binding endpoint to multiple REP sockets' do
       let(:endpoint) { 'inproc://the_one_and_only' }
-      let(:sock1) { CZTop::Socket::REP.new(endpoint) }
+      let(:sock1)    { CZTop::Socket::REP.new(endpoint) }
       before { sock1 }
 
       it 'raises' do
@@ -170,7 +170,7 @@ describe CZTop::Socket do
 
 
       describe 'with explicit TCP port endpoint' do
-        let(:port) { rand(55_755..58_665) }
+        let(:port)             { rand(55_755..58_665) }
         let(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
         before { socket.bind(another_endpoint) }
 

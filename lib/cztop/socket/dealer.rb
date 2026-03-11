@@ -5,12 +5,14 @@ module CZTop
 
     # Dealer socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
+    #
     class DEALER < Socket
 
       include Readable
       include Writable
 
       # @param endpoints [String] endpoints to connect to
+      #
       def initialize(endpoints = nil)
         super
 

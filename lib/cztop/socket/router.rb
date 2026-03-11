@@ -5,12 +5,14 @@ module CZTop
 
     # Router socket for the ZeroMQ Request-Reply Pattern.
     # @see http://rfc.zeromq.org/spec:28
+    #
     class ROUTER < Socket
 
       include Readable
       include Writable
 
       # @param endpoints [String] endpoints to bind to
+      #
       def initialize(endpoints = nil)
         super
 
@@ -22,6 +24,7 @@ module CZTop
       # you send a message to a specific receiver with no hops in between.
       # @param receiver [String] receiving peer's socket identity
       # @param message [String, Array<String>] the message to send
+      #
       def send_to(receiver, message)
         parts = message.is_a?(Array) ? message : [message]
         send([receiver, '', *parts])

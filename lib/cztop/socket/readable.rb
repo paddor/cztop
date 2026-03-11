@@ -3,6 +3,7 @@
 module CZTop
   class Socket
     # Read capability for ZMQ sockets.
+    #
     module Readable
 
       include FdWait
@@ -12,6 +13,7 @@ module CZTop
       # @return [Array<String>] message parts
       # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if receive timeout has been reached (see
       #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
+      #
       def receive
         wait_readable
 
@@ -41,6 +43,7 @@ module CZTop
 
 
       # @return [Float, nil] the timeout in seconds used by {#wait_readable}
+      #
       def read_timeout
         timeout = options.rcvtimeo
 

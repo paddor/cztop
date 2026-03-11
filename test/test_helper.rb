@@ -5,12 +5,7 @@ require 'simplecov'
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'minitest/mock'
-SimpleCov.start do
-  # skip DRAFT API
-  add_filter '/lib/cztop/poller.rb'
-  add_filter '/lib/cztop/poller/aggregated.rb'
-  add_filter '/test/cztop/poller_test.rb'
-end
+SimpleCov.start
 
 require_relative 'zmq_helper'
 

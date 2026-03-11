@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'spec_helper'
-require 'tmpdir'
-require 'pathname'
 
 
 describe CZTop::Socket do
@@ -59,121 +57,6 @@ describe CZTop::Socket do
         connecting_pair_socket << content
         msg = binding_pair_socket.receive
         assert_equal content, msg[0]
-      end
-    end
-  end
-
-
-  describe '#CURVE_server!' do
-    before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
-
-    let(:certificate) { CZTop::Certificate.new }
-    let(:options) { rep_socket.options }
-
-
-    describe 'with valid certificate' do
-      before do
-        rep_socket.CURVE_server!(certificate)
-      end
-
-      it 'enables CURVE server' do
-        assert rep_socket.options.CURVE_server?
-      end
-
-      it 'sets secret key' do
-        assert_equal certificate.secret_key, options.CURVE_secretkey
-      end
-
-      it 'sets public key' do
-        assert_equal certificate.public_key, options.CURVE_publickey
-      end
-    end
-
-
-    describe 'with no secret key in certificate' do
-      let(:certificate) do
-        tmpdir = Pathname.new(Dir.mktmpdir('zsock_test'))
-        path = tmpdir + 'server_cert.txt'
-        # NOTE: ensure only public key is set
-        CZTop::Certificate.new.save_public(path)
-        CZTop::Certificate.load(path)
-      end
-
-      it 'raises' do
-        assert_raises(ArgumentError) do
-          rep_socket.CURVE_server!(certificate)
-        end
-      end
-    end
-  end
-
-
-  describe '#CURVE_client!' do
-    before { skip 'requires CURVE' unless ::CZMQ::FFI::Zsys.has_curve }
-
-    let(:tmpdir) do
-      Pathname.new(Dir.mktmpdir('zsock_test'))
-    end
-    let(:path) { tmpdir + 'server_cert.txt' }
-    let(:server_cert) do
-      # NOTE: ensure only public key is set
-      CZTop::Certificate.new.save_public(path)
-      CZTop::Certificate.load(path)
-    end
-    let(:client_cert) { CZTop::Certificate.new }
-    let(:options) { req_socket.options }
-
-
-    describe 'with client certificate' do
-      before do
-        req_socket.CURVE_client!(client_cert, server_cert)
-      end
-
-      it 'sets client secret key' do
-        assert_equal client_cert.secret_key, options.CURVE_secretkey
-      end
-
-      it 'sets client public key' do
-        assert_equal client_cert.public_key, options.CURVE_publickey
-      end
-
-      it "sets server's public key" do
-        assert_equal server_cert.public_key, options.CURVE_serverkey
-      end
-
-      it "doesn't set CURVE server" do
-        refute options.CURVE_server?
-      end
-
-      it 'changes mechanism to :CURVE' do
-        assert_equal :CURVE, options.mechanism
-      end
-    end
-
-
-    describe 'with secret key in server certificate' do
-      let(:server_cert) { CZTop::Certificate.new }
-
-      it 'raises' do # server's secret key compromised
-        assert_raises(SecurityError) do
-          req_socket.CURVE_client!(client_cert, server_cert)
-        end
-      end
-    end
-
-
-    describe 'with no secret key in certificate' do
-      let(:client_cert) do
-        # NOTE: ensure only public key is set
-        path = tmpdir + 'client_cert.txt'
-        CZTop::Certificate.new.save_public(path)
-        CZTop::Certificate.load(path)
-      end
-
-      it 'raises' do
-        assert_raises(SystemCallError) do
-          req_socket.CURVE_client!(client_cert, server_cert)
-        end
       end
     end
   end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CZTop
-  # These are methods that can be used on a {Socket} as well as an {Actor}.
+  # These are methods that can be used on a {Socket}.
   # @see http://api.zeromq.org/czmq3-0:zsock
   module PolymorphicZsockMethods
 

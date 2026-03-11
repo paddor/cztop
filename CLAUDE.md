@@ -4,13 +4,13 @@ Ruby FFI binding for CZMQ/ZMQ. Version 2.0.0.pre1. Requires Ruby >= 3.3.
 
 ## Architecture
 
-- `lib/cztop/socket.rb` — Socket base class (connect, bind, CURVE, etc.)
+- `lib/cztop/socket.rb` — Socket base class (connect, bind, etc.)
 - `lib/cztop/socket/fd_wait.rb` — `FdWait` mixin: FD polling infrastructure (`FD_TIMEOUT`, `JIFFY`, `#wait_for_fd_signal`, `#wait_for_socket_state`)
 - `lib/cztop/socket/readable.rb` — `Readable` mixin: `#receive` → `Array<String>`, `#wait_readable`, `#read_timeout`
 - `lib/cztop/socket/writable.rb` — `Writable` mixin: `#send` accepts `String`/`Array<String>`, `#<<`, `#wait_writable`, `#write_timeout`
 - `lib/cztop/socket/types.rb` — `Types` constants + `TypeNames`
 - `lib/cztop/socket/{req,rep,dealer,router,pub,sub,xpub,xsub,push,pull,pair,stream}.rb` — individual socket types
-- `lib/cztop/ffi.rb` — FFI bindings + CZMQ signal handler disabling
+- `lib/cztop/ffi.rb` — FFI bindings (zsock, zmsg, zframe, zstr) + CZMQ signal handler disabling
 - `bench/` — benchmark-ips scripts (async/threads × throughput/latency)
 
 ### ZMQ FD polling

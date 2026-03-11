@@ -39,39 +39,6 @@ module CZTop
     def initialize(endpoints = nil); end
 
 
-    # @!group CURVE Security
-
-    # Enables CURVE security and makes this socket a CURVE server.
-    # @param cert [Certificate] this server's certificate,
-    #   so remote clients are able to authenticate this server
-    # @note You'll have to use a {CZTop::Authenticator}.
-    # @return [void]
-    # @raise [ArgumentError] if there's no secret key in certificate
-    def CURVE_server!(cert)
-      options.CURVE_server = true
-      cert.apply(self) # NOTE: desired: raises if no secret key in cert
-    end
-
-
-    # Enables CURVE security and makes this socket a CURVE client.
-    # @param client_cert [Certificate] client's certificate, to secure
-    #   communication (and be authenticated by the server)
-    # @param server_cert [Certificate] the remote server's certificate, so
-    #   this socket is able to authenticate the server
-    # @return [void]
-    # @raise [SecurityError] if the server's secret key is set in server_cert,
-    #   which means it's not secret anymore
-    # @raise [SystemCallError] if there's no secret key in client_cert
-    def CURVE_client!(client_cert, server_cert)
-      raise SecurityError, "server's secret key not secret" if server_cert.secret_key
-
-      client_cert.apply(self) # NOTE: desired: raises if no secret key in cert
-      options.CURVE_serverkey = server_cert.public_key
-    end
-
-    # @!endgroup
-
-
     # @return [String] last bound endpoint, if any
     # @return [nil] if not bound
     def last_endpoint

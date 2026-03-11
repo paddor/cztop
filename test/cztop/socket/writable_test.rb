@@ -51,7 +51,7 @@ describe CZTop::Socket::Writable do
 
     describe 'with no sndtimeout set' do
       before do
-        assert_equal(-1, req.options.sndtimeo)
+        assert_nil req.options.sndtimeo
       end
 
       it 'returns nil' do

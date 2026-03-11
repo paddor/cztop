@@ -64,12 +64,12 @@ module CZTop
       # @return [Socket] whose options this {OptionsAccessor} instance
       #   is accessing
       #
-      attr_reader :zocket
+      attr_reader :socket
 
-      # @param zocket [Socket]
+      # @param socket [Socket]
       #
-      def initialize(zocket)
-        @zocket = zocket
+      def initialize(socket)
+        @socket = socket
       end
 
 
@@ -123,67 +123,65 @@ module CZTop
       # @return [Integer] the send high water mark
       #
       def sndhwm
-        Zsock.sndhwm(@zocket)
+        Zsock.sndhwm(@socket)
       end
 
 
       # @param value [Integer] the new send high water mark.
       #
       def sndhwm=(value)
-        Zsock.set_sndhwm(@zocket, value)
+        Zsock.set_sndhwm(@socket, value)
       end
 
 
       # @return [Integer] the receive high water mark
       #
       def rcvhwm
-        Zsock.rcvhwm(@zocket)
+        Zsock.rcvhwm(@socket)
       end
 
 
       # @param value [Integer] the new receive high water mark
       #
       def rcvhwm=(value)
-        Zsock.set_rcvhwm(@zocket, value)
+        Zsock.set_rcvhwm(@socket, value)
       end
 
       # @!endgroup
 
       # @!group Send and Receive Timeouts
 
-      # @return [Integer] the timeout in milliseconds when receiving a message
-      # @see Message.receive_from
-      # @note -1 means infinite, 0 means nonblocking
+      # @return [Integer, nil] the receive timeout in milliseconds, or nil
+      #   if blocking indefinitely (no timeout). 0 means nonblocking.
       #
       def rcvtimeo
-        Zsock.rcvtimeo(@zocket)
+        value = Zsock.rcvtimeo(@socket)
+        value == -1 ? nil : value
       end
 
 
-      # @param timeout [Integer] new timeout in milliseconds
-      # @see Message.receive_from
-      # @note -1 means infinite, 0 means nonblocking
+      # @param timeout [Integer, nil] new receive timeout in milliseconds,
+      #   or nil to block indefinitely (no timeout). 0 means nonblocking.
       #
       def rcvtimeo=(timeout)
-        Zsock.set_rcvtimeo(@zocket, timeout)
+        Zsock.set_rcvtimeo(@socket, timeout || -1)
       end
 
 
-      # @return [Integer] the timeout in milliseconds when sending a message
-      # @see Message#send_to
-      # @note -1 means infinite, 0 means nonblocking
+      # @return [Integer, nil] the send timeout in milliseconds, or nil
+      #   if blocking indefinitely (no timeout). 0 means nonblocking.
       #
       def sndtimeo
-        Zsock.sndtimeo(@zocket)
+        value = Zsock.sndtimeo(@socket)
+        value == -1 ? nil : value
       end
 
 
-      # @param timeout [Integer] new timeout in milliseconds
-      # @see Message#send_to
-      # @note -1 means infinite, 0 means nonblocking
+      # @param timeout [Integer, nil] new send timeout in milliseconds,
+      #   or nil to block indefinitely (no timeout). 0 means nonblocking.
       #
       def sndtimeo=(timeout)
-        Zsock.set_sndtimeo(@zocket, timeout)
+        Zsock.set_sndtimeo(@socket, timeout || -1)
       end
 
       # @!endgroup
@@ -194,7 +192,7 @@ module CZTop
       # @see https://libzmq.readthedocs.io/en/latest/zmq_setsockopt.html#_zmq_router_mandatory_accept_only_routable_messages_on_router_sockets
       #
       def router_mandatory=(bool)
-        Zsock.set_router_mandatory(@zocket, bool ? 1 : 0)
+        Zsock.set_router_mandatory(@socket, bool ? 1 : 0)
         @router_mandatory = bool # NOTE: no way to read this option, so we need to remember
       end
 
@@ -202,14 +200,14 @@ module CZTop
       # @return [Boolean] whether ZMQ_ROUTER_MANDATORY has been set
       #
       def router_mandatory?
-        @router_mandatory
+        !!@router_mandatory
       end
 
 
       # @return [String] current socket identity
       #
       def identity
-        Zsock.identity(@zocket).read_string
+        Zsock.identity(@socket).read_string
       end
 
 
@@ -221,14 +219,14 @@ module CZTop
         raise ArgumentError, 'identity too long' if identity.bytesize > 255
         raise ArgumentError, 'invalid identity' if identity.start_with? "\0"
 
-        Zsock.set_identity(@zocket, identity)
+        Zsock.set_identity(@socket, identity)
       end
 
 
       # @return [Integer] current value of Type of Service
       #
       def tos
-        Zsock.tos(@zocket)
+        Zsock.tos(@socket)
       end
 
 
@@ -237,14 +235,14 @@ module CZTop
       def tos=(new_value)
         raise ArgumentError, 'invalid TOS' unless new_value >= 0
 
-        Zsock.set_tos(@zocket, new_value)
+        Zsock.set_tos(@socket, new_value)
       end
 
 
       # @return [Integer] current value of Heartbeat IVL
       #
       def heartbeat_ivl
-        Zsock.heartbeat_ivl(@zocket)
+        Zsock.heartbeat_ivl(@socket)
       end
 
 
@@ -253,14 +251,14 @@ module CZTop
       def heartbeat_ivl=(new_value)
         raise ArgumentError, 'invalid IVL' unless new_value >= 0
 
-        Zsock.set_heartbeat_ivl(@zocket, new_value)
+        Zsock.set_heartbeat_ivl(@socket, new_value)
       end
 
 
       # @return [Integer] current value of Heartbeat TTL, in milliseconds
       #
       def heartbeat_ttl
-        Zsock.heartbeat_ttl(@zocket)
+        Zsock.heartbeat_ttl(@socket)
       end
 
 
@@ -273,51 +271,61 @@ module CZTop
         raise ArgumentError, "invalid TTL: #{new_value}" unless new_value.is_a? Integer
         raise ArgumentError, "TTL out of range: #{new_value}" unless (0..65_536).include? new_value
 
-        Zsock.set_heartbeat_ttl(@zocket, new_value)
+        Zsock.set_heartbeat_ttl(@socket, new_value)
       end
 
 
-      # @return [Integer] current value of Heartbeat Timeout
+      # Returns the heartbeat timeout in milliseconds, or `nil` if not
+      # explicitly set. When `nil`, libzmq uses {#heartbeat_ivl} as the
+      # timeout (i.e. `-1` in the raw option means "use IVL").
+      #
+      # @return [Integer, nil] timeout in ms, or nil if unset
       #
       def heartbeat_timeout
-        Zsock.heartbeat_timeout(@zocket)
+        value = Zsock.heartbeat_timeout(@socket)
+        value == -1 ? nil : value
       end
 
 
-      # @param new_value [Integer] new value for Heartbeat Timeout
+      # @param new_value [Integer, nil] new value for Heartbeat Timeout in
+      #   milliseconds, or nil to reset to default (use {#heartbeat_ivl})
       #
       def heartbeat_timeout=(new_value)
+        if new_value.nil?
+          Zsock.set_heartbeat_timeout(@socket, 0)
+          return
+        end
+
         raise ArgumentError, 'invalid timeout' unless new_value >= 0
 
-        Zsock.set_heartbeat_timeout(@zocket, new_value)
+        Zsock.set_heartbeat_timeout(@socket, new_value)
       end
 
 
-      # @return [Integer] current value of LINGER
+      # @return [Integer, nil] linger period in milliseconds, or nil to
+      #   wait indefinitely. 0 means no waiting (default).
       #
       def linger
-        Zsock.linger(@zocket)
+        value = Zsock.linger(@socket)
+        value == -1 ? nil : value
       end
 
 
-      # This defines the number of milliseconds to wait while
-      # closing/disconnecting a socket if there are outstanding messages to
-      # send.
+      # Sets how long to wait while closing/disconnecting a socket if
+      # there are outstanding messages to send.
       #
-      # Default is 0, which means to not wait at all. -1 means to wait
-      # indefinitely
-      #
-      # @param new_value [Integer] new value for LINGER
+      # @param new_value [Integer, nil] linger period in milliseconds,
+      #   or nil to wait indefinitely. 0 means no waiting (default).
       #
       def linger=(new_value)
-        Zsock.set_linger(@zocket, new_value)
+        Zsock.set_linger(@socket, new_value || -1)
       end
 
 
       # @return [Boolean] current value of ipv6
       #
       def ipv6?
-        Zsock.ipv6(@zocket) != 0
+        Zsock.ipv6(@socket) != 0
       end
 
 
@@ -329,14 +337,14 @@ module CZTop
       # @param new_value [Boolean] new value for ipv6
       #
       def ipv6=(new_value)
-        Zsock.set_ipv6(@zocket, new_value ? 1 : 0)
+        Zsock.set_ipv6(@socket, new_value ? 1 : 0)
       end
 
 
       # @return [Integer] socket file descriptor
       #
       def fd
-        Zsock.fd(@zocket)
+        Zsock.fd(@socket)
       end
 
 
@@ -345,28 +353,24 @@ module CZTop
       # @see CZTop::ZsockOptions::POLLOUT
       #
       def events
-        Zsock.events(@zocket)
+        Zsock.events(@socket)
       end
 
 
-      # @return [Integer] current value of RECONNECT_IVL
+      # @return [Integer, nil] reconnect interval in milliseconds, or nil
+      #   if reconnection is disabled
       #
       def reconnect_ivl
-        Zsock.reconnect_ivl(@zocket)
+        value = Zsock.reconnect_ivl(@socket)
+        value == -1 ? nil : value
       end
 
 
-      # This defines the number of milliseconds to wait while
-      # closing/disconnecting a socket if there are outstanding messages to
-      # send.
-      #
-      # Default is 0, which means to not wait at all. -1 means to wait
-      # indefinitely
-      #
-      # @param new_value [Integer] new value for RECONNECT_IVL
+      # @param new_value [Integer, nil] reconnect interval in milliseconds,
+      #   or nil to disable reconnection
       #
       def reconnect_ivl=(new_value)
-        Zsock.set_reconnect_ivl(@zocket, new_value)
+        Zsock.set_reconnect_ivl(@socket, new_value || -1)
       end
 
     end

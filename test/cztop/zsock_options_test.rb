@@ -20,7 +20,7 @@ describe CZTop::ZsockOptions do
     end
 
     it "changes the correct socket's options" do
-      assert_same socket, socket.options.zocket
+      assert_same socket, socket.options.socket
     end
   end
 
@@ -126,23 +126,40 @@ describe CZTop::ZsockOptions do
 
 
     describe '#sndtimeo' do
-      it 'sets and gets send timeout' do
-        assert_equal(-1, socket.options.sndtimeo)
+      it 'returns nil by default (no timeout)' do
+        assert_nil socket.options.sndtimeo
+      end
 
+      it 'sets and gets send timeout' do
         socket.options.sndtimeo = 7
         assert_equal 7, socket.options.sndtimeo
 
         socket.options.sndtimeo = 0
         assert_equal 0, socket.options.sndtimeo
       end
+
+      it 'accepts nil to reset to no timeout' do
+        socket.options.sndtimeo = 7
+        socket.options.sndtimeo = nil
+        assert_nil socket.options.sndtimeo
+      end
     end
 
 
     describe '#rcvtimeo' do
+      it 'returns nil by default (no timeout)' do
+        assert_nil socket.options.rcvtimeo
+      end
+
       it 'sets and gets receive timeout' do
-        assert_equal(-1, socket.options.rcvtimeo)
         socket.options.rcvtimeo = 7
         assert_equal 7, socket.options.rcvtimeo
+      end
+
+      it 'accepts nil to reset to no timeout' do
+        socket.options.rcvtimeo = 7
+        socket.options.rcvtimeo = nil
+        assert_nil socket.options.rcvtimeo
       end
     end
 
@@ -261,20 +278,18 @@ describe CZTop::ZsockOptions do
 
 
     describe '#linger' do
-      describe 'with no LINGER' do
-        it 'returns default' do
-          assert_equal 0, socket.options.linger # ZMQ docs say 30_000, but they're wrong
-        end
+      it 'returns 0 by default' do
+        assert_equal 0, socket.options.linger
       end
 
+      it 'sets and gets value' do
+        socket.options.linger = 500
+        assert_equal 500, socket.options.linger
+      end
 
-      describe 'with LINGER set' do
-        let(:linger) { 500 }
-        before { socket.options.linger = linger }
-
-        it 'returns LINGER' do
-          assert_equal linger, socket.options.linger
-        end
+      it 'accepts nil for indefinite linger' do
+        socket.options.linger = nil
+        assert_nil socket.options.linger
       end
     end
 
@@ -316,13 +331,19 @@ describe CZTop::ZsockOptions do
 
 
     describe '#heartbeat_timeout' do
-      it 'returns default' do
-        assert_equal(-1, socket.options.heartbeat_timeout)
+      it 'returns nil by default' do
+        assert_nil socket.options.heartbeat_timeout
       end
 
       it 'sets and gets value' do
         socket.options.heartbeat_timeout = 5000
         assert_equal 5000, socket.options.heartbeat_timeout
+      end
+
+      it 'accepts nil to reset to default' do
+        socket.options.heartbeat_timeout = 5000
+        socket.options.heartbeat_timeout = nil
+        assert_equal 0, socket.options.heartbeat_timeout
       end
 
       it 'raises on negative value' do
@@ -449,20 +470,18 @@ describe CZTop::ZsockOptions do
 
 
     describe '#reconnect_ivl' do
-      describe 'with no RECONNECT_IVL' do
-        it 'returns default' do
-          assert_equal 100, socket.options.reconnect_ivl
-        end
+      it 'returns 100 by default' do
+        assert_equal 100, socket.options.reconnect_ivl
       end
 
+      it 'sets and gets value' do
+        socket.options.reconnect_ivl = 500
+        assert_equal 500, socket.options.reconnect_ivl
+      end
 
-      describe 'with RECONNECT_IVL set' do
-        let(:reconnect_ivl) { 500 }
-        before { socket.options.reconnect_ivl = reconnect_ivl }
-
-        it 'returns RECONNECT_IVL' do
-          assert_equal reconnect_ivl, socket.options.reconnect_ivl
-        end
+      it 'accepts nil to disable reconnection' do
+        socket.options.reconnect_ivl = nil
+        assert_nil socket.options.reconnect_ivl
       end
     end
 

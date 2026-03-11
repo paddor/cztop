@@ -35,7 +35,7 @@ describe CZTop::Socket::Readable do
 
     describe 'with no rcvtimeout set' do
       before do
-        assert_equal(-1, req.options.rcvtimeo)
+        assert_nil req.options.rcvtimeo
       end
 
       it 'returns nil' do

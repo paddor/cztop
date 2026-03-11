@@ -276,47 +276,47 @@ module CZMQ
       end
 
       # Class methods that take a zsock pointer (or wrapper with to_ptr)
-      # These are called as Zsock.method_name(zocket, ...) from zsock_options.rb
+      # These are called as Zsock.method_name(socket, ...) from zsock_options.rb
 
-      def self._resolve_ptr(zocket)
-        zocket.respond_to?(:to_ptr) ? zocket.to_ptr : zocket
+      def self._resolve_ptr(socket)
+        socket.respond_to?(:to_ptr) ? socket.to_ptr : socket
       end
       private_class_method :_resolve_ptr
 
-      def self.set_unbounded(zocket)
-        CZMQ::FFI.zsock_set_unbounded(_resolve_ptr(zocket))
+      def self.set_unbounded(socket)
+        CZMQ::FFI.zsock_set_unbounded(_resolve_ptr(socket))
       end
 
-      # Option getters (class methods taking a zocket)
-      def self.sndhwm(zocket)           = CZMQ::FFI.zsock_sndhwm(_resolve_ptr(zocket))
-      def self.rcvhwm(zocket)           = CZMQ::FFI.zsock_rcvhwm(_resolve_ptr(zocket))
-      def self.rcvtimeo(zocket)         = CZMQ::FFI.zsock_rcvtimeo(_resolve_ptr(zocket))
-      def self.sndtimeo(zocket)         = CZMQ::FFI.zsock_sndtimeo(_resolve_ptr(zocket))
-      def self.identity(zocket)         = CZMQ::FFI.zsock_identity(_resolve_ptr(zocket))
-      def self.tos(zocket)              = CZMQ::FFI.zsock_tos(_resolve_ptr(zocket))
-      def self.heartbeat_ivl(zocket)    = CZMQ::FFI.zsock_heartbeat_ivl(_resolve_ptr(zocket))
-      def self.heartbeat_ttl(zocket)    = CZMQ::FFI.zsock_heartbeat_ttl(_resolve_ptr(zocket))
-      def self.heartbeat_timeout(zocket) = CZMQ::FFI.zsock_heartbeat_timeout(_resolve_ptr(zocket))
-      def self.linger(zocket)           = CZMQ::FFI.zsock_linger(_resolve_ptr(zocket))
-      def self.ipv6(zocket)             = CZMQ::FFI.zsock_ipv6(_resolve_ptr(zocket))
-      def self.fd(zocket)               = CZMQ::FFI.zsock_fd(_resolve_ptr(zocket))
-      def self.events(zocket)           = CZMQ::FFI.zsock_events(_resolve_ptr(zocket))
-      def self.reconnect_ivl(zocket)    = CZMQ::FFI.zsock_reconnect_ivl(_resolve_ptr(zocket))
+      # Option getters (class methods taking a socket)
+      def self.sndhwm(socket)           = CZMQ::FFI.zsock_sndhwm(_resolve_ptr(socket))
+      def self.rcvhwm(socket)           = CZMQ::FFI.zsock_rcvhwm(_resolve_ptr(socket))
+      def self.rcvtimeo(socket)         = CZMQ::FFI.zsock_rcvtimeo(_resolve_ptr(socket))
+      def self.sndtimeo(socket)         = CZMQ::FFI.zsock_sndtimeo(_resolve_ptr(socket))
+      def self.identity(socket)         = CZMQ::FFI.zsock_identity(_resolve_ptr(socket))
+      def self.tos(socket)              = CZMQ::FFI.zsock_tos(_resolve_ptr(socket))
+      def self.heartbeat_ivl(socket)    = CZMQ::FFI.zsock_heartbeat_ivl(_resolve_ptr(socket))
+      def self.heartbeat_ttl(socket)    = CZMQ::FFI.zsock_heartbeat_ttl(_resolve_ptr(socket))
+      def self.heartbeat_timeout(socket) = CZMQ::FFI.zsock_heartbeat_timeout(_resolve_ptr(socket))
+      def self.linger(socket)           = CZMQ::FFI.zsock_linger(_resolve_ptr(socket))
+      def self.ipv6(socket)             = CZMQ::FFI.zsock_ipv6(_resolve_ptr(socket))
+      def self.fd(socket)               = CZMQ::FFI.zsock_fd(_resolve_ptr(socket))
+      def self.events(socket)           = CZMQ::FFI.zsock_events(_resolve_ptr(socket))
+      def self.reconnect_ivl(socket)    = CZMQ::FFI.zsock_reconnect_ivl(_resolve_ptr(socket))
 
-      # Option setters (class methods taking a zocket)
-      def self.set_sndhwm(zocket, val)           = CZMQ::FFI.zsock_set_sndhwm(_resolve_ptr(zocket), val)
-      def self.set_rcvhwm(zocket, val)           = CZMQ::FFI.zsock_set_rcvhwm(_resolve_ptr(zocket), val)
-      def self.set_rcvtimeo(zocket, val)         = CZMQ::FFI.zsock_set_rcvtimeo(_resolve_ptr(zocket), val)
-      def self.set_sndtimeo(zocket, val)         = CZMQ::FFI.zsock_set_sndtimeo(_resolve_ptr(zocket), val)
-      def self.set_router_mandatory(zocket, val) = CZMQ::FFI.zsock_set_router_mandatory(_resolve_ptr(zocket), val)
-      def self.set_identity(zocket, val)         = CZMQ::FFI.zsock_set_identity(_resolve_ptr(zocket), val)
-      def self.set_tos(zocket, val)              = CZMQ::FFI.zsock_set_tos(_resolve_ptr(zocket), val)
-      def self.set_heartbeat_ivl(zocket, val)    = CZMQ::FFI.zsock_set_heartbeat_ivl(_resolve_ptr(zocket), val)
-      def self.set_heartbeat_ttl(zocket, val)    = CZMQ::FFI.zsock_set_heartbeat_ttl(_resolve_ptr(zocket), val)
-      def self.set_heartbeat_timeout(zocket, val) = CZMQ::FFI.zsock_set_heartbeat_timeout(_resolve_ptr(zocket), val)
-      def self.set_linger(zocket, val)           = CZMQ::FFI.zsock_set_linger(_resolve_ptr(zocket), val)
-      def self.set_ipv6(zocket, val)             = CZMQ::FFI.zsock_set_ipv6(_resolve_ptr(zocket), val)
-      def self.set_reconnect_ivl(zocket, val)    = CZMQ::FFI.zsock_set_reconnect_ivl(_resolve_ptr(zocket), val)
+      # Option setters (class methods taking a socket)
+      def self.set_sndhwm(socket, val)           = CZMQ::FFI.zsock_set_sndhwm(_resolve_ptr(socket), val)
+      def self.set_rcvhwm(socket, val)           = CZMQ::FFI.zsock_set_rcvhwm(_resolve_ptr(socket), val)
+      def self.set_rcvtimeo(socket, val)         = CZMQ::FFI.zsock_set_rcvtimeo(_resolve_ptr(socket), val)
+      def self.set_sndtimeo(socket, val)         = CZMQ::FFI.zsock_set_sndtimeo(_resolve_ptr(socket), val)
+      def self.set_router_mandatory(socket, val) = CZMQ::FFI.zsock_set_router_mandatory(_resolve_ptr(socket), val)
+      def self.set_identity(socket, val)         = CZMQ::FFI.zsock_set_identity(_resolve_ptr(socket), val)
+      def self.set_tos(socket, val)              = CZMQ::FFI.zsock_set_tos(_resolve_ptr(socket), val)
+      def self.set_heartbeat_ivl(socket, val)    = CZMQ::FFI.zsock_set_heartbeat_ivl(_resolve_ptr(socket), val)
+      def self.set_heartbeat_ttl(socket, val)    = CZMQ::FFI.zsock_set_heartbeat_ttl(_resolve_ptr(socket), val)
+      def self.set_heartbeat_timeout(socket, val) = CZMQ::FFI.zsock_set_heartbeat_timeout(_resolve_ptr(socket), val)
+      def self.set_linger(socket, val)           = CZMQ::FFI.zsock_set_linger(_resolve_ptr(socket), val)
+      def self.set_ipv6(socket, val)             = CZMQ::FFI.zsock_set_ipv6(_resolve_ptr(socket), val)
+      def self.set_reconnect_ivl(socket, val)    = CZMQ::FFI.zsock_set_reconnect_ivl(_resolve_ptr(socket), val)
     end
 
     # -----------------------------------------------------------------

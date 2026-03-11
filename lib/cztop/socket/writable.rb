@@ -52,14 +52,9 @@ module CZTop
       #
       def write_timeout
         timeout = options.sndtimeo
+        return nil if timeout.nil? || timeout == 0
 
-        if timeout <= 0
-          timeout = nil
-        else
-          timeout = timeout.to_f / 1000
-        end
-
-        timeout
+        timeout.to_f / 1000
       end
     end
   end

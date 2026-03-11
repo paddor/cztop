@@ -48,8 +48,6 @@ module CZMQ
     attach_function :zsock_disconnect,     [:pointer, :string, :varargs], :int, **opts
     attach_function :zsock_bind,           [:pointer, :string, :varargs], :int, **opts
     attach_function :zsock_unbind,         [:pointer, :string, :varargs], :int, **opts
-    attach_function :zsock_signal,         [:pointer, :uchar], :int, **opts
-    attach_function :zsock_wait,           [:pointer], :int, **opts
     attach_function :zsock_resolve,        [:pointer], :pointer, **opts
     attach_function :zsock_set_unbounded,  [:pointer], :void, **opts
 
@@ -326,14 +324,6 @@ module CZMQ
 
       def self.resolve(zocket)
         CZMQ::FFI.zsock_resolve(_resolve_ptr(zocket))
-      end
-
-      def self.signal(zocket, status)
-        CZMQ::FFI.zsock_signal(_resolve_ptr(zocket), status)
-      end
-
-      def self.wait(zocket)
-        CZMQ::FFI.zsock_wait(_resolve_ptr(zocket))
       end
 
       def self.set_unbounded(zocket)

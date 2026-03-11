@@ -17,10 +17,6 @@ describe CZTop::Socket do
     assert_operator CZTop::Socket, :<, CZTop::ZsockOptions
   end
 
-  it 'has polymorphic Zsock methods' do
-    assert_operator CZTop::Socket, :<, CZTop::PolymorphicZsockMethods
-  end
-
 
   describe '#initialize' do
     describe 'given invalid endpoint' do
@@ -45,6 +41,15 @@ describe CZTop::Socket do
           CZTop::Socket::REP.new(endpoint)
         end
       end
+    end
+  end
+
+
+  describe '#set_unbounded' do
+    it 'sets sndhwm and rcvhwm to 0' do
+      req_socket.set_unbounded
+      assert_equal 0, req_socket.options.sndhwm
+      assert_equal 0, req_socket.options.rcvhwm
     end
   end
 

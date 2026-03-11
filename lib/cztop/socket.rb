@@ -7,7 +7,6 @@ module CZTop
     include HasFFIDelegate
     extend HasFFIDelegate::ClassMethods
     include ZsockOptions
-    include PolymorphicZsockMethods
     include CZMQ::FFI
 
 
@@ -97,6 +96,13 @@ module CZTop
     def unbind(endpoint)
       rc = ffi_delegate.unbind('%s', :string, endpoint)
       raise ArgumentError, format('incorrect endpoint: %p', endpoint) if rc == -1
+    end
+
+
+    # Set socket to use unbounded pipes (HWM=0); use this in cases when you are
+    # totally certain the message volume can fit in memory.
+    def set_unbounded
+      ::CZMQ::FFI::Zsock.set_unbounded(ffi_delegate)
     end
 
 

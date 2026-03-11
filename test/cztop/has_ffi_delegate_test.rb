@@ -103,9 +103,33 @@ describe CZTop::HasFFIDelegate do
     describe 'with nullified delegate' do
       let(:ptr) { nil } # represents nullpointer
 
-      it 'raises' do
+      it 'raises ArgumentError for EINVAL' do
         CZMQ::FFI::Errors.stub(:errno, Errno::EINVAL::Errno) do
           assert_raises(ArgumentError) do
+            delegator.attach_ffi_delegate(delegate)
+          end
+        end
+      end
+
+      it 'raises Interrupt for EINTR' do
+        CZMQ::FFI::Errors.stub(:errno, Errno::EINTR::Errno) do
+          assert_raises(Interrupt) do
+            delegator.attach_ffi_delegate(delegate)
+          end
+        end
+      end
+
+      it 'raises SocketError for EHOSTUNREACH' do
+        CZMQ::FFI::Errors.stub(:errno, Errno::EHOSTUNREACH::Errno) do
+          assert_raises(SocketError) do
+            delegator.attach_ffi_delegate(delegate)
+          end
+        end
+      end
+
+      it 'raises SystemCallError for unknown errno' do
+        CZMQ::FFI::Errors.stub(:errno, Errno::ENOENT::Errno) do
+          assert_raises(Errno::ENOENT) do
             delegator.attach_ffi_delegate(delegate)
           end
         end

@@ -20,6 +20,12 @@ describe CZTop::Socket::Readable do
       assert_kind_of Array, msg
       assert_equal ['hello'], msg
     end
+
+    it 'wraps Errno::EAGAIN as IO::EAGAINWaitReadable' do
+      pull.stub(:wait_readable, -> (*) { raise Errno::EAGAIN }) do
+        assert_raises(IO::EAGAINWaitReadable) { pull.receive }
+      end
+    end
   end
 
 

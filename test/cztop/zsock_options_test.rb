@@ -279,6 +279,58 @@ describe CZTop::ZsockOptions do
     end
 
 
+    describe '#heartbeat_ivl' do
+      it 'returns default' do
+        assert_equal 0, socket.options.heartbeat_ivl
+      end
+
+      it 'sets and gets value' do
+        socket.options.heartbeat_ivl = 500
+        assert_equal 500, socket.options.heartbeat_ivl
+      end
+
+      it 'raises on negative value' do
+        assert_raises(ArgumentError) { socket.options.heartbeat_ivl = -1 }
+      end
+    end
+
+
+    describe '#heartbeat_ttl' do
+      it 'returns default' do
+        assert_equal 0, socket.options.heartbeat_ttl
+      end
+
+      it 'sets and gets value' do
+        socket.options.heartbeat_ttl = 1000
+        assert_equal 1000, socket.options.heartbeat_ttl
+      end
+
+      it 'raises on non-integer' do
+        assert_raises(ArgumentError) { socket.options.heartbeat_ttl = 1.5 }
+      end
+
+      it 'raises on out-of-range value' do
+        assert_raises(ArgumentError) { socket.options.heartbeat_ttl = 100_000 }
+      end
+    end
+
+
+    describe '#heartbeat_timeout' do
+      it 'returns default' do
+        assert_equal(-1, socket.options.heartbeat_timeout)
+      end
+
+      it 'sets and gets value' do
+        socket.options.heartbeat_timeout = 5000
+        assert_equal 5000, socket.options.heartbeat_timeout
+      end
+
+      it 'raises on negative value' do
+        assert_raises(ArgumentError) { socket.options.heartbeat_timeout = -1 }
+      end
+    end
+
+
     describe '#ipv6=' do
       it 'can enable IPv6' do
         called_with = nil
@@ -326,13 +378,24 @@ describe CZTop::ZsockOptions do
 
 
     describe '#[]' do
+      describe 'with exact method name' do
+        it 'hits direct method match' do
+          assert_kind_of Integer, socket.options[:sndhwm]
+        end
+
+        it 'hits predicate match' do
+          assert_equal false, socket.options[:ipv6]
+        end
+      end
+
+
       describe 'with vague option name' do
         let(:identity) { 'foobar' }
         before do
           socket.options.identity = identity
         end
 
-        it 'gets option' do
+        it 'gets option via case-insensitive search' do
           assert_equal identity, socket.options[:IDENTITY]
           assert_equal identity, socket.options['IDENTITY']
           assert_equal socket.options.tos, socket.options[:ToS]

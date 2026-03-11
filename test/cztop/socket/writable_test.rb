@@ -36,6 +36,12 @@ describe CZTop::Socket::Writable do
     it 'raises on empty array' do
       assert_raises(ArgumentError) { push.send([]) }
     end
+
+    it 'wraps Errno::EAGAIN as IO::EAGAINWaitWritable' do
+      push.stub(:wait_writable, -> (*) { raise Errno::EAGAIN }) do
+        assert_raises(IO::EAGAINWaitWritable) { push.send('hello') }
+      end
+    end
   end
 
 

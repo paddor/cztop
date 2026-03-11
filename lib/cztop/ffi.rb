@@ -98,7 +98,6 @@ module CZMQ
     # -----------------------------------------------------------------
     # zframe functions
     # -----------------------------------------------------------------
-    attach_function :zframe_destroy,     [:pointer], :void, **opts
     attach_function :zframe_data,        [:pointer], :pointer, **opts
     attach_function :zframe_size,        [:pointer], :size_t, **opts
 
@@ -128,12 +127,6 @@ module CZMQ
 
       def null?
         @ptr.null? || @moved
-      end
-
-      def __undef_finalizer
-        ObjectSpace.undefine_finalizer(self)
-        @finalizer = nil
-        self
       end
 
       # Give away ownership of the pointer (e.g. for zmsg_send which
@@ -209,14 +202,10 @@ module CZMQ
 
       DestroyedError = CZMQ::FFI::DestroyedError
 
-      def initialize(ptr_or_type, owned = true)
-        if ptr_or_type.is_a?(::FFI::Pointer)
-          @ptr = ptr_or_type
-        else
-          @ptr = CZMQ::FFI.zsock_new(ptr_or_type)
-        end
+      def initialize(type)
+        @ptr = CZMQ::FFI.zsock_new(type)
         @moved = false
-        if owned && !@ptr.null?
+        unless @ptr.null?
           ObjectSpace.define_finalizer(self,
             self.class.prevent_leak(@ptr, :zsock_destroy))
         end
@@ -338,14 +327,10 @@ module CZMQ
 
       DestroyedError = CZMQ::FFI::DestroyedError
 
-      def initialize(ptr = nil, owned = true)
-        if ptr.is_a?(::FFI::Pointer)
-          @ptr = ptr
-        else
-          @ptr = CZMQ::FFI.zmsg_new
-        end
+      def initialize
+        @ptr = CZMQ::FFI.zmsg_new
         @moved = false
-        if owned && !@ptr.null?
+        unless @ptr.null?
           ObjectSpace.define_finalizer(self,
             self.class.prevent_leak(@ptr, :zmsg_destroy))
         end
@@ -407,22 +392,11 @@ module CZMQ
     # Zframe (lightweight — only used for borrowed frames from Zmsg)
     # -----------------------------------------------------------------
     class Zframe
-      include Wrapper
-
-      DestroyedError = CZMQ::FFI::DestroyedError
-
-      # Used internally to wrap a raw pointer.
-      # @param ptr [FFI::Pointer] zframe_t pointer
-      # @param owned [Boolean] whether we own this pointer
+      # Wraps a borrowed zframe_t pointer (not owned, no finalizer).
       #
-      def self._from_ptr(ptr, owned = true)
+      def self._from_ptr(ptr, _owned = false)
         obj = allocate
         obj.instance_variable_set(:@ptr, ptr)
-        obj.instance_variable_set(:@moved, false)
-        if owned && !ptr.null?
-          ObjectSpace.define_finalizer(obj,
-            prevent_leak(ptr, :zframe_destroy))
-        end
         obj
       end
 

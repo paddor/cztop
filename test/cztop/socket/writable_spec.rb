@@ -120,15 +120,12 @@ describe CZTop::Socket::Writable do
                 req << 'bar'
               end
 
-              task.async do
-                rep.receive
-              end
-
               t0 = Time.now
+              rep.receive
               assert rep.wait_writable
               t1 = Time.now
 
-              assert_in_delta 0.05, t1 - t0, 0.05
+              assert_in_delta 0.05, t1 - t0, 0.04
             end
           end
         end
@@ -144,7 +141,7 @@ describe CZTop::Socket::Writable do
               end
 
               t1 = Time.now
-              assert_in_delta 0.05, t1 - t0, 0.05
+              assert_in_delta 0.05, t1 - t0, 0.04
             end
           end
         end
@@ -166,5 +163,5 @@ describe CZTop::Socket::Writable do
         end
       end
     end
-  end if IO.method_defined?(:wait_readable)
+  end
 end

@@ -68,5 +68,5 @@ describe CZTop::Socket::FdWait do
         assert_kind_of Numeric, received_timeout
       end
     end
-  end if IO.method_defined?(:wait_readable)
+  end
 end

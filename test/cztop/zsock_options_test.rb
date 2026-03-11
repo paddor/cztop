@@ -7,7 +7,7 @@ describe CZTop::ZsockOptions do
 
   i = 0
   let(:endpoint) { "inproc://zsock_options_#{i += 1}" }
-  let(:socket) { CZTop::Socket::REQ.new(endpoint) }
+  let(:socket)   { CZTop::Socket::REQ.new(endpoint) }
 
 
   describe '#options' do

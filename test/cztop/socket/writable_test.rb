@@ -6,8 +6,8 @@ describe CZTop::Socket::Writable do
   describe '#send' do
     i = 0
     let(:endpoint) { "inproc://writable_send_spec_#{i += 1}" }
-    let(:push) { CZTop::Socket::PUSH.new(endpoint) }
-    let(:pull) { CZTop::Socket::PULL.new(endpoint) }
+    let(:push)     { CZTop::Socket::PUSH.new(endpoint) }
+    let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
 
     before do
       push.options.sndtimeo = 100

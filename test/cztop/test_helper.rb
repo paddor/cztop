@@ -3,6 +3,7 @@
 require_relative '../test_helper'
 
 module HasFFIDelegateExamples
+
   def test_has_ffi_delegate
     klass = self.class.desc
     assert_operator klass, :<, CZTop::HasFFIDelegate

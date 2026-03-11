@@ -6,8 +6,8 @@ describe CZTop::Socket::Readable do
   describe '#receive' do
     i = 0
     let(:endpoint) { "inproc://readable_receive_spec_#{i += 1}" }
-    let(:push) { CZTop::Socket::PUSH.new(endpoint) }
-    let(:pull) { CZTop::Socket::PULL.new(endpoint) }
+    let(:push)     { CZTop::Socket::PUSH.new(endpoint) }
+    let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
 
     before do
       push.options.sndtimeo = 100

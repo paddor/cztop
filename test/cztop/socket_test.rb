@@ -7,10 +7,10 @@ describe CZTop::Socket do
   include HasFFIDelegateExamples
 
   i = 0
-  let(:endpoint) { "inproc://endpoint_socket_spec_#{i += 1}" }
-  let(:req_socket) { CZTop::Socket::REQ.new(endpoint) }
-  let(:rep_socket) { CZTop::Socket::REP.new(endpoint) }
-  let(:binding_pair_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
+  let(:endpoint)              { "inproc://endpoint_socket_spec_#{i += 1}" }
+  let(:req_socket)            { CZTop::Socket::REQ.new(endpoint) }
+  let(:rep_socket)            { CZTop::Socket::REP.new(endpoint) }
+  let(:binding_pair_socket)   { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
   it 'has Zsock options' do

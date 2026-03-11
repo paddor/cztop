@@ -433,8 +433,8 @@ end
 
 describe CZTop::Socket::PAIR do
   i = 0
-  let(:endpoint) { "inproc://socket_types_spec_#{i += 1}" }
-  let(:binding_socket) { CZTop::Socket::PAIR.new("@#{endpoint}") }
+  let(:endpoint)          { "inproc://socket_types_spec_#{i += 1}" }
+  let(:binding_socket)    { CZTop::Socket::PAIR.new("@#{endpoint}") }
   let(:connecting_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
   it 'creates PAIR sockets' do

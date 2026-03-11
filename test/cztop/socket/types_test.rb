@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../spec_helper'
+require_relative '../../test_helper'
 
 describe CZTop::Socket::Types do
   it 'has constants' do

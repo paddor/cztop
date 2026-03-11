@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../spec_helper'
+require_relative '../test_helper'
 
 module HasFFIDelegateExamples
   def test_has_ffi_delegate

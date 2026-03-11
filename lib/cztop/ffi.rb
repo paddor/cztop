@@ -48,16 +48,10 @@ module CZMQ
     attach_function :zsock_disconnect,     [:pointer, :string, :varargs], :int, **opts
     attach_function :zsock_bind,           [:pointer, :string, :varargs], :int, **opts
     attach_function :zsock_unbind,         [:pointer, :string, :varargs], :int, **opts
-    attach_function :zsock_resolve,        [:pointer], :pointer, **opts
     attach_function :zsock_set_unbounded,  [:pointer], :void, **opts
 
     attach_function :zsock_set_subscribe,   [:pointer, :string], :void, **opts
     attach_function :zsock_set_unsubscribe, [:pointer, :string], :void, **opts
-
-    # zsock_send is variadic: int zsock_send(void *self, const char *picture, ...)
-    begin
-      attach_function :zsock_send_picture,   :zsock_send, [:pointer, :string, :varargs], :int, **opts
-    rescue ::FFI::NotFoundError; end
 
     # zsock option getters
     attach_function :zsock_sndhwm,           [:pointer], :int, **opts
@@ -97,38 +91,16 @@ module CZMQ
     attach_function :zmsg_destroy,      [:pointer], :void, **opts
     attach_function :zmsg_send,         [:pointer, :pointer], :int, **opts
     attach_function :zmsg_recv,         [:pointer], :pointer, **opts
-    attach_function :zmsg_addmem,       [:pointer, :pointer, :size_t], :int, **opts
     attach_function :zmsg_addmem_s, 'zmsg_addmem', [:pointer, :buffer_in, :size_t], :int, **opts
-    attach_function :zmsg_append,       [:pointer, :pointer], :int, **opts
-    attach_function :zmsg_pushmem,      [:pointer, :pointer, :size_t], :int, **opts
-    attach_function :zmsg_prepend,      [:pointer, :pointer], :int, **opts
-    attach_function :zmsg_pop,          [:pointer], :pointer, **opts
-    attach_function :zmsg_content_size, [:pointer], :size_t, **opts
     attach_function :zmsg_first,        [:pointer], :pointer, **opts
     attach_function :zmsg_next,         [:pointer], :pointer, **opts
-    attach_function :zmsg_last,         [:pointer], :pointer, **opts
-    attach_function :zmsg_size,         [:pointer], :size_t, **opts
 
     # -----------------------------------------------------------------
     # zframe functions
     # -----------------------------------------------------------------
-    attach_function :zframe_new,         [:pointer, :size_t], :pointer, **opts
-    attach_function :zframe_new_empty,   [], :pointer, **opts
     attach_function :zframe_destroy,     [:pointer], :void, **opts
-    attach_function :zframe_send,        [:pointer, :pointer, :int], :int, **opts
-    attach_function :zframe_recv,        [:pointer], :pointer, **opts
     attach_function :zframe_data,        [:pointer], :pointer, **opts
     attach_function :zframe_size,        [:pointer], :size_t, **opts
-    attach_function :zframe_reset,       [:pointer, :pointer, :size_t], :void, **opts
-    attach_function :zframe_dup,         [:pointer], :pointer, **opts
-    attach_function :zframe_more,        [:pointer], :int, **opts
-    attach_function :zframe_set_more,    [:pointer, :int], :void, **opts
-    attach_function :zframe_eq,          [:pointer, :pointer], :bool, **opts
-
-    # -----------------------------------------------------------------
-    # zstr functions
-    # -----------------------------------------------------------------
-    attach_function :zstr_recv,  [:pointer], :pointer, **opts
 
     # =================================================================
     # Wrapper Classes
@@ -188,8 +160,8 @@ module CZMQ
         CZMQ::FFI.zmq_errno
       end
 
-      def self.strerror
-        CZMQ::FFI.zmq_strerror(CZMQ::FFI.zmq_errno)
+      def self.strerror(errno = CZMQ::FFI.zmq_errno)
+        CZMQ::FFI.zmq_strerror(errno)
       end
     end
 
@@ -322,18 +294,8 @@ module CZMQ
       end
       private_class_method :_resolve_ptr
 
-      def self.resolve(zocket)
-        CZMQ::FFI.zsock_resolve(_resolve_ptr(zocket))
-      end
-
       def self.set_unbounded(zocket)
         CZMQ::FFI.zsock_set_unbounded(_resolve_ptr(zocket))
-      end
-
-      # Override Object#send to call zsock_send.
-      # Called as: CZMQ::FFI::Zsock.send(delegate, picture, *args)
-      def self.send(zocket, picture, *args)
-        CZMQ::FFI.zsock_send_picture(_resolve_ptr(zocket), picture, *args)
       end
 
       # Option getters (class methods taking a zocket)
@@ -415,37 +377,10 @@ module CZMQ
         _wrap(ptr)
       end
 
-      def addmem(data, size)
-        CZMQ::FFI.zmsg_addmem(@ptr, data, size)
-      end
-
       # Appends a Ruby string directly without intermediate MemoryPointer copy.
       # Uses :buffer_in to pass the string's internal buffer pointer to C.
       def add_buffer(str)
         CZMQ::FFI.zmsg_addmem_s(@ptr, str, str.bytesize)
-      end
-
-      def append(frame)
-        frame_ptr = frame.respond_to?(:__ptr_give_ref) ? frame.__ptr_give_ref : frame
-        CZMQ::FFI.zmsg_append(@ptr, frame_ptr)
-      end
-
-      def pushmem(data, size)
-        CZMQ::FFI.zmsg_pushmem(@ptr, data, size)
-      end
-
-      def prepend(frame)
-        frame_ptr = frame.respond_to?(:__ptr_give_ref) ? frame.__ptr_give_ref : frame
-        CZMQ::FFI.zmsg_prepend(@ptr, frame_ptr)
-      end
-
-      def pop
-        ptr = CZMQ::FFI.zmsg_pop(@ptr)
-        Zframe._from_ptr(ptr)
-      end
-
-      def content_size
-        CZMQ::FFI.zmsg_content_size(@ptr)
       end
 
       def first
@@ -460,15 +395,6 @@ module CZMQ
         _borrowed_frame(ptr)
       end
 
-      def last
-        ptr = CZMQ::FFI.zmsg_last(@ptr)
-        _borrowed_frame(ptr)
-      end
-
-      def size
-        CZMQ::FFI.zmsg_size(@ptr)
-      end
-
       private
 
       # Returns a Zframe that does NOT own the pointer (borrowed from zmsg).
@@ -478,38 +404,17 @@ module CZMQ
     end
 
     # -----------------------------------------------------------------
-    # Zframe
+    # Zframe (lightweight — only used for borrowed frames from Zmsg)
     # -----------------------------------------------------------------
     class Zframe
       include Wrapper
 
       DestroyedError = CZMQ::FFI::DestroyedError
 
-      def initialize(data = nil, size = nil)
-        if data.is_a?(::FFI::Pointer) && !size.nil?
-          # new(ptr, size) — creating from data pointer and size
-          @ptr = CZMQ::FFI.zframe_new(data, size)
-        elsif data.is_a?(::FFI::Pointer)
-          # wrapping an existing zframe_t* pointer
-          @ptr = data
-        elsif data.nil?
-          @ptr = CZMQ::FFI.zframe_new_empty
-        else
-          mem = ::FFI::MemoryPointer.from_string(data.to_s)
-          @ptr = CZMQ::FFI.zframe_new(mem, data.to_s.bytesize)
-        end
-        @moved = false
-        ObjectSpace.define_finalizer(self,
-          self.class.prevent_leak(@ptr, :zframe_destroy)) unless @ptr.null?
-      end
-
-      def self.new_empty
-        _from_ptr(CZMQ::FFI.zframe_new_empty)
-      end
-
       # Used internally to wrap a raw pointer.
       # @param ptr [FFI::Pointer] zframe_t pointer
       # @param owned [Boolean] whether we own this pointer
+      #
       def self._from_ptr(ptr, owned = true)
         obj = allocate
         obj.instance_variable_set(:@ptr, ptr)
@@ -521,63 +426,12 @@ module CZMQ
         obj
       end
 
-      # Public alias used by Frame after send to re-wrap a pointer.
-      def self.__new(ptr, owned)
-        _from_ptr(ptr, owned)
-      end
-
-      # Override Object#send: int zframe_send(zframe_t **self_p, void *dest, int flags)
-      def self.send(frame, dest, flags)
-        frame_ptr = frame.respond_to?(:__ptr_give_ref) ? frame.__ptr_give_ref : frame
-        dest_ptr = dest.respond_to?(:to_ptr) ? dest.to_ptr : dest
-        CZMQ::FFI.zframe_send(frame_ptr, dest_ptr, flags)
-      end
-
-      def self.recv(source)
-        source_ptr = source.respond_to?(:to_ptr) ? source.to_ptr : source
-        ptr = CZMQ::FFI.zframe_recv(source_ptr)
-        _from_ptr(ptr)
-      end
-
       def data
         CZMQ::FFI.zframe_data(@ptr)
       end
 
       def size
         CZMQ::FFI.zframe_size(@ptr)
-      end
-
-      def reset(data, size)
-        CZMQ::FFI.zframe_reset(@ptr, data, size)
-      end
-
-      def dup
-        ptr = CZMQ::FFI.zframe_dup(@ptr)
-        self.class._from_ptr(ptr)
-      end
-
-      def more
-        CZMQ::FFI.zframe_more(@ptr)
-      end
-
-      def set_more(val)
-        CZMQ::FFI.zframe_set_more(@ptr, val)
-      end
-
-      def eq(other)
-        other_ptr = other.respond_to?(:to_ptr) ? other.to_ptr : other
-        CZMQ::FFI.zframe_eq(@ptr, other_ptr)
-      end
-
-    end
-
-    # -----------------------------------------------------------------
-    # Zstr
-    # -----------------------------------------------------------------
-    module Zstr
-      def self.recv(source)
-        source_ptr = source.respond_to?(:to_ptr) ? source.to_ptr : source
-        CZMQ::FFI.zstr_recv(source_ptr)
       end
     end
 

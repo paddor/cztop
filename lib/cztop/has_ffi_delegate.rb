@@ -26,11 +26,11 @@ module CZTop::HasFFIDelegate
   # @return [void]
   # @note This only raises the correct exception when the creation of the new
   #   CZMQ object was the most recent thing done with the CZMQ library and
-  #   thus CZMQ::FFI::Errors.errno is still reports the correct error number.
+  #   thus CZMQ::FFI::Errors.errno still reports the correct error number.
   # @see raise_zmq_err
   #
   def attach_ffi_delegate(ffi_delegate)
-    raise_zmq_err(CZMQ::FFI::Errors.strerror) if ffi_delegate.null?
+    raise_zmq_err if ffi_delegate.null?
     @ffi_delegate = ffi_delegate
   end
 
@@ -47,15 +47,20 @@ module CZTop::HasFFIDelegate
 
   # Raises the appropriate exception for the reported ZMQ error.
   #
-  # @param msg [String] error message
+  # Captures +zmq_errno+ once to avoid a race where a subsequent ZMQ call
+  # overwrites it before we read it.
+  #
+  # @param msg [String] error message (default: ZMQ's strerror for current errno)
+  # @param errno [Integer] ZMQ errno (default: current zmq_errno)
   # @raise [ArgumentError] if EINVAL was reported
   # @raise [Interrupt] if EINTR was reported
   # @raise [SocketError] if EHOSTUNREACH was reported
   # @raise [SystemCallError] any other reported error (appropriate
   #   SystemCallError subclass, if errno is known)
   #
-  def raise_zmq_err(msg = CZMQ::FFI::Errors.strerror,
-                    errno: CZMQ::FFI::Errors.errno)
+  def raise_zmq_err(msg = nil, errno: nil)
+    errno ||= CZMQ::FFI::Errors.errno
+    msg   ||= CZMQ::FFI::Errors.strerror(errno)
     case errno
     when Errno::EINVAL::Errno
       fail ArgumentError, msg, caller

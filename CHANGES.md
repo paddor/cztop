@@ -1,3 +1,65 @@
+2.0.0.pre1
+-----
+
+### Breaking changes
+
+* **Removed classes:** Actor, Authenticator, Beacon, Certificate, CertStore, Config,
+  Frame, Message, Metadata, Monitor, Poller, Proxy, Z85, ZAP
+* **Removed modules:** SendReceiveMethods, PolymorphicZsockMethods
+* **Removed socket types (draft API dropped):** SERVER, CLIENT, RADIO, DISH,
+  GATHER, SCATTER
+* **Removed CURVE/PLAIN/GSSAPI security API:**
+    - `Socket#CURVE_server!`, `Socket#CURVE_client!`
+    - `OptionsAccessor` CURVE methods (`#CURVE_server?`, `#CURVE_serverkey`,
+      `#CURVE_secretkey`, `#CURVE_publickey`, etc.)
+    - `OptionsAccessor` PLAIN methods (`#PLAIN_server?`, `#PLAIN_username`,
+      `#PLAIN_password`, etc.)
+    - `OptionsAccessor#mechanism`, `#zap_domain`
+* **Send/receive API changed:**
+    - `#receive` now returns `Array<String>` (was `CZTop::Message`)
+    - `#<<` accepts `String` or `Array<String>` directly (was `Message.coerce`)
+    - `#send` added as alias for `#<<` (shadows `Object#send`; use `__send__`
+      for Ruby dispatch)
+    - `SendReceiveMethods` split into `Socket::Readable`, `Socket::Writable`, and
+      `Socket::FdWait` mixins; socket types include only what they need
+      (e.g. PUB includes only Writable, SUB only Readable)
+* **Sentinel values changed from -1 to nil:**
+    - `OptionsAccessor#rcvtimeo` / `#sndtimeo` — returns/accepts `nil` instead
+      of `-1` for "no timeout"
+    - `OptionsAccessor#linger` — `nil` instead of `-1` for "wait indefinitely"
+    - `OptionsAccessor#heartbeat_timeout` — `nil` instead of `-1` for "use IVL"
+    - `OptionsAccessor#reconnect_ivl` — `nil` instead of `-1` for "disabled"
+* **`OptionsAccessor#zocket` renamed to `#socket`** (ivar `@zocket` → `@socket`)
+* **`#set_unbounded` moved from PolymorphicZsockMethods to Socket**
+* **`czmq-ffi-gen` gem dependency removed** — replaced with handcrafted FFI
+  bindings in `lib/cztop/ffi.rb`
+* **Minimum Ruby version raised to 3.3**
+
+### New features
+
+* **CURVE encryption** with ergonomic `curve:` kwarg on all socket constructors:
+    - `CZTop::CURVE.keypair` — generate keypairs (32-byte binary)
+    - `CZTop::CURVE.public_key(secret_key)` — derive public from secret
+    - `CZTop::CURVE.z85_encode` / `.z85_decode` — Z85 utility for interop
+    - `CZTop::CURVE::Auth` — in-memory ZAP handler (no filesystem, no zauth actor)
+    - Server: `CZTop::Socket::REP.new(endpoint, curve: { secret_key: sk })`
+    - Client: `CZTop::Socket::REQ.new(endpoint, curve: { secret_key: sk, server_key: pk })`
+* **`@`/`>` endpoint prefix convention** supported on all socket constructors
+  (e.g. `PAIR.new("@inproc://ep")` to bind, `PAIR.new(">inproc://ep")` to connect)
+
+### Other changes
+
+* replace RSpec with Minitest
+* replace `perf/` with `bench/` using benchmark-ips
+* add per-socket-type integration test files for all 12 types
+* add STREAM ↔ raw TCP integration tests
+* add CURVE throughput benchmark (`bench/threads/curve_throughput.rb`)
+* add Shannon entropy system tests for CURVE (`test/system/`)
+* split socket creation from connect/bind to support pre-connect option setting
+* tune FD_TIMEOUT (500ms → 250ms) and JIFFY (15ms → 1ms) for better responsiveness
+* fix zmq_errno race condition in `#raise_zmq_err`
+* move CZMQ signal handler disabling into `lib/cztop/ffi.rb`
+
 1.3.2 (1/3/2025)
 -----
 * add 'benchmark' dependency for specs

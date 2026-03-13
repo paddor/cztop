@@ -1,121 +1,135 @@
-[![CI](https://github.com/paddor/cztop/actions/workflows/ci.yml/badge.svg)](https://github.com/paddor/cztop/actions/workflows/ci.yml)
-
 # CZTop
 
-CZTop is a CZMQ binding for Ruby with hardcoded FFI bindings. It focuses on
-being easy to use for Rubyists (POLS) and provides first-class support for
-security mechanisms (CURVE).
+[![CI](https://github.com/paddor/cztop/actions/workflows/ci.yml/badge.svg)](https://github.com/paddor/cztop/actions/workflows/ci.yml)
+[![Gem Version](https://img.shields.io/gem/v/cztop?color=e9573f)](https://rubygems.org/gems/cztop)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
+[![Ruby](https://img.shields.io/badge/Ruby-%3E%3D%203.3-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org)
 
-## Features
+Ruby FFI binding for [CZMQ](http://czmq.zeromq.org/) / [ZeroMQ](https://zeromq.org/) — high-performance asynchronous messaging for distributed systems.
 
-* Ruby-idiomatic API
-* Fiber Scheduler compatible
-* errors as exceptions
-* CURVE security
-* extensive test coverage
+> **353k msg/s** inproc throughput | **49 µs** fiber roundtrip latency | nonblock fast path
 
-## Requirements
+---
 
-* CZMQ >= 4.2
-* Ruby 3.3+
+## Highlights
 
-### Installing dependencies
+- **All socket types** — req/rep, pub/sub, push/pull, dealer/router, xpub/xsub, pair, stream
+- **Async-first** — first-class [async](https://github.com/socketry/async) fiber support, also works with plain threads
+- **Ruby-idiomatic API** — messages as `Array<String>`, errors as exceptions, timeouts as `IO::TimeoutError`
 
-Debian / Ubuntu:
+## Install
 
-    $ sudo apt install libczmq-dev
+Install CZMQ on your system:
 
-macOS (Homebrew):
+```sh
+# Debian/Ubuntu
+sudo apt install libczmq-dev
 
-    $ brew install czmq
+# macOS
+brew install czmq
+```
 
-## Installation
+Then add the gem:
 
-Add to your Gemfile:
-
-```ruby
+```sh
+gem install cztop
+# or in Gemfile
 gem 'cztop'
 ```
 
-Then run `bundle install`. Or install directly:
+## Quick Start
 
-    $ gem install cztop
-
-## Quick example
+### Request / Reply
 
 ```ruby
 require 'cztop'
 require 'async'
 
-ENDPOINT = 'inproc://req_rep_example'
-
 Async do |task|
-  rep_task = task.async do
-    socket = CZTop::Socket::REP.new(ENDPOINT)
-
-    loop do
-      msg = socket.receive
-      puts "<<< #{msg.to_a.inspect}"
-      socket << msg.to_a.map(&:upcase)
-    end
-  ensure
-    puts "REP done."
-  end
+  rep = CZTop::Socket::REP.new('inproc://example')
+  req = CZTop::Socket::REQ.new('inproc://example')
 
   task.async do
-    socket = CZTop::Socket::REQ.new(ENDPOINT)
-
-    10.times do |i|
-      socket << "foobar ##{i}"
-      msg = socket.receive
-      puts ">>> #{msg.to_a.inspect}"
-    end
-
-    puts "REQ done."
-    rep_task.stop
+    msg = rep.receive
+    rep << msg.map(&:upcase)
   end
+
+  req << 'hello'
+  puts req.receive.inspect  # => ["HELLO"]
 end
 ```
 
-More examples in the [examples](https://github.com/paddor/cztop/tree/master/examples) directory.
+### Pub / Sub
 
-## Class overview
+```ruby
+Async do |task|
+  pub = CZTop::Socket::PUB.new('inproc://pubsub')
+  sub = CZTop::Socket::SUB.new('inproc://pubsub')
+  sub.subscribe('')  # subscribe to all
 
-* [CZTop](http://www.rubydoc.info/gems/cztop/CZTop)
-  * [Actor](http://www.rubydoc.info/gems/cztop/CZTop/Actor)
-  * [Authenticator](http://www.rubydoc.info/gems/cztop/CZTop/Authenticator)
-  * [Beacon](http://www.rubydoc.info/gems/cztop/CZTop/Beacon)
-  * [Certificate](http://www.rubydoc.info/gems/cztop/CZTop/Certificate)
-  * [CertStore](http://www.rubydoc.info/gems/cztop/CZTop/CertStore)
-  * [Config](http://www.rubydoc.info/gems/cztop/CZTop/Config)
-  * [Frame](http://www.rubydoc.info/gems/cztop/CZTop/Frame)
-  * [Message](http://www.rubydoc.info/gems/cztop/CZTop/Message)
-  * [Metadata](http://www.rubydoc.info/gems/cztop/CZTop/Metadata)
-  * [Monitor](http://www.rubydoc.info/gems/cztop/CZTop/Monitor)
-  * [Proxy](http://www.rubydoc.info/gems/cztop/CZTop/Proxy)
-  * [Socket](http://www.rubydoc.info/gems/cztop/CZTop/Socket)
-    * [REQ](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REQ), [REP](http://www.rubydoc.info/gems/cztop/CZTop/Socket/REP), [ROUTER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/ROUTER), [DEALER](http://www.rubydoc.info/gems/cztop/CZTop/Socket/DEALER)
-    * [PUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUB), [SUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/SUB), [XPUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XPUB), [XSUB](http://www.rubydoc.info/gems/cztop/CZTop/Socket/XSUB)
-    * [PUSH](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PUSH), [PULL](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PULL)
-    * [PAIR](http://www.rubydoc.info/gems/cztop/CZTop/Socket/PAIR), [STREAM](http://www.rubydoc.info/gems/cztop/CZTop/Socket/STREAM)
-  * [Z85](http://www.rubydoc.info/gems/cztop/CZTop/Z85)
-  * [ZAP](http://www.rubydoc.info/gems/cztop/CZTop/ZAP)
+  sleep 0.01  # allow connection to establish
 
-Full [API documentation](http://www.rubydoc.info/gems/cztop).
+  task.async { pub << 'news flash' }
+  puts sub.receive.inspect  # => ["news flash"]
+end
+```
+
+### Push / Pull (Pipeline)
+
+```ruby
+Async do
+  push = CZTop::Socket::PUSH.new('inproc://pipeline')
+  pull = CZTop::Socket::PULL.new('inproc://pipeline')
+
+  push << 'work item'
+  puts pull.receive.inspect  # => ["work item"]
+end
+```
+
+## Socket Types
+
+| Pattern | Classes | Direction |
+|---------|---------|-----------|
+| Request/Reply | `REQ`, `REP` | bidirectional |
+| Publish/Subscribe | `PUB`, `SUB`, `XPUB`, `XSUB` | unidirectional |
+| Pipeline | `PUSH`, `PULL` | unidirectional |
+| Routing | `DEALER`, `ROUTER` | bidirectional |
+| Exclusive pair | `PAIR` | bidirectional |
+| Raw TCP | `STREAM` | bidirectional |
+
+All classes live under `CZTop::Socket::`.
 
 ## Performance
 
-CZTop is a thin convenience layer on top of CZMQ via FFI. See the
-[bench](https://github.com/paddor/cztop/tree/master/bench) directory for
-latency and throughput benchmarks.
+Benchmarked with benchmark-ips on Linux x86_64 (CZMQ 4.2.1, ZMQ 4.3.5, Ruby 4.0.1 +YJIT):
 
-## Contributing
+#### Throughput (push/pull)
 
-Bug reports and pull requests are welcome at https://github.com/paddor/cztop.
+| | inproc | ipc | tcp |
+|---|--------|-----|-----|
+| **Async** | 284k/s | 17k/s | 14k/s |
+| **Threads** | 353k/s | 25k/s | 21k/s |
 
-Run the tests with `bundle exec rake`.
+#### Latency (req/rep roundtrip)
+
+| | inproc | ipc | tcp |
+|---|--------|-----|-----|
+| **Async** | 49 µs | 100 µs | 107 µs |
+| **Threads** | 113 µs | 154 µs | 168 µs |
+
+Async fibers deliver 2.3x lower inproc latency thanks to cheap context switching. See [`bench/`](bench/) for full results and scripts.
+
+## API Reference
+
+Full [API documentation](http://www.rubydoc.info/gems/cztop).
+
+## Development
+
+```sh
+bundle install
+bundle exec rake
+```
 
 ## License
 
-Available as open source under the [ISC License](http://opensource.org/licenses/ISC).
-See the [LICENSE](https://github.com/paddor/cztop/blob/master/LICENSE) file.
+[ISC](LICENSE)

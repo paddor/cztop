@@ -10,21 +10,22 @@ module CZTop
 
       include Readable
 
+      # @return [String] subscription prefix to subscribe to everything
+      EVERYTHING = ''
+
       # @param endpoints [String] endpoints to connect to
-      # @param subscription [String] what to subscribe to
+      # @param prefix [String, nil] subscription prefix; defaults to
+      #   everything ({EVERYTHING}). Pass +nil+ to skip subscribing.
       # @param curve [Hash, nil] CURVE encryption options
       #
-      def initialize(endpoints = nil, subscription = nil, curve: nil)
+      def initialize(endpoints = nil, prefix: EVERYTHING, curve: nil)
         super(endpoints, curve: curve)
 
         attach_ffi_delegate(Zsock.new(Types::SUB))
         _apply_curve(curve)
-        subscribe(subscription) if subscription
+        subscribe(prefix) unless prefix.nil?
         _attach(endpoints, default: :connect)
       end
-
-      # @return [String] subscription prefix to subscribe to everything
-      EVERYTHING = ''
 
       # Subscribes to the given prefix string.
       # @param prefix [String] prefix string to subscribe to

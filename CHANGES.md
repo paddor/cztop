@@ -18,8 +18,8 @@
 * **Send/receive API changed:**
     - `#receive` now returns `Array<String>` (was `CZTop::Message`)
     - `#<<` accepts `String` or `Array<String>` directly (was `Message.coerce`)
-    - `#send` added as alias for `#<<` (shadows `Object#send`; use `__send__`
-      for Ruby dispatch)
+    - `#send` is the primary method; `#<<` is an alias (note: `#send` shadows
+      `Object#send`; use `__send__` for Ruby dispatch)
     - `SendReceiveMethods` split into `Socket::Readable`, `Socket::Writable`, and
       `Socket::FdWait` mixins; socket types include only what they need
       (e.g. PUB includes only Writable, SUB only Readable)
@@ -30,6 +30,9 @@
     - `OptionsAccessor#heartbeat_timeout` — `nil` instead of `-1` for "use IVL"
     - `OptionsAccessor#reconnect_ivl` — `nil` instead of `-1` for "disabled"
 * **`OptionsAccessor#zocket` renamed to `#socket`** (ivar `@zocket` → `@socket`)
+* **`Socket::SUB#initialize` subscription is now a `prefix:` kwarg** — was a
+    positional parameter; defaults to `EVERYTHING` (`''`), pass `prefix: nil` to
+    skip subscribing
 * **`#set_unbounded` moved from PolymorphicZsockMethods to Socket**
 * **`czmq-ffi-gen` gem dependency removed** — replaced with handcrafted FFI
   bindings in `lib/cztop/ffi.rb`

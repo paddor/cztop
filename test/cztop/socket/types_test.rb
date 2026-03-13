@@ -306,9 +306,37 @@ describe CZTop::Socket::SUB do
         called_with = prefix
         original_set.bind_call(self, prefix)
       end
-      CZTop::Socket::SUB.new(nil, subscription)
+      CZTop::Socket::SUB.new(nil, prefix: subscription)
       ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
       assert_equal subscription, called_with
+    end
+  end
+
+
+  describe 'default subscription' do
+    it 'subscribes to everything by default' do
+      called_with = :not_called
+      original_set = ::CZMQ::FFI::Zsock.instance_method(:set_subscribe)
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe) do |prefix|
+        called_with = prefix
+        original_set.bind_call(self, prefix)
+      end
+      CZTop::Socket::SUB.new
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
+      assert_equal '', called_with
+    end
+
+
+    it 'skips subscription when nil is passed explicitly' do
+      called_with = :not_called
+      original_set = ::CZMQ::FFI::Zsock.instance_method(:set_subscribe)
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe) do |prefix|
+        called_with = prefix
+        original_set.bind_call(self, prefix)
+      end
+      CZTop::Socket::SUB.new(nil, prefix: nil)
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
+      assert_equal :not_called, called_with
     end
   end
 

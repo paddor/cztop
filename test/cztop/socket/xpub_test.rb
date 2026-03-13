@@ -19,7 +19,7 @@ describe CZTop::Socket::XPUB do
     it 'receives subscription messages from SUB' do
       xpub
 
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 100
       sub.subscribe('news')
       sub.connect endpoint
@@ -34,7 +34,7 @@ describe CZTop::Socket::XPUB do
     it 'forwards published data to subscribers' do
       xpub
 
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 100
       sub.subscribe('data')
       sub.connect endpoint
@@ -51,7 +51,7 @@ describe CZTop::Socket::XPUB do
     it 'receives unsubscribe events' do
       xpub
 
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 100
       sub.subscribe('topic')
       sub.connect endpoint
@@ -85,7 +85,7 @@ describe CZTop::Socket::XPUB do
 
       xsub.connect pub_ep
 
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 100
       sub.subscribe('proxy')
       sub.connect sub_ep

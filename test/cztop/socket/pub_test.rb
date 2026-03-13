@@ -28,7 +28,7 @@ describe CZTop::Socket::PUB do
 
 
     it 'publishes with topic prefix filtering' do
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 100
       sub.subscribe('weather')
       sub.connect endpoint
@@ -41,7 +41,7 @@ describe CZTop::Socket::PUB do
 
 
     it 'does not deliver messages to non-matching subscriptions' do
-      sub = CZTop::Socket::SUB.new
+      sub = CZTop::Socket::SUB.new(nil, prefix: nil)
       sub.options.rcvtimeo = 50
       sub.subscribe('sports')
       sub.connect endpoint

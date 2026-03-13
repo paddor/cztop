@@ -1,6 +1,6 @@
 # Benchmark Results
 
-CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
+CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1+YJIT | Linux x86_64
 
 ## Throughput (push/pull, iterations/s)
 
@@ -8,19 +8,19 @@ CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
 
 | Size | inproc | ipc | tcp |
 |------|--------|-----|-----|
-| 64B | 36.1k | 12.0k | 10.5k |
-| 256B | 37.7k | 12.7k | 10.4k |
-| 1024B | 34.0k | 12.4k | 10.4k |
-| 4096B | 34.6k | 11.3k | 10.2k |
+| 64B | 283.6k | 17.3k | 11.4k |
+| 256B | 292.0k | 17.1k | 18.6k |
+| 1024B | 251.7k | 16.7k | 13.9k |
+| 4096B | 204.2k | 17.3k | 13.9k |
 
 ### Threads
 
 | Size | inproc | ipc | tcp |
 |------|--------|-----|-----|
-| 64B | 41.1k | 12.6k | 10.9k |
-| 256B | 38.1k | 12.5k | 10.7k |
-| 1024B | 38.6k | 12.3k | 10.6k |
-| 4096B | 35.4k | 11.9k | 10.6k |
+| 64B | 353.0k | 26.5k | 22.5k |
+| 256B | 341.6k | 23.7k | 21.3k |
+| 1024B | 303.8k | 24.4k | 20.8k |
+| 4096B | 242.3k | 22.8k | 20.4k |
 
 ## Latency (req/rep roundtrip)
 
@@ -28,22 +28,23 @@ CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
 
 | Transport | roundtrips/s | latency |
 |-----------|-------------|---------|
-| inproc | 11.3k | 89 µs |
-| ipc | 6.4k | 156 µs |
-| tcp | 5.4k | 185 µs |
+| inproc | 20.3k | 49 µs |
+| ipc | 10.0k | 100 µs |
+| tcp | 9.3k | 107 µs |
 
 ### Threads
 
 | Transport | roundtrips/s | latency |
 |-----------|-------------|---------|
-| inproc | 5.7k | 177 µs |
-| ipc | 4.8k | 209 µs |
-| tcp | 4.6k | 218 µs |
+| inproc | 8.8k | 113 µs |
+| ipc | 6.5k | 154 µs |
+| tcp | 5.9k | 168 µs |
 
 ## Notes
 
 - Throughput measures one-way push/pull (no reply needed)
 - Latency measures full req/rep roundtrip
+- Send/receive uses a nonblocking fast path via `zframe_recv_nowait`/`zframe_send(DONTWAIT)`, falling back to FD polling when data isn't immediately available
 - Async uses Ruby fibers via the [async](https://github.com/socketry/async) gem
 - Threads use a dedicated responder thread
 - Async is ~2x faster for inproc latency due to cheap fiber switching
@@ -51,8 +52,8 @@ CZMQ 4.2.1 | ZMQ 4.3.5 | Ruby 4.0.1 | Linux x86_64
 ## Running
 
 ```sh
-bundle exec ruby bench/async/throughput.rb
-bundle exec ruby bench/async/latency.rb
-bundle exec ruby bench/threads/throughput.rb
-bundle exec ruby bench/threads/latency.rb
+bundle exec ruby --yjit bench/async/throughput.rb
+bundle exec ruby --yjit bench/async/latency.rb
+bundle exec ruby --yjit bench/threads/throughput.rb
+bundle exec ruby --yjit bench/threads/latency.rb
 ```

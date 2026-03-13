@@ -21,6 +21,24 @@ describe CZTop::Socket::Readable do
       assert_equal ['hello'], msg
     end
 
+    it 'receives multipart messages' do
+      push.send(%w[hello world])
+      assert_equal %w[hello world], pull.receive
+    end
+
+    it 'receives multipart messages with many parts' do
+      parts = (1..10).map { |i| "part#{i}" }
+      push.send(parts)
+      assert_equal parts, pull.receive
+    end
+
+    it 'receives binary data with embedded NULs' do
+      binary = "hello\x00world\x00\x01\x02"
+      push << binary
+      msg = pull.receive
+      assert_equal [binary], msg
+    end
+
     it 'wraps Errno::EAGAIN as IO::EAGAINWaitReadable' do
       pull.stub(:wait_readable, -> (*) { raise Errno::EAGAIN }) do
         assert_raises(IO::EAGAINWaitReadable) { pull.receive }
@@ -131,6 +149,67 @@ describe CZTop::Socket::Readable do
           assert_raises ::IO::TimeoutError do
             req.receive
           end
+        end
+      end
+    end
+  end
+
+
+  describe 'Threads without Fiber Scheduler' do
+    i = 0
+    let(:endpoint) { "inproc://threaded_readable_spec_#{i += 1}" }
+    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
+    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
+    before { req; rep } # eagerly evaluate
+
+
+    describe '#wait_readable' do
+      describe 'if readable' do
+        it 'returns true' do
+          req << 'foo'
+          sleep 0.01 until rep.readable?
+          assert_equal true, rep.wait_readable
+        end
+      end
+
+
+      describe 'if not readable' do
+        it 'waits' do
+          thread = Thread.new do
+            sleep 0.05
+            req << 'bar'
+          end
+
+          assert rep.wait_readable
+          thread.join
+        end
+
+
+        describe 'when timed out' do
+          it 'raises IO::TimeoutError' do
+            t0 = Time.now
+
+            assert_raises IO::TimeoutError do
+              rep.wait_readable 0.05
+            end
+
+            t1 = Time.now
+            assert_in_delta 0.05, t1 - t0, 0.04
+          end
+        end
+      end
+    end
+
+
+    describe 'with rcvtimeo' do
+      before do
+        req.options.rcvtimeo = 30
+        assert_equal 30, req.options.rcvtimeo
+      end
+
+      it 'will raise TimeoutError' do
+        assert_raises ::IO::TimeoutError do
+          req.receive
         end
       end
     end

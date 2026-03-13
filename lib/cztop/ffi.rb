@@ -98,8 +98,16 @@ module CZMQ
     # -----------------------------------------------------------------
     # zframe functions
     # -----------------------------------------------------------------
-    attach_function :zframe_data,        [:pointer], :pointer, **opts
-    attach_function :zframe_size,        [:pointer], :size_t, **opts
+    attach_function :zframe_data,          [:pointer], :pointer, **opts
+    attach_function :zframe_size,          [:pointer], :size_t, **opts
+    attach_function :zframe_more,          [:pointer], :int
+    attach_function :zframe_destroy,       [:pointer], :void
+    attach_function :zframe_recv_nowait,   [:pointer], :pointer
+    attach_function :zframe_new_s, 'zframe_new', [:buffer_in, :size_t], :pointer
+    attach_function :zframe_send,          [:pointer, :pointer, :int], :int
+
+    ZFRAME_MORE     = 1
+    ZFRAME_DONTWAIT = 4
 
     # =================================================================
     # Wrapper Classes

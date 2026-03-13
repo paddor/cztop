@@ -75,6 +75,14 @@ module CZTop
       def now
         Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
+
+
+      # Reusable pointer-to-pointer for zframe_destroy / zframe_send.
+      # Safe because ZMQ sockets must not be shared across threads.
+      #
+      def _zframe_pp
+        @_zframe_pp ||= ::FFI::MemoryPointer.new(:pointer)
+      end
     end
   end
 end

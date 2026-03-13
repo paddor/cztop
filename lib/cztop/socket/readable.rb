@@ -15,6 +15,11 @@ module CZTop
       #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
       #
       def receive
+        # Fast path: nonblock recv (no GVL release)
+        parts = recv_nonblock
+        return parts if parts
+
+        # Slow path: FD poll → blocking recv
         wait_readable
 
         zmsg = CZMQ::FFI::Zmsg.recv(self)
@@ -49,6 +54,32 @@ module CZTop
         return nil if timeout.nil? || timeout == 0
 
         timeout.to_f / 1000
+      end
+
+
+      private
+
+
+      # Tries a nonblocking receive via zframe_recv_nowait.
+      # @return [Array<String>, nil] message parts, or nil if not ready
+      #
+      def recv_nonblock
+        sock_ptr = to_ptr
+        frame = CZMQ::FFI.zframe_recv_nowait(sock_ptr)
+        return nil if frame.null?
+
+        pp = _zframe_pp
+        parts = []
+        loop do
+          parts << CZMQ::FFI.zframe_data(frame).read_bytes(CZMQ::FFI.zframe_size(frame))
+          more = CZMQ::FFI.zframe_more(frame) == 1
+          pp.write_pointer(frame)
+          CZMQ::FFI.zframe_destroy(pp)
+          break unless more
+          frame = CZMQ::FFI.zframe_recv_nowait(sock_ptr)
+          break if frame.null?
+        end
+        parts
       end
     end
   end

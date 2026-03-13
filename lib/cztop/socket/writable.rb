@@ -19,6 +19,10 @@ module CZTop
         parts = message.is_a?(Array) ? message : [message]
         raise ArgumentError, 'message has no parts' if parts.empty?
 
+        # Fast path: nonblock send (no GVL release)
+        return self if send_nonblock(parts)
+
+        # Slow path: FD poll → blocking send
         wait_writable
 
         zmsg = CZMQ::FFI::Zmsg.new
@@ -55,6 +59,37 @@ module CZTop
         return nil if timeout.nil? || timeout == 0
 
         timeout.to_f / 1000
+      end
+
+
+      private
+
+
+      # Tries a nonblocking send via zframe_send with ZFRAME_DONTWAIT.
+      # @param parts [Array<String>] message parts
+      # @return [Boolean] true if sent, false if would block
+      #
+      def send_nonblock(parts)
+        sock_ptr = to_ptr
+        pp = _zframe_pp
+        last_idx = parts.size - 1
+
+        parts.each_with_index do |part, i|
+          str = part.to_s
+          frame = CZMQ::FFI.zframe_new_s(str, str.bytesize)
+          return false if frame.null?
+
+          flags = CZMQ::FFI::ZFRAME_DONTWAIT
+          flags |= CZMQ::FFI::ZFRAME_MORE if i < last_idx
+
+          pp.write_pointer(frame)
+          rc = CZMQ::FFI.zframe_send(pp, sock_ptr, flags)
+          unless rc.zero?
+            CZMQ::FFI.zframe_destroy(pp)
+            return false
+          end
+        end
+        true
       end
     end
   end

@@ -14,6 +14,10 @@ module CZMQ
     attach_function :zmq_errno,    [], :int
     attach_function :zmq_strerror, [:int], :string
     attach_function :zmq_version,  [:pointer, :pointer, :pointer], :void
+    attach_function :zmq_curve_keypair, [:pointer, :pointer], :int
+    attach_function :zmq_curve_public,  [:pointer, :pointer], :int
+    attach_function :zmq_z85_encode,    [:pointer, :pointer, :size_t], :pointer
+    attach_function :zmq_z85_decode,    [:pointer, :string], :pointer
 
     # -----------------------------------------------------------------
     # zsys functions
@@ -21,6 +25,7 @@ module CZMQ
     attach_function :zsys_handler_set,     [:pointer], :void
     attach_function :zsys_set_logstream,   [:pointer], :void
     attach_function :zsys_version,         [:pointer, :pointer, :pointer], :void
+    attach_function :zsys_has_curve,       [], :bool
 
     # -----------------------------------------------------------------
     # zsock functions
@@ -83,6 +88,13 @@ module CZMQ
     attach_function :zsock_set_linger,            [:pointer, :int], :void, **opts
     attach_function :zsock_set_ipv6,              [:pointer, :int], :void, **opts
     attach_function :zsock_set_reconnect_ivl,     [:pointer, :int], :void, **opts
+
+    # CURVE option setters
+    attach_function :zsock_set_curve_server,       [:pointer, :int], :void, **opts
+    attach_function :zsock_set_curve_publickey_bin, [:pointer, :pointer], :void, **opts
+    attach_function :zsock_set_curve_secretkey_bin, [:pointer, :pointer], :void, **opts
+    attach_function :zsock_set_curve_serverkey_bin, [:pointer, :pointer], :void, **opts
+    attach_function :zsock_set_zap_domain,         [:pointer, :string], :void, **opts
 
     # -----------------------------------------------------------------
     # zmsg functions

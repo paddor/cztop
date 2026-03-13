@@ -13,11 +13,14 @@ module CZTop
       include Writable
 
       # @param endpoints [String] endpoints to connect to
+      # @param curve [Hash, nil] CURVE encryption options
       #
-      def initialize(endpoints = nil)
+      def initialize(endpoints = nil, curve: nil)
         super
 
-        attach_ffi_delegate(Zsock.new_stream(endpoints))
+        attach_ffi_delegate(Zsock.new(Types::STREAM))
+        _apply_curve(curve)
+        _attach(endpoints, default: :connect)
       end
 
     end

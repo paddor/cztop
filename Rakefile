@@ -3,7 +3,13 @@ require "rake/testtask"
 
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
-  t.pattern = "test/**/*_test.rb"
+  t.test_files = FileList["test/**/*_test.rb"].exclude("test/system/**/*_test.rb")
+  t.warning = false
+end
+
+Rake::TestTask.new("test:system") do |t|
+  t.libs << "test"
+  t.pattern = "test/system/**/*_test.rb"
   t.warning = false
 end
 

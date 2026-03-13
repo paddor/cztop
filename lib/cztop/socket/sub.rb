@@ -12,11 +12,15 @@ module CZTop
 
       # @param endpoints [String] endpoints to connect to
       # @param subscription [String] what to subscribe to
+      # @param curve [Hash, nil] CURVE encryption options
       #
-      def initialize(endpoints = nil, subscription = nil)
-        super(endpoints)
+      def initialize(endpoints = nil, subscription = nil, curve: nil)
+        super(endpoints, curve: curve)
 
-        attach_ffi_delegate(Zsock.new_sub(endpoints, subscription))
+        attach_ffi_delegate(Zsock.new(Types::SUB))
+        _apply_curve(curve)
+        subscribe(subscription) if subscription
+        _attach(endpoints, default: :connect)
       end
 
       # @return [String] subscription prefix to subscribe to everything

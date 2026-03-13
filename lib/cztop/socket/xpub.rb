@@ -12,11 +12,14 @@ module CZTop
       include Writable
 
       # @param endpoints [String] endpoints to bind to
+      # @param curve [Hash, nil] CURVE encryption options
       #
-      def initialize(endpoints = nil)
+      def initialize(endpoints = nil, curve: nil)
         super
 
-        attach_ffi_delegate(Zsock.new_xpub(endpoints))
+        attach_ffi_delegate(Zsock.new(Types::XPUB))
+        _apply_curve(curve)
+        _attach(endpoints, default: :bind)
       end
 
     end

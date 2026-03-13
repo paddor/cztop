@@ -37,7 +37,7 @@ module CZTop
     end
 
 
-    def initialize(endpoints = nil); end
+    def initialize(endpoints = nil, curve: nil); end
 
 
     # @return [String] last bound endpoint, if any
@@ -123,6 +123,39 @@ module CZTop
       format('#<%s:0x%x last_endpoint=%p>', self.class, to_ptr.address, last_endpoint)
     rescue Zsock::DestroyedError
       format('#<%s: invalid>', self.class)
+    end
+
+
+    private
+
+
+    # Applies CURVE encryption settings to this socket.
+    # @api private
+    #
+    def _apply_curve(curve)
+      return unless curve
+      if curve[:server_key]
+        CZTop::CURVE.setup_client!(self, curve[:secret_key], curve[:server_key])
+      else
+        CZTop::CURVE.setup_server!(self, curve[:secret_key])
+      end
+    end
+
+    # Connects or binds based on CZMQ endpoint prefix convention.
+    # @api private
+    # @param endpoints [String] endpoint, optionally prefixed with +@+ (bind) or +>+ (connect)
+    # @param default [Symbol] +:connect+ or +:bind+ — action when no prefix given
+    #
+    def _attach(endpoints, default:)
+      return unless endpoints
+      case endpoints
+      when /\A@(.+)\z/
+        bind($1)
+      when /\A>(.+)\z/
+        connect($1)
+      else
+        __send__(default, endpoints)
+      end
     end
 
   end

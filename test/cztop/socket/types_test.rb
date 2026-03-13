@@ -301,11 +301,14 @@ describe CZTop::Socket::SUB do
   describe 'with subscription' do
     it 'subscribes' do
       called_with = nil
-      original = ::CZMQ::FFI::Zsock.method(:new_sub)
-      ::CZMQ::FFI::Zsock.stub(:new_sub, ->(*args) { called_with = args; original.call(*args) }) do
-        CZTop::Socket::SUB.new(nil, subscription)
+      original_set = ::CZMQ::FFI::Zsock.instance_method(:set_subscribe)
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe) do |prefix|
+        called_with = prefix
+        original_set.bind_call(self, prefix)
       end
-      assert_equal [nil, subscription], called_with
+      CZTop::Socket::SUB.new(nil, subscription)
+      ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
+      assert_equal subscription, called_with
     end
   end
 

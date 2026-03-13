@@ -32,3 +32,7 @@ require_relative 'cztop/socket/push'
 require_relative 'cztop/socket/pull'
 require_relative 'cztop/socket/pair'
 require_relative 'cztop/socket/stream'
+
+# CURVE encryption
+require_relative 'cztop/curve'
+require_relative 'cztop/curve/auth'

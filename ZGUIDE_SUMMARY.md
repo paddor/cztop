@@ -1091,6 +1091,10 @@ Peer-to-peer               ROUTER ──▶ ROUTER  (hard mode)
 | [`05_heartbeat.rb`](examples/zguide/05_heartbeat.rb) | Liveness detection | PUB, SUB |
 | [`06_last_value_cache.rb`](examples/zguide/06_last_value_cache.rb) | Caching proxy + snapshot | PUB, SUB, REQ, REP |
 | [`07_clone.rb`](examples/zguide/07_clone.rb) | Reliable state sync | PUB, SUB, REQ, REP |
+| [`08_majordomo.rb`](examples/zguide/08_majordomo.rb) | Service-oriented broker | ROUTER, DEALER, REQ |
+| [`09_titanic.rb`](examples/zguide/09_titanic.rb) | Disk-based store-and-forward | REQ, REP, PUSH, PULL |
+| [`10_binary_star.rb`](examples/zguide/10_binary_star.rb) | Active/passive failover | REQ, REP, PUB, SUB |
+| [`11_freelance.rb`](examples/zguide/11_freelance.rb) | Brokerless multi-server reliability | REQ, REP, DEALER |
 
 Run any example: `ruby examples/zguide/03_pipeline.rb`
 

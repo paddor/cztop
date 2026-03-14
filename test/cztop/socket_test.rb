@@ -18,6 +18,45 @@ describe CZTop::Socket do
   end
 
 
+  describe '.bind' do
+    it 'creates a socket and binds to the endpoint' do
+      rep = CZTop::Socket::REP.bind(endpoint)
+      assert_equal endpoint, rep.last_endpoint
+    end
+
+    it 'passes through keyword arguments' do
+      rep = CZTop::Socket::REP.bind(endpoint, curve: nil)
+      assert_equal endpoint, rep.last_endpoint
+    end
+
+    it 'works on all socket types' do
+      pub = CZTop::Socket::PUB.bind(endpoint)
+      assert_equal endpoint, pub.last_endpoint
+    end
+  end
+
+
+  describe '.connect' do
+    before { CZTop::Socket::REP.bind(endpoint) }
+
+    it 'creates a socket and connects to the endpoint' do
+      req = CZTop::Socket::REQ.connect(endpoint)
+      assert_instance_of CZTop::Socket::REQ, req
+    end
+
+    it 'passes through keyword arguments' do
+      req = CZTop::Socket::REQ.connect(endpoint, curve: nil)
+      assert_instance_of CZTop::Socket::REQ, req
+    end
+
+    it 'works with SUB prefix: kwarg' do
+      pub = CZTop::Socket::PUB.bind("inproc://bind_connect_sub_test")
+      sub = CZTop::Socket::SUB.connect("inproc://bind_connect_sub_test", prefix: 'weather')
+      assert_instance_of CZTop::Socket::SUB, sub
+    end
+  end
+
+
   describe '#initialize' do
     describe 'given invalid endpoint' do
       let(:endpoint) { 'foo://bar' }

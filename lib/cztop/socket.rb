@@ -11,6 +11,28 @@ module CZTop
     include CZMQ::FFI
 
 
+    # Creates a new socket and binds it to the given endpoint.
+    # @param endpoint [String] endpoint to bind to
+    # @param opts [Hash] keyword arguments forwarded to {#initialize}
+    #   (e.g. +curve:+, +prefix:+ for SUB)
+    # @return [Socket] the new, bound socket
+    #
+    def self.bind(endpoint, **opts)
+      new(nil, **opts).tap { |s| s.bind(endpoint) }
+    end
+
+
+    # Creates a new socket and connects it to the given endpoint.
+    # @param endpoint [String] endpoint to connect to
+    # @param opts [Hash] keyword arguments forwarded to {#initialize}
+    #   (e.g. +curve:+, +prefix:+ for SUB)
+    # @return [Socket] the new, connected socket
+    #
+    def self.connect(endpoint, **opts)
+      new(nil, **opts).tap { |s| s.connect(endpoint) }
+    end
+
+
     # @param type [Symbol, Integer] type from {Types} or like +:PUB+
     # @return [REQ, REP, PUSH, PULL, ... ] the new socket
     # @see Types

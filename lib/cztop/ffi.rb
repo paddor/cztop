@@ -73,6 +73,13 @@ module CZMQ
     attach_function :zsock_fd,               [:pointer], :int, **opts
     attach_function :zsock_events,           [:pointer], :int, **opts
     attach_function :zsock_reconnect_ivl,    [:pointer], :int, **opts
+    attach_function :zsock_reconnect_ivl_max, [:pointer], :int, **opts
+    attach_function :zsock_maxmsgsize,      [:pointer], :int, **opts
+    attach_function :zsock_immediate,       [:pointer], :int, **opts
+    attach_function :zsock_tcp_keepalive,       [:pointer], :int, **opts
+    attach_function :zsock_tcp_keepalive_idle,  [:pointer], :int, **opts
+    attach_function :zsock_tcp_keepalive_cnt,   [:pointer], :int, **opts
+    attach_function :zsock_tcp_keepalive_intvl, [:pointer], :int, **opts
 
     # zsock option setters
     attach_function :zsock_set_sndhwm,           [:pointer, :int], :void, **opts
@@ -88,6 +95,14 @@ module CZMQ
     attach_function :zsock_set_linger,            [:pointer, :int], :void, **opts
     attach_function :zsock_set_ipv6,              [:pointer, :int], :void, **opts
     attach_function :zsock_set_reconnect_ivl,     [:pointer, :int], :void, **opts
+    attach_function :zsock_set_reconnect_ivl_max, [:pointer, :int], :void, **opts
+    attach_function :zsock_set_maxmsgsize,       [:pointer, :int], :void, **opts
+    attach_function :zsock_set_immediate,        [:pointer, :int], :void, **opts
+    attach_function :zsock_set_conflate,            [:pointer, :int], :void, **opts
+    attach_function :zsock_set_tcp_keepalive,       [:pointer, :int], :void, **opts
+    attach_function :zsock_set_tcp_keepalive_idle,  [:pointer, :int], :void, **opts
+    attach_function :zsock_set_tcp_keepalive_cnt,   [:pointer, :int], :void, **opts
+    attach_function :zsock_set_tcp_keepalive_intvl, [:pointer, :int], :void, **opts
 
     # CURVE option setters
     attach_function :zsock_set_curve_server,       [:pointer, :int], :void, **opts
@@ -322,6 +337,13 @@ module CZMQ
       def self.fd(socket)               = CZMQ::FFI.zsock_fd(_resolve_ptr(socket))
       def self.events(socket)           = CZMQ::FFI.zsock_events(_resolve_ptr(socket))
       def self.reconnect_ivl(socket)    = CZMQ::FFI.zsock_reconnect_ivl(_resolve_ptr(socket))
+      def self.reconnect_ivl_max(socket) = CZMQ::FFI.zsock_reconnect_ivl_max(_resolve_ptr(socket))
+      def self.maxmsgsize(socket)       = CZMQ::FFI.zsock_maxmsgsize(_resolve_ptr(socket))
+      def self.immediate(socket)        = CZMQ::FFI.zsock_immediate(_resolve_ptr(socket))
+      def self.tcp_keepalive(socket)       = CZMQ::FFI.zsock_tcp_keepalive(_resolve_ptr(socket))
+      def self.tcp_keepalive_idle(socket)  = CZMQ::FFI.zsock_tcp_keepalive_idle(_resolve_ptr(socket))
+      def self.tcp_keepalive_cnt(socket)   = CZMQ::FFI.zsock_tcp_keepalive_cnt(_resolve_ptr(socket))
+      def self.tcp_keepalive_intvl(socket) = CZMQ::FFI.zsock_tcp_keepalive_intvl(_resolve_ptr(socket))
 
       # Option setters (class methods taking a socket)
       def self.set_sndhwm(socket, val)           = CZMQ::FFI.zsock_set_sndhwm(_resolve_ptr(socket), val)
@@ -337,6 +359,14 @@ module CZMQ
       def self.set_linger(socket, val)           = CZMQ::FFI.zsock_set_linger(_resolve_ptr(socket), val)
       def self.set_ipv6(socket, val)             = CZMQ::FFI.zsock_set_ipv6(_resolve_ptr(socket), val)
       def self.set_reconnect_ivl(socket, val)    = CZMQ::FFI.zsock_set_reconnect_ivl(_resolve_ptr(socket), val)
+      def self.set_reconnect_ivl_max(socket, val) = CZMQ::FFI.zsock_set_reconnect_ivl_max(_resolve_ptr(socket), val)
+      def self.set_maxmsgsize(socket, val)       = CZMQ::FFI.zsock_set_maxmsgsize(_resolve_ptr(socket), val)
+      def self.set_immediate(socket, val)        = CZMQ::FFI.zsock_set_immediate(_resolve_ptr(socket), val)
+      def self.set_conflate(socket, val)            = CZMQ::FFI.zsock_set_conflate(_resolve_ptr(socket), val)
+      def self.set_tcp_keepalive(socket, val)       = CZMQ::FFI.zsock_set_tcp_keepalive(_resolve_ptr(socket), val)
+      def self.set_tcp_keepalive_idle(socket, val)  = CZMQ::FFI.zsock_set_tcp_keepalive_idle(_resolve_ptr(socket), val)
+      def self.set_tcp_keepalive_cnt(socket, val)   = CZMQ::FFI.zsock_set_tcp_keepalive_cnt(_resolve_ptr(socket), val)
+      def self.set_tcp_keepalive_intvl(socket, val) = CZMQ::FFI.zsock_set_tcp_keepalive_intvl(_resolve_ptr(socket), val)
     end
 
     # -----------------------------------------------------------------

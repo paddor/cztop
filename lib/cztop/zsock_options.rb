@@ -296,6 +296,170 @@ module CZTop
     end
 
 
+    # @return [Numeric, nil] maximum reconnect interval in seconds, or nil
+    #   if no maximum is set (uses fixed {#reconnect_ivl})
+    #
+    def reconnect_ivl_max
+      value = Zsock.reconnect_ivl_max(self)
+      value.zero? ? nil : value / 1000.0
+    end
+
+
+    # Sets the maximum reconnect interval for exponential backoff.
+    # When set, reconnect intervals grow from {#reconnect_ivl} up to this
+    # maximum. Set to nil to disable backoff (use fixed interval).
+    #
+    # @param new_value [Numeric, nil] max reconnect interval in seconds,
+    #   or nil to disable backoff
+    #
+    def reconnect_ivl_max=(new_value)
+      Zsock.set_reconnect_ivl_max(self, new_value.nil? ? 0 : (new_value * 1000).to_i)
+    end
+
+
+    # @return [Integer, nil] maximum inbound message size in bytes,
+    #   or nil if unlimited (the default, -1 in libzmq)
+    #
+    def max_msg_size
+      value = Zsock.maxmsgsize(self)
+      value == -1 ? nil : value
+    end
+
+
+    # Sets the maximum inbound message size. Messages larger than this are
+    # dropped and the connection is disconnected. Useful for DoS protection.
+    #
+    # @param new_value [Integer, nil] max size in bytes, or nil for unlimited
+    #
+    def max_msg_size=(new_value)
+      Zsock.set_maxmsgsize(self, new_value.nil? ? -1 : new_value)
+    end
+
+
+    # @return [Boolean] whether the socket queues messages only for
+    #   completed connections
+    #
+    def immediate?
+      Zsock.immediate(self) == 1
+    end
+
+
+    # When true, the socket queues messages only for completed connections
+    # (i.e. peers that have finished the ZMTP handshake). When false
+    # (default), messages may be queued for connections that haven't
+    # completed yet, risking message loss if the peer never connects.
+    #
+    # @param bool [Boolean] whether to enable immediate mode
+    #
+    def immediate=(bool)
+      Zsock.set_immediate(self, bool ? 1 : 0)
+    end
+
+
+    # @return [Boolean] whether conflate mode is enabled
+    # @note There is no libzmq getter for this option, so the value
+    #   is tracked locally.
+    #
+    def conflate?
+      !!@conflate
+    end
+
+
+    # When true, the socket keeps only the last message in its
+    # inbound/outbound queue, discarding older messages. Useful for
+    # "last value cache" semantics in PUB/SUB or PUSH/PULL pipelines
+    # where only the latest value matters.
+    #
+    # @param bool [Boolean] whether to enable conflate mode
+    # @note Must be set before connecting/binding.
+    #
+    def conflate=(bool)
+      Zsock.set_conflate(self, bool ? 1 : 0)
+      @conflate = bool
+    end
+
+    # @!group TCP Keepalive
+
+    # @return [Boolean, nil] TCP keepalive override: true = enabled,
+    #   false = disabled, nil = OS default (-1)
+    #
+    def tcp_keepalive
+      value = Zsock.tcp_keepalive(self)
+      case value
+      when -1 then nil
+      when 0  then false
+      when 1  then true
+      end
+    end
+
+
+    # Overrides the OS default for TCP keepalive on this socket.
+    #
+    # @param value [Boolean, nil] true = enable, false = disable,
+    #   nil = use OS default
+    #
+    def tcp_keepalive=(value)
+      int = case value
+            when nil   then -1
+            when false then 0
+            when true  then 1
+            end
+      Zsock.set_tcp_keepalive(self, int)
+    end
+
+
+    # @return [Integer, nil] TCP keepalive idle time in seconds,
+    #   or nil for OS default
+    #
+    def tcp_keepalive_idle
+      value = Zsock.tcp_keepalive_idle(self)
+      value == -1 ? nil : value
+    end
+
+
+    # @param value [Integer, nil] idle time in seconds before first
+    #   keepalive probe, or nil for OS default
+    #
+    def tcp_keepalive_idle=(value)
+      Zsock.set_tcp_keepalive_idle(self, value.nil? ? -1 : value)
+    end
+
+
+    # @return [Integer, nil] number of keepalive probes before declaring
+    #   the connection dead, or nil for OS default
+    #
+    def tcp_keepalive_cnt
+      value = Zsock.tcp_keepalive_cnt(self)
+      value == -1 ? nil : value
+    end
+
+
+    # @param value [Integer, nil] probe count, or nil for OS default
+    #
+    def tcp_keepalive_cnt=(value)
+      Zsock.set_tcp_keepalive_cnt(self, value.nil? ? -1 : value)
+    end
+
+
+    # @return [Integer, nil] interval in seconds between keepalive probes,
+    #   or nil for OS default
+    #
+    def tcp_keepalive_intvl
+      value = Zsock.tcp_keepalive_intvl(self)
+      value == -1 ? nil : value
+    end
+
+
+    # @param value [Integer, nil] probe interval in seconds,
+    #   or nil for OS default
+    #
+    def tcp_keepalive_intvl=(value)
+      Zsock.set_tcp_keepalive_intvl(self, value.nil? ? -1 : value)
+    end
+
+    # @!endgroup
+
+
     private
 
 

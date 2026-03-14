@@ -419,6 +419,151 @@ describe CZTop::ZsockOptions do
   end
 
 
+  describe '#reconnect_ivl_max' do
+    it 'returns nil by default (no backoff)' do
+      assert_nil socket.reconnect_ivl_max
+    end
+
+    it 'sets and gets value' do
+      socket.reconnect_ivl_max = 10
+      assert_equal 10.0, socket.reconnect_ivl_max
+    end
+
+    it 'accepts nil to disable backoff' do
+      socket.reconnect_ivl_max = 10
+      socket.reconnect_ivl_max = nil
+      assert_nil socket.reconnect_ivl_max
+    end
+  end
+
+
+  describe '#max_msg_size' do
+    it 'returns nil by default (unlimited)' do
+      assert_nil socket.max_msg_size
+    end
+
+    it 'sets and gets value' do
+      socket.max_msg_size = 1024
+      assert_equal 1024, socket.max_msg_size
+    end
+
+    it 'accepts nil for unlimited' do
+      socket.max_msg_size = 1024
+      socket.max_msg_size = nil
+      assert_nil socket.max_msg_size
+    end
+  end
+
+
+  describe '#immediate' do
+    it 'is false by default' do
+      refute_operator socket, :immediate?
+    end
+
+    it 'can be enabled' do
+      socket.immediate = true
+      assert_operator socket, :immediate?
+    end
+
+    it 'can be disabled' do
+      socket.immediate = true
+      socket.immediate = false
+      refute_operator socket, :immediate?
+    end
+  end
+
+
+  describe '#conflate' do
+    let(:socket) { CZTop::Socket::PULL.new }
+
+    it 'is false by default' do
+      refute_operator socket, :conflate?
+    end
+
+    it 'can be enabled' do
+      socket.conflate = true
+      assert_operator socket, :conflate?
+    end
+  end
+
+
+  describe '#tcp_keepalive' do
+    it 'returns nil by default (OS default)' do
+      assert_nil socket.tcp_keepalive
+    end
+
+    it 'can be enabled' do
+      socket.tcp_keepalive = true
+      assert_equal true, socket.tcp_keepalive
+    end
+
+    it 'can be disabled' do
+      socket.tcp_keepalive = false
+      assert_equal false, socket.tcp_keepalive
+    end
+
+    it 'can be reset to OS default' do
+      socket.tcp_keepalive = true
+      socket.tcp_keepalive = nil
+      assert_nil socket.tcp_keepalive
+    end
+  end
+
+
+  describe '#tcp_keepalive_idle' do
+    it 'returns nil by default (OS default)' do
+      assert_nil socket.tcp_keepalive_idle
+    end
+
+    it 'sets and gets value' do
+      socket.tcp_keepalive_idle = 60
+      assert_equal 60, socket.tcp_keepalive_idle
+    end
+
+    it 'accepts nil for OS default' do
+      socket.tcp_keepalive_idle = 60
+      socket.tcp_keepalive_idle = nil
+      assert_nil socket.tcp_keepalive_idle
+    end
+  end
+
+
+  describe '#tcp_keepalive_cnt' do
+    it 'returns nil by default (OS default)' do
+      assert_nil socket.tcp_keepalive_cnt
+    end
+
+    it 'sets and gets value' do
+      socket.tcp_keepalive_cnt = 5
+      assert_equal 5, socket.tcp_keepalive_cnt
+    end
+
+    it 'accepts nil for OS default' do
+      socket.tcp_keepalive_cnt = 5
+      socket.tcp_keepalive_cnt = nil
+      assert_nil socket.tcp_keepalive_cnt
+    end
+  end
+
+
+  describe '#tcp_keepalive_intvl' do
+    it 'returns nil by default (OS default)' do
+      assert_nil socket.tcp_keepalive_intvl
+    end
+
+    it 'sets and gets value' do
+      socket.tcp_keepalive_intvl = 10
+      assert_equal 10, socket.tcp_keepalive_intvl
+    end
+
+    it 'accepts nil for OS default' do
+      socket.tcp_keepalive_intvl = 10
+      socket.tcp_keepalive_intvl = nil
+      assert_nil socket.tcp_keepalive_intvl
+    end
+  end
+
+
   describe '#events' do
     let(:writer) { CZTop::Socket::PUSH.new(endpoint) }
     let(:reader) { CZTop::Socket::PULL.new(endpoint) }

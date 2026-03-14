@@ -6,12 +6,15 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'cztop'
+require 'async'
 
 # ZGuide Chapter 5 — Last Value Cache
 # A caching proxy sits between publishers and subscribers. It caches
 # the latest value for each topic. When a new subscriber joins, it
 # immediately receives the cached value (snapshot) before live updates.
 # Uses REQ/REP for snapshot requests and PUB/SUB for live data.
+#
+# Proxy runs in threads. Publisher + late joiner run inside Sync { }.
 
 describe 'Last Value Cache' do
   it 'serves cached values to late-joining subscribers' do
@@ -23,8 +26,7 @@ describe 'Last Value Cache' do
     cache = {}
     cache_mu = Mutex.new
 
-    # Cache proxy: two threads — one forwards data, one serves snapshots
-    forward_thread = Thread.new do
+    forward = Thread.new do
       pull = Cztop::Socket::PULL.bind(pub_ep)
       pub  = Cztop::Socket::PUB.bind(sub_ep)
       pull.recv_timeout = 2
@@ -39,7 +41,7 @@ describe 'Last Value Cache' do
       end
     end
 
-    snapshot_thread = Thread.new do
+    snapshot = Thread.new do
       snap = Cztop::Socket::REP.bind(snapshot_ep)
       snap.recv_timeout = 3
 
@@ -55,29 +57,31 @@ describe 'Last Value Cache' do
 
     sleep 0.01
 
-    # Publisher: sends weather data
-    push = Cztop::Socket::PUSH.connect(pub_ep)
-    5.times do |i|
-      push << "weather.nyc #{70 + i}F"
-      push << "weather.sfo #{60 + i}F"
-      sleep 0.01
+    Sync do
+      # Publisher: sends weather data
+      push = Cztop::Socket::PUSH.connect(pub_ep)
+      5.times do |i|
+        push << "weather.nyc #{70 + i}F"
+        push << "weather.sfo #{60 + i}F"
+        sleep 0.01
+      end
+
+      # Wait for all messages to be cached
+      sleep 0.1
+
+      # Late joiner: requests snapshot
+      req = Cztop::Socket::REQ.connect(snapshot_ep)
+      req.recv_timeout = 2
+      req << 'SNAPSHOT'
+      result = req.receive.first
+      result.split("\n").each do |line|
+        received_late << line
+        puts "  late joiner (snapshot): #{line}"
+      end
+      req.close
     end
 
-    # Wait for all messages to be cached
-    sleep 0.1
-
-    # Late joiner: requests snapshot
-    req = Cztop::Socket::REQ.connect(snapshot_ep)
-    req.recv_timeout = 2
-    req << 'SNAPSHOT'
-    snapshot = req.receive.first
-    snapshot.split("\n").each do |line|
-      received_late << line
-      puts "  late joiner (snapshot): #{line}"
-    end
-    req.close
-
-    [forward_thread, snapshot_thread].each { |t| t.join(5) }
+    [forward, snapshot].each { |t| t.join(5) }
 
     refute_empty received_late, 'late joiner should receive cached values'
     assert(received_late.any? { |m| m.include?('weather.nyc') }, 'should have NYC data')

@@ -6,6 +6,7 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'cztop'
+require 'async'
 
 # ZGuide Chapter 4 — Freelance Pattern
 # Brokerless reliability: client talks directly to multiple servers.
@@ -13,9 +14,10 @@ require 'cztop'
 #   1. Sequential failover — try servers in order, skip on timeout
 #   2. Shotgun — blast to all, take first reply
 #   3. Tracked — remember which server is alive, prefer it
+#
+# Servers run in threads. Client code runs inside Sync { }.
 
 describe 'Freelance' do
-  # Helper: start a named REP server
   def start_server(endpoint, name, delay: 0)
     Thread.new do
       rep = Cztop::Socket::REP.bind(endpoint)
@@ -37,32 +39,30 @@ describe 'Freelance' do
     ep2 = 'inproc://zg11a_server2'
     ep3 = 'inproc://zg11a_server3'
 
-    # Server 1 is down (not started), server 2 is up
     s2 = start_server(ep2, 'server2')
-
     sleep 0.01
-    replies = []
 
-    # Client tries servers in order
-    endpoints = [ep1, ep2, ep3]
+    replies = Sync do
+      endpoints = [ep1, ep2, ep3]
 
-    3.times do |i|
-      reply = nil
-      endpoints.each do |ep|
-        req = Cztop::Socket::REQ.connect(ep)
-        req.recv_timeout = 0.15
-        req.linger = 0
-        req << "request-#{i}"
-        begin
-          reply = req.receive.first
-          req.close
-          break
-        rescue IO::TimeoutError
-          puts "  client: timeout on #{ep}, trying next"
-          req.close
+      3.times.map do |i|
+        reply = nil
+        endpoints.each do |ep|
+          req = Cztop::Socket::REQ.connect(ep)
+          req.recv_timeout = 0.15
+          req.linger = 0
+          req << "request-#{i}"
+          begin
+            reply = req.receive.first
+            req.close
+            break
+          rescue IO::TimeoutError
+            puts "  client: timeout on #{ep}, trying next"
+            req.close
+          end
         end
+        reply
       end
-      replies << reply
     end
 
     s2.join(3)
@@ -78,25 +78,24 @@ describe 'Freelance' do
 
     s1 = start_server(ep1, 'fast', delay: 0)
     s2 = start_server(ep2, 'slow', delay: 0.3)
-
     sleep 0.01
 
-    # Client sends to all servers via DEALER, takes first reply
-    dealer = Cztop::Socket::DEALER.new
-    dealer.connect(ep1)
-    dealer.connect(ep2)
-    dealer.recv_timeout = 1
+    first_reply = Sync do
+      dealer = Cztop::Socket::DEALER.new
+      dealer.connect(ep1)
+      dealer.connect(ep2)
+      dealer.recv_timeout = 1
 
-    # Send request (DEALER round-robins, so send twice to hit both)
-    dealer << ['', 'shotgun-req']
-    dealer << ['', 'shotgun-req']
+      dealer << ['', 'shotgun-req']
+      dealer << ['', 'shotgun-req']
 
-    # Take first reply
-    reply = dealer.receive
-    first_reply = reply.last
-    puts "  client: first reply = #{first_reply}"
+      reply = dealer.receive
+      result = reply.last
+      puts "  client: first reply = #{result}"
+      dealer.close
+      result
+    end
 
-    dealer.close
     [s1, s2].each { |t| t.join(2) }
 
     assert first_reply.end_with?('shotgun-req')
@@ -110,40 +109,41 @@ describe 'Freelance' do
 
     s1 = start_server(ep1, 'server1')
     s2 = start_server(ep2, 'server2')
-
     sleep 0.01
 
-    replies = []
-    known_good = nil
-    endpoints = [ep1, ep2]
+    replies = Sync do
+      known_good = nil
+      endpoints = [ep1, ep2]
 
-    6.times do |i|
-      # Try known-good first, then others
-      try_order = known_good ? [known_good] + (endpoints - [known_good]) : endpoints
+      6.times.map do |i|
+        try_order = known_good ? [known_good] + (endpoints - [known_good]) : endpoints
+        reply = nil
 
-      try_order.each do |ep|
-        req = Cztop::Socket::REQ.connect(ep)
-        req.recv_timeout = 0.2
-        req.linger = 0
-        req << "request-#{i}"
-        begin
-          reply = req.receive.first
-          known_good = ep
-          replies << reply
-          puts "  client: #{reply} (via #{ep})"
-          req.close
-          break
-        rescue IO::TimeoutError
-          puts "  client: #{ep} timed out, rotating"
-          known_good = nil if known_good == ep
-          req.close
+        try_order.each do |ep|
+          req = Cztop::Socket::REQ.connect(ep)
+          req.recv_timeout = 0.2
+          req.linger = 0
+          req << "request-#{i}"
+          begin
+            reply = req.receive.first
+            known_good = ep
+            puts "  client: #{reply} (via #{ep})"
+            req.close
+            break
+          rescue IO::TimeoutError
+            puts "  client: #{ep} timed out, rotating"
+            known_good = nil if known_good == ep
+            req.close
+          end
         end
-      end
 
-      # Kill server1 after 3 requests to force rotation
-      if i == 2
-        puts "  --- server1 goes down ---"
-        s1.kill
+        # Kill server1 after 3 requests
+        if i == 2
+          puts "  --- server1 goes down ---"
+          s1.kill
+        end
+
+        reply
       end
     end
 

@@ -6,6 +6,7 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'cztop'
+require 'async'
 
 # ZGuide Chapter 4 — Binary Star Pattern
 # Active/passive high-availability pair. The primary server handles
@@ -15,6 +16,8 @@ require 'cztop'
 #
 # Fencing rule: backup only takes over if heartbeats are lost (proving
 # the primary is truly gone, not just a network partition between them).
+#
+# Servers run in threads. Client runs inside Sync { }.
 
 describe 'Binary Star' do
   it 'backup takes over when primary fails' do
@@ -23,8 +26,7 @@ describe 'Binary Star' do
     hb_ep      = 'inproc://zg10_heartbeat'
     served_by  = []
 
-    # Heartbeat publisher (primary → backup)
-    hb_thread = Thread.new do
+    hb = Thread.new do
       pub = Cztop::Socket::PUB.bind(hb_ep)
       sleep 0.01
       loop do
@@ -35,8 +37,7 @@ describe 'Binary Star' do
       end
     end
 
-    # Primary server
-    primary_thread = Thread.new do
+    primary = Thread.new do
       rep = Cztop::Socket::REP.bind(primary_ep)
       rep.recv_timeout = 2
       loop do
@@ -48,13 +49,11 @@ describe 'Binary Star' do
       end
     end
 
-    # Backup server: monitors heartbeats, serves after failover
     backup_ready = Queue.new
-    backup_thread = Thread.new do
+    backup = Thread.new do
       rep = Cztop::Socket::REP.bind(backup_ep)
       rep.recv_timeout = 2
 
-      # Phase 1: passive — monitor heartbeats
       sub = Cztop::Socket::SUB.connect(hb_ep, prefix: 'HB')
       sub.recv_timeout = 0.3
 
@@ -67,7 +66,6 @@ describe 'Binary Star' do
         break
       end
 
-      # Phase 2: active — serve requests
       loop do
         msg = rep.receive.first
         rep << "backup:#{msg}"
@@ -80,7 +78,6 @@ describe 'Binary Star' do
     backup_ready.pop
     sleep 0.02
 
-    # Client helper: try primary, fall back to backup
     send_request = lambda do |body|
       req = Cztop::Socket::REQ.connect(primary_ep)
       req.recv_timeout = 0.2
@@ -100,23 +97,21 @@ describe 'Binary Star' do
       reply
     end
 
-    # Phase 1: primary handles requests
-    served_by << send_request.call('req-1')
-    served_by << send_request.call('req-2')
+    Sync do
+      served_by << send_request.call('req-1')
+      served_by << send_request.call('req-2')
 
-    # Kill primary
-    puts "  --- primary crashes ---"
-    hb_thread.kill
-    primary_thread.kill
+      puts "  --- primary crashes ---"
+      hb.kill
+      primary.kill
 
-    # Wait for backup to detect failure
-    sleep 0.5
+      sleep 0.5
 
-    # Phase 2: backup handles requests
-    served_by << send_request.call('req-3')
-    served_by << send_request.call('req-4')
+      served_by << send_request.call('req-3')
+      served_by << send_request.call('req-4')
+    end
 
-    backup_thread.join(3)
+    backup.join(3)
 
     puts "  responses: #{served_by.inspect}"
     assert_equal 'primary:req-1', served_by[0]

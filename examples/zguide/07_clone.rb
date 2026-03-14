@@ -6,12 +6,16 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'cztop'
+require 'async'
 
 # ZGuide Chapter 5 — Clone Pattern (simplified)
 # Reliable state synchronization: a server maintains a key-value store,
 # publishes updates via PUB, and serves snapshots via REQ/REP.
 # Clients get a snapshot first, then apply live updates ordered by
 # sequence number. Demonstrates the core Clone technique.
+#
+# Server runs in a thread. Client runs inside Sync { } with an Async
+# task buffering the SUB stream while the snapshot is fetched.
 
 describe 'Clone' do
   it 'synchronizes state via snapshot + live updates' do
@@ -24,8 +28,7 @@ describe 'Clone' do
 
     client_store = {}
 
-    # Server: maintains store, publishes updates, serves snapshots
-    server_thread = Thread.new do
+    server = Thread.new do
       pub  = Cztop::Socket::PUB.bind(pub_ep)
       snap = Cztop::Socket::REP.bind(snapshot_ep)
       snap.recv_timeout = 0.2
@@ -75,15 +78,14 @@ describe 'Clone' do
 
     sleep 0.05
 
-    # Client: subscribe first (to not miss updates during snapshot),
-    # then request snapshot, apply it, then apply live updates
-    client_thread = Thread.new do
+    # Client: subscribe first, snapshot second, apply buffered updates
+    Sync do |task|
       sub = Cztop::Socket::SUB.connect(pub_ep)
       sub.recv_timeout = 0.5
 
-      # Buffer updates while getting snapshot
+      # Buffer live updates in an Async task while fetching snapshot
       buffered = []
-      buffer_thread = Thread.new do
+      buffer_task = task.async do
         loop do
           msg = sub.receive.first
           buffered << msg
@@ -110,7 +112,7 @@ describe 'Clone' do
         puts "  client (snapshot): #{k}=#{v} seq=#{s}"
       end
 
-      buffer_thread.join(2)
+      buffer_task.wait
 
       # Apply buffered updates with seq > snapshot_seq
       buffered.each do |line|
@@ -125,12 +127,11 @@ describe 'Clone' do
       end
     end
 
-    [server_thread, client_thread].each { |t| t.join(5) }
+    server.join
 
     refute_empty client_store, 'client should have state'
     puts "  client store: #{client_store.inspect}"
 
-    # Client should have the latest values
     assert_equal 'updated-0', client_store['key-0'], 'should have live update for key-0'
     assert client_store.key?('key-3'), 'should have snapshot data for key-3'
   end

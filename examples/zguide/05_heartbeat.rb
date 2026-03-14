@@ -6,11 +6,14 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'cztop'
+require 'async'
 
 # ZGuide Chapter 4 — Heartbeat Pattern
 # PUB/SUB liveness detection: the publisher sends periodic heartbeats.
 # The subscriber monitors them and detects alive → dead → recovered
 # transitions when the publisher pauses and resumes.
+#
+# Publisher runs in a thread. Monitor/subscriber runs inside Sync { }.
 
 describe 'Heartbeat' do
   it 'detects alive, dead, and recovered states' do
@@ -19,8 +22,7 @@ describe 'Heartbeat' do
     dead_threshold = heartbeat_ivl * 3
     events = []
 
-    # Publisher: sends heartbeats, pauses to simulate failure, resumes
-    pub_thread = Thread.new do
+    publisher = Thread.new do
       pub = Cztop::Socket::PUB.bind(endpoint)
       sleep 0.02
 
@@ -40,8 +42,7 @@ describe 'Heartbeat' do
       end
     end
 
-    # Subscriber: monitors heartbeats, tracks state transitions
-    sub_thread = Thread.new do
+    Sync do
       sub = Cztop::Socket::SUB.connect(endpoint, prefix: 'HEARTBEAT')
       sub.recv_timeout = dead_threshold
       alive = false
@@ -64,13 +65,12 @@ describe 'Heartbeat' do
       end
     end
 
-    [pub_thread, sub_thread].each { |t| t.join(5) }
+    publisher.join
 
     puts "  events: #{events.inspect}"
     assert_includes events, :alive, 'expected to detect alive state'
     assert_includes events, :dead, 'expected to detect dead state'
 
-    # Should see alive -> dead -> alive (recovered)
     alive_indices = events.each_index.select { |i| events[i] == :alive }
     dead_indices  = events.each_index.select { |i| events[i] == :dead }
     assert(alive_indices.last > dead_indices.first, 'expected recovery after death')

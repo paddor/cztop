@@ -10,11 +10,11 @@
   GATHER, SCATTER
 * **Removed CURVE/PLAIN/GSSAPI security API:**
     - `Socket#CURVE_server!`, `Socket#CURVE_client!`
-    - `OptionsAccessor` CURVE methods (`#CURVE_server?`, `#CURVE_serverkey`,
+    - CURVE option methods (`#CURVE_server?`, `#CURVE_serverkey`,
       `#CURVE_secretkey`, `#CURVE_publickey`, etc.)
-    - `OptionsAccessor` PLAIN methods (`#PLAIN_server?`, `#PLAIN_username`,
+    - PLAIN option methods (`#PLAIN_server?`, `#PLAIN_username`,
       `#PLAIN_password`, etc.)
-    - `OptionsAccessor#mechanism`, `#zap_domain`
+    - `#mechanism`, `#zap_domain`
 * **Send/receive API changed:**
     - `#receive` now returns `Array<String>` (was `CZTop::Message`)
     - `#<<` accepts `String` or `Array<String>` directly (was `Message.coerce`)
@@ -23,23 +23,37 @@
     - `SendReceiveMethods` split into `Socket::Readable`, `Socket::Writable`, and
       `Socket::FdWait` mixins; socket types include only what they need
       (e.g. PUB includes only Writable, SUB only Readable)
+* **Time-based options now use seconds** (was milliseconds) — applies to
+    `#recv_timeout`, `#send_timeout`, `#linger`, `#heartbeat_ivl`, `#heartbeat_ttl`,
+    `#heartbeat_timeout`, `#reconnect_ivl`
 * **Sentinel values changed from -1 to nil:**
-    - `OptionsAccessor#rcvtimeo` / `#sndtimeo` — returns/accepts `nil` instead
+    - `#recv_timeout` / `#send_timeout` — returns/accepts `nil` instead
       of `-1` for "no timeout"
-    - `OptionsAccessor#linger` — `nil` instead of `-1` for "wait indefinitely"
-    - `OptionsAccessor#heartbeat_timeout` — `nil` instead of `-1` for "use IVL"
-    - `OptionsAccessor#reconnect_ivl` — `nil` instead of `-1` for "disabled"
-* **`OptionsAccessor#zocket` renamed to `#socket`** (ivar `@zocket` → `@socket`)
+    - `#linger` — `nil` instead of `-1` for "wait indefinitely"
+    - `#heartbeat_timeout` — `nil` instead of `-1` for "use IVL"
+    - `#reconnect_ivl` — `nil` instead of `-1` for "disabled"
 * **`Socket::SUB#initialize` subscription is now a `prefix:` kwarg** — was a
     positional parameter; defaults to `EVERYTHING` (`''`), pass `prefix: nil` to
     skip subscribing
 * **`#set_unbounded` moved from PolymorphicZsockMethods to Socket**
+* **`OptionsAccessor` removed** — all option methods now live directly on
+  `Socket` (e.g. `socket.sndhwm` instead of `socket.options.sndhwm`)
+* **`#rcvtimeo` / `#sndtimeo` removed** — use `#recv_timeout` / `#send_timeout`
+  (aliased as `#read_timeout` / `#write_timeout`). `nil` = no timeout
+  (block forever), `0` = nonblocking, positive = timeout in seconds.
+* **Fuzzy `#[]` / `#[]=` accessors removed**
 * **`czmq-ffi-gen` gem dependency removed** — replaced with handcrafted FFI
   bindings in `lib/cztop/ffi.rb`
 * **Minimum Ruby version raised to 3.3**
 
 ### New features
 
+* **`Cztop` module alias** — `Cztop = CZTop` for conventional Ruby naming;
+  both `Cztop::Socket::REQ` and `CZTop::Socket::REQ` work
+* **`.bind` and `.connect` class methods** on all socket types —
+  `REP.bind(endpoint)` and `REQ.connect(endpoint)` as shorthand for
+  `new(nil).tap { |s| s.bind(endpoint) }`; passes through `curve:`,
+  `prefix:` (SUB), and other kwargs
 * **CURVE encryption** with ergonomic `curve:` kwarg on all socket constructors:
     - `CZTop::CURVE.keypair` — generate keypairs (32-byte binary)
     - `CZTop::CURVE.public_key(secret_key)` — derive public from secret
@@ -49,9 +63,20 @@
     - Client: `CZTop::Socket::REQ.new(endpoint, curve: { secret_key: sk, server_key: pk })`
 * **`@`/`>` endpoint prefix convention** supported on all socket constructors
   (e.g. `PAIR.new("@inproc://ep")` to bind, `PAIR.new(">inproc://ep")` to connect)
+* **New socket options:**
+    - `#reconnect_ivl_max` — max reconnect backoff interval (exponential backoff)
+    - `#max_msg_size` — max inbound message size (DoS protection)
+    - `#immediate?` / `#immediate=` — queue only for completed connections
+    - `#conflate?` / `#conflate=` — keep only last message (last-value-cache)
+    - `#tcp_keepalive` / `#tcp_keepalive_idle` / `#tcp_keepalive_cnt` /
+      `#tcp_keepalive_intvl` — TCP keepalive tuning
 
 ### Other changes
 
+* replace old examples with numbered `examples/zguide/` pattern files
+  (01–07: req/rep, pub/sub, pipeline, lazy pirate, heartbeat, LVC, clone)
+* expand ZGUIDE_SUMMARY.md to ~30 min read with working code excerpts,
+  threading/concurrency guidance, and common mistakes section
 * replace RSpec with Minitest
 * replace `perf/` with `bench/` using benchmark-ips
 * add per-socket-type integration test files for all 12 types

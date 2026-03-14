@@ -10,4 +10,12 @@ describe CZTop do
   it "disables CZMQ's default signal handling" do
     assert CZMQ::FFI::Signals.default_handling_disabled?
   end
+
+  it 'is aliased as Cztop' do
+    assert_same CZTop, Cztop
+  end
+
+  it 'allows accessing socket types via Cztop alias' do
+    assert_same CZTop::Socket::REQ, Cztop::Socket::REQ
+  end
 end

@@ -36,3 +36,6 @@ require_relative 'cztop/socket/stream'
 # CURVE encryption
 require_relative 'cztop/curve'
 require_relative 'cztop/curve/auth'
+
+# Convenience alias — allows `Cztop::Socket::REQ` alongside `CZTop::Socket::REQ`.
+Cztop = CZTop

@@ -48,8 +48,8 @@ describe CZTop::Socket do
   describe '#set_unbounded' do
     it 'sets sndhwm and rcvhwm to 0' do
       req_socket.set_unbounded
-      assert_equal 0, req_socket.options.sndhwm
-      assert_equal 0, req_socket.options.rcvhwm
+      assert_equal 0, req_socket.sndhwm
+      assert_equal 0, req_socket.rcvhwm
     end
   end
 

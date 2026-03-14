@@ -10,8 +10,8 @@ describe CZTop::Socket::Readable do
     let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
 
     before do
-      push.options.sndtimeo = 100
-      pull.options.rcvtimeo = 100
+      push.send_timeout = 0.1
+      pull.recv_timeout = 0.1
     end
 
     it 'returns an Array of Strings' do
@@ -53,7 +53,7 @@ describe CZTop::Socket::Readable do
 
     describe 'with no rcvtimeout set' do
       before do
-        assert_nil req.options.rcvtimeo
+        assert_nil req.recv_timeout
       end
 
       it 'returns nil' do
@@ -61,21 +61,20 @@ describe CZTop::Socket::Readable do
       end
     end
 
-    # NOTE: 0 would mean non-block (EAGAIN), but that's obsolete with Async
-    describe 'with no rcvtimeout=0' do
+    describe 'with rcvtimeout=0' do
       before do
-        req.options.rcvtimeo = 0
+        req.recv_timeout = 0
       end
 
-      it 'returns nil' do
-        assert_nil req.read_timeout
+      it 'returns 0' do
+        assert_equal 0, req.read_timeout
       end
     end
 
 
     describe 'with rcvtimeout set' do
       before do
-        req.options.rcvtimeo = 10 # ms
+        req.recv_timeout = 0.01
       end
 
       it 'returns timeout in seconds' do
@@ -140,8 +139,8 @@ describe CZTop::Socket::Readable do
 
     describe 'with rcvtimeo' do
       before do
-        req.options.rcvtimeo = 30
-        assert_equal 30, req.options.rcvtimeo
+        req.recv_timeout = 0.03
+        assert_equal 0.03, req.recv_timeout
       end
 
       it 'will raise TimeoutError' do
@@ -203,8 +202,8 @@ describe CZTop::Socket::Readable do
 
     describe 'with rcvtimeo' do
       before do
-        req.options.rcvtimeo = 30
-        assert_equal 30, req.options.rcvtimeo
+        req.recv_timeout = 0.03
+        assert_equal 0.03, req.recv_timeout
       end
 
       it 'will raise TimeoutError' do

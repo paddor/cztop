@@ -9,7 +9,7 @@ describe CZTop::Socket::PULL do
 
     let(:pull) do
       CZTop::Socket::PULL.new.tap do |s|
-        s.options.rcvtimeo = 100
+        s.recv_timeout = 0.1
         s.bind endpoint
       end
     end
@@ -19,7 +19,7 @@ describe CZTop::Socket::PULL do
       pull
 
       push = CZTop::Socket::PUSH.new
-      push.options.sndtimeo = 100
+      push.send_timeout = 0.1
       push.connect endpoint
 
       push << 'single'
@@ -33,7 +33,7 @@ describe CZTop::Socket::PULL do
 
       pushers = 3.times.map do
         CZTop::Socket::PUSH.new.tap do |p|
-          p.options.sndtimeo = 100
+          p.send_timeout = 0.1
           p.connect endpoint
         end
       end
@@ -52,11 +52,11 @@ describe CZTop::Socket::PULL do
       pull
 
       push_a = CZTop::Socket::PUSH.new
-      push_a.options.sndtimeo = 100
+      push_a.send_timeout = 0.1
       push_a.connect endpoint
 
       push_b = CZTop::Socket::PUSH.new
-      push_b.options.sndtimeo = 100
+      push_b.send_timeout = 0.1
       push_b.connect endpoint
 
       push_a << %w[source_a data_a]
@@ -75,7 +75,7 @@ describe CZTop::Socket::PULL do
 
       pushers = 5.times.map do
         CZTop::Socket::PUSH.new.tap do |p|
-          p.options.sndtimeo = 100
+          p.send_timeout = 0.1
           p.connect endpoint
         end
       end

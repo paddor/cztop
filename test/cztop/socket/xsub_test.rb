@@ -9,15 +9,15 @@ describe CZTop::Socket::XSUB do
 
     let(:pub) do
       CZTop::Socket::PUB.new.tap do |s|
-        s.options.sndtimeo = 100
+        s.send_timeout = 0.1
         s.bind endpoint
       end
     end
 
     let(:xsub) do
       CZTop::Socket::XSUB.new.tap do |s|
-        s.options.sndtimeo = 100
-        s.options.rcvtimeo = 100
+        s.send_timeout = 0.1
+        s.recv_timeout = 0.1
         s.connect endpoint
       end
     end

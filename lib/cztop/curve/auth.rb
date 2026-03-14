@@ -28,7 +28,7 @@ module CZTop
         @allowed = allowed_clients&.map { |k| k.b.freeze }&.then { |keys| Set.new(keys) }
         @allow_any = allow_any
         @zap = CZTop::Socket::REP.new
-        @zap.options.linger = 0
+        @zap.linger = 0
         @zap.bind('inproc://zeromq.zap.01')
         @thread = Thread.new { run }
         ObjectSpace.define_finalizer(self, self.class._poststop(@thread))

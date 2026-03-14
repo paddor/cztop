@@ -12,7 +12,7 @@ module CZTop
       #
       # @return [Array<String>] message parts
       # @raise [IO::EAGAINWaitReadable, IO::TimeoutError] if receive timeout has been reached (see
-      #   {ZsockOptions::OptionsAccessor#rcvtimeo=})
+      #   {ZsockOptions#recv_timeout=})
       #
       def receive
         # Fast path: nonblock recv (no GVL release)
@@ -44,16 +44,6 @@ module CZTop
       #
       def wait_readable(timeout = read_timeout)
         wait_for_socket_state(:readable?, timeout)
-      end
-
-
-      # @return [Float, nil] the timeout in seconds used by {#wait_readable}
-      #
-      def read_timeout
-        timeout = options.rcvtimeo
-        return nil if timeout.nil? || timeout == 0
-
-        timeout.to_f / 1000
       end
 
 

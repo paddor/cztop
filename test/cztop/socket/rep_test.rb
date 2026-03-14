@@ -10,10 +10,10 @@ describe CZTop::Socket::REP do
     let(:endpoint) { "inproc://rep_test_#{i += 1}" }
 
     before do
-      rep.options.sndtimeo = 100
-      rep.options.rcvtimeo = 100
-      req.options.sndtimeo = 100
-      req.options.rcvtimeo = 100
+      rep.send_timeout = 0.1
+      rep.recv_timeout = 0.1
+      req.send_timeout = 0.1
+      req.recv_timeout = 0.1
 
       rep.bind endpoint
       req.connect endpoint

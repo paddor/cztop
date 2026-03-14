@@ -8,8 +8,8 @@ describe CZTop::Socket::STREAM do
     describe 'STREAM server with TCPSocket client' do
       it 'accepts a raw TCP connection and exchanges data' do
         stream = CZTop::Socket::STREAM.new
-        stream.options.sndtimeo = 500
-        stream.options.rcvtimeo = 500
+        stream.send_timeout = 0.5
+        stream.recv_timeout = 0.5
 
         port = stream.bind('tcp://127.0.0.1:*')
 
@@ -50,8 +50,8 @@ describe CZTop::Socket::STREAM do
 
       it 'handles multiple TCP clients' do
         stream = CZTop::Socket::STREAM.new
-        stream.options.sndtimeo = 500
-        stream.options.rcvtimeo = 500
+        stream.send_timeout = 0.5
+        stream.recv_timeout = 0.5
 
         port = stream.bind('tcp://127.0.0.1:*')
 
@@ -94,8 +94,8 @@ describe CZTop::Socket::STREAM do
         port = tcp_server.addr[1]
 
         stream = CZTop::Socket::STREAM.new
-        stream.options.sndtimeo = 500
-        stream.options.rcvtimeo = 500
+        stream.send_timeout = 0.5
+        stream.recv_timeout = 0.5
         stream.connect("tcp://127.0.0.1:#{port}")
 
         client_sock = tcp_server.accept
@@ -131,8 +131,8 @@ describe CZTop::Socket::STREAM do
     describe 'echo server pattern' do
       it 'echoes data back to TCP client' do
         stream = CZTop::Socket::STREAM.new
-        stream.options.sndtimeo = 500
-        stream.options.rcvtimeo = 500
+        stream.send_timeout = 0.5
+        stream.recv_timeout = 0.5
 
         port = stream.bind('tcp://127.0.0.1:*')
 

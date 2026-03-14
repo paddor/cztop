@@ -13,10 +13,10 @@ describe CZTop::Socket::PAIR do
       let(:connector) { CZTop::Socket::PAIR.new(">#{endpoint}") }
 
       before do
-        binder.options.sndtimeo = 100
-        binder.options.rcvtimeo = 100
-        connector.options.sndtimeo = 100
-        connector.options.rcvtimeo = 100
+        binder.send_timeout = 0.1
+        binder.recv_timeout = 0.1
+        connector.send_timeout = 0.1
+        connector.recv_timeout = 0.1
       end
 
 
@@ -46,10 +46,10 @@ describe CZTop::Socket::PAIR do
       let(:pair_b) { CZTop::Socket::PAIR.new }
 
       before do
-        pair_a.options.sndtimeo = 100
-        pair_a.options.rcvtimeo = 100
-        pair_b.options.sndtimeo = 100
-        pair_b.options.rcvtimeo = 100
+        pair_a.send_timeout = 0.1
+        pair_a.recv_timeout = 0.1
+        pair_b.send_timeout = 0.1
+        pair_b.recv_timeout = 0.1
 
         pair_a.bind endpoint
         pair_b.connect endpoint

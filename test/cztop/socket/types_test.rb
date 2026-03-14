@@ -117,8 +117,8 @@ describe CZTop::Socket::REQ do
     let(:endpoint) { "inproc://socket_types_spec_reqrep_#{i += 1}" }
 
     before do
-      req.options.sndtimeo = 100
-      rep.options.rcvtimeo = 100
+      req.send_timeout = 0.1
+      rep.recv_timeout = 0.1
 
       req.bind endpoint
       rep.connect endpoint
@@ -208,7 +208,7 @@ describe CZTop::Socket::ROUTER do
 
   describe 'with ZMQ_ROUTER_MANDATORY flag set' do
     before do
-      socket.options.router_mandatory = true
+      socket.router_mandatory = true
     end
 
 
@@ -222,12 +222,13 @@ describe CZTop::Socket::ROUTER do
 
       let(:dealer) do
         CZTop::Socket::DEALER.new.tap do |dealer|
-          dealer.options.identity = identity
+          dealer.identity = identity
           dealer.connect endpoint
         end
       end
 
       before do
+        socket.send_timeout = 0.1
         socket.bind endpoint
         dealer.connect endpoint
         sleep 0.1
@@ -420,8 +421,8 @@ describe CZTop::Socket::PUSH do
     let(:endpoint) { "inproc://socket_types_spec_push_#{i += 1}" }
 
     before do
-      push.options.sndtimeo = 100
-      pull.options.rcvtimeo = 100
+      push.send_timeout = 0.1
+      pull.recv_timeout = 0.1
 
       push.bind endpoint
       pull.connect endpoint

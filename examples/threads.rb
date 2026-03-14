@@ -5,7 +5,7 @@ require "cztop"
 
 t1 = Thread.new do
   socket = CZTop::Socket::REP.new("inproc://req_rep_example")
-  socket.options.rcvtimeo = 50 # ms
+  socket.recv_timeout = 0.05
 
   loop do
     msg = socket.receive

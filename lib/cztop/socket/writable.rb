@@ -12,7 +12,7 @@ module CZTop
       #
       # @param message [String, Array<String>] the message to send
       # @raise [IO::EAGAINWaitWritable, IO::TimeoutError] if send timeout has been reached (see
-      #   {ZsockOptions::OptionsAccessor#sndtimeo=})
+      #   {ZsockOptions#send_timeout=})
       # @return [self]
       #
       def send(message)
@@ -49,16 +49,6 @@ module CZTop
       #
       def wait_writable(timeout = write_timeout)
         wait_for_socket_state(:writable?, timeout)
-      end
-
-
-      # @return [Float, nil] the timeout in seconds used by {#wait_writable}
-      #
-      def write_timeout
-        timeout = options.sndtimeo
-        return nil if timeout.nil? || timeout == 0
-
-        timeout.to_f / 1000
       end
 
 

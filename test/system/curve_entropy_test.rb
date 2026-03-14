@@ -97,10 +97,10 @@ describe 'CURVE Shannon entropy' do
 
     client = CZTop::Socket::REQ.new("tcp://127.0.0.1:#{proxy_port}",
                curve: { secret_key: client_sec, server_key: server_pub })
-    client.options.sndtimeo = 5000
-    client.options.rcvtimeo = 5000
-    server.options.sndtimeo = 5000
-    server.options.rcvtimeo = 5000
+    client.send_timeout = 5
+    client.recv_timeout = 5
+    server.send_timeout = 5
+    server.recv_timeout = 5
 
     # Payloads are deliberately low-entropy (repetitive ASCII) so we can
     # prove the wire bytes are NOT low-entropy — encryption is working.
@@ -164,10 +164,10 @@ describe 'CURVE Shannon entropy' do
     end
 
     client = CZTop::Socket::REQ.new("tcp://127.0.0.1:#{proxy_port}")
-    client.options.sndtimeo = 5000
-    client.options.rcvtimeo = 5000
-    server.options.sndtimeo = 5000
-    server.options.rcvtimeo = 5000
+    client.send_timeout = 5
+    client.recv_timeout = 5
+    server.send_timeout = 5
+    server.recv_timeout = 5
 
     message_count.times do |i|
       payload = "message #{i}: #{'A' * payload_size}"

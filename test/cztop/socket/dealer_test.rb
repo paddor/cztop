@@ -10,10 +10,10 @@ describe CZTop::Socket::DEALER do
     let(:endpoint) { "inproc://dealer_test_#{i += 1}" }
 
     before do
-      dealer.options.sndtimeo = 100
-      dealer.options.rcvtimeo = 100
-      router.options.sndtimeo = 100
-      router.options.rcvtimeo = 100
+      dealer.send_timeout = 0.1
+      dealer.recv_timeout = 0.1
+      router.send_timeout = 0.1
+      router.recv_timeout = 0.1
 
       router.bind endpoint
       dealer.connect endpoint
@@ -56,13 +56,13 @@ describe CZTop::Socket::DEALER do
     it 'sets and uses a custom identity' do
       custom_id = 'my_dealer_id'
       d = CZTop::Socket::DEALER.new
-      d.options.identity = custom_id
-      d.options.sndtimeo = 100
-      d.options.rcvtimeo = 100
+      d.identity = custom_id
+      d.send_timeout = 0.1
+      d.recv_timeout = 0.1
 
       r = CZTop::Socket::ROUTER.new
-      r.options.sndtimeo = 100
-      r.options.rcvtimeo = 100
+      r.send_timeout = 0.1
+      r.recv_timeout = 0.1
 
       ep = "inproc://dealer_test_identity_#{i += 1}"
       r.bind ep

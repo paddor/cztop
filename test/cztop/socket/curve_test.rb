@@ -28,10 +28,10 @@ describe 'CURVE socket integration' do
       client = CZTop::Socket::REQ.new("tcp://127.0.0.1:#{port}",
                  curve: { secret_key: client_sec, server_key: server_pub })
 
-      client.options.sndtimeo = 2000
-      client.options.rcvtimeo = 2000
-      server.options.rcvtimeo = 2000
-      server.options.sndtimeo = 2000
+      client.send_timeout = 2
+      client.recv_timeout = 2
+      server.recv_timeout = 2
+      server.send_timeout = 2
 
       client << 'hello'
       msg = server.receive
@@ -59,10 +59,10 @@ describe 'CURVE socket integration' do
       client = CZTop::Socket::REQ.new("tcp://127.0.0.1:#{port}",
                  curve: { secret_key: client_sec, server_key: server_pub })
 
-      client.options.sndtimeo = 2000
-      client.options.rcvtimeo = 2000
-      server.options.rcvtimeo = 2000
-      server.options.sndtimeo = 2000
+      client.send_timeout = 2
+      client.recv_timeout = 2
+      server.recv_timeout = 2
+      server.send_timeout = 2
 
       client << 'ping'
       msg = server.receive
@@ -88,8 +88,8 @@ describe 'CURVE socket integration' do
       rejected = CZTop::Socket::REQ.new("tcp://127.0.0.1:#{port}",
                    curve: { secret_key: other_sec, server_key: server_pub })
 
-      rejected.options.sndtimeo = 500
-      server.options.rcvtimeo = 500
+      rejected.send_timeout = 0.5
+      server.recv_timeout = 0.5
 
       rejected << 'hello' rescue nil  # may or may not raise
 

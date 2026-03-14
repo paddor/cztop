@@ -9,14 +9,14 @@ describe CZTop::Socket::PUB do
     let(:endpoint) { "inproc://pub_test_#{i += 1}" }
 
     before do
-      pub.options.sndtimeo = 100
+      pub.send_timeout = 0.1
       pub.bind endpoint
     end
 
 
     it 'publishes messages to a subscribed SUB' do
       sub = CZTop::Socket::SUB.new
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe
       sub.connect endpoint
       sleep 0.05
@@ -29,7 +29,7 @@ describe CZTop::Socket::PUB do
 
     it 'publishes with topic prefix filtering' do
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe('weather')
       sub.connect endpoint
       sleep 0.05
@@ -42,7 +42,7 @@ describe CZTop::Socket::PUB do
 
     it 'does not deliver messages to non-matching subscriptions' do
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 50
+      sub.recv_timeout = 0.05
       sub.subscribe('sports')
       sub.connect endpoint
       sleep 0.05
@@ -54,7 +54,7 @@ describe CZTop::Socket::PUB do
 
     it 'publishes multipart messages' do
       sub = CZTop::Socket::SUB.new
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe
       sub.connect endpoint
       sleep 0.05
@@ -68,7 +68,7 @@ describe CZTop::Socket::PUB do
     it 'fans out to multiple subscribers' do
       subs = 3.times.map do
         CZTop::Socket::SUB.new.tap do |s|
-          s.options.rcvtimeo = 100
+          s.recv_timeout = 0.1
           s.subscribe
           s.connect endpoint
         end

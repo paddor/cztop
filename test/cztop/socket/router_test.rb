@@ -9,8 +9,8 @@ describe CZTop::Socket::ROUTER do
 
     let(:router) do
       CZTop::Socket::ROUTER.new.tap do |r|
-        r.options.sndtimeo = 100
-        r.options.rcvtimeo = 100
+        r.send_timeout = 0.1
+        r.recv_timeout = 0.1
         r.bind endpoint
       end
     end
@@ -21,9 +21,9 @@ describe CZTop::Socket::ROUTER do
 
       let(:dealer) do
         CZTop::Socket::DEALER.new.tap do |d|
-          d.options.identity = identity
-          d.options.sndtimeo = 100
-          d.options.rcvtimeo = 100
+          d.identity = identity
+          d.send_timeout = 0.1
+          d.recv_timeout = 0.1
           d.connect endpoint
         end
       end
@@ -63,18 +63,18 @@ describe CZTop::Socket::ROUTER do
 
       let(:dealer_a) do
         CZTop::Socket::DEALER.new.tap do |d|
-          d.options.identity = id_a
-          d.options.sndtimeo = 100
-          d.options.rcvtimeo = 100
+          d.identity = id_a
+          d.send_timeout = 0.1
+          d.recv_timeout = 0.1
           d.connect endpoint
         end
       end
 
       let(:dealer_b) do
         CZTop::Socket::DEALER.new.tap do |d|
-          d.options.identity = id_b
-          d.options.sndtimeo = 100
-          d.options.rcvtimeo = 100
+          d.identity = id_b
+          d.send_timeout = 0.1
+          d.recv_timeout = 0.1
           d.connect endpoint
         end
       end

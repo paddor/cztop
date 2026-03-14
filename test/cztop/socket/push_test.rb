@@ -10,8 +10,8 @@ describe CZTop::Socket::PUSH do
     let(:endpoint) { "inproc://push_test_#{i += 1}" }
 
     before do
-      push.options.sndtimeo = 100
-      pull.options.rcvtimeo = 100
+      push.send_timeout = 0.1
+      pull.recv_timeout = 0.1
 
       pull.bind endpoint
       push.connect endpoint
@@ -51,18 +51,18 @@ describe CZTop::Socket::PUSH do
 
     it 'load-balances across multiple PULLs' do
       pull2 = CZTop::Socket::PULL.new
-      pull2.options.rcvtimeo = 50
+      pull2.recv_timeout = 0.05
       pull2.bind "inproc://push_test_lb_#{i += 1}"
       push2 = CZTop::Socket::PUSH.new
-      push2.options.sndtimeo = 100
+      push2.send_timeout = 0.1
 
       ep = "inproc://push_test_lb2_#{i += 1}"
       pull_a = CZTop::Socket::PULL.new
-      pull_a.options.rcvtimeo = 100
+      pull_a.recv_timeout = 0.1
       pull_a.bind ep
 
       pull_b = CZTop::Socket::PULL.new
-      pull_b.options.rcvtimeo = 100
+      pull_b.recv_timeout = 0.1
       pull_b.connect ep  # second PULL on same endpoint won't work for inproc bind
 
       # Instead test fan-out from push side: one push, one pull, many messages

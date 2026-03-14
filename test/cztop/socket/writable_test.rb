@@ -10,8 +10,8 @@ describe CZTop::Socket::Writable do
     let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
 
     before do
-      push.options.sndtimeo = 100
-      pull.options.rcvtimeo = 100
+      push.send_timeout = 0.1
+      pull.recv_timeout = 0.1
     end
 
     it 'sends a string' do
@@ -65,7 +65,7 @@ describe CZTop::Socket::Writable do
 
     describe 'with no sndtimeout set' do
       before do
-        assert_nil req.options.sndtimeo
+        assert_nil req.send_timeout
       end
 
       it 'returns nil' do
@@ -73,21 +73,20 @@ describe CZTop::Socket::Writable do
       end
     end
 
-    # NOTE: 0 would mean non-block (EAGAIN), but that's obsolete with Async
     describe 'with sndtimeout=0' do
       before do
-        req.options.sndtimeo = 0
+        req.send_timeout = 0
       end
 
-      it 'returns nil' do
-        assert_nil req.write_timeout
+      it 'returns 0' do
+        assert_equal 0, req.write_timeout
       end
     end
 
 
     describe 'with sndtimeout set' do
       before do
-        req.options.sndtimeo = 10
+        req.send_timeout = 0.01
       end
 
       it 'returns timeout in seconds' do
@@ -171,8 +170,8 @@ describe CZTop::Socket::Writable do
 
     describe 'with sndtimeo' do
       before do
-        rep.options.sndtimeo = 30
-        assert_equal 30, rep.options.sndtimeo
+        rep.send_timeout = 0.03
+        assert_equal 0.03, rep.send_timeout
       end
 
       it 'will raise TimeoutError' do
@@ -244,8 +243,8 @@ describe CZTop::Socket::Writable do
 
     describe 'with sndtimeo' do
       before do
-        rep.options.sndtimeo = 30
-        assert_equal 30, rep.options.sndtimeo
+        rep.send_timeout = 0.03
+        assert_equal 0.03, rep.send_timeout
       end
 
       it 'will raise TimeoutError' do

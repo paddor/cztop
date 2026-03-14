@@ -9,8 +9,8 @@ describe CZTop::Socket::XPUB do
 
     let(:xpub) do
       CZTop::Socket::XPUB.new.tap do |s|
-        s.options.sndtimeo = 100
-        s.options.rcvtimeo = 100
+        s.send_timeout = 0.1
+        s.recv_timeout = 0.1
         s.bind endpoint
       end
     end
@@ -20,7 +20,7 @@ describe CZTop::Socket::XPUB do
       xpub
 
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe('news')
       sub.connect endpoint
 
@@ -35,7 +35,7 @@ describe CZTop::Socket::XPUB do
       xpub
 
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe('data')
       sub.connect endpoint
 
@@ -52,7 +52,7 @@ describe CZTop::Socket::XPUB do
       xpub
 
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe('topic')
       sub.connect endpoint
 
@@ -68,25 +68,25 @@ describe CZTop::Socket::XPUB do
 
     it 'acts as proxy between PUB and SUB via XSUB' do
       xsub = CZTop::Socket::XSUB.new
-      xsub.options.sndtimeo = 100
-      xsub.options.rcvtimeo = 100
+      xsub.send_timeout = 0.1
+      xsub.recv_timeout = 0.1
 
       pub_ep = "inproc://xpub_proxy_pub_#{i += 1}"
       sub_ep = "inproc://xpub_proxy_sub_#{i}"
 
       xpub_proxy = CZTop::Socket::XPUB.new
-      xpub_proxy.options.sndtimeo = 100
-      xpub_proxy.options.rcvtimeo = 100
+      xpub_proxy.send_timeout = 0.1
+      xpub_proxy.recv_timeout = 0.1
       xpub_proxy.bind sub_ep
 
       pub = CZTop::Socket::PUB.new
-      pub.options.sndtimeo = 100
+      pub.send_timeout = 0.1
       pub.bind pub_ep
 
       xsub.connect pub_ep
 
       sub = CZTop::Socket::SUB.new(nil, prefix: nil)
-      sub.options.rcvtimeo = 100
+      sub.recv_timeout = 0.1
       sub.subscribe('proxy')
       sub.connect sub_ep
 

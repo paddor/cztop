@@ -112,6 +112,28 @@ module CZMQ
     attach_function :zsock_set_zap_domain,         [:pointer, :string], :void, **opts
 
     # -----------------------------------------------------------------
+    # zactor functions
+    # -----------------------------------------------------------------
+    attach_function :zactor_new,     [:pointer, :pointer], :pointer, **opts
+    attach_function :zactor_destroy, [:pointer], :void, **opts
+
+    # -----------------------------------------------------------------
+    # zstr functions
+    # -----------------------------------------------------------------
+    attach_function :zstr_send,  [:pointer, :string], :int, **opts
+    attach_function :zstr_sendm, [:pointer, :string], :int, **opts
+
+    # -----------------------------------------------------------------
+    # zsock_wait (used for zactor START synchronization)
+    # -----------------------------------------------------------------
+    attach_function :zsock_wait, [:pointer], :int, **opts
+
+    # zmonitor actor function pointer (for zactor_new)
+    ZMONITOR_FN = ffi_libraries.filter_map { |lib|
+      lib.find_function('zmonitor') rescue nil # rubocop:disable Style/RescueModifier
+    }.first
+
+    # -----------------------------------------------------------------
     # zmsg functions
     # -----------------------------------------------------------------
     attach_function :zmsg_new,          [], :pointer, **opts

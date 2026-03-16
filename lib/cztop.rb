@@ -33,6 +33,9 @@ require_relative 'cztop/socket/pull'
 require_relative 'cztop/socket/pair'
 require_relative 'cztop/socket/stream'
 
+# Socket monitoring
+require_relative 'cztop/monitor'
+
 # CURVE encryption
 require_relative 'cztop/curve'
 require_relative 'cztop/curve/auth'

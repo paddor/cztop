@@ -1,4 +1,4 @@
-2.0.0.pre1
+2.0.0.rc1
 -----
 
 ### Breaking changes
@@ -48,6 +48,9 @@
 
 ### New features
 
+* **`CZTop::Monitor`** — socket event monitoring via CZMQ's zmonitor actor;
+  detects CONNECTED, LISTENING, ACCEPTED, DISCONNECTED, and other ZMQ events.
+  Returns `Monitor::Event` value objects (`Data.define(:name, :endpoint, :peer_address)`)
 * **`Cztop` module alias** — `Cztop = CZTop` for conventional Ruby naming;
   both `Cztop::Socket::REQ` and `CZTop::Socket::REQ` work
 * **`.bind` and `.connect` class methods** on all socket types —
@@ -73,13 +76,19 @@
 
 ### Other changes
 
+* **FFI bindings for zactor, zstr, zsock_wait** — foundational bindings for
+  CZMQ actor-based APIs (used by Monitor, extensible for future actors)
 * replace old examples with numbered `examples/zguide/` pattern files
-  (01–07: req/rep, pub/sub, pipeline, lazy pirate, heartbeat, LVC, clone)
+  (01–12: req/rep, pub/sub, pipeline, lazy pirate, heartbeat, LVC, clone,
+  majordomo, titanic, binary star, freelance)
 * expand ZGUIDE_SUMMARY.md to ~30 min read with working code excerpts,
   threading/concurrency guidance, and common mistakes section
 * replace RSpec with Minitest
 * replace `perf/` with `bench/` using benchmark-ips
-* add per-socket-type integration test files for all 12 types
+* add per-socket-type integration test files for all 13 types
+* add socket combination tests (ROUTER+REQ, ROUTER+ROUTER, pipeline, XPUB+multi SUB)
+* add HWM mute state tests (PUSH/PULL blocking, PUB/SUB dropping, ROUTER mandatory)
+* add REQ/REP reconnection tests (TCP restart, stuck-state demonstration)
 * add STREAM ↔ raw TCP integration tests
 * add CURVE throughput benchmark (`bench/threads/curve_throughput.rb`)
 * add Shannon entropy system tests for CURVE (`test/system/`)

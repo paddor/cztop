@@ -1,5 +1,5 @@
 {
-  "lib/*.rb": { "alternate": "test/{}_spec.rb" },
+  "lib/*.rb": { "alternate": "test/{}_test.rb" },
   "test/*_spec.rb": {
     "alternate": "lib/{}.rb",
     "dispatch": "bundle exec ruby -Ilib:test {file}"

@@ -37,6 +37,10 @@ gem install cztop
 gem 'cztop'
 ```
 
+## Learning ZeroMQ
+
+New to ZeroMQ? See [ZGUIDE_SUMMARY.md](ZGUIDE_SUMMARY.md) — a ~30 min read covering all major patterns with working CZTop code examples.
+
 ## Quick Start
 
 ### Request / Reply

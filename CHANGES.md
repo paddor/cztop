@@ -1,3 +1,8 @@
+2.0.0.rc3
+-----
+
+* `#close` and `#set_unbounded` now return `nil` instead of leaking FFI objects
+
 2.0.0.rc2
 -----
 

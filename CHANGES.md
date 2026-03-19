@@ -1,3 +1,14 @@
+2.0.0.rc2
+-----
+
+### Breaking changes
+
+* **Removed `Socket.new_by_type` factory method** — use type-specific constructors
+  instead (e.g. `Socket::REQ.new`, `Socket::PUB.new`)
+* **`linger` now defaults to 0** on all socket constructors — ZMQ's default of
+  infinite (-1) caused `#close` to block when unsent messages remained. Pass
+  `linger:` to override (e.g. `Socket::REQ.new(endpoint, linger: 1)`)
+
 2.0.0.rc1
 -----
 

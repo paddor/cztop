@@ -33,7 +33,7 @@ module CZTop
     end
 
 
-    def initialize(endpoints = nil, curve: nil); end
+    def initialize(endpoints = nil, curve: nil, linger: 0); end
 
 
     # @return [String] last bound endpoint, if any

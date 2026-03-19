@@ -24,6 +24,20 @@ describe CZTop::Socket::Types do
 end
 
 
+describe 'linger default' do
+  it 'defaults to 0' do
+    socket = CZTop::Socket::REQ.new
+    assert_equal 0, socket.linger
+  end
+
+
+  it 'accepts linger: override' do
+    socket = CZTop::Socket::REQ.new(nil, linger: 1)
+    assert_equal 1, socket.linger
+  end
+end
+
+
 describe CZTop::Socket::REQ do
   let(:socket) { CZTop::Socket::REQ.new }
 

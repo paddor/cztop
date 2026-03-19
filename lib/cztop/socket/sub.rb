@@ -17,11 +17,13 @@ module CZTop
       # @param prefix [String, nil] subscription prefix; defaults to
       #   everything ({EVERYTHING}). Pass +nil+ to skip subscribing.
       # @param curve [Hash, nil] CURVE encryption options
+      # @param linger [Integer] linger period in milliseconds (default: 0)
       #
-      def initialize(endpoints = nil, prefix: EVERYTHING, curve: nil)
-        super(endpoints, curve: curve)
+      def initialize(endpoints = nil, prefix: EVERYTHING, curve: nil, linger: 0)
+        super(endpoints, curve: curve, linger: linger)
 
         attach_ffi_delegate(Zsock.new(Types::SUB))
+        self.linger = linger
         _apply_curve(curve)
         subscribe(prefix) unless prefix.nil?
         _attach(endpoints, default: :connect)

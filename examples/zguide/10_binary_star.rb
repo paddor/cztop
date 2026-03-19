@@ -81,7 +81,6 @@ describe 'Binary Star' do
     send_request = lambda do |body|
       req = Cztop::Socket::REQ.connect(primary_ep)
       req.recv_timeout = 0.2
-      req.linger = 0
       req << body
       reply = req.receive.first
       req.close
@@ -90,7 +89,6 @@ describe 'Binary Star' do
       req&.close
       req = Cztop::Socket::REQ.connect(backup_ep)
       req.recv_timeout = 1
-      req.linger = 0
       req << body
       reply = req.receive.first
       req.close

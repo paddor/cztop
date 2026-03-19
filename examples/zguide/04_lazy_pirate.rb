@@ -53,7 +53,6 @@ describe 'Lazy Pirate' do
         loop do
           req = Cztop::Socket::REQ.connect(endpoint)
           req.recv_timeout = 0.3
-          req.linger = 0
 
           req << "request-#{seq}"
           begin

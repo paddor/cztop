@@ -50,7 +50,7 @@ describe 'Freelance' do
         endpoints.each do |ep|
           req = Cztop::Socket::REQ.connect(ep)
           req.recv_timeout = 0.15
-          req.linger = 0
+
           req << "request-#{i}"
           begin
             reply = req.receive.first
@@ -122,7 +122,7 @@ describe 'Freelance' do
         try_order.each do |ep|
           req = Cztop::Socket::REQ.connect(ep)
           req.recv_timeout = 0.2
-          req.linger = 0
+
           req << "request-#{i}"
           begin
             reply = req.receive.first

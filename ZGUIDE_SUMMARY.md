@@ -538,12 +538,10 @@ connecting (identity, HWM). Timeouts and linger can change at any time.
 sock = Cztop::Socket::REQ.new
 sock.send_timeout = 1          # 1 second
 sock.recv_timeout = 1          # 1 second
-sock.linger = 0                # drop unsent on close
 sock.identity = 'worker-1'    # ROUTER-visible identity
 
 # nil = no timeout / wait indefinitely:
 sock.send_timeout = nil
-sock.linger = nil
 ```
 
 Key options:
@@ -591,7 +589,7 @@ with it directly. Key rules:
 
 - Sockets are **not thread-safe** — one socket per thread
 - One I/O thread handles ~1 Gbps — usually enough
-- Set `linger = 0` for instant shutdown
+- `linger` defaults to `0` — instant shutdown, no blocking on close
 
 ---
 
@@ -667,7 +665,6 @@ def lazy_pirate_request(endpoint, request)
   MAX_RETRIES.times do |attempt|
     req = Cztop::Socket::REQ.connect(endpoint)
     req.recv_timeout = 2.5
-    req.linger = 0
 
     req << request
     begin
@@ -988,11 +985,11 @@ it and create a new one (Lazy Pirate).
 Not thread-safe. Silent data corruption, hangs, or segfaults. One
 socket per thread. Use `inproc://` between threads.
 
-### 3. Forgetting linger
+### 3. Overriding linger without resetting it
 
-CZTop defaults to `linger = 0`. If you changed it, `#close` blocks
-until queued messages are delivered. Always `socket.linger = 0` for
-sockets you want to close fast.
+CZTop defaults to `linger = 0` (drop unsent messages on close). If you
+set `linger = nil` (wait forever), remember to reset it before closing
+or `#close` will block until all queued messages are delivered.
 
 ### 4. Not setting timeouts
 
@@ -1065,7 +1062,8 @@ Peer-to-peer               ROUTER ──▶ ROUTER  (hard mode)
    until it isn't.
 2. **Don't share sockets across threads.** One socket per thread,
    `inproc://` between them.
-3. **Always set `linger`** — `sock.linger = 0` for clean shutdown.
+3. **`linger` defaults to 0** — sockets close instantly. Override with
+   `linger:` kwarg or `sock.linger =` only when you need delivery guarantees.
 4. **PUB/SUB filtering is prefix-based.** `""` = everything.
 5. **Connect from the ephemeral side.** Stable address binds.
 6. **Heartbeat everything** in production.

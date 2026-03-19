@@ -72,6 +72,7 @@ module CZTop
     #
     def close
       ffi_delegate.destroy
+      nil
     end
 
     # @return [Integer] last automatically selected, bound TCP port, if any
@@ -109,6 +110,7 @@ module CZTop
     #
     def set_unbounded
       ::CZMQ::FFI::Zsock.set_unbounded(ffi_delegate)
+      nil
     end
 
 

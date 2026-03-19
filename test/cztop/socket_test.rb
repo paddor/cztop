@@ -108,7 +108,7 @@ describe CZTop::Socket do
 
   describe '#last_endpoint' do
     describe 'unbound socket' do
-      let(:socket) { CZTop::Socket.new_by_type(:REP) }
+      let(:socket) { CZTop::Socket::REP.new }
 
       it 'returns nil' do
         assert_nil socket.last_endpoint

@@ -45,6 +45,11 @@ describe CZTop::Socket::Writable do
       assert_equal push.method(:send).unbind, push.method(:<<).unbind
     end
 
+    it '#<< returns self for chaining' do
+      assert_same push, (push << 'hello')
+      pull.receive # drain
+    end
+
     it 'raises on empty array' do
       assert_raises(ArgumentError) { push.send([]) }
     end

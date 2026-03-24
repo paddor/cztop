@@ -1,5 +1,6 @@
 # CZTop
 
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/cztop)
 [![CI](https://github.com/paddor/cztop/actions/workflows/ci.yml/badge.svg)](https://github.com/paddor/cztop/actions/workflows/ci.yml)
 [![Gem Version](https://img.shields.io/gem/v/cztop?color=e9573f)](https://rubygems.org/gems/cztop)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)

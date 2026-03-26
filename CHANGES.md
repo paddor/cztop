@@ -1,4 +1,4 @@
-2.0.0.rc4
+2.0.0
 -----
 
 * `Socket::SUB` no longer auto-subscribes to everything — constructor `prefix:`

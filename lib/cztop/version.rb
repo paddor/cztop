@@ -2,6 +2,6 @@
 
 module CZTop
 
-  VERSION = '2.0.0.rc4'
+  VERSION = '2.0.0'
 
 end

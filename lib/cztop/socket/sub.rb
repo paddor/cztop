@@ -14,12 +14,12 @@ module CZTop
       EVERYTHING = ''
 
       # @param endpoints [String] endpoints to connect to
-      # @param prefix [String, nil] subscription prefix; defaults to
-      #   everything ({EVERYTHING}). Pass +nil+ to skip subscribing.
+      # @param prefix [String, nil] subscription prefix; defaults to no
+      #   subscription. Pass {EVERYTHING} (+""+) to subscribe to everything.
       # @param curve [Hash, nil] CURVE encryption options
       # @param linger [Integer] linger period in milliseconds (default: 0)
       #
-      def initialize(endpoints = nil, prefix: EVERYTHING, curve: nil, linger: 0)
+      def initialize(endpoints = nil, prefix: nil, curve: nil, linger: 0)
         super(endpoints, curve: curve, linger: linger)
 
         attach_ffi_delegate(Zsock.new(Types::SUB))

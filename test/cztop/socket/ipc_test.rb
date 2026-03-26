@@ -45,6 +45,7 @@ describe 'IPC transport' do
 
       sub = CZTop::Socket::SUB.new
       sub.recv_timeout = 0.5
+      sub.subscribe
       sub.connect endpoint
       sleep 0.05
 

@@ -1,3 +1,10 @@
+2.0.0.rc4
+-----
+
+* `Socket::SUB` no longer auto-subscribes to everything — constructor `prefix:`
+  now defaults to `nil` (no subscription). Call `#subscribe` explicitly or pass
+  `prefix: ""` to subscribe to all messages.
+
 2.0.0.rc3
 -----
 

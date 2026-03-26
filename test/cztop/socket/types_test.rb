@@ -258,7 +258,7 @@ describe CZTop::Socket::SUB do
 
 
   describe 'default subscription' do
-    it 'subscribes to everything by default' do
+    it 'does not subscribe by default' do
       called_with = :not_called
       original_set = ::CZMQ::FFI::Zsock.instance_method(:set_subscribe)
       ::CZMQ::FFI::Zsock.define_method(:set_subscribe) do |prefix|
@@ -267,20 +267,20 @@ describe CZTop::Socket::SUB do
       end
       CZTop::Socket::SUB.new
       ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
-      assert_equal '', called_with
+      assert_equal :not_called, called_with
     end
 
 
-    it 'skips subscription when nil is passed explicitly' do
+    it 'subscribes to everything when empty string is passed' do
       called_with = :not_called
       original_set = ::CZMQ::FFI::Zsock.instance_method(:set_subscribe)
       ::CZMQ::FFI::Zsock.define_method(:set_subscribe) do |prefix|
         called_with = prefix
         original_set.bind_call(self, prefix)
       end
-      CZTop::Socket::SUB.new(nil, prefix: nil)
+      CZTop::Socket::SUB.new(nil, prefix: '')
       ::CZMQ::FFI::Zsock.define_method(:set_subscribe, original_set)
-      assert_equal :not_called, called_with
+      assert_equal '', called_with
     end
   end
 

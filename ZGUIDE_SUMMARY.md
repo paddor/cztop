@@ -180,12 +180,11 @@ loop do
   puts msg.first
 end
 
-# --- subscribe to everything (the default) ---
-sub = Cztop::Socket::SUB.connect('tcp://localhost:5556')
+# --- subscribe to everything ---
+sub = Cztop::Socket::SUB.connect('tcp://localhost:5556', prefix: '')
 
-# --- defer subscription, add later ---
-sub = Cztop::Socket::SUB.new('tcp://localhost:5556', prefix: nil)
-sub.subscribe('weather.sfo')
+# --- subscribe to a specific prefix ---
+sub = Cztop::Socket::SUB.connect('tcp://localhost:5556', prefix: 'weather.sfo')
 ```
 
 → see [`examples/zguide/02_pub_sub.rb`](examples/zguide/02_pub_sub.rb)
@@ -798,7 +797,7 @@ in the snapshot using the sequence number.
 
 ```ruby
 # Clone client sketch
-sub = Cztop::Socket::SUB.connect(pub_endpoint)
+sub = Cztop::Socket::SUB.connect(pub_endpoint, prefix: '')
 sub.recv_timeout = 1
 
 # Subscribe first, snapshot second
@@ -906,7 +905,7 @@ is a feature.
 ```ruby
 # Class methods (preferred)
 pub = Cztop::Socket::PUB.bind('tcp://*:5556')
-sub = Cztop::Socket::SUB.connect('tcp://localhost:5556')
+sub = Cztop::Socket::SUB.connect('tcp://localhost:5556', prefix: '')
 
 # Constructor
 pub = Cztop::Socket::PUB.new('tcp://*:5556')

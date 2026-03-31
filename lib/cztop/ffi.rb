@@ -6,8 +6,7 @@ module CZMQ
   module FFI
     extend ::FFI::Library
 
-    ffi_lib 'libzmq.so.5', 'libzmq'
-    ffi_lib 'libczmq.so.4', 'libczmq'
+    ffi_lib ['libzmq.so.5', 'libzmq'], ['libczmq.so.4', 'libczmq']
 
     # -----------------------------------------------------------------
     # libzmq functions

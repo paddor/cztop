@@ -1,3 +1,15 @@
+2.0.2
+-----
+
+* Fix `ffi_lib` fallback: use arrays so versioned sonames (`libzmq.so.5`,
+  `libczmq.so.4`) are tried first with unversioned names as actual fallbacks
+
+2.0.1
+-----
+
+* Prefer versioned sonames (`libzmq.so.5`, `libczmq.so.4`) over unversioned
+  names that require `-dev` packages
+
 2.0.0
 -----
 

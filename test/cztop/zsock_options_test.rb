@@ -218,6 +218,18 @@ class CZTopZsockOptionsTest < Minitest::Spec
 
 
   describe '#identity' do
+    it 'frees the native string after reading it' do
+      released = false
+      free = CZMQ::FFI.method(:zstr_free)
+      CZMQ::FFI.stub(:zstr_free, ->(ref) {
+        refute ref.read_pointer.null?
+        free.call(ref)
+        released = true
+      }) do
+        assert_equal '', socket.identity
+      end
+      assert released
+    end
 
     describe 'with no identity set' do
       it 'returns empty string' do

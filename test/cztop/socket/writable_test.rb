@@ -4,6 +4,13 @@ require_relative '../test_helper'
 
 class CZTopSocketWritableTest < Minitest::Spec
   describe '#send' do
+    it 'raises WaitWritable immediately with a zero timeout' do
+      socket = CZTop::Socket::PUSH.new
+      socket.send_timeout = 0
+      assert_raises(IO::EAGAINWaitWritable) { socket.send('hello') }
+    ensure
+      socket&.close
+    end
 
     def endpoint
       @endpoint ||= "inproc://writable_send_spec_#{SecureRandom.hex(8)}"
@@ -32,7 +39,25 @@ class CZTopSocketWritableTest < Minitest::Spec
       assert_equal %w[hello world], pull.receive
     end
 
+    it 'converts parts before sending any frames' do
+      invalid = Object.new
+      def invalid.to_s
+        raise TypeError, 'invalid part'
+      end
+      assert_raises(TypeError) { push.send(['first', invalid]) }
+      push.send('next message')
+      assert_equal ['next message'], pull.receive
+    end
 
+    it 'raises native errors without waiting for writability' do
+      CZMQ::FFI.stub(:zframe_send, -1) do
+        CZMQ::FFI::Errors.stub(:errno, Errno::EHOSTUNREACH::Errno) do
+          push.stub(:wait_writable, ->(*) { flunk 'unexpected wait' }) do
+            assert_raises(SocketError) { push.send('hello') }
+          end
+        end
+      end
+    end
 
     it 'sends multipart messages with many parts' do
       parts = (1..10).map { |i| "part#{i}" }
@@ -193,15 +218,19 @@ class CZTopSocketWritableTest < Minitest::Spec
 
 
     describe 'with sndtimeo' do
+      def sender
+        @sender ||= CZTop::Socket::PUSH.new
+      end
+
       before do
-        rep.send_timeout = 0.03
-        assert_equal 0.03, rep.send_timeout
+        sender.send_timeout = 0.03
+        assert_equal 0.03, sender.send_timeout
       end
 
       it 'will raise TimeoutError' do
         Async do
           assert_raises ::IO::TimeoutError do
-            rep << ['foo']
+            sender << ['foo']
           end
         end
       end
@@ -273,14 +302,18 @@ class CZTopSocketWritableTest < Minitest::Spec
 
 
     describe 'with sndtimeo' do
+      def sender
+        @sender ||= CZTop::Socket::PUSH.new
+      end
+
       before do
-        rep.send_timeout = 0.03
-        assert_equal 0.03, rep.send_timeout
+        sender.send_timeout = 0.03
+        assert_equal 0.03, sender.send_timeout
       end
 
       it 'will raise TimeoutError' do
         assert_raises ::IO::TimeoutError do
-          rep << ['foo']
+          sender << ['foo']
         end
       end
     end

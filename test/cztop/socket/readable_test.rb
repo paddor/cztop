@@ -4,7 +4,26 @@ require_relative '../test_helper'
 
 class CZTopSocketReadableTest < Minitest::Spec
   describe '#receive' do
+    it 'raises WaitReadable immediately with a zero timeout' do
+      socket = CZTop::Socket::PULL.new
+      socket.recv_timeout = 0
+      assert_raises(IO::EAGAINWaitReadable) { socket.receive }
+    ensure
+      socket&.close
+    end
 
+    it 'raises native errors without waiting for readability' do
+      socket = CZTop::Socket::REP.new
+      CZMQ::FFI.stub(:zframe_recv_nowait, ::FFI::Pointer::NULL) do
+        CZMQ::FFI::Errors.stub(:errno, Errno::EINVAL::Errno) do
+          socket.stub(:wait_readable, ->(*) { flunk 'unexpected wait' }) do
+            assert_raises(ArgumentError) { socket.receive }
+          end
+        end
+      end
+    ensure
+      socket&.close
+    end
 
     def endpoint
       @endpoint ||= "inproc://readable_receive_spec_#{SecureRandom.hex(8)}"
@@ -157,6 +176,8 @@ class CZTopSocketReadableTest < Minitest::Spec
 
     describe 'with rcvtimeo' do
       before do
+        req << 'request'
+        rep.receive
         req.recv_timeout = 0.03
         assert_equal 0.03, req.recv_timeout
       end
@@ -227,6 +248,8 @@ class CZTopSocketReadableTest < Minitest::Spec
 
     describe 'with rcvtimeo' do
       before do
+        req << 'request'
+        rep.receive
         req.recv_timeout = 0.03
         assert_equal 0.03, req.recv_timeout
       end

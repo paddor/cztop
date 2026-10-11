@@ -18,16 +18,18 @@ module CZTop
       def send(message)
         parts = message.is_a?(Array) ? message : [message]
         raise ArgumentError, 'message has no parts' if parts.empty?
+        parts = parts.map(&:to_s)
 
         # Fast path: nonblock send (no GVL release)
         return self if send_nonblock(parts)
+        raise IO::EAGAINWaitWritable if write_timeout == 0
 
         # Slow path: FD poll → blocking send
         wait_writable
 
         zmsg = CZMQ::FFI::Zmsg.new
         parts.each do |part|
-          rc = zmsg.add_buffer(part.to_s)
+          rc = zmsg.add_buffer(part)
           HasFFIDelegate.raise_zmq_err unless rc.zero?
         end
 
@@ -65,9 +67,8 @@ module CZTop
         last_idx = parts.size - 1
 
         parts.each_with_index do |part, i|
-          str = part.to_s
-          frame = CZMQ::FFI.zframe_new_s(str, str.bytesize)
-          return false if frame.null?
+          frame = CZMQ::FFI.zframe_new_s(part, part.bytesize)
+          raise NoMemoryError, 'could not allocate message frame' if frame.null?
 
           flags = CZMQ::FFI::ZFRAME_DONTWAIT
           flags |= CZMQ::FFI::ZFRAME_MORE if i < last_idx
@@ -75,7 +76,9 @@ module CZTop
           pp.write_pointer(frame)
           rc = CZMQ::FFI.zframe_send(pp, sock_ptr, flags)
           unless rc.zero?
+            errno = CZMQ::FFI::Errors.errno
             CZMQ::FFI.zframe_destroy(pp)
+            HasFFIDelegate.raise_zmq_err(errno: errno) unless errno == Errno::EAGAIN::Errno
             return false
           end
         end

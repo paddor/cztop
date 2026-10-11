@@ -1,6 +1,15 @@
 ## [Unreleased]
 
 * Port specs to named `Minitest::Spec` subclasses with ordinary Ruby helpers
+* Add regression coverage for native library loading and fallback
+* Raise native send/receive errors immediately instead of waiting for readiness
+* Raise `IO::EAGAINWaitReadable`/`IO::EAGAINWaitWritable` when nonblocking I/O
+  would block
+* Convert all multipart message parts before sending the first frame
+* Free native identity strings and messages retained after failed sends
+* Reject endpoint and subscription operations on closed sockets, and receive
+  operations on closed monitors
+* Close the CURVE authentication socket in its responder thread during shutdown
 
 2.0.2
 -----

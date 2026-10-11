@@ -6,6 +6,8 @@ module CZMQ
   module FFI
     extend ::FFI::Library
 
+    # Runtime packages may only include versioned sonames. Keep each library's
+    # alternatives in one array so FFI can fall back to platform-specific names.
     ffi_lib ['libzmq.so.5', 'libzmq'], ['libczmq.so.4', 'libczmq']
 
     # -----------------------------------------------------------------
@@ -122,6 +124,7 @@ module CZMQ
     # -----------------------------------------------------------------
     attach_function :zstr_send,  [:pointer, :string], :int, **opts
     attach_function :zstr_sendm, [:pointer, :string], :int, **opts
+    attach_function :zstr_free,  [:pointer], :void
 
     # -----------------------------------------------------------------
     # zsock_wait (used for zactor START synchronization)
@@ -296,23 +299,23 @@ module CZMQ
 
       # Instance methods
       def endpoint
-        CZMQ::FFI.zsock_endpoint(@ptr)
+        CZMQ::FFI.zsock_endpoint(to_ptr)
       end
 
       def connect(format, *args)
-        CZMQ::FFI.zsock_connect(@ptr, format, *args)
+        CZMQ::FFI.zsock_connect(to_ptr, format, *args)
       end
 
       def disconnect(format, *args)
-        CZMQ::FFI.zsock_disconnect(@ptr, format, *args)
+        CZMQ::FFI.zsock_disconnect(to_ptr, format, *args)
       end
 
       def bind(format, *args)
-        CZMQ::FFI.zsock_bind(@ptr, format, *args)
+        CZMQ::FFI.zsock_bind(to_ptr, format, *args)
       end
 
       def unbind(format, *args)
-        CZMQ::FFI.zsock_unbind(@ptr, format, *args)
+        CZMQ::FFI.zsock_unbind(to_ptr, format, *args)
       end
 
       def destroy
@@ -325,11 +328,11 @@ module CZMQ
       end
 
       def set_subscribe(prefix)
-        CZMQ::FFI.zsock_set_subscribe(@ptr, prefix)
+        CZMQ::FFI.zsock_set_subscribe(to_ptr, prefix)
       end
 
       def set_unsubscribe(prefix)
-        CZMQ::FFI.zsock_set_unsubscribe(@ptr, prefix)
+        CZMQ::FFI.zsock_set_unsubscribe(to_ptr, prefix)
       end
 
       # Class methods that take a zsock pointer (or wrapper with to_ptr)
@@ -423,9 +426,15 @@ module CZMQ
       # Override Object#send: int zmsg_send(zmsg_t **self_p, void *dest)
       # Called as: Zmsg.send(zmsg_wrapper_or_ptr, destination)
       def self.send(msg, dest)
-        msg_ptr = msg.respond_to?(:__ptr_give_ref) ? msg.__ptr_give_ref : msg
         dest_ptr = dest.respond_to?(:to_ptr) ? dest.to_ptr : dest
-        CZMQ::FFI.zmsg_send(msg_ptr, dest_ptr)
+        msg_ptr = msg.respond_to?(:__ptr_give_ref) ? msg.__ptr_give_ref : msg
+        rc = CZMQ::FFI.zmsg_send(msg_ptr, dest_ptr)
+        unless rc.zero?
+          errno = CZMQ::FFI::Errors.errno
+          CZMQ::FFI.zmsg_destroy(msg_ptr) if msg.respond_to?(:__ptr_give_ref)
+          CZTop::HasFFIDelegate.raise_zmq_err(errno: errno)
+        end
+        rc
       end
 
       def self.recv(source)
@@ -437,17 +446,17 @@ module CZMQ
       # Appends a Ruby string directly without intermediate MemoryPointer copy.
       # Uses :buffer_in to pass the string's internal buffer pointer to C.
       def add_buffer(str)
-        CZMQ::FFI.zmsg_addmem_s(@ptr, str, str.bytesize)
+        CZMQ::FFI.zmsg_addmem_s(to_ptr, str, str.bytesize)
       end
 
       def first
-        ptr = CZMQ::FFI.zmsg_first(@ptr)
+        ptr = CZMQ::FFI.zmsg_first(to_ptr)
         return nil if ptr.null?
         _borrowed_frame(ptr)
       end
 
       def next
-        ptr = CZMQ::FFI.zmsg_next(@ptr)
+        ptr = CZMQ::FFI.zmsg_next(to_ptr)
         return nil if ptr.null?
         _borrowed_frame(ptr)
       end
@@ -461,7 +470,7 @@ module CZMQ
     end
 
     # -----------------------------------------------------------------
-    # Zframe (lightweight — only used for borrowed frames from Zmsg)
+    # Zframe (lightweight; only used for borrowed frames from Zmsg)
     # -----------------------------------------------------------------
     class Zframe
       # Wraps a borrowed zframe_t pointer (not owned, no finalizer).

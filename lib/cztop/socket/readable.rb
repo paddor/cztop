@@ -18,6 +18,7 @@ module CZTop
         # Fast path: nonblock recv (no GVL release)
         parts = recv_nonblock
         return parts if parts
+        raise IO::EAGAINWaitReadable if read_timeout == 0
 
         # Slow path: FD poll → blocking recv
         wait_readable
@@ -56,7 +57,11 @@ module CZTop
       def recv_nonblock
         sock_ptr = to_ptr
         frame = CZMQ::FFI.zframe_recv_nowait(sock_ptr)
-        return nil if frame.null?
+        if frame.null?
+          errno = CZMQ::FFI::Errors.errno
+          HasFFIDelegate.raise_zmq_err(errno: errno) unless errno == Errno::EAGAIN::Errno
+          return nil
+        end
 
         pp = _zframe_pp
         parts = []

@@ -77,7 +77,7 @@ class SystemCURVEEntropyTest < Minitest::Spec
           rescue IO::WaitReadable
             next
           rescue EOFError
-            break
+            raise
           end
 
           if sock == client_conn
@@ -146,7 +146,7 @@ class SystemCURVEEntropyTest < Minitest::Spec
           rescue IO::WaitReadable
             next
           rescue EOFError
-            break
+            raise
           end
 
           if sock == client_conn

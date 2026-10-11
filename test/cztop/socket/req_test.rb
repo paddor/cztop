@@ -3,6 +3,14 @@
 require_relative '../test_helper'
 
 class CZTopSocketREQTest < Minitest::Spec
+  it 'raises a state error when receiving before sending' do
+    socket = CZTop::Socket::REQ.new
+    socket.recv_timeout = 0.1
+    error = assert_raises(SystemCallError) { socket.receive }
+    assert_equal 156_384_763, error.errno # EFSM
+  ensure
+    socket&.close
+  end
 
   describe 'integration' do
     def req

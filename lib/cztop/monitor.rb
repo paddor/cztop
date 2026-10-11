@@ -69,6 +69,7 @@ module CZTop
     # @return [Event, nil] the event, or nil on timeout
     #
     def receive(timeout: 0.1)
+      raise IOError, 'monitor is closed' if @closed
       CZMQ::FFI.zsock_set_rcvtimeo(@actor_ptr, (timeout * 1000).to_i)
 
       zmsg_ptr = CZMQ::FFI.zmsg_recv(@actor_ptr)

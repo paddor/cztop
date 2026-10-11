@@ -220,7 +220,21 @@ class CZTopSocketTest < Minitest::Spec
       assert rep_socket.ffi_delegate.null?
     end
 
+    it 'can be called twice' do
+      rep_socket.close
+      assert_nil rep_socket.close
+    end
 
+    it 'rejects operations on a closed socket' do
+      rep_socket.close
+      [-> { rep_socket.last_endpoint },
+       -> { rep_socket.bind(endpoint) },
+       -> { rep_socket.connect(endpoint) },
+       -> { rep_socket.disconnect(endpoint) },
+       -> { rep_socket.unbind(endpoint) }].each do |operation|
+        assert_raises(CZMQ::FFI::DestroyedError, &operation)
+      end
+    end
   end
 
 

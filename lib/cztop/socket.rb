@@ -142,7 +142,7 @@ module CZTop
     # Connects or binds based on CZMQ endpoint prefix convention.
     # @api private
     # @param endpoints [String] endpoint, optionally prefixed with +@+ (bind) or +>+ (connect)
-    # @param default [Symbol] +:connect+ or +:bind+ — action when no prefix given
+    # @param default [Symbol] +:connect+ or +:bind+; action when no prefix given
     #
     def _attach(endpoints, default:)
       return unless endpoints

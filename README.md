@@ -5,17 +5,17 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 [![Ruby](https://img.shields.io/badge/Ruby-%3E%3D%203.3-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org)
 
-Ruby FFI binding for [CZMQ](http://czmq.zeromq.org/) / [ZeroMQ](https://zeromq.org/) — high-performance asynchronous messaging for distributed systems.
+Ruby FFI binding for [CZMQ](https://github.com/zeromq/czmq) and [ZeroMQ](https://zeromq.org/), with support for threads, Fiber Scheduler, and CURVE encryption.
 
-> **353k msg/s** inproc throughput | **49 µs** fiber roundtrip latency | nonblock fast path
+> **310k msg/s** inproc throughput (64 B) | **61 µs** Async roundtrip latency
 
 ---
 
 ## Highlights
 
-- **All socket types** — req/rep, pub/sub, push/pull, dealer/router, xpub/xsub, pair, stream
-- **Async-first** — first-class [async](https://github.com/socketry/async) fiber support, also works with plain threads
-- **Ruby-idiomatic API** — messages as `Array<String>`, errors as exceptions, timeouts as `IO::TimeoutError`
+- **Socket types:** REQ/REP, PUB/SUB, PUSH/PULL, DEALER/ROUTER, XPUB/XSUB, PAIR, STREAM
+- **Fibers and threads:** works with [async](https://github.com/socketry/async) and plain threads
+- **Ruby API:** messages as `Array<String>`, errors as exceptions, timeouts as `IO::TimeoutError`
 
 ## Install
 
@@ -33,17 +33,21 @@ Then add the gem:
 
 ```sh
 gem install cztop
-# or in Gemfile
+```
+
+Or add it to your Gemfile:
+
+```ruby
 gem 'cztop'
 ```
 
 ## Learning ZeroMQ
 
-New to ZeroMQ? See [ZGUIDE_SUMMARY.md](ZGUIDE_SUMMARY.md) — a ~30 min read covering all major patterns with working CZTop code examples.
+New to ZeroMQ? See [ZGUIDE_SUMMARY.md](ZGUIDE_SUMMARY.md) for messaging patterns and working CZTop examples.
 
 ## Quick Start
 
-### Request / Reply
+### REQ / REP
 
 ```ruby
 require 'cztop'
@@ -63,7 +67,7 @@ Async do |task|
 end
 ```
 
-### Pub / Sub
+### PUB / SUB
 
 ```ruby
 Async do |task|
@@ -78,7 +82,7 @@ Async do |task|
 end
 ```
 
-### Push / Pull (Pipeline)
+### PUSH / PULL (Pipeline)
 
 ```ruby
 Async do
@@ -95,7 +99,8 @@ end
 | Pattern | Classes | Direction |
 |---------|---------|-----------|
 | Request/Reply | `REQ`, `REP` | bidirectional |
-| Publish/Subscribe | `PUB`, `SUB`, `XPUB`, `XSUB` | unidirectional |
+| Publish/Subscribe | `PUB`, `SUB` | unidirectional |
+| Subscription forwarding | `XPUB`, `XSUB` | bidirectional |
 | Pipeline | `PUSH`, `PULL` | unidirectional |
 | Routing | `DEALER`, `ROUTER` | bidirectional |
 | Exclusive pair | `PAIR` | bidirectional |
@@ -105,23 +110,23 @@ All classes live under `CZTop::Socket::`.
 
 ## Performance
 
-Benchmarked with benchmark-ips on Linux x86_64 (CZMQ 4.2.1, ZMQ 4.3.5, Ruby 4.0.1 +YJIT):
+Benchmarked with benchmark-ips on Linux x86_64 (CZMQ 4.2.1, ZMQ 4.3.5, Ruby 4.0.6 +YJIT):
 
-#### Throughput (push/pull)
-
-| | inproc | ipc | tcp |
-|---|--------|-----|-----|
-| **Async** | 284k/s | 17k/s | 14k/s |
-| **Threads** | 353k/s | 25k/s | 21k/s |
-
-#### Latency (req/rep roundtrip)
+#### Throughput (PUSH/PULL, 64 B messages)
 
 | | inproc | ipc | tcp |
 |---|--------|-----|-----|
-| **Async** | 49 µs | 100 µs | 107 µs |
-| **Threads** | 113 µs | 154 µs | 168 µs |
+| **Async** | 278k/s | 18.3k/s | 15.8k/s |
+| **Threads** | 310k/s | 18.3k/s | 16.2k/s |
 
-Async fibers deliver 2.3x lower inproc latency thanks to cheap context switching. See [`bench/`](bench/) for full results and scripts.
+#### Latency (REQ/REP roundtrip)
+
+| | inproc | ipc | tcp |
+|---|--------|-----|-----|
+| **Async** | 60.7 µs | 112.6 µs | 127.8 µs |
+| **Threads** | 74.9 µs | 109.2 µs | 119.6 µs |
+
+See [bench/README.md](bench/README.md) for full results, measurement details, and scripts.
 
 ## API Reference
 

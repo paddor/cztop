@@ -14,7 +14,7 @@ module CZTop
 
       # @param endpoints [String] endpoints to connect to
       # @param curve [Hash, nil] CURVE encryption options
-      # @param linger [Integer] linger period in milliseconds (default: 0)
+      # @param linger [Numeric, nil] linger period in seconds (default: 0)
       #
       def initialize(endpoints = nil, curve: nil, linger: 0)
         super

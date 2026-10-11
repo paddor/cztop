@@ -40,5 +40,5 @@ require_relative 'cztop/monitor'
 require_relative 'cztop/curve'
 require_relative 'cztop/curve/auth'
 
-# Convenience alias — allows `Cztop::Socket::REQ` alongside `CZTop::Socket::REQ`.
+# Convenience alias; allows `Cztop::Socket::REQ` alongside `CZTop::Socket::REQ`.
 Cztop = CZTop

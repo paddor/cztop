@@ -10,6 +10,8 @@
 * Reject endpoint and subscription operations on closed sockets, and receive
   operations on closed monitors
 * Close the CURVE authentication socket in its responder thread during shutdown
+* Fix linger documentation to use seconds
+* Clean up benchmark socket lifetimes and refresh measurements and README
 
 2.0.2
 -----

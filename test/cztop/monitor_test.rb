@@ -3,7 +3,8 @@
 require_relative 'test_helper'
 
 
-describe CZTop::Monitor do
+class CZTopMonitorTest < Minitest::Spec
+
   after do
     @monitor&.close
   end

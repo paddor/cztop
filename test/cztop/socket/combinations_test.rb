@@ -3,21 +3,22 @@
 require_relative '../test_helper'
 
 
-describe 'socket combinations' do
+class CZTopSocketCombinationsTest < Minitest::Spec
   describe 'ROUTER + REQ' do
-    i = 0
-    let(:endpoint) { "inproc://combo_router_req_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://combo_router_req_#{SecureRandom.hex(8)}"
+    end
 
-    let(:router) do
-      CZTop::Socket::ROUTER.new.tap do |r|
+    def router
+      @router ||= CZTop::Socket::ROUTER.new.tap do |r|
         r.send_timeout = 0.1
         r.recv_timeout = 0.1
         r.bind endpoint
       end
     end
 
-    let(:req) do
-      CZTop::Socket::REQ.new.tap do |r|
+    def req
+      @req ||= CZTop::Socket::REQ.new.tap do |r|
         r.send_timeout = 0.1
         r.recv_timeout = 0.1
         r.identity = 'test_req'
@@ -73,11 +74,12 @@ describe 'socket combinations' do
 
 
   describe 'ROUTER + ROUTER' do
-    i = 0
-    let(:endpoint) { "inproc://combo_router_router_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://combo_router_router_#{SecureRandom.hex(8)}"
+    end
 
-    let(:router_a) do
-      CZTop::Socket::ROUTER.new.tap do |r|
+    def router_a
+      @router_a ||= CZTop::Socket::ROUTER.new.tap do |r|
         r.identity = 'A'
         r.send_timeout = 0.1
         r.recv_timeout = 0.1
@@ -85,8 +87,8 @@ describe 'socket combinations' do
       end
     end
 
-    let(:router_b) do
-      CZTop::Socket::ROUTER.new.tap do |r|
+    def router_b
+      @router_b ||= CZTop::Socket::ROUTER.new.tap do |r|
         r.identity = 'B'
         r.send_timeout = 0.1
         r.recv_timeout = 0.1
@@ -114,9 +116,13 @@ describe 'socket combinations' do
 
 
   describe 'two-step pipeline (fan-out / fan-in)' do
-    i = 0
-    let(:vent_ep) { "inproc://combo_pipeline_vent_#{i += 1}" }
-    let(:coll_ep) { "inproc://combo_pipeline_coll_#{i}" }
+    def vent_ep
+      @vent_ep ||= "inproc://combo_pipeline_vent_#{SecureRandom.hex(8)}"
+    end
+
+    def coll_ep
+      @coll_ep ||= "inproc://combo_pipeline_coll_#{SecureRandom.hex(8)}"
+    end
 
     it 'fans out tasks to workers and collects results' do
       ventilator = CZTop::Socket::PUSH.new
@@ -165,11 +171,12 @@ describe 'socket combinations' do
 
 
   describe 'XPUB with multiple SUB' do
-    i = 0
-    let(:endpoint) { "inproc://combo_xpub_multi_sub_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://combo_xpub_multi_sub_#{SecureRandom.hex(8)}"
+    end
 
-    let(:xpub) do
-      CZTop::Socket::XPUB.new.tap do |s|
+    def xpub
+      @xpub ||= CZTop::Socket::XPUB.new.tap do |s|
         s.send_timeout = 0.1
         s.recv_timeout = 0.1
         s.bind endpoint

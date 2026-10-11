@@ -2,12 +2,19 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::REP do
+class CZTopSocketREPTest < Minitest::Spec
   describe 'integration' do
-    let(:rep) { CZTop::Socket::REP.new }
-    let(:req) { CZTop::Socket::REQ.new }
-    i = 0
-    let(:endpoint) { "inproc://rep_test_#{i += 1}" }
+    def rep
+      @rep ||= CZTop::Socket::REP.new
+    end
+
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://rep_test_#{SecureRandom.hex(8)}"
+    end
 
     before do
       rep.send_timeout = 0.1

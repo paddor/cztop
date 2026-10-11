@@ -1,3 +1,7 @@
+## [Unreleased]
+
+* Port specs to named `Minitest::Spec` subclasses with ordinary Ruby helpers
+
 2.0.2
 -----
 

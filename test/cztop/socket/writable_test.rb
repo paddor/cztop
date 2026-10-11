@@ -2,12 +2,20 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::Writable do
+class CZTopSocketWritableTest < Minitest::Spec
   describe '#send' do
-    i = 0
-    let(:endpoint) { "inproc://writable_send_spec_#{i += 1}" }
-    let(:push)     { CZTop::Socket::PUSH.new(endpoint) }
-    let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
+
+    def endpoint
+      @endpoint ||= "inproc://writable_send_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def push
+      @push ||= CZTop::Socket::PUSH.new(endpoint)
+    end
+
+    def pull
+      @pull ||= CZTop::Socket::PULL.new(endpoint)
+    end
 
     before do
       push.send_timeout = 0.1
@@ -23,6 +31,8 @@ describe CZTop::Socket::Writable do
       push.send(%w[hello world])
       assert_equal %w[hello world], pull.receive
     end
+
+
 
     it 'sends multipart messages with many parts' do
       parts = (1..10).map { |i| "part#{i}" }
@@ -65,7 +75,9 @@ describe CZTop::Socket::Writable do
 
 
   describe '#write_timeout' do
-    let(:req) { CZTop::Socket::REQ.new }
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
 
 
     describe 'with no sndtimeout set' do
@@ -104,10 +116,17 @@ describe CZTop::Socket::Writable do
   describe 'Async with Fiber Scheduler' do
     require 'async'
 
-    i = 0
-    let(:endpoint) { "inproc://async_writable_spec_#{i += 1}" }
-    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
-    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
+    def endpoint
+      @endpoint ||= "inproc://async_writable_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def req
+      @req ||= CZTop::Socket::REQ.new(endpoint)
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new(endpoint)
+    end
     before { req; rep } # eagerly evaluate
 
 
@@ -191,10 +210,17 @@ describe CZTop::Socket::Writable do
 
 
   describe 'Threads without Fiber Scheduler' do
-    i = 0
-    let(:endpoint) { "inproc://threaded_writable_spec_#{i += 1}" }
-    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
-    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
+    def endpoint
+      @endpoint ||= "inproc://threaded_writable_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def req
+      @req ||= CZTop::Socket::REQ.new(endpoint)
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new(endpoint)
+    end
     before { req; rep } # eagerly evaluate
 
 

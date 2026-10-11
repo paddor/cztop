@@ -2,43 +2,49 @@
 
 require_relative '../test_helper'
 
-describe CZTop::HasFFIDelegate do
-  let(:delegate_class) do
-    Class.new do
-      def initialize(ptr)
-        @ptr = ptr
-      end
+class CZTopHasFFIDelegateTest < Minitest::Spec
+  class Delegate
+    def initialize(ptr)
+      @ptr = ptr
+    end
 
+    def to_ptr
+      @ptr
+    end
 
-      def to_ptr
-        @ptr
-      end
+    def null?
+      @ptr.nil?
+    end
 
-
-      def null?
-        @ptr.nil?
-      end
-
-
-      def foo
-        :foo
-      end
+    def foo
+      :foo
     end
   end
 
-  let(:ptr)      { 'some pointer' }
-  let(:delegate) { delegate_class.new(ptr) }
-  let(:delegator_class) do
-    Class.new do
+  def ptr
+    @ptr ||= 'some pointer'
+  end
+
+  def delegate
+    @delegate ||= Delegate.new(ptr)
+  end
+
+  def delegator_class
+    @delegator_class ||= Class.new do
       include CZTop::HasFFIDelegate
       extend CZTop::HasFFIDelegate::ClassMethods
     end
   end
-  let(:delegator) { delegator_class.new }
+
+  def delegator
+    @delegator ||= delegator_class.new
+  end
 
 
   describe '.ffi_delegate' do
-    let(:method_name) { :m1 }
+    def method_name
+      @method_name ||= :m1
+    end
 
     it 'defines delegator method' do
       called_with = nil
@@ -101,7 +107,9 @@ describe CZTop::HasFFIDelegate do
 
 
     describe 'with nullified delegate' do
-      let(:ptr) { nil } # represents nullpointer
+      def ptr
+        nil
+      end
 
       it 'raises ArgumentError for EINVAL' do
         CZMQ::FFI::Errors.stub(:errno, Errno::EINVAL::Errno) do
@@ -139,7 +147,9 @@ describe CZTop::HasFFIDelegate do
 
 
   describe '#from_ffi_delegate' do
-    let(:arg) { 'foo' }
+    def arg
+      @arg ||= 'foo'
+    end
 
     it 'delegates to class method equivalent' do
       called_with = nil
@@ -152,7 +162,9 @@ describe CZTop::HasFFIDelegate do
 
 
   describe '.from_ffi_delegate' do
-    let(:obj) { delegator_class.from_ffi_delegate(delegate) }
+    def obj
+      @obj ||= delegator_class.from_ffi_delegate(delegate)
+    end
 
     it 'creates a fresh object' do
       assert_instance_of delegator_class, obj

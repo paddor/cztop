@@ -2,12 +2,20 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::REQ do
+class CZTopSocketREQTest < Minitest::Spec
+
   describe 'integration' do
-    let(:req) { CZTop::Socket::REQ.new }
-    let(:rep) { CZTop::Socket::REP.new }
-    i = 0
-    let(:endpoint) { "inproc://req_test_#{i += 1}" }
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://req_test_#{SecureRandom.hex(8)}"
+    end
 
     before do
       req.send_timeout = 0.1
@@ -126,7 +134,7 @@ describe CZTop::Socket::REQ do
       rep.receive
       rep.close
 
-      # REQ is stuck in recv state — times out
+      # REQ is stuck in recv state: times out
       assert_raises(IO::TimeoutError) { req.receive }
     end
   end

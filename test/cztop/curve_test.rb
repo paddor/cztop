@@ -3,7 +3,8 @@
 require_relative 'test_helper'
 
 
-describe CZTop::CURVE do
+class CZTopCURVETest < Minitest::Spec
+
 
   describe '.available?' do
     it 'returns a boolean' do

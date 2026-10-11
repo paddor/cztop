@@ -2,12 +2,19 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::PUSH do
+class CZTopSocketPUSHTest < Minitest::Spec
   describe 'integration' do
-    let(:push) { CZTop::Socket::PUSH.new }
-    let(:pull) { CZTop::Socket::PULL.new }
-    i = 0
-    let(:endpoint) { "inproc://push_test_#{i += 1}" }
+    def push
+      @push ||= CZTop::Socket::PUSH.new
+    end
+
+    def pull
+      @pull ||= CZTop::Socket::PULL.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://push_test_#{SecureRandom.hex(8)}"
+    end
 
     before do
       push.send_timeout = 0.1
@@ -52,11 +59,11 @@ describe CZTop::Socket::PUSH do
     it 'load-balances across multiple PULLs' do
       pull2 = CZTop::Socket::PULL.new
       pull2.recv_timeout = 0.05
-      pull2.bind "inproc://push_test_lb_#{i += 1}"
+      pull2.bind "inproc://push_test_lb_#{SecureRandom.hex(8)}"
       push2 = CZTop::Socket::PUSH.new
       push2.send_timeout = 0.1
 
-      ep = "inproc://push_test_lb2_#{i += 1}"
+      ep = "inproc://push_test_lb2_#{SecureRandom.hex(8)}"
       pull_a = CZTop::Socket::PULL.new
       pull_a.recv_timeout = 0.1
       pull_a.bind ep

@@ -3,10 +3,11 @@
 require_relative '../test_helper'
 
 
-describe 'HWM mute state' do
-  describe 'PUSH/PULL — blocks when HWM reached' do
-    i = 0
-    let(:endpoint) { "inproc://hwm_push_pull_#{i += 1}" }
+class CZTopSocketHWMTest < Minitest::Spec
+  describe 'PUSH/PULL: blocks when HWM reached' do
+    def endpoint
+      @endpoint ||= "inproc://hwm_push_pull_#{SecureRandom.hex(8)}"
+    end
 
     it 'blocks sender after HWM is reached' do
       push = CZTop::Socket::PUSH.new
@@ -36,9 +37,10 @@ describe 'HWM mute state' do
   end
 
 
-  describe 'PUB/SUB — drops when HWM reached' do
-    i = 0
-    let(:endpoint) { "inproc://hwm_pub_sub_#{i += 1}" }
+  describe 'PUB/SUB: drops when HWM reached' do
+    def endpoint
+      @endpoint ||= "inproc://hwm_pub_sub_#{SecureRandom.hex(8)}"
+    end
 
     it 'drops messages beyond HWM capacity' do
       pub = CZTop::Socket::PUB.new
@@ -69,9 +71,10 @@ describe 'HWM mute state' do
   end
 
 
-  describe 'ROUTER with router_mandatory — errors on full peer' do
-    i = 0
-    let(:endpoint) { "inproc://hwm_router_mandatory_#{i += 1}" }
+  describe 'ROUTER with router_mandatory: errors on full peer' do
+    def endpoint
+      @endpoint ||= "inproc://hwm_router_mandatory_#{SecureRandom.hex(8)}"
+    end
 
     it 'raises when peer HWM is reached' do
       router = CZTop::Socket::ROUTER.new

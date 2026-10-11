@@ -2,7 +2,7 @@
 
 require_relative '../../test_helper'
 
-describe CZTop::Socket::Types do
+class CZTopSocketTypesTest < Minitest::Spec
   it 'has constants' do
     %i[PAIR PUB SUB REQ REP DEALER ROUTER PULL PUSH XPUB XSUB STREAM].each do |name|
       assert_operator CZTop::Socket::Types, :const_defined?, name
@@ -24,7 +24,7 @@ describe CZTop::Socket::Types do
 end
 
 
-describe 'linger default' do
+class CZTopSocketTypesLingerTest < Minitest::Spec
   it 'defaults to 0' do
     socket = CZTop::Socket::REQ.new
     assert_equal 0, socket.linger
@@ -38,8 +38,10 @@ describe 'linger default' do
 end
 
 
-describe CZTop::Socket::REQ do
-  let(:socket) { CZTop::Socket::REQ.new }
+class CZTopSocketTypesREQTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::REQ.new
+  end
 
   it 'instantiates' do
     socket
@@ -54,10 +56,17 @@ describe CZTop::Socket::REQ do
 
 
   describe 'integration' do
-    let(:req) { CZTop::Socket::REQ.new }
-    let(:rep) { CZTop::Socket::REP.new }
-    i = 0
-    let(:endpoint) { "inproc://socket_types_spec_reqrep_#{i += 1}" }
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://socket_types_spec_reqrep_#{SecureRandom.hex(8)}"
+    end
 
     before do
       req.send_timeout = 0.1
@@ -88,8 +97,10 @@ describe CZTop::Socket::REQ do
 end
 
 
-describe CZTop::Socket::REP do
-  let(:socket) { CZTop::Socket::REP.new }
+class CZTopSocketTypesREPTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::REP.new
+  end
 
   it 'instantiates' do
     socket
@@ -104,8 +115,10 @@ describe CZTop::Socket::REP do
 end
 
 
-describe CZTop::Socket::DEALER do
-  let(:socket) { CZTop::Socket::DEALER.new }
+class CZTopSocketTypesDEALERTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::DEALER.new
+  end
 
   it 'instantiates' do
     socket
@@ -120,8 +133,10 @@ describe CZTop::Socket::DEALER do
 end
 
 
-describe CZTop::Socket::ROUTER do
-  let(:socket) { CZTop::Socket::ROUTER.new }
+class CZTopSocketTypesROUTERTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::ROUTER.new
+  end
 
   it 'instantiates' do
     socket
@@ -136,8 +151,13 @@ describe CZTop::Socket::ROUTER do
 
 
   describe '#send_to' do
-    let(:receiver) { 'mike' }
-    let(:content)  { 'foobar' }
+    def receiver
+      @receiver ||= 'mike'
+    end
+
+    def content
+      @content ||= 'foobar'
+    end
 
     it 'sends message to receiver' do
       sent = nil
@@ -156,15 +176,24 @@ describe CZTop::Socket::ROUTER do
 
 
     describe 'when connected' do
-      let(:identity) { 'receiver identity' }
-      let(:content)  { 'foobar' }
-      let(:msg)      { [identity, '', content] }
+      def identity
+        @identity ||= 'receiver identity'
+      end
 
-      i = 34_590
-      let(:endpoint) { "inproc://router_mandatory_spec_#{i += 1}" }
+      def content
+        @content ||= 'foobar'
+      end
 
-      let(:dealer) do
-        CZTop::Socket::DEALER.new.tap do |dealer|
+      def msg
+        @msg ||= [identity, '', content]
+      end
+
+      def endpoint
+        @endpoint ||= "inproc://router_mandatory_spec_#{SecureRandom.hex(8)}"
+      end
+
+      def dealer
+        @dealer ||= CZTop::Socket::DEALER.new.tap do |dealer|
           dealer.identity = identity
           dealer.connect endpoint
         end
@@ -181,7 +210,9 @@ describe CZTop::Socket::ROUTER do
 
 
       describe 'for unroutable message' do
-        let(:msg_with_wrong_identity) { ['wrong_id', '', content] }
+        def msg_with_wrong_identity
+          @msg_with_wrong_identity ||= ['wrong_id', '', content]
+        end
 
         it 'raises' do
           assert_raises(SocketError) { socket << msg_with_wrong_identity }
@@ -190,9 +221,17 @@ describe CZTop::Socket::ROUTER do
 
 
       describe 'for routable message' do
-        let(:identity) { 'receiver identity' }
-        let(:content)  { 'foobar' }
-        let(:msg)      { [identity, '', content] }
+        def identity
+          @identity ||= 'receiver identity'
+        end
+
+        def content
+          @content ||= 'foobar'
+        end
+
+        def msg
+          @msg ||= [identity, '', content]
+        end
 
         it 'accepts message' do
           socket << msg
@@ -209,8 +248,10 @@ describe CZTop::Socket::ROUTER do
 end
 
 
-describe CZTop::Socket::PUB do
-  let(:socket) { CZTop::Socket::PUB.new }
+class CZTopSocketTypesPUBTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::PUB.new
+  end
 
   it 'instantiates' do
     socket
@@ -225,8 +266,10 @@ describe CZTop::Socket::PUB do
 end
 
 
-describe CZTop::Socket::SUB do
-  let(:socket) { CZTop::Socket::SUB.new }
+class CZTopSocketTypesSUBTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::SUB.new
+  end
 
   it 'instantiates' do
     socket
@@ -239,7 +282,9 @@ describe CZTop::Socket::SUB do
     end
   end
 
-  let(:subscription) { 'test_prefix' }
+  def subscription
+    @subscription ||= 'test_prefix'
+  end
 
 
   describe 'with subscription' do
@@ -310,8 +355,10 @@ describe CZTop::Socket::SUB do
 end
 
 
-describe CZTop::Socket::XPUB do
-  let(:socket) { CZTop::Socket::XPUB.new }
+class CZTopSocketTypesXPUBTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::XPUB.new
+  end
 
   it 'instantiates' do
     socket
@@ -326,8 +373,10 @@ describe CZTop::Socket::XPUB do
 end
 
 
-describe CZTop::Socket::XSUB do
-  let(:socket) { CZTop::Socket::XSUB.new }
+class CZTopSocketTypesXSUBTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::XSUB.new
+  end
 
   it 'instantiates' do
     socket
@@ -342,8 +391,10 @@ describe CZTop::Socket::XSUB do
 end
 
 
-describe CZTop::Socket::PUSH do
-  let(:socket) { CZTop::Socket::PUSH.new }
+class CZTopSocketTypesPUSHTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::PUSH.new
+  end
 
   it 'instantiates' do
     socket
@@ -358,10 +409,17 @@ describe CZTop::Socket::PUSH do
 
 
   describe 'integration' do
-    let(:push) { CZTop::Socket::PUSH.new }
-    let(:pull) { CZTop::Socket::PULL.new }
-    i = 0
-    let(:endpoint) { "inproc://socket_types_spec_push_#{i += 1}" }
+    def push
+      @push ||= CZTop::Socket::PUSH.new
+    end
+
+    def pull
+      @pull ||= CZTop::Socket::PULL.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://socket_types_spec_push_#{SecureRandom.hex(8)}"
+    end
 
     before do
       push.send_timeout = 0.1
@@ -390,8 +448,10 @@ describe CZTop::Socket::PUSH do
 end
 
 
-describe CZTop::Socket::PULL do
-  let(:socket) { CZTop::Socket::PULL.new }
+class CZTopSocketTypesPULLTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::PULL.new
+  end
 
   it 'instantiates' do
     socket
@@ -406,11 +466,18 @@ describe CZTop::Socket::PULL do
 end
 
 
-describe CZTop::Socket::PAIR do
-  i = 0
-  let(:endpoint)          { "inproc://socket_types_spec_#{i += 1}" }
-  let(:binding_socket)    { CZTop::Socket::PAIR.new("@#{endpoint}") }
-  let(:connecting_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
+class CZTopSocketTypesPAIRTest < Minitest::Spec
+  def endpoint
+    @endpoint ||= "inproc://socket_types_spec_#{SecureRandom.hex(8)}"
+  end
+
+  def binding_socket
+    @binding_socket ||= CZTop::Socket::PAIR.new("@#{endpoint}")
+  end
+
+  def connecting_socket
+    @connecting_socket ||= CZTop::Socket::PAIR.new(">#{endpoint}")
+  end
 
   it 'creates PAIR sockets' do
     binding_socket
@@ -430,8 +497,10 @@ describe CZTop::Socket::PAIR do
 end
 
 
-describe CZTop::Socket::STREAM do
-  let(:socket) { CZTop::Socket::STREAM.new }
+class CZTopSocketTypesSTREAMTest < Minitest::Spec
+  def socket
+    @socket ||= CZTop::Socket::STREAM.new
+  end
 
   it 'instantiates' do
     socket

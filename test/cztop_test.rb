@@ -2,7 +2,7 @@
 
 require_relative 'test_helper'
 
-describe CZTop do
+class CZTopTest < Minitest::Spec
   it 'has a version' do
     refute_nil CZTop::VERSION
   end

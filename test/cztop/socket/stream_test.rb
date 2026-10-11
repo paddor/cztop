@@ -3,7 +3,7 @@
 require_relative '../test_helper'
 require 'socket'
 
-describe CZTop::Socket::STREAM do
+class CZTopSocketSTREAMTest < Minitest::Spec
   describe 'integration with raw TCP' do
     describe 'STREAM server with TCPSocket client' do
       it 'accepts a raw TCP connection and exchanges data' do

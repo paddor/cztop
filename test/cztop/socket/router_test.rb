@@ -2,13 +2,14 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::ROUTER do
+class CZTopSocketROUTERTest < Minitest::Spec
   describe 'integration' do
-    i = 0
-    let(:endpoint) { "inproc://router_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://router_test_#{SecureRandom.hex(8)}"
+    end
 
-    let(:router) do
-      CZTop::Socket::ROUTER.new.tap do |r|
+    def router
+      @router ||= CZTop::Socket::ROUTER.new.tap do |r|
         r.send_timeout = 0.1
         r.recv_timeout = 0.1
         r.bind endpoint
@@ -17,10 +18,12 @@ describe CZTop::Socket::ROUTER do
 
 
     describe '#send_to' do
-      let(:identity) { 'test_dealer' }
+      def identity
+        @identity ||= 'test_dealer'
+      end
 
-      let(:dealer) do
-        CZTop::Socket::DEALER.new.tap do |d|
+      def dealer
+        @dealer ||= CZTop::Socket::DEALER.new.tap do |d|
           d.identity = identity
           d.send_timeout = 0.1
           d.recv_timeout = 0.1
@@ -58,11 +61,16 @@ describe CZTop::Socket::ROUTER do
 
 
     describe 'routing between multiple dealers' do
-      let(:id_a) { 'dealer_a' }
-      let(:id_b) { 'dealer_b' }
+      def id_a
+        @id_a ||= 'dealer_a'
+      end
 
-      let(:dealer_a) do
-        CZTop::Socket::DEALER.new.tap do |d|
+      def id_b
+        @id_b ||= 'dealer_b'
+      end
+
+      def dealer_a
+        @dealer_a ||= CZTop::Socket::DEALER.new.tap do |d|
           d.identity = id_a
           d.send_timeout = 0.1
           d.recv_timeout = 0.1
@@ -70,8 +78,8 @@ describe CZTop::Socket::ROUTER do
         end
       end
 
-      let(:dealer_b) do
-        CZTop::Socket::DEALER.new.tap do |d|
+      def dealer_b
+        @dealer_b ||= CZTop::Socket::DEALER.new.tap do |d|
           d.identity = id_b
           d.send_timeout = 0.1
           d.recv_timeout = 0.1

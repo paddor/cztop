@@ -2,10 +2,11 @@
 
 require_relative '../test_helper'
 
-describe 'IPC transport' do
+class CZTopSocketIPCTest < Minitest::Spec
   describe 'abstract namespace' do
-    i = 0
-    let(:endpoint) { "ipc://@cztop_abstract_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "ipc://@cztop_abstract_test_#{SecureRandom.hex(8)}"
+    end
 
     it 'sends and receives via abstract namespace' do
       rep = CZTop::Socket::REP.new
@@ -34,7 +35,7 @@ describe 'IPC transport' do
 
       # Abstract namespace sockets have no filesystem entry
       refute File.exist?(endpoint.sub('ipc://@', ''))
-      refute File.exist?("@cztop_abstract_test_#{i}")
+      refute File.exist?(endpoint.delete_prefix('ipc://'))
     end
 
 

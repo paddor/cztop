@@ -2,13 +2,14 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::XPUB do
+class CZTopSocketXPUBTest < Minitest::Spec
   describe 'integration' do
-    i = 0
-    let(:endpoint) { "inproc://xpub_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://xpub_test_#{SecureRandom.hex(8)}"
+    end
 
-    let(:xpub) do
-      CZTop::Socket::XPUB.new.tap do |s|
+    def xpub
+      @xpub ||= CZTop::Socket::XPUB.new.tap do |s|
         s.send_timeout = 0.1
         s.recv_timeout = 0.1
         s.bind endpoint
@@ -71,8 +72,8 @@ describe CZTop::Socket::XPUB do
       xsub.send_timeout = 0.1
       xsub.recv_timeout = 0.1
 
-      pub_ep = "inproc://xpub_proxy_pub_#{i += 1}"
-      sub_ep = "inproc://xpub_proxy_sub_#{i}"
+      pub_ep = "inproc://xpub_proxy_pub_#{SecureRandom.hex(8)}"
+      sub_ep = "inproc://xpub_proxy_sub_#{SecureRandom.hex(8)}"
 
       xpub_proxy = CZTop::Socket::XPUB.new
       xpub_proxy.send_timeout = 0.1

@@ -39,6 +39,18 @@ class CZTopSocketWritableTest < Minitest::Spec
       assert_equal %w[hello world], pull.receive
     end
 
+    it 'converts parts without modifying the caller array' do
+      parts = ['hello', 42].freeze
+      push.send(parts)
+      assert_equal ['hello', '42'], pull.receive
+      assert_equal ['hello', 42], parts
+    end
+
+    it 'converts a scalar message' do
+      push.send(42)
+      assert_equal ['42'], pull.receive
+    end
+
     it 'converts parts before sending any frames' do
       invalid = Object.new
       def invalid.to_s

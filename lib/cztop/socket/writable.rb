@@ -16,9 +16,8 @@ module CZTop
       # @return [self]
       #
       def send(message)
-        parts = message.is_a?(Array) ? message : [message]
+        parts = message.is_a?(Array) ? message.map(&:to_s) : [message.to_s]
         raise ArgumentError, 'message has no parts' if parts.empty?
-        parts = parts.map(&:to_s)
 
         # Fast path: nonblock send (no GVL release)
         return self if send_nonblock(parts)

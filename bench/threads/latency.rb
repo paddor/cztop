@@ -1,49 +1,35 @@
 # frozen_string_literal: true
 
-require 'cztop'
-require 'benchmark/ips'
+require_relative '../helper'
 
-TRANSPORTS = {
-  'inproc' => 'inproc://bench_latency_t',
-  'ipc'    => 'ipc:///tmp/cztop_bench_latency_t.sock',
-  'tcp'    => 'tcp://127.0.0.1:9200',
-}
-
-puts "CZMQ #{CZMQ::FFI::CZMQ_VERSION} | ZMQ #{CZMQ::FFI::ZMQ_VERSION} | Ruby #{RUBY_VERSION} (Threads)"
-puts
-
+CZTopBench.print_environment('Threads')
 payload = 'ping'
 
-TRANSPORTS.each do |transport, addr|
+CZTopBench::TRANSPORTS.each do |transport|
   puts "--- #{transport} ---"
 
-  rep = CZTop::Socket::REP.new(addr)
-  req = CZTop::Socket::REQ.new(addr)
+  CZTopBench.with_sockets(transport, CZTop::Socket::REP, CZTop::Socket::REQ) do |rep, req|
+    responder = Thread.new do
+      loop { rep << rep.receive }
+    end
 
-  responder = Thread.new do
-    loop do
-      msg = rep.receive
-      rep << msg
-    rescue IOError, SystemCallError
-      break
+    begin
+      100.times do
+        req << payload
+        req.receive
+      end
+
+      Benchmark.ips do |x|
+        x.config(warmup: 1, time: 3)
+        x.report('roundtrip') do
+          req << payload
+          req.receive
+        end
+      end
+    ensure
+      responder.kill
+      responder.join
     end
   end
-
-  # Warm up
-  100.times do
-    req << payload
-    req.receive
-  end
-
-  Benchmark.ips do |x|
-    x.config(warmup: 1, time: 3)
-
-    x.report('roundtrip') do
-      req << payload
-      req.receive
-    end
-  end
-
-  responder.kill
   puts
 end

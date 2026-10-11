@@ -3,7 +3,24 @@
 require_relative 'test_helper'
 
 
-describe CZTop::CURVE do
+class CZTopCURVETest < Minitest::Spec
+
+  describe 'Auth#stop' do
+    before { skip unless CZTop::CURVE.available? }
+
+    it 'joins the responder before allowing another handler to bind' do
+      auth = CZTop::CURVE::Auth.new(allow_any: true)
+      thread = auth.instance_variable_get(:@thread)
+      auth.stop
+      refute thread.alive?
+      assert_nil auth.stop
+
+      replacement = CZTop::CURVE::Auth.new(allow_any: true)
+    ensure
+      auth&.stop
+      replacement&.stop
+    end
+  end
 
   describe '.available?' do
     it 'returns a boolean' do

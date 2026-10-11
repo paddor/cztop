@@ -3,15 +3,11 @@
 require_relative '../test_helper'
 
 
-describe 'CURVE socket integration' do
-  before { skip unless CZTop::CURVE.available? }
-
-  let(:server_pub) { @server_pub }
-  let(:server_sec) { @server_sec }
-  let(:client_pub) { @client_pub }
-  let(:client_sec) { @client_sec }
+class CZTopSocketCURVETest < Minitest::Spec
+  attr_reader :server_pub, :server_sec, :client_pub, :client_sec
 
   before do
+    skip unless CZTop::CURVE.available?
     @server_pub, @server_sec = CZTop::CURVE.keypair
     @client_pub, @client_sec = CZTop::CURVE.keypair
   end

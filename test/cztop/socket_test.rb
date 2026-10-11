@@ -3,15 +3,29 @@
 require_relative 'test_helper'
 
 
-describe CZTop::Socket do
+class CZTopSocketTest < Minitest::Spec
+  SUBJECT = CZTop::Socket
   include HasFFIDelegateExamples
 
-  i = 0
-  let(:endpoint)              { "inproc://endpoint_socket_spec_#{i += 1}" }
-  let(:req_socket)            { CZTop::Socket::REQ.new(endpoint) }
-  let(:rep_socket)            { CZTop::Socket::REP.new(endpoint) }
-  let(:binding_pair_socket)   { CZTop::Socket::PAIR.new("@#{endpoint}") }
-  let(:connecting_pair_socket) { CZTop::Socket::PAIR.new(">#{endpoint}") }
+  def endpoint
+    @endpoint ||= "inproc://endpoint_socket_spec_#{SecureRandom.hex(8)}"
+  end
+
+  def req_socket
+    @req_socket ||= CZTop::Socket::REQ.new(endpoint)
+  end
+
+  def rep_socket
+    @rep_socket ||= CZTop::Socket::REP.new(endpoint)
+  end
+
+  def binding_pair_socket
+    @binding_pair_socket ||= CZTop::Socket::PAIR.new("@#{endpoint}")
+  end
+
+  def connecting_pair_socket
+    @connecting_pair_socket ||= CZTop::Socket::PAIR.new(">#{endpoint}")
+  end
 
   it 'has Zsock options' do
     assert_operator CZTop::Socket, :<, CZTop::ZsockOptions
@@ -59,7 +73,9 @@ describe CZTop::Socket do
 
   describe '#initialize' do
     describe 'given invalid endpoint' do
-      let(:endpoint) { 'foo://bar' }
+      def endpoint
+        @endpoint ||= 'foo://bar'
+      end
 
       it 'raises' do
         assert_raises(SystemCallError) do
@@ -70,8 +86,13 @@ describe CZTop::Socket do
 
 
     describe 'given same binding endpoint to multiple REP sockets' do
-      let(:endpoint) { 'inproc://the_one_and_only' }
-      let(:sock1)    { CZTop::Socket::REP.new(endpoint) }
+      def endpoint
+        @endpoint ||= 'inproc://the_one_and_only'
+      end
+
+      def sock1
+        @sock1 ||= CZTop::Socket::REP.new(endpoint)
+      end
       before { sock1 }
 
       it 'raises' do
@@ -95,7 +116,9 @@ describe CZTop::Socket do
 
   describe '#<< and #receive' do
     describe 'given a sent content' do
-      let(:content) { 'foobar' }
+      def content
+        @content ||= 'foobar'
+      end
 
       it 'receives the content' do
         connecting_pair_socket << content
@@ -108,7 +131,9 @@ describe CZTop::Socket do
 
   describe '#last_endpoint' do
     describe 'unbound socket' do
-      let(:socket) { CZTop::Socket::REP.new }
+      def socket
+        @socket ||= CZTop::Socket::REP.new
+      end
 
       it 'returns nil' do
         assert_nil socket.last_endpoint
@@ -125,11 +150,15 @@ describe CZTop::Socket do
 
 
   describe '#connect' do
-    let(:socket) { rep_socket }
+    def socket
+      @socket ||= rep_socket
+    end
 
 
     describe 'with valid endpoint' do
-      let(:another_endpoint) { 'inproc://foo' }
+      def another_endpoint
+        @another_endpoint ||= 'inproc://foo'
+      end
 
       it 'connects' do
         req_socket.connect(another_endpoint)
@@ -138,7 +167,9 @@ describe CZTop::Socket do
 
 
     describe 'with invalid endpoint' do
-      let(:another_endpoint) { 'foo://bar' }
+      def another_endpoint
+        @another_endpoint ||= 'foo://bar'
+      end
 
       it 'raises' do
         assert_raises(ArgumentError) { socket.connect(another_endpoint) }
@@ -153,7 +184,9 @@ describe CZTop::Socket do
 
 
   describe '#disconnect' do
-    let(:socket) { rep_socket }
+    def socket
+      @socket ||= rep_socket
+    end
 
 
     describe 'with valid endpoint' do
@@ -166,7 +199,9 @@ describe CZTop::Socket do
 
 
     describe 'with invalid endpoint' do
-      let(:another_endpoint) { 'foo://bar' }
+      def another_endpoint
+        @another_endpoint ||= 'foo://bar'
+      end
 
       it 'raises' do
         assert_raises(ArgumentError) { socket.disconnect(another_endpoint) }
@@ -184,11 +219,29 @@ describe CZTop::Socket do
       rep_socket.close
       assert rep_socket.ffi_delegate.null?
     end
+
+    it 'can be called twice' do
+      rep_socket.close
+      assert_nil rep_socket.close
+    end
+
+    it 'rejects operations on a closed socket' do
+      rep_socket.close
+      [-> { rep_socket.last_endpoint },
+       -> { rep_socket.bind(endpoint) },
+       -> { rep_socket.connect(endpoint) },
+       -> { rep_socket.disconnect(endpoint) },
+       -> { rep_socket.unbind(endpoint) }].each do |operation|
+        assert_raises(CZMQ::FFI::DestroyedError, &operation)
+      end
+    end
   end
 
 
   describe '#bind' do
-    let(:socket) { rep_socket }
+    def socket
+      @socket ||= rep_socket
+    end
 
 
     describe 'with valid endpoint' do
@@ -198,7 +251,9 @@ describe CZTop::Socket do
 
 
       describe 'with automatic TCP port selection endpoint' do
-        let(:another_endpoint) { 'tcp://127.0.0.1:*' }
+        def another_endpoint
+          @another_endpoint ||= 'tcp://127.0.0.1:*'
+        end
         before { socket.bind(another_endpoint) }
 
         it 'sets last_tcp_port to a positive integer' do
@@ -209,8 +264,13 @@ describe CZTop::Socket do
 
 
       describe 'with explicit TCP port endpoint' do
-        let(:port)             { rand(55_755..58_665) }
-        let(:another_endpoint) { "tcp://127.0.0.1:#{port}" }
+        def port
+          @port ||= rand(55_755..58_665)
+        end
+
+        def another_endpoint
+          @another_endpoint ||= "tcp://127.0.0.1:#{port}"
+        end
         before { socket.bind(another_endpoint) }
 
         it 'sets last_tcp_port to the specified port' do
@@ -220,7 +280,9 @@ describe CZTop::Socket do
 
 
       describe 'with non-TCP endpoint' do
-        let(:another_endpoint) { 'inproc://non_tcp_endpoint' }
+        def another_endpoint
+          @another_endpoint ||= 'inproc://non_tcp_endpoint'
+        end
         before { socket.bind(another_endpoint) }
 
         it 'has no last_tcp_port' do
@@ -231,7 +293,9 @@ describe CZTop::Socket do
 
 
     describe 'with invalid endpoint' do
-      let(:another_endpoint) { 'foo://bar' }
+      def another_endpoint
+        @another_endpoint ||= 'foo://bar'
+      end
 
       it 'raises' do
         assert_raises(SystemCallError) { socket.bind(another_endpoint) }
@@ -245,7 +309,9 @@ describe CZTop::Socket do
 
 
   describe '#unbind' do
-    let(:socket) { rep_socket }
+    def socket
+      @socket ||= rep_socket
+    end
 
 
     describe 'with valid endpoint' do
@@ -256,7 +322,9 @@ describe CZTop::Socket do
 
 
     describe 'with invalid endpoint' do
-      let(:another_endpoint) { 'bar://foo' }
+      def another_endpoint
+        @another_endpoint ||= 'bar://foo'
+      end
 
       it 'raises' do
         assert_raises(ArgumentError) { socket.unbind(another_endpoint) }

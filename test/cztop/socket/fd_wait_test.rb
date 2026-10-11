@@ -2,11 +2,13 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::FdWait do
+class CZTopSocketFdWaitTest < Minitest::Spec
   require 'async'
 
   describe '#wait_for_fd_signal' do
-    let(:req) { CZTop::Socket::REQ.new }
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
 
     it 'waits for readability on ZMQ FD' do
       waited = false

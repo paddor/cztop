@@ -2,12 +2,19 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::DEALER do
+class CZTopSocketDEALERTest < Minitest::Spec
   describe 'integration' do
-    let(:dealer) { CZTop::Socket::DEALER.new }
-    let(:router) { CZTop::Socket::ROUTER.new }
-    i = 0
-    let(:endpoint) { "inproc://dealer_test_#{i += 1}" }
+    def dealer
+      @dealer ||= CZTop::Socket::DEALER.new
+    end
+
+    def router
+      @router ||= CZTop::Socket::ROUTER.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://dealer_test_#{SecureRandom.hex(8)}"
+    end
 
     before do
       dealer.send_timeout = 0.1
@@ -64,7 +71,7 @@ describe CZTop::Socket::DEALER do
       r.send_timeout = 0.1
       r.recv_timeout = 0.1
 
-      ep = "inproc://dealer_test_identity_#{i += 1}"
+      ep = "inproc://dealer_test_identity_#{SecureRandom.hex(8)}"
       r.bind ep
       d.connect ep
 

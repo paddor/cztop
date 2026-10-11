@@ -5,6 +5,7 @@ require 'simplecov'
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'minitest/mock'
+require 'securerandom'
 SimpleCov.start
 
 require_relative 'zmq_helper'

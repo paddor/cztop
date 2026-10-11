@@ -6,8 +6,8 @@ require 'socket'
 # --------------------------------------------------------------------------
 # Shannon entropy system test for CURVE encryption
 #
-# Proves that CURVE-encrypted traffic on the wire is indistinguishable from
-# random data by measuring Shannon entropy of the raw TCP bytes.
+# Compares byte distributions of CURVE and plaintext TCP traffic.
+# Shannon entropy alone does not establish cryptographic security.
 #
 #   H(X) = -Σ p(x) log₂ p(x)    for each byte value x ∈ [0, 255]
 #
@@ -23,7 +23,7 @@ require 'socket'
 # Run:   bundle exec rake test:system
 # --------------------------------------------------------------------------
 
-describe 'CURVE Shannon entropy' do
+class SystemCURVEEntropyTest < Minitest::Spec
   before { skip 'CURVE not available' unless CZTop::CURVE.available? }
 
   BOX_WIDTH = 57
@@ -77,7 +77,7 @@ describe 'CURVE Shannon entropy' do
           rescue IO::WaitReadable
             next
           rescue EOFError
-            break
+            raise
           end
 
           if sock == client_conn
@@ -103,7 +103,7 @@ describe 'CURVE Shannon entropy' do
     server.recv_timeout = 5
 
     # Payloads are deliberately low-entropy (repetitive ASCII) so we can
-    # prove the wire bytes are NOT low-entropy — encryption is working.
+    # compare their byte distribution with the encrypted wire bytes.
     message_count.times do |i|
       payload = "message #{i}: #{'A' * payload_size}"
       client << payload
@@ -146,7 +146,7 @@ describe 'CURVE Shannon entropy' do
           rescue IO::WaitReadable
             next
           rescue EOFError
-            break
+            raise
           end
 
           if sock == client_conn
@@ -202,7 +202,7 @@ describe 'CURVE Shannon entropy' do
     # name bytes + metadata). These pull entropy slightly below 8.0.
     # Threshold of 7.8 accounts for this framing overhead.
     assert_operator entropy, :>=, 7.8,
-      "CURVE ciphertext entropy #{entropy} is too low — expected ≥ 7.8 bits/byte"
+      "CURVE ciphertext entropy #{entropy} is too low: expected ≥ 7.8 bits/byte"
   end
 
 
@@ -225,7 +225,7 @@ describe 'CURVE Shannon entropy' do
     assert_operator curve_entropy, :>, pt_entropy,
       "CURVE entropy (#{'%.4f' % curve_entropy}) should exceed plaintext (#{'%.4f' % pt_entropy})"
     assert_operator delta, :>=, 0.5,
-      "Δ entropy #{delta} too small — encryption not meaningfully changing wire bytes"
+      "Δ entropy #{delta} too small: encryption not meaningfully changing wire bytes"
   end
 
 
@@ -250,6 +250,6 @@ describe 'CURVE Shannon entropy' do
         "Flatness ratio:     #{'%.4f' % flatness}  (1.0 = perfectly uniform)")
 
     assert_equal 256, coverage,
-      "only #{coverage}/256 byte values present — ciphertext should cover full byte range"
+      "only #{coverage}/256 byte values present: ciphertext should cover full byte range"
   end
 end

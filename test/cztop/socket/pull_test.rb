@@ -2,13 +2,14 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::PULL do
+class CZTopSocketPULLTest < Minitest::Spec
   describe 'integration' do
-    i = 0
-    let(:endpoint) { "inproc://pull_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://pull_test_#{SecureRandom.hex(8)}"
+    end
 
-    let(:pull) do
-      CZTop::Socket::PULL.new.tap do |s|
+    def pull
+      @pull ||= CZTop::Socket::PULL.new.tap do |s|
         s.recv_timeout = 0.1
         s.bind endpoint
       end

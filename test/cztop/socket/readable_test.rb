@@ -2,12 +2,40 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::Readable do
+class CZTopSocketReadableTest < Minitest::Spec
   describe '#receive' do
-    i = 0
-    let(:endpoint) { "inproc://readable_receive_spec_#{i += 1}" }
-    let(:push)     { CZTop::Socket::PUSH.new(endpoint) }
-    let(:pull)     { CZTop::Socket::PULL.new(endpoint) }
+    it 'raises WaitReadable immediately with a zero timeout' do
+      socket = CZTop::Socket::PULL.new
+      socket.recv_timeout = 0
+      assert_raises(IO::EAGAINWaitReadable) { socket.receive }
+    ensure
+      socket&.close
+    end
+
+    it 'raises native errors without waiting for readability' do
+      socket = CZTop::Socket::REP.new
+      CZMQ::FFI.stub(:zframe_recv_nowait, ::FFI::Pointer::NULL) do
+        CZMQ::FFI::Errors.stub(:errno, Errno::EINVAL::Errno) do
+          socket.stub(:wait_readable, ->(*) { flunk 'unexpected wait' }) do
+            assert_raises(ArgumentError) { socket.receive }
+          end
+        end
+      end
+    ensure
+      socket&.close
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://readable_receive_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def push
+      @push ||= CZTop::Socket::PUSH.new(endpoint)
+    end
+
+    def pull
+      @pull ||= CZTop::Socket::PULL.new(endpoint)
+    end
 
     before do
       push.send_timeout = 0.1
@@ -48,7 +76,9 @@ describe CZTop::Socket::Readable do
 
 
   describe '#read_timeout' do
-    let(:req) { CZTop::Socket::REQ.new }
+    def req
+      @req ||= CZTop::Socket::REQ.new
+    end
 
 
     describe 'with no rcvtimeout set' do
@@ -87,10 +117,17 @@ describe CZTop::Socket::Readable do
   describe 'Async with Fiber Scheduler' do
     require 'async'
 
-    i = 0
-    let(:endpoint) { "inproc://async_readable_spec_#{i += 1}" }
-    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
-    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
+    def endpoint
+      @endpoint ||= "inproc://async_readable_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def req
+      @req ||= CZTop::Socket::REQ.new(endpoint)
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new(endpoint)
+    end
     before { req; rep } # eagerly evaluate
 
 
@@ -139,6 +176,8 @@ describe CZTop::Socket::Readable do
 
     describe 'with rcvtimeo' do
       before do
+        req << 'request'
+        rep.receive
         req.recv_timeout = 0.03
         assert_equal 0.03, req.recv_timeout
       end
@@ -155,10 +194,17 @@ describe CZTop::Socket::Readable do
 
 
   describe 'Threads without Fiber Scheduler' do
-    i = 0
-    let(:endpoint) { "inproc://threaded_readable_spec_#{i += 1}" }
-    let(:req)      { CZTop::Socket::REQ.new(endpoint) }
-    let(:rep)      { CZTop::Socket::REP.new(endpoint) }
+    def endpoint
+      @endpoint ||= "inproc://threaded_readable_spec_#{SecureRandom.hex(8)}"
+    end
+
+    def req
+      @req ||= CZTop::Socket::REQ.new(endpoint)
+    end
+
+    def rep
+      @rep ||= CZTop::Socket::REP.new(endpoint)
+    end
     before { req; rep } # eagerly evaluate
 
 
@@ -202,6 +248,8 @@ describe CZTop::Socket::Readable do
 
     describe 'with rcvtimeo' do
       before do
+        req << 'request'
+        rep.receive
         req.recv_timeout = 0.03
         assert_equal 0.03, req.recv_timeout
       end

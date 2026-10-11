@@ -2,15 +2,21 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::PAIR do
+class CZTopSocketPAIRTest < Minitest::Spec
   describe 'integration' do
-    i = 0
-    let(:endpoint) { "inproc://pair_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://pair_test_#{SecureRandom.hex(8)}"
+    end
 
 
     describe 'with @ and > prefix convention' do
-      let(:binder)    { CZTop::Socket::PAIR.new("@#{endpoint}") }
-      let(:connector) { CZTop::Socket::PAIR.new(">#{endpoint}") }
+      def binder
+        @binder ||= CZTop::Socket::PAIR.new("@#{endpoint}")
+      end
+
+      def connector
+        @connector ||= CZTop::Socket::PAIR.new(">#{endpoint}")
+      end
 
       before do
         binder.send_timeout = 0.1
@@ -42,8 +48,13 @@ describe CZTop::Socket::PAIR do
 
 
     describe 'with explicit bind/connect' do
-      let(:pair_a) { CZTop::Socket::PAIR.new }
-      let(:pair_b) { CZTop::Socket::PAIR.new }
+      def pair_a
+        @pair_a ||= CZTop::Socket::PAIR.new
+      end
+
+      def pair_b
+        @pair_b ||= CZTop::Socket::PAIR.new
+      end
 
       before do
         pair_a.send_timeout = 0.1

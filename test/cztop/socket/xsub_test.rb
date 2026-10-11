@@ -2,20 +2,21 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::XSUB do
+class CZTopSocketXSUBTest < Minitest::Spec
   describe 'integration' do
-    i = 0
-    let(:endpoint) { "inproc://xsub_test_#{i += 1}" }
+    def endpoint
+      @endpoint ||= "inproc://xsub_test_#{SecureRandom.hex(8)}"
+    end
 
-    let(:pub) do
-      CZTop::Socket::PUB.new.tap do |s|
+    def pub
+      @pub ||= CZTop::Socket::PUB.new.tap do |s|
         s.send_timeout = 0.1
         s.bind endpoint
       end
     end
 
-    let(:xsub) do
-      CZTop::Socket::XSUB.new.tap do |s|
+    def xsub
+      @xsub ||= CZTop::Socket::XSUB.new.tap do |s|
         s.send_timeout = 0.1
         s.recv_timeout = 0.1
         s.connect endpoint

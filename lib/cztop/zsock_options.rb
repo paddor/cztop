@@ -145,7 +145,15 @@ module CZTop
     # @return [String] current socket identity
     #
     def identity
-      Zsock.identity(self).read_string
+      ptr = Zsock.identity(self)
+      HasFFIDelegate.raise_zmq_err if ptr.null?
+      begin
+        ptr.read_string
+      ensure
+        ref = ::FFI::MemoryPointer.new(:pointer)
+        ref.write_pointer(ptr)
+        CZMQ::FFI.zstr_free(ref)
+      end
     end
 
 

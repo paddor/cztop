@@ -3,7 +3,17 @@
 require_relative 'test_helper'
 
 
-describe CZTop::Monitor do
+class CZTopMonitorTest < Minitest::Spec
+  it 'rejects receive after close' do
+    server = CZTop::Socket::REP.new
+    @monitor = CZTop::Monitor.new(server)
+    @monitor.close
+    assert_nil @monitor.close
+    assert_raises(IOError) { @monitor.receive }
+  ensure
+    server&.close
+  end
+
   after do
     @monitor&.close
   end

@@ -29,7 +29,9 @@ module CZTop
         @allow_any = allow_any
         @zap = CZTop::Socket::REP.new
         @zap.linger = 0
+        @zap.recv_timeout = 0.1
         @zap.bind('inproc://zeromq.zap.01')
+        @stopping = false
         @thread = Thread.new { run }
         ObjectSpace.define_finalizer(self, self.class._poststop(@thread))
       end
@@ -60,8 +62,9 @@ module CZTop
       #
       def stop
         ObjectSpace.undefine_finalizer(self)
-        @zap.close
-        @thread.join(1)
+        @stopping = true
+        @thread.join
+        nil
       end
 
       # @api private
@@ -75,8 +78,12 @@ module CZTop
       private
 
       def run
-        loop do
-          msg = @zap.receive
+        until @stopping
+          begin
+            msg = @zap.receive
+          rescue IO::TimeoutError
+            next
+          end
           # ZAP request: [version, request_id, domain, address, identity, mechanism, credential]
           version    = msg[0]
           request_id = msg[1]
@@ -90,8 +97,8 @@ module CZTop
 
           @zap.__send__(:send, [version, request_id, status, '', '', ''])
         end
-      rescue
-        # Socket closed or thread interrupted → exit gracefully
+      ensure
+        @zap.close
       end
 
     end

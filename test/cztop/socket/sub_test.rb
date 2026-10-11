@@ -2,11 +2,15 @@
 
 require_relative '../test_helper'
 
-describe CZTop::Socket::SUB do
+class CZTopSocketSUBTest < Minitest::Spec
   describe 'integration' do
-    let(:pub) { CZTop::Socket::PUB.new }
-    i = 0
-    let(:endpoint) { "inproc://sub_test_#{i += 1}" }
+    def pub
+      @pub ||= CZTop::Socket::PUB.new
+    end
+
+    def endpoint
+      @endpoint ||= "inproc://sub_test_#{SecureRandom.hex(8)}"
+    end
 
     before do
       pub.send_timeout = 0.1

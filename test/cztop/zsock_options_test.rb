@@ -2,12 +2,15 @@
 
 require_relative 'test_helper'
 
-describe CZTop::ZsockOptions do
+class CZTopZsockOptionsTest < Minitest::Spec
   include ZMQHelper
+  def endpoint
+    @endpoint ||= "inproc://zsock_options_#{SecureRandom.hex(8)}"
+  end
 
-  i = 0
-  let(:endpoint) { "inproc://zsock_options_#{i += 1}" }
-  let(:socket)   { CZTop::Socket::REQ.new(endpoint) }
+  def socket
+    @socket ||= CZTop::Socket::REQ.new(endpoint)
+  end
 
 
   describe 'event-based methods' do
@@ -81,7 +84,9 @@ describe CZTop::ZsockOptions do
 
 
     describe 'when setting new value' do
-      let(:new_value) { 99 }
+      def new_value
+        @new_value ||= 99
+      end
       before { socket.sndhwm = new_value }
 
       it 'sets new value' do
@@ -100,7 +105,9 @@ describe CZTop::ZsockOptions do
 
 
     describe 'when setting new value' do
-      let(:new_value) { 99 }
+      def new_value
+        @new_value ||= 99
+      end
       before { socket.rcvhwm = new_value }
 
       it 'sets new value' do
@@ -173,7 +180,9 @@ describe CZTop::ZsockOptions do
 
 
   describe '#router_mandatory=' do
-    let(:router) { CZTop::Socket::ROUTER.new(endpoint) }
+    def router
+      @router ||= CZTop::Socket::ROUTER.new(endpoint)
+    end
 
     it 'can set the flag' do
       called_with = nil
@@ -194,7 +203,9 @@ describe CZTop::ZsockOptions do
 
 
   describe '#router_mandatory?' do
-    let(:router) { CZTop::Socket::ROUTER.new(endpoint) }
+    def router
+      @router ||= CZTop::Socket::ROUTER.new(endpoint)
+    end
 
     it 'gets the flag' do
       refute_operator router, :router_mandatory?
@@ -207,6 +218,19 @@ describe CZTop::ZsockOptions do
 
 
   describe '#identity' do
+    it 'frees the native string after reading it' do
+      released = false
+      free = CZMQ::FFI.method(:zstr_free)
+      CZMQ::FFI.stub(:zstr_free, ->(ref) {
+        refute ref.read_pointer.null?
+        free.call(ref)
+        released = true
+      }) do
+        assert_equal '', socket.identity
+      end
+      assert released
+    end
+
     describe 'with no identity set' do
       it 'returns empty string' do
         assert_equal '', socket.identity
@@ -215,7 +239,9 @@ describe CZTop::ZsockOptions do
 
 
     describe 'with identity set' do
-      let(:identity) { 'foobar' }
+      def identity
+        @identity ||= 'foobar'
+      end
       before { socket.identity = identity }
 
       it 'returns identity' do
@@ -259,7 +285,9 @@ describe CZTop::ZsockOptions do
 
 
     describe 'with TOS set' do
-      let(:tos) { 5 }
+      def tos
+        @tos ||= 5
+      end
       before { socket.tos = tos }
 
       it 'returns TOS' do
@@ -474,7 +502,9 @@ describe CZTop::ZsockOptions do
 
 
   describe '#conflate' do
-    let(:socket) { CZTop::Socket::PULL.new }
+    def socket
+      @socket ||= CZTop::Socket::PULL.new
+    end
 
     it 'is false by default' do
       refute_operator socket, :conflate?
@@ -565,8 +595,13 @@ describe CZTop::ZsockOptions do
 
 
   describe '#events' do
-    let(:writer) { CZTop::Socket::PUSH.new(endpoint) }
-    let(:reader) { CZTop::Socket::PULL.new(endpoint) }
+    def writer
+      @writer ||= CZTop::Socket::PUSH.new(endpoint)
+    end
+
+    def reader
+      @reader ||= CZTop::Socket::PULL.new(endpoint)
+    end
 
 
     describe 'with readable socket' do
@@ -593,12 +628,14 @@ describe CZTop::ZsockOptions do
 
 
     describe 'with non-writable socket' do
-      let(:full_writer) do
-        sock = CZTop::Socket::PUSH.new
-        sock.sndhwm = 1
-        sock.connect(endpoint)
-        sock << 'is now full'
-        sock
+      def full_writer
+        @full_writer ||= begin
+          sock = CZTop::Socket::PUSH.new
+          sock.sndhwm = 1
+          sock.connect(endpoint)
+          sock << 'is now full'
+          sock
+        end
       end
 
       it 'is not writable' do

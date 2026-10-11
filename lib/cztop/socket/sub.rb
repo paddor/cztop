@@ -17,7 +17,7 @@ module CZTop
       # @param prefix [String, nil] subscription prefix; defaults to no
       #   subscription. Pass {EVERYTHING} (+""+) to subscribe to everything.
       # @param curve [Hash, nil] CURVE encryption options
-      # @param linger [Integer] linger period in milliseconds (default: 0)
+      # @param linger [Numeric, nil] linger period in seconds (default: 0)
       #
       def initialize(endpoints = nil, prefix: nil, curve: nil, linger: 0)
         super(endpoints, curve: curve, linger: linger)

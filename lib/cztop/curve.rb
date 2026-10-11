@@ -6,7 +6,7 @@ module CZTop
   #
   # Provides keypair generation, key derivation, and Z85 encoding/decoding.
   # CURVE options are applied to sockets via the +curve:+ keyword argument
-  # in socket constructors — there are no public CURVE methods on Socket.
+  # in socket constructors; there are no public CURVE methods on Socket.
   #
   module CURVE
 

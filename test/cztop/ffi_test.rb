@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../test_helper'
+require 'weakref'
 
 class CZTopFFITest < Minitest::Spec
   # Evaluate only library loading, before any functions are attached.
@@ -164,5 +165,42 @@ class CZTopFFIZsockTest < Minitest::Spec
     assert_instance_of CZMQ::FFI::DestroyedError, error
   ensure
     socket&.destroy
+  end
+end
+
+class CZTopFFIZframeTest < Minitest::Spec
+  def borrowed_frames
+    message = CZMQ::FFI::Zmsg.new
+    message.add_buffer('first')
+    message.add_buffer('second')
+    [[message.first, message.next], WeakRef.new(message)]
+  end
+
+  it 'retains the parent message while borrowed frames remain live' do
+    frames, owner = borrowed_frames
+    GC.start(full_mark: true, immediate_sweep: true)
+    assert owner.weakref_alive?, 'parent message was collected with live frames'
+    assert_equal ['first', 'second'], frames.map { |frame| frame.data.read_bytes(frame.size) }
+  end
+
+  it 'rejects borrowed frame access after the parent transfers ownership' do
+    message = CZMQ::FFI::Zmsg.new
+    message.add_buffer('first')
+    message.add_buffer('second')
+    frames = [message.first, message.next]
+    ref = message.__ptr_give_ref
+    CZMQ::FFI.zmsg_destroy(ref)
+
+    # Keep a regression from passing freed frame pointers to native functions.
+    CZMQ::FFI.stub(:zframe_data, ::FFI::Pointer::NULL) do
+      CZMQ::FFI.stub(:zframe_size, 0) do
+        frames.each do |frame|
+          assert_raises(CZMQ::FFI::DestroyedError) { frame.data }
+          assert_raises(CZMQ::FFI::DestroyedError) { frame.size }
+        end
+      end
+    end
+  ensure
+    CZMQ::FFI.zmsg_destroy(ref) if ref
   end
 end

@@ -467,7 +467,7 @@ module CZMQ
 
       # Returns a Zframe that does NOT own the pointer (borrowed from zmsg).
       def _borrowed_frame(ptr)
-        Zframe._from_ptr(ptr, false)
+        Zframe._from_ptr(ptr, owner: self)
       end
     end
 
@@ -475,19 +475,22 @@ module CZMQ
     # Zframe (lightweight; only used for borrowed frames from Zmsg)
     # -----------------------------------------------------------------
     class Zframe
-      # Wraps a borrowed zframe_t pointer (not owned, no finalizer).
+      # Wraps a borrowed zframe_t pointer and retains its owning message.
       #
-      def self._from_ptr(ptr, _owned = false)
+      def self._from_ptr(ptr, owner:)
         obj = allocate
         obj.instance_variable_set(:@ptr, ptr)
+        obj.instance_variable_set(:@owner, owner)
         obj
       end
 
       def data
+        @owner.to_ptr
         CZMQ::FFI.zframe_data(@ptr)
       end
 
       def size
+        @owner.to_ptr
         CZMQ::FFI.zframe_size(@ptr)
       end
     end

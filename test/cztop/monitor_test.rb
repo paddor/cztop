@@ -77,3 +77,77 @@ class CZTopMonitorTest < Minitest::Spec
     assert_equal 'DISCONNECTED', event.name
   end
 end
+
+
+class CZTopMonitorCleanupTest < Minitest::Spec
+  before do
+    @server = CZTop::Socket::REP.new
+  end
+
+  after do
+    @monitor&.close
+    @server.close
+  end
+
+  def monitor
+    @monitor ||= CZTop::Monitor.new(@server)
+  end
+
+  it 'removes the finalizer before native destruction' do
+    subject = monitor
+    events = []
+    unregister = ObjectSpace.method(:undefine_finalizer)
+    destroy = CZMQ::FFI.method(:zactor_destroy)
+    ObjectSpace.stub(:undefine_finalizer, ->(object) {
+      events << :unregister
+      unregister.call(object)
+    }) do
+      CZMQ::FFI.stub(:zactor_destroy, ->(ref) {
+        events << :destroy
+        destroy.call(ref)
+      }) { subject.close }
+    end
+    assert_equal [:unregister, :destroy], events
+  end
+
+  it 'leaves a pending finalizer with a null pointer after native destruction' do
+    finalizer = nil
+    register = ObjectSpace.method(:define_finalizer)
+    ObjectSpace.stub(:define_finalizer, ->(object, callback) {
+      finalizer = callback
+      register.call(object, callback)
+    }) { monitor }
+
+    pointers = []
+    destroy = CZMQ::FFI.method(:zactor_destroy)
+    CZMQ::FFI.stub(:zactor_destroy, ->(ref) {
+      pointers << ref.read_pointer
+      # Avoid a native double free if the finalizer still holds a stale pointer.
+      destroy.call(ref) if pointers.length == 1 || ref.read_pointer.null?
+    }) do
+      monitor.close
+      finalizer.call(monitor.object_id)
+    end
+    assert_equal 2, pointers.length
+    refute pointers.first.null?
+    assert pointers.last.null?, 'finalizer retains a destroyed monitor'
+  end
+
+  it 'marks itself closed and rejects repeated close during native destruction' do
+    subject = monitor
+    calls = 0
+    closed = false
+    destroy = CZMQ::FFI.method(:zactor_destroy)
+    CZMQ::FFI.stub(:zactor_destroy, ->(ref) {
+      calls += 1
+      if calls == 1
+        closed = subject.closed?
+        subject.close
+        destroy.call(ref)
+      end
+    }) { subject.close }
+    assert_equal 1, calls
+    assert closed
+    assert_nil subject.close
+  end
+end

@@ -46,9 +46,9 @@ module CZTop
 
       @closed = false
 
-      prevent_leak_ptr = ::FFI::MemoryPointer.new(:pointer)
-      prevent_leak_ptr.write_pointer(@actor_ptr)
-      ObjectSpace.define_finalizer(self, self.class._make_destructor(prevent_leak_ptr))
+      @actor_ref = ::FFI::MemoryPointer.new(:pointer)
+      @actor_ref.write_pointer(@actor_ptr)
+      ObjectSpace.define_finalizer(self, self.class._make_destructor(@actor_ref))
 
       CZMQ::FFI.zstr_send(@actor_ptr, 'VERBOSE') if verbose
 
@@ -103,11 +103,9 @@ module CZTop
     def close
       return if @closed
 
-      pp = ::FFI::MemoryPointer.new(:pointer)
-      pp.write_pointer(@actor_ptr)
-      CZMQ::FFI.zactor_destroy(pp)
       @closed = true
       ObjectSpace.undefine_finalizer(self)
+      CZMQ::FFI.zactor_destroy(@actor_ref)
     end
 
 

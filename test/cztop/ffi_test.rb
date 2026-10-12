@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../test_helper'
+require 'weakref'
 
 class CZTopFFITest < Minitest::Spec
   # Evaluate only library loading, before any functions are attached.
@@ -81,5 +82,125 @@ class CZTopFFITest < Minitest::Spec
     socket.close
     assert_raises(CZMQ::FFI::DestroyedError) { CZMQ::FFI::Zmsg.send(message, socket) }
     refute message.null?
+  end
+end
+
+class CZTopFFIZsockTest < Minitest::Spec
+  def socket_with_finalizer(factory)
+    finalizer = nil
+    register = ObjectSpace.method(:define_finalizer)
+    socket = ObjectSpace.stub(:define_finalizer, ->(object, callback) {
+      finalizer = callback
+      register.call(object, callback)
+    }) do
+      case factory
+      when :new then CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+      when :new_pair then CZMQ::FFI::Zsock.new_pair(nil)
+      end
+    end
+    [socket, finalizer]
+  end
+
+  it 'removes the finalizer before native destruction' do
+    socket = CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+    events = []
+    unregister = ObjectSpace.method(:undefine_finalizer)
+    destroy = CZMQ::FFI.method(:zsock_destroy)
+    ObjectSpace.stub(:undefine_finalizer, ->(object) {
+      events << :unregister
+      unregister.call(object)
+    }) do
+      CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+        events << :destroy
+        destroy.call(ref)
+      }) { socket.destroy }
+    end
+    assert_equal [:unregister, :destroy], events
+  ensure
+    socket&.destroy
+  end
+
+  it 'leaves a pending finalizer with a null pointer after native destruction' do
+    [:new, :new_pair].each do |factory|
+      socket, finalizer = socket_with_finalizer(factory)
+      pointers = []
+      destroy = CZMQ::FFI.method(:zsock_destroy)
+      CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+        pointers << ref.read_pointer
+        # Avoid a native double free if the finalizer still holds a stale pointer.
+        destroy.call(ref) if pointers.length == 1 || ref.read_pointer.null?
+      }) do
+        socket.destroy
+        finalizer.call(socket.object_id)
+      end
+      assert_equal 2, pointers.length
+      refute pointers.first.null?
+      assert pointers.last.null?, "#{factory} finalizer retains a destroyed socket"
+    ensure
+      socket&.destroy
+    end
+  end
+
+  it 'rejects use and repeated destruction during native destruction' do
+    socket = CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+    calls = 0
+    closed = false
+    error = nil
+    destroy = CZMQ::FFI.method(:zsock_destroy)
+    CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+      calls += 1
+      if calls == 1
+        closed = socket.null?
+        begin
+          socket.to_ptr
+        rescue CZMQ::FFI::DestroyedError => e
+          error = e
+        end
+        socket.destroy
+        destroy.call(ref)
+      end
+    }) { socket.destroy }
+    assert_equal 1, calls
+    assert closed
+    assert_instance_of CZMQ::FFI::DestroyedError, error
+  ensure
+    socket&.destroy
+  end
+end
+
+class CZTopFFIZframeTest < Minitest::Spec
+  def borrowed_frames
+    message = CZMQ::FFI::Zmsg.new
+    message.add_buffer('first')
+    message.add_buffer('second')
+    [[message.first, message.next], WeakRef.new(message)]
+  end
+
+  it 'retains the parent message while borrowed frames remain live' do
+    frames, owner = borrowed_frames
+    GC.start(full_mark: true, immediate_sweep: true)
+    assert owner.weakref_alive?, 'parent message was collected with live frames'
+    assert_equal ['first', 'second'], frames.map { |frame| frame.data.read_bytes(frame.size) }
+  end
+
+  it 'rejects borrowed frame access after the parent transfers ownership' do
+    message = CZMQ::FFI::Zmsg.new
+    message.add_buffer('first')
+    message.add_buffer('second')
+    frames = [message.first, message.next]
+    ref = message.__ptr_give_ref
+    CZMQ::FFI.zmsg_destroy(ref)
+
+    # Keep a regression from passing freed frame pointers to native functions.
+    CZMQ::FFI.stub(:zframe_data, ::FFI::Pointer::NULL) do
+      CZMQ::FFI.stub(:zframe_size, 0) do
+        frames.each do |frame|
+          assert_raises(CZMQ::FFI::DestroyedError) { frame.data }
+          assert_raises(CZMQ::FFI::DestroyedError) { frame.size }
+        end
+      end
+    end
+  ensure
+    CZMQ::FFI.zmsg_destroy(ref) if ref
   end
 end

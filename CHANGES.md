@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+2.0.4
+-----
+
+* Prevent socket double destruction by removing finalizers before native cleanup
+  and sharing their pointer holders with explicit destruction
+* Prevent monitor double destruction with the same finalizer cleanup ordering
+  and shared pointer holder
+* Keep parent messages alive while borrowed frames remain live, and reject frame
+  access after message ownership is transferred
+
 2.0.3
 -----
 

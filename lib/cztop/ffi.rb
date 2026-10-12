@@ -172,8 +172,8 @@ module CZMQ
       end
 
       module ClassMethods
-        def prevent_leak(ptr, destroy_fn)
-          prevent_leak_ptr = ::FFI::MemoryPointer.new(:pointer)
+        def prevent_leak(ptr, destroy_fn, ptr_ref: nil)
+          prevent_leak_ptr = ptr_ref || ::FFI::MemoryPointer.new(:pointer)
           prevent_leak_ptr.write_pointer(ptr)
           prevent_leak_fn = destroy_fn
           ->(id) { CZMQ::FFI.__send__(prevent_leak_fn, prevent_leak_ptr) }
@@ -264,10 +264,11 @@ module CZMQ
 
       def initialize(type)
         @ptr = CZMQ::FFI.zsock_new(type)
+        @ptr_ref = ::FFI::MemoryPointer.new(:pointer)
         @moved = false
         unless @ptr.null?
           ObjectSpace.define_finalizer(self,
-            self.class.prevent_leak(@ptr, :zsock_destroy))
+            self.class.prevent_leak(@ptr, :zsock_destroy, ptr_ref: @ptr_ref))
         end
       end
 
@@ -287,11 +288,13 @@ module CZMQ
 
       def self._wrap(ptr)
         obj = allocate
+        ptr_ref = ::FFI::MemoryPointer.new(:pointer)
         obj.instance_variable_set(:@ptr, ptr)
+        obj.instance_variable_set(:@ptr_ref, ptr_ref)
         obj.instance_variable_set(:@moved, false)
         unless ptr.null?
           ObjectSpace.define_finalizer(obj,
-            prevent_leak(ptr, :zsock_destroy))
+            prevent_leak(ptr, :zsock_destroy, ptr_ref: ptr_ref))
         end
         obj
       end
@@ -320,11 +323,10 @@ module CZMQ
 
       def destroy
         return if @moved
-        ptr_ptr = ::FFI::MemoryPointer.new(:pointer)
-        ptr_ptr.write_pointer(@ptr)
-        CZMQ::FFI.zsock_destroy(ptr_ptr)
         @moved = true
         ObjectSpace.undefine_finalizer(self)
+        # Native destruction releases the GVL and nulls the finalizer's reference.
+        CZMQ::FFI.zsock_destroy(@ptr_ref)
       end
 
       def set_subscribe(prefix)
@@ -465,7 +467,7 @@ module CZMQ
 
       # Returns a Zframe that does NOT own the pointer (borrowed from zmsg).
       def _borrowed_frame(ptr)
-        Zframe._from_ptr(ptr, false)
+        Zframe._from_ptr(ptr, owner: self)
       end
     end
 
@@ -473,19 +475,22 @@ module CZMQ
     # Zframe (lightweight; only used for borrowed frames from Zmsg)
     # -----------------------------------------------------------------
     class Zframe
-      # Wraps a borrowed zframe_t pointer (not owned, no finalizer).
+      # Wraps a borrowed zframe_t pointer and retains its owning message.
       #
-      def self._from_ptr(ptr, _owned = false)
+      def self._from_ptr(ptr, owner:)
         obj = allocate
         obj.instance_variable_set(:@ptr, ptr)
+        obj.instance_variable_set(:@owner, owner)
         obj
       end
 
       def data
+        @owner.to_ptr
         CZMQ::FFI.zframe_data(@ptr)
       end
 
       def size
+        @owner.to_ptr
         CZMQ::FFI.zframe_size(@ptr)
       end
     end

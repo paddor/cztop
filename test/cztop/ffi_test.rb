@@ -83,3 +83,86 @@ class CZTopFFITest < Minitest::Spec
     refute message.null?
   end
 end
+
+class CZTopFFIZsockTest < Minitest::Spec
+  def socket_with_finalizer(factory)
+    finalizer = nil
+    register = ObjectSpace.method(:define_finalizer)
+    socket = ObjectSpace.stub(:define_finalizer, ->(object, callback) {
+      finalizer = callback
+      register.call(object, callback)
+    }) do
+      case factory
+      when :new then CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+      when :new_pair then CZMQ::FFI::Zsock.new_pair(nil)
+      end
+    end
+    [socket, finalizer]
+  end
+
+  it 'removes the finalizer before native destruction' do
+    socket = CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+    events = []
+    unregister = ObjectSpace.method(:undefine_finalizer)
+    destroy = CZMQ::FFI.method(:zsock_destroy)
+    ObjectSpace.stub(:undefine_finalizer, ->(object) {
+      events << :unregister
+      unregister.call(object)
+    }) do
+      CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+        events << :destroy
+        destroy.call(ref)
+      }) { socket.destroy }
+    end
+    assert_equal [:unregister, :destroy], events
+  ensure
+    socket&.destroy
+  end
+
+  it 'leaves a pending finalizer with a null pointer after native destruction' do
+    [:new, :new_pair].each do |factory|
+      socket, finalizer = socket_with_finalizer(factory)
+      pointers = []
+      destroy = CZMQ::FFI.method(:zsock_destroy)
+      CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+        pointers << ref.read_pointer
+        # Avoid a native double free if the finalizer still holds a stale pointer.
+        destroy.call(ref) if pointers.length == 1 || ref.read_pointer.null?
+      }) do
+        socket.destroy
+        finalizer.call(socket.object_id)
+      end
+      assert_equal 2, pointers.length
+      refute pointers.first.null?
+      assert pointers.last.null?, "#{factory} finalizer retains a destroyed socket"
+    ensure
+      socket&.destroy
+    end
+  end
+
+  it 'rejects use and repeated destruction during native destruction' do
+    socket = CZMQ::FFI::Zsock.new(CZTop::Socket::Types::PAIR)
+    calls = 0
+    closed = false
+    error = nil
+    destroy = CZMQ::FFI.method(:zsock_destroy)
+    CZMQ::FFI.stub(:zsock_destroy, ->(ref) {
+      calls += 1
+      if calls == 1
+        closed = socket.null?
+        begin
+          socket.to_ptr
+        rescue CZMQ::FFI::DestroyedError => e
+          error = e
+        end
+        socket.destroy
+        destroy.call(ref)
+      end
+    }) { socket.destroy }
+    assert_equal 1, calls
+    assert closed
+    assert_instance_of CZMQ::FFI::DestroyedError, error
+  ensure
+    socket&.destroy
+  end
+end

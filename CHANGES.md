@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+* Prevent socket double destruction by removing finalizers before native cleanup
+  and sharing their pointer holders with explicit destruction
+
 2.0.3
 -----
 
